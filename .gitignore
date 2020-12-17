@@ -1,0 +1,5 @@
+.DS_Store
+.vscode
+/plugin/indexes.json
+/plugin/docs
+/plugin/style
