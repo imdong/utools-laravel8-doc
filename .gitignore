@@ -1,7 +1,7 @@
 .DS_Store
 .vscode
 /config.js
-/md_docs/
+/docs/
 /node_modules/
 /package-lock.json
 /plugin/indexes.json
