@@ -4,7 +4,7 @@ Laravel 中文文档，同步自 [learnku](https://learnku.com/docs/laravel/8.x)
 
 ## 关于
 
-作者: 青石  
+作者: 青石   
 博客: [www.qs5.org](https://www.qs5.org)
 
 ## 版权声明
