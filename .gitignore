@@ -4,6 +4,7 @@
 /docs/
 /node_modules/
 /package-lock.json
-/plugin/indexes.json
+/plugin/*-indexes.json
 /plugin/docs
+/plugin/cheatsheets
 /plugin/style

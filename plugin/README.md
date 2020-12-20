@@ -2,7 +2,7 @@
 
 Laravel 中文文档，不定期同步自 [learnku](https://learnku.com/docs/laravel/8.x) 社区，感谢社区热心用户与平台。
 
-最后同步日期: `2020-12-18 15:20`
+最后同步日期: `2020-12-20 13:47`
 
 ## 关于
 
@@ -105,7 +105,10 @@ Laravel 中文文档，不定期同步自 [learnku](https://learnku.com/docs/lar
 
 - `1.0.0 (2020-12-18)`: 首次发布并开源
 - `1.0.1 (2020-12-18)`: 更正 译者链接 无法点击的问题
+- `1.0.2 (2020-12-20)`: 添加 Laravel 速查表
 
 ## 版权声明
 
-本插件以 MIT 协议开源，代码托管于 [Github](https://www.github.com/imdong/utools-laravel8-doc) ，引用文档部分版权归原作者所有。
+本插件以 ![MIT](https://www.qs5.org/public/open-source/MIT_logo.svg?utools-laravel8-doc) 协议开源，代码托管于 [Github](https://www.github.com/imdong/utools-laravel8-doc) ，引用文档部分版权归原作者所有。
+
+
