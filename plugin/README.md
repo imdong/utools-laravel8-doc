@@ -1,13 +1,14 @@
 # Laravel 8.x 中文文档
 
-Laravel 中文文档，不定期同步自 [learnku](https://learnku.com/docs/laravel/8.x) 社区，感谢社区热心用户与平台。
+文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/8.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/8.x) 
+，不定期同步自 [learnku](https://learnku.com/docs) 社区，感谢社区热心用户与平台。
 
 最后同步日期: `2020-12-20 13:47`
 
 ## 关于
 
 作者：青石 (ImDong)  
-博客: [www.qs5.org](https://www.qs5.org)
+博客: [www.qs5.org](https://www.qs5.org/?utools-laravel8-doc)
 
 ## 参与译者: 87
 

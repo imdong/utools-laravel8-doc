@@ -1,6 +1,7 @@
 # Laravel 8.x 中文文档 for uTools Plugin
 
-Laravel 中文文档，同步自 [learnku](https://learnku.com/docs/laravel/8.x) 社区，感谢社区热心用户与平台。
+文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/8.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/8.x) 
+，同步自 [learnku](https://learnku.com/docs) 社区，感谢社区热心用户与平台。
 
 ## 关于
 
