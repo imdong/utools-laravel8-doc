@@ -1,6 +1,6 @@
 {
     "pluginName": "Laravel 8.x 中文文档",
-    "description": "Laravel 中文文档，定期同步自 learnku 社区，感谢社区热心用户与平台。",
+    "description": "Laravel 中文文档，不定期定期同步自 learnku 社区，感谢社区热心用户与平台。",
     "author": "ImDong",
     "homepage": "https://www.qs5.org/?utools-laravel8-doc",
     "version": "1.0.2",
