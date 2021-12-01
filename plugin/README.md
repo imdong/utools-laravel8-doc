@@ -3,7 +3,7 @@
 文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/8.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/8.x) 
 ，不定期同步自 [learnku](https://learnku.com/docs) 社区，感谢社区热心用户与平台。
 
-最后同步日期: `2020-12-20 13:47`
+最后同步日期: `2021-03-19 01:22`
 
 ## 关于
 
@@ -77,7 +77,7 @@
 - [qufo](https://learnku.com/users/4717) 翻译了 1 块翻译
 - [honey_wan](https://learnku.com/users/28957) 翻译了 1 块翻译
 - [PFinal南丞](https://learnku.com/users/18228) 翻译了 1 块翻译
-- [超级蛋](https://learnku.com/users/32195) 翻译了 1 块翻译
+- [SuperEggs](https://learnku.com/users/32195) 翻译了 1 块翻译
 - [Michael762](https://learnku.com/users/35866) 翻译了 1 块翻译
 - [L学习不停](https://learnku.com/users/20453) 翻译了 1 块翻译
 - [anzichen](https://learnku.com/users/18488) 翻译了 1 块翻译
@@ -107,6 +107,7 @@
 - `1.0.0 (2020-12-18)`: 首次发布并开源
 - `1.0.1 (2020-12-18)`: 更正 译者链接 无法点击的问题
 - `1.0.2 (2020-12-20)`: 添加 Laravel 速查表
+- `1.0.3 (2021-03-19)`: 同步文档
 
 ## 版权声明
 
