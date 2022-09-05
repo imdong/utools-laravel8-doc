@@ -1,6 +1,6 @@
-# Laravel 8.x 中文文档
+# Laravel 9.x 中文文档
 
-文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/8.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/8.x) 
+文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/9.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/9.x)  
 ，不定期同步自 [learnku](https://learnku.com/docs) 社区，感谢社区热心用户与平台。
 
 最后同步日期: `2021-03-19 01:22`
@@ -8,7 +8,7 @@
 ## 关于
 
 作者：青石 (ImDong)  
-博客: [www.qs5.org](https://www.qs5.org/?utools-laravel8-doc)
+博客: [www.qs5.org](https://www.qs5.org/?utools-laravel9-doc)
 
 ## 参与译者: 87
 
@@ -112,5 +112,3 @@
 ## 版权声明
 
 本插件以 ![MIT](https://www.qs5.org/public/open-source/MIT_logo.svg?utools-laravel8-doc) 协议开源，代码托管于 [Github](https://www.github.com/imdong/utools-laravel8-doc) ，引用文档部分版权归原作者所有。
-
-
