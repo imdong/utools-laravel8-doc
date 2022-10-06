@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="安装">安装</h1>
+<ul>
+<li><a href="#meet-laravel">认识 Laravel</a><ul>
+<li><a href="#why-laravel">为什么选择 Laravel?</a></li>
+</ul>
+</li>
+<li><a href="#your-first-laravel-project">你的第一个 Laravel 项目</a><ul>
+<li><a href="#getting-started-on-macos">macOS 入门</a></li>
+<li><a href="#getting-started-on-windows">Windows 入门</a></li>
+<li><a href="#getting-started-on-linux">Linux 入门</a></li>
+<li><a href="#choosing-your-sail-services">选择 Sail 服务</a></li>
+<li><a href="#installation-via-composer">通过 Composer 安装</a></li>
+</ul>
+</li>
+<li><a href="#initial-configuration">初始化</a><ul>
+<li><a href="#environment-based-configuration">基于环境的配置</a></li>
+<li><a href="#directory-configuration">目录配置</a></li>
+</ul>
+</li>
+<li><a href="#next-steps">下一步</a><ul>
+<li><a href="#laravel-the-fullstack-framework">将 Laravel 用作全栈框架</a></li>
+<li><a href="#laravel-the-api-backend">将 Laravel 用作 API 后端</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="meet-laravel"></a></p>
+<h2 id="认识-laravel">认识 Laravel</h2>
+<p>Laravel 是一个 Web应用框架， 有着表现力强、语法优雅的特点。Web 框架为创建应用提供了一个结构和起点，你只需要专注于创造，我们来为你处理细节。</p>
+<p>Laravel 致力于提供出色的开发体验，同时提供强大的特性，例如完全的依赖注入，富有表现力的数据库抽象层，队列和计划任务，单元和集成测试等等。</p>
+<p>无论你是刚刚接触 PHP 和 Web 框架的新人，亦或是有着多年经验的老手， Laravel 都是一个可以与你一同成长的框架。我们将帮助你迈出成为 Web 开发者的第一步，或是将你的经验提高到下一个等级。我们迫不及待的想看看你的作品。</p>
+<p><a name="why-laravel"></a></p>
+<h3 id="为什么选择-laravel">为什么选择 Laravel?</h3>
+<p>有非常多的工具和框架可以被用于构建一个 Web 应用。但我们相信 Laravel 是构建现代化、全栈 Web 应用的最佳选择。</p>
+<h4 id="一个渐进式框架">一个渐进式框架</h4>
+<p>我们喜欢称 Laravel 是一个「渐进式」框架。意思是 Laravel 将与你一同成长。如果你是首次进入 Web 开发， Laravel 大量的文档、指南和 <a href="https://laracasts.com">视频教程</a> 将帮助你熟悉使用技巧而不至于不知所措。</p>
+<p>如果你是高级开发人员，Laravel 为你提供了强大的工具用于 <a href="container.html">依赖注入</a>、<a href="testing.html">单元测试</a>、<a href="queues.html">队列</a>、<a href="broadcasting.html">广播系统</a> 等等。Laravel 为构建专业的 Web 应用程序进行了微调，并准备好处理企业工作负载。</p>
+<h4 id="一个可扩展的框架">一个可扩展的框架</h4>
+<p>Laravel 具有难以置信的可扩展性。由于 PHP 的灵活性以及 Laravel 对 Redis 等快速分布式缓存系统的内置支持，使用 Laravel 进行扩展是轻而易举的事。事实上，Laravel 应用程序已经很容易扩展到每月处理数亿个请求。</p>
+<p>需要压缩开发费用吗？ <a href="https://vapor.laravel.com">Laravel Vapor</a> 允许你在 AWS 最新的无服务器技术上以几乎无限的规模运行 Laravel 应用程序。</p>
+<h4 id="一个社区化的框架">一个社区化的框架</h4>
+<p>Laravel 结合了 PHP 生态系统中最好的软件包，提供了最健壮、对开发人员友好的框架。此外，来自世界各地的数千名有才华的开发人员<a href="https://github.com/laravel/framework">为框架做出了贡献</a>。谁知道呢，也许你就是下一个 Laravel 的贡献者。</p>
+<p><a name="your-first-laravel-project"></a></p>
+<h2 id="你的第一个-laravel-项目">你的第一个 Laravel 项目</h2>
+<p>我们希望尽可能轻松地开始使用 Laravel。在你自己的计算机上开发和运行 Laravel 项目有多种选择。虽然你可能希望以后再研究这些选项，但 Laravel 提供了 <a href="sail.html">Sail</a>，使用 <a href="https://www.docker.com">Docker</a> 运行 Laravel 项目的内置解决方案</p>
+<p>Docker 是一种在小型、轻量级的「容器」中运行应用程序和服务的工具，它不会干扰本地计算机安装的软件或配置。这意味着你不必担心在个人计算机上配置或设置复杂的开发工具，例如 web 服务器和数据库。要开始，你只需安装 <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>。</p>
+<p>Laravel Sail 是一个轻量级的命令行界面，用于与 Laravel 的默认 Docker 配置进行交互。Sail 为使用 PHP、MySQL 和 Redis 构建 Laravel 应用程序提供了一个很好的起点，而无需之前的 Docker 经验。</p>
+<blockquote>
+<p>技巧：已经是 Docker 专家？别担心！关于 Sail 的一切都可以使用Laravel 附带的文件 <code>docker-compose.yml</code> 进行自定义。</p>
+</blockquote>
+<p><a name="getting-started-on-macos"></a></p>
+<h3 id="macos-入门">macOS 入门</h3>
+<p>如果你在 Mac 上开发并且已经安装了 <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>，你可以使用一个简单的终端命令来创建一个新的 Laravel 项目。 例如，要在名为「example-app」的目录中创建一个新的 Laravel 应用程序，你可以在终端中运行以下命令：</p>
+<pre><code class="language-shell">curl -s &quot;https://laravel.build/example-app&quot; | bash
+</code></pre>
+<p>当然，你可以将此 URL 中的「example-app」更改为你喜欢的任何内容。Laravel 应用程序的目录将在你执行命令的目录中创建。</p>
+<p>创建项目后，你可以导航到应用程序目录并启动 Laravel Sail。Laravel Sail 提供了一个简单的命令行界面，用于与 Laravel 的默认 Docker 配置进行交互：</p>
+<pre><code class="language-shell">cd example-app
+./vendor/bin/sail up
+</code></pre>
+<p>第一次运行 Sail <code>up</code> 命令时， Sail 的应用程序容器将在你的机器上构建。这可能需要几分钟。 <strong>不用担心，随后尝试启动 Sail 会快得多。</strong></p>
+<p>启动应用程序的 Docker 容器后，你可以在 Web 浏览器中访问应用程序： <a href="http://localhost">http://localhost</a> 。</p>
+<blockquote>
+<p>技巧：要继续了解有关 Laravel Sail 的更多信息，请查看其 <a href="sail.html">完整文档</a>。</p>
+</blockquote>
+<p><a name="getting-started-on-windows"></a></p>
+<h3 id="windows-入门">Windows 入门</h3>
+<p>在新建 Laravel 应用前，请确保你的 Windows 电脑已经安装了 <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a>。之后，请确保已经安装并启用了适用于 Linux 的 Windows 子系统 2 （WSL2）。 WSL 允许你在 Windows 10 上运行 Linux 二进制文件。关于如何安装并启用 WSL2，请参阅微软 <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">开发者环境文档</a>。</p>
+<blockquote>
+<p>技巧：安装并启用 WSL2 后，请确保 Docker Desktop 已经 <a href="https://docs.docker.com/docker-for-windows/wsl/">配置为使用 WSL2 后端</a>。</p>
+</blockquote>
+<p>接下来，准备创建你的第一个 Laravel 项目。启动 <a href="https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701?rtc=1&amp;activetab=pivot:overviewtab">Windows Terminal</a>，为 WSL2 Linux 操作系统打开一个终端。之后，你可以使用简单的命令来新建 Laravel 项目。比如，想要在「example-app」文件夹中新建 Laravel 应用，可以在终端中运行以下命令：</p>
+<pre><code class="language-shell">curl -s https:<span class="comment token">//laravel.build/example-app | bash</span>
+</code></pre>
+<p>当然，你可以任意更改 URL 中的「example-app」。Laravel 应用将被创建在执行命令的文件夹中。</p>
+<p>创建项目后，你可以切换到应用目录并启动 Laravel Sail。Laravel Sail 提供了一个简单的命令行接口，用于和 Laravel 默认 Docker 配置进行交互：</p>
+<pre><code class="language-shell">cd example-app
+./vendor/bin/sail up
+</code></pre>
+<p>在你首次运行 Sail 的 <code>up</code> 命令的时候，Sail 的应用容器将会在你的机器上进行编译。这个过程将会花费几分钟时间。<strong>不要担心，以后就会很快了。</strong></p>
+<p>一旦应用的 Docker 容器启动了，你便可在 Web 浏览器中通过 <a href="http://localhost">http://localhost</a> 访问你的应用了。</p>
+<blockquote>
+<p>技巧：要继续学习更多关于 Laravel Sail 的知识，请参阅 <a href="sail.html">详细文档</a>。</p>
+</blockquote>
+<h4 id="使用-wsl2-进行开发">使用 WSL2 进行开发</h4>
+<p>当然，你需要能够修改在 WSL2 安装中创建的 Laravel 应用程序文件。我们推荐你使用微软的 <a href="https://code.visualstudio.com">Visual Studio Code</a> 编辑器并搭配其 <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack">Remote Development</a> 扩展，它们可以帮助你解决这个问题。</p>
+<p>一旦这些工具成功安装，你可以使用 Windows Terminal 在应用根目录执行 <code>code .</code> 命令来打开任何 Laravel 项目。</p>
+<p><a name="getting-started-on-linux"></a></p>
+<h3 id="在-linux-使用-laravel-sail">在 Linux 使用 Laravel Sail</h3>
+<p>如果在 Linux 开发，并且已经安装了 <a href="https://docs.docker.com/compose/install/">Docker Compose</a>，你可以使用简单的终端命令来创建一个新的 Laravel 项目。例如，要在「example-app」目录中创建新的 Laravel 应用，你可以在终端中运行如下命令：</p>
+<pre><code class="language-shell">curl -s https:<span class="comment token">//laravel.build/example-app | bash</span>
+</code></pre>
+<p>当然，你可以将 URL 中的「example-app」替换为任何你喜欢的内容。Laravel 应用程序的目录将在执行命令的目录中创建。</p>
+<p>在项目创建完成后，你可以导航至应用目录和启动 Laravel Sail。Laravel Sail 提供了一个简单的命令行接口，用于与 Laravel 的默认 Docker 配置进行交互：</p>
+<pre><code class="language-shell">cd example-app
+./vendor/bin/sail up
+</code></pre>
+<p>在你首次运行 Sail 的 <code>up</code> 命令的时候，Sail 的应用容器将会在你的机器上进行编译。这个过程将会花费一段时间。<strong>不要担心，以后就会很快了。</strong></p>
+<p>一旦应用的 Docker 容器启动了，你便可在 Web 浏览器中通过 <a href="http://localhost">http://localhost</a> 访问你的应用了。</p>
+<blockquote>
+<p>技巧：要继续学习更多关于 Laravel Sail 的知识，请参阅 <a href="sail.html">详细文档</a>。</p>
+</blockquote>
+<p><a name="choosing-your-sail-services"></a></p>
+<h3 id="选择你的-sail-服务">选择你的 Sail 服务</h3>
+<p>当通过 Sail 创建一个新的 Laravel 应用程序时, 你可以通过 <code>with</code> 查询变量来选择哪些服务需要配置到你的新应用程序的 <code>docker-compose.yml</code> 文件。 可选择的服务包括 <code>mysql</code>，<code>pgsql</code>，<code>mariadb</code>，<code>redis</code>，<code>memcached</code>，<code>meilisearch</code>，<code>minio</code>，<code>selenium</code> 和 <code>mailhog</code>：</p>
+<pre><code class="language-shell">curl -s &quot;https://laravel.build/example-app?with=mysql,redis&quot; | bash
+</code></pre>
+<p>如果你没有制定你想配置的服务, 默认将配置 <code>mysql</code>，<code>redis</code>，<code>meilisearch</code>，<code>mailhog</code> 和 <code>selenium</code>。</p>
+<p>你可以通过在 URL 中添加 <a href="sail.html#using-devcontainers">容器开发</a>
+参数来指定 Sail 默认安装的服务。</p>
+<pre><code class="language-shell">curl -s "https://laravel.build/example-app?with=mysql,redis&amp;devcontainer" | bash
+</code></pre>
+<p><a name="installation-via-composer"></a></p>
+<h3 id="通过-composer-安装">通过 Composer 安装</h3>
+<p>如果你的终端已经安装了 PHP 和 Composer，你可以直接使用 Composer 来创建一个新的 Laravel 项目。 当应用程序创建完成后，你可以通过 Artisan CLI 的 <code>serve</code> 命令来启动 Laravel 的本地服务：</p>
+<pre><code class="language-shell">composer create-project laravel/laravel example-app
+cd example-app
+php artisan serve
+</code></pre>
+<p><a name="the-laravel-installer"></a></p>
+<h4 id="通过-laravel-安装器">通过 Laravel 安装器</h4>
+<p>或者, 你可以通过 Laravel 安装器作为全局 Composer 依赖：</p>
+<pre><code class="language-shell">composer <span class="keyword token">global</span> <span class="keyword token">require</span> laravel/installer
+laravel <span class="keyword token">new</span> example-app
+cd example-app
+php artisan serve
+</code></pre>
+<p>请确保将 Composer 的全局 vendor bin 目录放置在你的系统环境变量 <code>$PATH</code> 中，以便系统可以找到 <code>laravel</code> 的可执行文件。在不同的操作系统中，该目录的路径也不相同；下面列出一些常见的位置：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>macOS: <code>$HOME/.composer/vendor/bin</code></li>
+<li>Windows: <code>%USERPROFILE%\AppData\Roaming\Composer\vendor\bin</code></li>
+<li>GNU / Linux Distributions: <code>$HOME/.config/composer/vendor/bin</code> or <code>$HOME/.composer/vendor/bin</code></li>
+</ul>
+</div>
+
+<p>为方便起见，Laravel 安装程序还可以为你的新项目创建一个 Git 仓库。如需创建 Git 仓库，请在创建新项目时通过 <code>--git</code> 指定：</p>
+<pre><code class="language-shell">laravel <span class="keyword token">new</span> example-app --git
+</code></pre>
+<p>此命令将为你的项目初始化一个新的 Git 仓库并自动提交基础的 Laravel 框架。使用 <code>git</code> 命令前请确保你已正确安装并配置 Git。你还可以使用该 <code>--branch</code> 命令来设置初始的分支名称：</p>
+<pre><code class="language-shell">laravel <span class="keyword token">new</span> example-app --git --branch=<span class="string token">"main"</span>
+</code></pre>
+<p>除了使用 <code>--git</code> 命令之外，你还可以使用 <code>--github</code> 命令在 GitHub 上创建相应的私有仓库：</p>
+<pre><code class="language-shell">laravel <span class="keyword token">new</span> example-app --github
+</code></pre>
+<p>创建的仓库将在 <code>https://github.com/&lt;your-account&gt;/example-app</code> 上。 使用 <code>github</code> 命令前请确保你已正确安装 <a href="https://cli.github.com">GitHub CLI</a> 并已通过 GitHub 进行身份验证。此外，你还应该安装 <code>git</code> 并正确配置。如果需要，你可以传递 GitHub CLI 支持的其它命令：</p>
+<pre><code class="language-shell">laravel <span class="keyword token">new</span> example-app --github=<span class="string token">"--public"</span>
+</code></pre>
+<p>你可以使用 <code>--organization</code> 命令在特定的 GitHub 组织下创建仓库：</p>
+<pre><code class="language-shell">laravel <span class="keyword token">new</span> example-app --github=<span class="string token">"--public"</span> --organization=<span class="string token">"laravel"</span>
+</code></pre>
+<h2 id="初始配置">初始配置</h2>
+<p>Laravel 框架的所有配置文件都存储在 <code>config</code> 目录中。每个选项都有文档记录，所以请随意浏览这些文件并熟悉可用的选项。</p>
+<p>Laravel 几乎不需要额外的配置。你可以自由地开始开发！然而，你可能希望查看 <code>config/app.php</code> 文件及其文档。它包含几个选项，比如 <code>timezone</code> 和 <code>locale</code>，你可能希望根据你的应用程序进行更改。</p>
+<p><a name="environment-based-configuration"></a></p>
+<h3 id="基于环境的配置">基于环境的配置</h3>
+<p>由于 Laravel 的许多配置选项值可能会根据你的应用程序是在本地计算机上还是在生产 Web 服务器上运行而有所不同，因此许多重要的配置值是使用 <code>.env</code> 存在于应用程序根目录中的文件来定义的。</p>
+<p>你的 <code>.env</code> 文件不应提交到应用程序的源代码管理，因为每个使用你的应用程序的开发人员/服务器可能需要不同的环境配置。此外，如果入侵者获得对你的源代码控制存储库的访问权限，这将是一个安全风险，因为任何敏感凭据都会被暴露。</p>
+<blockquote>
+<p>技巧：有关 <code>.env</code> 基于文件和环境的配置的更多信息，请查看完整的 <a href="configuration.html#environment-configuration">配置文档</a>。</p>
+</blockquote>
+<p><a name="directory-configuration"></a></p>
+<h3 id="目录配置">目录配置</h3>
+<p>Laravel 应该始终从为你的 Web 服务器配置的「Web 目录」的根目录中提供服务。你不应该尝试从「Web 目录」的子目录中提供 Laravel 应用程序。尝试这样做可能会暴露应用程序中存在的敏感文件。</p>
+<p><a name="next-steps"></a></p>
+<h2 id="下一步">下一步</h2>
+<p>现在你已经创建了 Laravel 项目，你可能想知道接下来要学习什么。首先，我们强烈建议你通过阅读以下文档来熟悉 Laravel 的工作原理：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="lifecycle.html">请求生命周期</a></li>
+<li><a href="configuration.html">配置</a></li>
+<li><a href="structure.html">目录结构</a></li>
+<li><a href="container.html">服务容器</a></li>
+<li><a href="facades.html">Facades</a></li>
+</ul>
+</div>
+
+<p>你想如何使用 Laravel 也将决定你旅程的下一步。有多种使用 Laravel 的方法，我们将探讨以下框架的两个主要用例。</p>
+<p><a name="laravel-the-fullstack-framework"></a></p>
+<h3 id="laravel-全栈框架">Laravel 全栈框架</h3>
+<p>Laravel 可以作为一个全栈框架。「全栈」框架是指你将使用 Laravel 将请求路由到你的应用程序，并通过 <a href="blade.html">Blade 模板</a> 或使用单页应用程序混合技术 <a href="https://inertiajs.com">Inertia.js</a> 呈现你的前端。这是使用 Laravel 框架最常见的方式。</p>
+<p>如果这是你计划使用 Laravel 的方式，你可能需要查看我们关于 <a href="routing.html">路由</a>，<a href="views.html">视图</a>，或者 <a href="eloquent.html">Eloquent ORM</a> 的文档。此外，你可能有兴趣了解 <a href="https://laravel-livewire.com">Livewire</a> 和 <a href="https://inertiajs.com">Inertia.js</a> 等社区软件包。这些包允许你将 Laravel 用作全栈框架，同时享受单页 JavaScript 应用程序提供的许多 UI 优势。</p>
+<p>如果你使用 Laravel 作为全栈框架，我们也强烈建议你学习如何使用 <a href="mix.html">Laravel Mix</a> 编译应用程序的 CSS 和 JavaScript 。</p>
+<blockquote>
+<p>技巧：如果你想尽快构建你的应用程序，请查看我们的官方 <a href="starter-kits.html">应用程序入门工具包</a>。</p>
+</blockquote>
+<p><a name="laravel-the-api-backend"></a></p>
+<h3 id="laravel-api-后端">Laravel API 后端</h3>
+<p>Laravel 也可以作为 JavaScript 单页应用程序或移动应用程序的 API 后端。例如，你可以使用 Laravel 作为 <a href="https://nextjs.org">Next.js</a> 应用程序的 API 后端。在这种情况下，你可以使用 Laravel 为你的应用程序提供 <a href="sanctum.html">身份验证</a> 和数据存储/检索，同时还可以利用 Laravel 的强大服务，例如队列、电子邮件、通知等。</p>
+<p>如果这是你计划使用 Laravel 的方式，你可能需要查看我们关于 <a href="routing.html">路由</a>, <a href="sanctum.html">Laravel Sanctum</a> 和 <a href="eloquent.html">Eloquent ORM</a> 的文档。</p>
+<blockquote>
+<p>技巧：需要抢先搭建 Laravel 后端和 Next.js 前端的脚手架？Laravel Breeze 提供了 <a href="starter-kits.html#breeze-and-next">API 堆栈</a> 以及 <a href="https://github.com/laravel/breeze-next">Next.js 前端实现</a> ，因此你可以在几分钟内开始使用。</p>
+</blockquote>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

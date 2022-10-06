@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="请求生命周期">请求生命周期</h1>
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D">介绍</a></li>
+<li><a href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A6%82%E8%BF%B0">生命周期概述</a><ul>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5">第一步</a></li>
+<li><a href="#http-console-kernels">HTTP / Console 内核</a></li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85">服务提供者</a></li>
+<li><a href="#%E8%B7%AF%E7%94%B1">路由</a></li>
+<li><a href="#%E8%AF%B7%E6%B1%82%E7%BB%93%E6%9D%9F">请求结束</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%B3%E6%B3%A8%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85">关注服务提供者</a></li>
+</ul>
+<p><a name="介绍"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>在「真实世界」中使用任何工具时，如果你了解该工具的工作原理，你会更加自信。应用程序开发也不例外。当您了解开发工具的功能时，你会觉得使用它们更舒服、更自信。</p>
+<p>本文的目的是让您对 Laravel 框架的工作原理有一个良好的、高层次的理解。通过更好地了解整个框架，一切感觉都不那么「神奇」，你将更有信心构建你的应用程序。如果你不明白所有的规则，不要灰心！只要试着对正在发生的事情有一个基本的掌握，你的知识就会随着你探索文档的其他部分而增长。</p>
+<p><a name="生命周期概述"></a></p>
+<h2 id="生命周期概述">生命周期概述</h2>
+<p><a name="第一步"></a></p>
+<h3 id="第一步">第一步</h3>
+<p>Laravel 应用程序的所有请求的入口点都是 <code>public/index.php</code> 文件。所有请求都由你的 <code>web</code> 服务器（Apache/Nginx）配置定向到此文件。那个 <code>index.php</code> 文件不包含太多代码。相反，它是加载框架其余部分的起点。</p>
+<p>该 <code>index.php</code> 文件将加载 <code>Composer</code> 生成的自动加载器定义，然后从 <code>bootstrap/app.php</code> 中检索 <code>Laravel </code>应用程序的实例。<code>Laravel</code> 本身采取的第一个操作是创建应用 / <a href="container.html">服务容器</a> 的实例。</p>
+<p><a name="http-console-kernels"></a></p>
+<h3 id="http--console-内核">HTTP / Console 内核</h3>
+<p>接下来，根据进入应用的请求类型，传入的请求将被发送到 <code>HTTP</code> 内核或者 <code>Console</code> 内核。这两个内核充当所有请求流经的中心位置。现在，我们只关注位于 <code>app/Http/Kernel.php</code> 中的 <code>HTTP</code> 内核。</p>
+<p><code>HTTP</code> 内核继承了 <code>Illuminate\Foundation\Http\Kernel</code> 类，该类定义了一个将在执行请求之前运行的 <code>bootstrappers</code> 数组。这个数组用来在实际处理请求之前完成：配置异常处理、配置日志、<a href="configuration.html#environment-configuration">检测应用程序环境</a>，以及其它需要完成的任务。</p>
+<p>HTTP 内核还定义了一个 HTTP <a href="middleware.html">中间件</a> 列表，所有请求在被应用程序处理之前都必须通过该列表。这些中间件处理读写 <a href="session.html">HTTP 会话</a>，确定应用程序是否处于维护模式，<a href="csrf.html">校验 CSRF 令牌</a> 等等。我们接下来会做详细的讨论。</p>
+<p>HTTP 内核的 <code>handle</code> 方法的签名非常简单：它接收 <code>Request</code> 接口并返回 <code>Response</code> 接口。把内核想象成一个代表整个应用程序的大黑匣子。向它提供 HTTP 请求，它将返回 HTTP 响应。</p>
+<p><a name="service-providers"></a></p>
+<h3 id="服务提供者">服务提供者</h3>
+<p>最重要的内核引导操作之一是为应用程序加载 <a href="providers.html">服务提供者</a> 。应用程序的所有服务提供程序都在 <code>config/app.php</code> 文件中的 <code>providers</code> 数组。</p>
+<p>Laravel 将遍历这个提供者列表并实例化它们中的每一个。实例化提供程序后，将在所有提供程序上调用 register 方法。然后，一旦所有的提供者都被注册了，就会对每个提供程序调用 <code>boot</code> 方法。服务提供者可能依赖于在执行 <code>boot</code> 方法时注册并可用的每个容器绑定。</p>
+<p>服务提供者负责引导框架的所有不同组件，如数据库、队列、验证和路由组件。基本上，Laravel 提供的每个主要功能都是由服务提供商引导和配置的。由于它们引导和配置框架提供的许多特性，服务提供者是整个 Laravel 引导过程中最重要的部分。</p>
+<p><a name="路由"></a></p>
+<h3 id="路由">路由</h3>
+<p>应用程序中最重要的服务提供者之一是 <code>App\Providers\RouteServiceProvider</code>。此服务提供者加载应用程序的 <code>routes</code> 目录中包含的路由文件。继续，打开<code>RouteServiceProvider</code> 代码，看看它是如何工作的！</p>
+<p>一旦应用程序被引导并且所有服务提供者都被注册，「请求」将被传递给路由器进行调度。路由器将请求发送到路由或控制器，并运行任何路由特定的中间件。</p>
+<p>中间件为过滤或检查进入应用程序的 HTTP 请求提供了一种方便的机制。例如，Laravel 包含一个这样的中间件，用于验证应用程序的用户是否经过身份验证。如果用户未通过身份验证，中间件将用户重定向到登录页。但是，如果用户经过身份验证，中间件将允许请求进一步进入应用程序。一些中间件被分配给应用程序中的所有路由，比如那些在 HTTP 内核的 <code>$middleware</code> 属性中定义的路由，而一些只被分配给特定的路由或路由组。您可以通过阅读完整的 <a href="middleware.html">中间件文档</a> 来了解关于中间件的信息。</p>
+<p>如果请求通过了所有匹配路由分配的中间件，则执行路由或控制器方法，并通过路由的中间件链路返回路由或控制器方法的响应。</p>
+<p><a name="finishing-up"></a></p>
+<h3 id="最后">最后</h3>
+<p>一旦路由或控制器方法返回一个响应，该响应将通过路由的中间件返回，从而使应用程序有机会修改或检查传出的响应。
+最后，一旦响应通过中间件返回，HTTP 内核的 <code>handle</code> 方法将返回响应对象，并且 <code>index.php</code> 文件在返回的响应上调用 <code>send</code> 方法。 <code>send</code> 方法将响应内容发送到用户的 web 浏览器。至此，我们已经完成了整个 Laravel 请求生命周期的旅程！</p>
+<p><a name="关注服务提供者"></a></p>
+<h2 id="关注服务提供者">关注服务提供者</h2>
+<p>服务提供者确实是引导 Laravel 应用程序的关键。创建应用程序实例，注册服务提供者，并将请求传递给引导应用程序。就这么简单！
+牢牢掌握服务提供者的构建和其对 Laravel 应用处理机制的原理是非常有价值的。你的应用的默认服务提供会存放在 <code>app/Providers</code> 目录下面。</p>
+<p>默认情况下，<code>AppServiceProvider</code> 是空白的。这里是用于你添加应用自身的引导处理和服务容器绑定的一个非常棒的地方。在大型项目中，您可能希望创建多个服务提供者，每个服务提供者都为应用程序使用的特定服务提供更细粒度的引导。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

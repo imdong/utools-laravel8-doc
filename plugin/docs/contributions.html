@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="贡献导引">贡献导引</h1>
+<ul>
+<li><a href="#bug-reports">Bug 报告</a></li>
+<li><a href="#support-questions">帮助支持</a></li>
+<li><a href="#core-development-discussion">核心发展讨论</a></li>
+<li><a href="#which-branch">哪个分支？</a></li>
+<li><a href="#compiled-assets">编译资源</a></li>
+<li><a href="#security-vulnerabilities">安全漏洞</a></li>
+<li><a href="#coding-style">代码风格</a><ul>
+<li><a href="#phpdoc">PHPDoc</a></li>
+<li><a href="#styleci">StyleCI</a></li>
+</ul>
+</li>
+<li><a href="#code-of-conduct">行为守则</a></li>
+</ul>
+<p><a name="bug-reports"></a></p>
+<h2 id="bug-报告">Bug 报告</h2>
+<p>为了鼓励积极的合作，Laravel 强烈鼓励提交 pull request，而不仅仅是提交「Bug 报告」。「Bug 报告」也可以包含失败测试的 pull request 的形式发送。只有在标记为「准备好审核」（而不是处于「草稿」状态）并且新功能的所有测试都通过时，才会审核拉取请求。停留在「草稿」状态的、非活动的拉取请求将在几天后关闭。</p>
+<p>然而，如果你提交了一个 Bug 报告，你的问题（issue）应该包含一个标题和对问题的清晰描述。你还应该包含尽可能多的相关信息以及演示该问题的代码示例。错误报告的目标是使您自己（以及其他人）能够轻松地复现错误并开发修复程序。</p>
+<p>请记住，创建 Bug 报告是希望有相同问题的其他人能够与您协作解决它。不要期望 Bug 报告能够自动查看任何活动或者其他人跳转自此来修复它。创建 Bug 报告有助于你自己和其他人开始修复问题。如果你想加入，你可以通过修复 <a href="https://github.com/issues?q=is%3Aopen+is%3Aissue+label%3Abug+user%3Alaravel">issues 列表</a> 来提供帮助。你必须通过 GitHub 认证才能查看 Laravel 的所有问题。</p>
+<p>Laravel 源码托管在 GitHub 上，每个项目都有一个仓库：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="https://github.com/laravel/laravel">Laravel Application</a></li>
+<li><a href="https://github.com/laravel/art">Laravel Art</a></li>
+<li><a href="https://github.com/laravel/docs">Laravel Documentation</a></li>
+<li><a href="https://github.com/laravel/dusk">Laravel Dusk</a></li>
+<li><a href="https://github.com/laravel/cashier">Laravel Cashier Stripe</a></li>
+<li><a href="https://github.com/laravel/cashier-paddle">Laravel Cashier Paddle</a></li>
+<li><a href="https://github.com/laravel/echo">Laravel Echo</a></li>
+<li><a href="https://github.com/laravel/envoy">Laravel Envoy</a></li>
+<li><a href="https://github.com/laravel/framework">Laravel Framework</a></li>
+<li><a href="https://github.com/laravel/homestead">Laravel Homestead</a></li>
+<li><a href="https://github.com/laravel/settler">Laravel Homestead Build Scripts</a></li>
+<li><a href="https://github.com/laravel/horizon">Laravel Horizon</a></li>
+<li><a href="https://github.com/laravel/jetstream">Laravel Jetstream</a></li>
+<li><a href="https://github.com/laravel/passport">Laravel Passport</a></li>
+<li><a href="https://github.com/laravel/sail">Laravel Sail</a></li>
+<li><a href="https://github.com/laravel/sanctum">Laravel Sanctum</a></li>
+<li><a href="https://github.com/laravel/scout">Laravel Scout</a></li>
+<li><a href="https://github.com/laravel/socialite">Laravel Socialite</a></li>
+<li><a href="https://github.com/laravel/telescope">Laravel Telescope</a></li>
+<li><a href="https://github.com/laravel/laravel.com-next">Laravel Website</a></li>
+</ul>
+</div>
+
+<p><a name="support-questions"></a></p>
+<h2 id="帮助支持">帮助支持</h2>
+<p>Laravel 的 GitHub issue 不打算提供 Laravel 的帮助或支持。相反，可以使用以下途径之一:</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="https://github.com/laravel/framework/discussions">GitHub 讨论</a></li>
+<li><a href="https://laracasts.com/discuss">Laracasts 论坛</a></li>
+<li><a href="https://laravel.io/forum">Laravel.io 论坛</a></li>
+<li><a href="https://stackoverflow.com/questions/tagged/laravel">StackOverflow</a></li>
+<li><a href="https://discord.gg/laravel">Discord</a></li>
+<li><a href="https://larachat.co">Larachat</a></li>
+<li><a href="https://web.libera.chat/?nick=artisan&amp;channels=#laravel">IRC</a></li>
+</ul>
+</div>
+
+
+
+<p><a name="core-development-discussion"></a></p>
+<h2 id="核心开发讨论">核心开发讨论</h2>
+<p>你可以在 Laravel 框架存储库的 <a href="https://github.com/laravel/framework/discussions">GitHub 讨论区</a> 中提出新功能或对现有 Laravel 行为的改进。 如果您提出一项新功能，请愿意至少实现一些完成该功能所需的代码。</p>
+<p>在 <a href="https://discord.gg/laravel">Laravel Discord 服务器</a> 的 <code>#internals</code> 频道中进行了有关错误、新功能和现有功能实现的非正式讨论。 Laravel 的维护者 Taylor Otwell 通常在工作日的上午 8 点至下午 5 点（UTC-06:00 或美国/芝加哥）出现在频道中，并在其他时间偶尔出现在频道中。</p>
+<p><a name="which-branch"></a></p>
+<h2 id="哪个分支？">哪个分支？</h2>
+<p><strong>所有</strong>错误修复应发送到最新的稳定分支。 错误修复不应该被发送到 <code>master</code> 分支，除非它们修复了仅存在于即将发布的版本中的功能。</p>
+<p><strong>与当前版本</strong>完全向后兼容<strong>的</strong>次要**功能可能会发送到最新的稳定分支。</p>
+<p><strong>主要</strong> 新功能应始终发送到包含即将发布的版本的 <code>master</code> 分支。</p>
+<p>如果您不确定您的功能是否符合主要或次要功能，请在 <a href="https://discord.gg/laravel">Laravel Discord 服务器</a> 的 <code>#internals</code> 频道中询问 Taylor Otwell。</p>
+<p><a name="compiled-assets"></a></p>
+<h2 id="编译文件">编译文件</h2>
+<p>如果您提交的更改会影响已编译文件，例如 <code>laravel/laravel</code> 存储库的 <code>resources/css</code> 或 <code>resources/js</code> 中的大部分文件，请不要提交已编译文件。 由于它们的体积很大，维护者实际上无法对其进行审查。 这可能被用作将恶意代码注入 Laravel 的一种方式。 为了防御性地防止这种情况发生，所有编译的文件都将由 Laravel 维护者生成和提交。</p>
+<p><a name="security-vulnerabilities"></a></p>
+<h2 id="安全漏洞">安全漏洞</h2>
+<p>如果你发现 Laravel 中存在安全漏洞，请发送电子邮件至 <a href="mailto:taylor@laravel.com">taylor@laravel.com</a> 给 Taylor Otwell。 所有安全漏洞都将得到及时解决。</p>
+<p><a name="coding-style"></a></p>
+<h2 id="编码风格">编码风格</h2>
+<p>Laravel 遵循 <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md">PSR-2</a> 编码标准和 <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md">PSR- 4</a> 自动加载标准。</p>
+<p><a name="phpdoc"></a></p>
+<h3 id="php文档">PHP文档</h3>
+<p>下面是一个有效的 Laravel 文档块的示例。 请注意，<code>@param</code> 属性后跟两个空格、参数类型、另外两个空格，最后是变量名：</p>
+<pre><code><span class="comment token">/**
+ * 向容器注册绑定。
+ *
+ *<span class="phpdoc token"> @param</span>  string|array  $abstract
+ *<span class="phpdoc token"> @param</span>  \Closure|string|null  $concrete
+ *<span class="phpdoc token"> @param</span>  bool  $shared
+ *<span class="phpdoc token"> @return</span> void
+ *
+ *<span class="phpdoc token"> @throws</span> \Exception
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> bind(<span class="variable token">$abstract</span>, <span class="variable token">$concrete</span> = <span class="keyword token">null</span>, <span class="variable token">$shared</span> = <span class="keyword token">false</span>)
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="styleci"></a></p>
+<h3 id="styleci">StyleCI</h3>
+<p>如果您的代码样式不完美，请不要担心！ <a href="https://styleci.io/">StyleCI</a> 将在合并拉取请求后自动将任何样式修复合并到 Laravel 存储库中。 这使我们能够专注于贡献的内容，而不是代码风格。</p>
+<p><a name="code-of-conduct"></a></p>
+<h2 id="行为准则">行为准则</h2>
+<p>Laravel 行为准则源自 Ruby 行为准则。 任何违反行为准则的行为都可以报告给 Taylor Otwell (<a href="mailto:&#x74;&#97;&#x79;&#108;&#x6f;&#x72;&#x40;&#108;&#97;&#x72;&#x61;&#118;&#x65;&#x6c;&#46;&#99;&#111;&#x6d;">&#x74;&#97;&#x79;&#108;&#x6f;&#x72;&#x40;&#108;&#97;&#x72;&#x61;&#118;&#x65;&#x6c;&#46;&#99;&#111;&#x6d;</a>)：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>参与者将容忍反对意见。</li>
+<li>参与者必须确保他们的语言和行为没有人身攻击和贬低个人言论。</li>
+<li>在解释他人的言行时，参与者应始终保持良好的意图。</li>
+<li>不能容忍可合理视为骚扰的行为。</li>
+</ul>
+</div>
+
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

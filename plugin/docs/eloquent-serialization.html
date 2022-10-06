@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="eloquent-序列化">Eloquent: 序列化</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#serializing-models-and-collections">序列化模型 &amp; 集合</a><ul>
+<li><a href="#serializing-to-arrays">序列化为数组</a></li>
+<li><a href="#serializing-to-json">序列化为 JSON</a></li>
+</ul>
+</li>
+<li><a href="#hiding-attributes-from-json">隐藏 JSON 属性</a></li>
+<li><a href="#appending-values-to-json">追加 JSON 值</a></li>
+<li><a href="#date-serialization">序列化日期</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>在使用 Laravel 构建 API 时，经常需要把模型和关联转化为数组或 JSON。针对这些操作，Eloquent 提供了一些便捷方法，以及对序列化中的属性控制。</p>
+<blockquote>
+<p>技巧：想获得更全面处理 Eloquent 的模型和集合 JSON 序列化的方法，请查看 <a href="eloquent-resources.html">Eloquent API 资源</a> 文档。</p>
+</blockquote>
+<p><a name="serializing-models-and-collections"></a></p>
+<h2 id="序列化模型--集合">序列化模型 &amp; 集合</h2>
+<p><a name="serializing-to-arrays"></a></p>
+<h3 id="序列化为数组">序列化为数组</h3>
+<p>要转化模型及其加载的 <a href="eloquent-relationships.html">关联</a> 为数组，可以使用 <code>toArray</code> 方法。这是一个递归的方法，因此所有的属性和关联（包括关联的关联）都将转化成数组：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::with(<span class="string token">'roles'</span>)-&gt;first();
+
+<span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;toArray();
+</code></pre>
+<p><code>attributesToArray</code> 方法可用于将模型的属性转换为数组，但不会转换其关联：</p>
+<pre><code><span class="variable token">$user</span> = User::first();
+
+<span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;attributesToArray();
+</code></pre>
+<p>您还可以通过调用集合实例上的 <code>toArray</code> 方法，将模型的全部 <a href="eloquent-collections.html">集合</a> 转换为数组：</p>
+<pre><code><span class="variable token">$users</span> = User::all();
+
+<span class="keyword token">return</span> <span class="variable token">$users</span>-&gt;toArray();
+</code></pre>
+<p><a name="serializing-to-json"></a></p>
+<h3 id="序列化为-json">序列化为 JSON</h3>
+<p>您可以使用 <code>toJson</code> 方法将模型转化成 JSON。和 <code>toArray</code> 一样，<code>toJson</code> 方法也是递归的，因此所有属性和关联都会转化成 JSON, 您还可以指定由 <a href="https://secure.php.net/manual/en/function.json-encode.php">PHP 支持</a>的任何  JSON 编码选项：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;toJson();
+
+<span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;toJson(JSON_PRETTY_PRINT);
+</code></pre>
+<p>或者，你也可以将模型或集合转换为字符串，模型或集合上的 <code>toJson</code> 方法会自动调用：</p>
+<pre><code><span class="keyword token">return</span> (string) User::find(<span class="number token">1</span>);
+</code></pre>
+<p>由于模型和集合在转化为字符串的时候会转成 JSON， 因此可以在应用的路由或控制器中直接返回 Eloquent 对象。Laravel 会自动将 Eloquent 模型和集合序列化为 JSON：</p>
+<pre><code>Route::get(<span class="string token">'users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> User::all();
+});
+</code></pre>
+<p><a name="relationships"></a></p>
+<h4 id="关联关系">关联关系</h4>
+<p>当一个模型被转化为 JSON 的时候，它加载的关联关系也将自动转化为 JSON 对象被包含进来。同时，通过「小驼峰」定义的关联方法，关联的 JSON 属性将会是「蛇形」命名。</p>
+<p><a name="hiding-attributes-from-json"></a></p>
+<h2 id="隐藏-json-属性">隐藏 JSON 属性</h2>
+<p>有时要将模型数组或 JSON 中的某些属性进行隐藏，比如密码。则可以在模型中添加 <code>$hidden</code> 属性。模型序列化后， <code>$hidden</code> 数组中列出的属性将不会被显示：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 数组中的属性会被隐藏。
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$hidden</span> = [<span class="string token">'password'</span>];
+}
+</code></pre>
+<blockquote>
+<p>技巧：隐藏关联时，需添加关联的方法名到 <code>$hidden</code> 属性中。</p>
+</blockquote>
+<p>此外，也可以使用属性 <code>visible</code> 定义一个模型数组和 JSON 可见的「白名单」。转化后的数组或 JSON 不会出现其他的属性：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 数组中的属性会被展示。
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$visible</span> = [<span class="string token">'first_name'</span>, <span class="string token">'last_name'</span>];
+}
+</code></pre>
+<p><a name="temporarily-modifying-attribute-visibility"></a></p>
+<h4 id="临时修改可见属性">临时修改可见属性</h4>
+<p>如果您想要在一个模型实例中显示隐藏的属性，可以使用  <code>makeVisible</code> 方法。<code>makeVisible</code> 方法返回模型实例：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;makeVisible(<span class="string token">'attribute'</span>)-&gt;toArray();
+</code></pre>
+<p>相应地，如果您想要在一个模型实例中隐藏可见的属性，可以使用 <code>makeHidden</code> 方法。</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;makeHidden(<span class="string token">'attribute'</span>)-&gt;toArray();
+</code></pre>
+<p><a name="appending-values-to-json"></a></p>
+<h2 id="追加-json-值">追加 JSON 值</h2>
+<p>有时，需要在模型转换为数组或 JSON 时添加一些数据库中不存在字段的对应属性。要实现这个功能，首先要定义一个 <a href="eloquent-mutators.html">访问器</a>：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * Determine if the user is an administrator.
+     *
+     *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Casts\Attribute
+     */</span>
+    <span class="keyword token">protected</span> <span class="keyword token">function</span> isAdmin(): Attribute
+    {
+        <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
+            get: fn () =&gt; <span class="string token">'yes'</span>,
+        );
+    }
+}
+</code></pre>
+<p>然后，在模型属性 <code>appends</code> 中添加该属性名。注意，尽管访问器使用「驼峰命名法」方式定义，但是属性名通常以「蛇形命名法」的方式来引用：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * The accessors to append to the model's array form.
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$appends</span> = [<span class="string token">'is_admin'</span>];
+}
+</code></pre>
+<p>使用 <code>appends</code> 方法追加属性后，它将包含在模型的数组和 JSON 中。<code>appends</code> 数组中的属性也将遵循模型上配置的 <code>visible</code> 和 <code>hidden</code> 设置。</p>
+<p><a name="appending-at-run-time"></a></p>
+<h4 id="运行时追加">运行时追加</h4>
+<p>在运行时，您可以在单个模型实例上使用 append 方法来追加属性。或者，使用 setAppends 方法来重写整个追加属性的数组：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;append(<span class="string token">'is_admin'</span>)-&gt;toArray();
+
+<span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;setAppends([<span class="string token">'is_admin'</span>])-&gt;toArray();
+</code></pre>
+<p><a name="date-serialization"></a></p>
+<h2 id="日期序列化">日期序列化</h2>
+<p><a name="customizing-the-default-date-format"></a></p>
+<h4 id="自定义默认日期格式">自定义默认日期格式</h4>
+<p>您可以通过重写 <code>serializeDate</code> 方法来自定义默认序列化格式。此方法不会影响日期在数据库中存储的格式：</p>
+<pre><code><span class="comment token">/**
+ * 为 array / JSON 序列化准备日期格式
+ *
+ *<span class="phpdoc token"> @param</span>  \DateTimeInterface  $date
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">function</span> serializeDate(DateTimeInterface <span class="variable token">$date</span>)
+{
+    <span class="keyword token">return</span> <span class="variable token">$date</span>-&gt;format(<span class="string token">'Y-m-d'</span>);
+}
+</code></pre>
+<p><a name="customizing-the-date-format-per-attribute"></a></p>
+<h4 id="自定义任意属性的日期格式">自定义任意属性的日期格式</h4>
+<p>您可以在 Eloquent 的 <a href="eloquent-mutators.html#attribute-casting">属性转换</a> 中单独为日期属性自定义日期格式：</p>
+<pre><code><span class="keyword token">protected</span> <span class="variable token">$casts</span> = [
+    <span class="string token">'birthday'</span> =&gt; <span class="string token">'date:Y-m-d'</span>,
+    <span class="string token">'joined_at'</span> =&gt; <span class="string token">'datetime:Y-m-d H:00'</span>,
+];
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="契约（contract）">契约（Contract）</h1>
+<ul>
+<li><a href="#introduction">简介</a><ul>
+<li><a href="#contracts-vs-facades">Contract 对比 Facade</a></li>
+</ul>
+</li>
+<li><a href="#when-to-use-contracts">何时使用 Contract</a></li>
+<li><a href="#how-to-use-contracts">如何使用 Contract</a></li>
+<li><a href="#contract-reference">Contract 参考</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>Laravel 的 Contract 是一组接口，它们定义由框架提供的核心服务。例如，<code>illuste\Contracts\Queue\Queue</code> Contract 定义了队列所需的方法，而 <code>illuste\Contracts\Mail\Mailer</code> Contract 定义了发送邮件所需的方法。</p>
+<p>每个契约都有由框架提供的相应实现。例如，Laravel 提供了一个支持各种驱动的队列实现，还有一个由 <a href="https://swiftmailer.symfony.com/">SwiftMailer</a> 提供支持的邮件程序实现等等。</p>
+<p>所有的 Laravel Contract 都存在于它们各自的 <a href="https://github.com/illuminate/contracts">GitHub 仓库</a>。这为所有可用的契约提供了一个快速的参考点，以及一个可以被包开发人员使用的独立的包。</p>
+<p><a name="contracts-vs-facades"></a></p>
+<h3 id="contract-对比-facade">Contract 对比 Facade</h3>
+<p>Laravel 的 <a href="/docs/laravel/8.x/facades">Facade</a> 和辅助函数提供了一种利用 Laravel 服务的简单方法，无需类型提示并可以从服务容器中解析 Contract。在大多数情况下，每个 Facade 都有一个等效的 Contract。</p>
+<p>和 Facade（不需要在构造函数中引入）不同，Contract 允许你为类定义显式依赖关系。一些开发者更喜欢以这种方式显式定义其依赖项，所以更喜欢使用 Contract，而其他开发者则享受 Facade 带来的便利。<strong>通常，大多数应用都可以在开发过程中使用 Facade。</strong></p>
+<p><a name="when-to-use-contracts"></a></p>
+<h2 id="何时使用-contract">何时使用 Contract</h2>
+<p>使用 Contract 或 Facades 取决于个人喜好和开发团队的喜好。Contract 和 Facade 均可用于创建功能强大且经过良好测试的 Laravel 应用。Contract 和 Facade 并不是一道单选题，你可以在同一个应用内同时使用 Contract 和 Facade。只要聚焦在类的职责应该单一上，您会发现 Contract 和 Facade 的实际差异其实很小。</p>
+<p>通常情况下，大部分使用 Facade 的应用都不会在开发中遇到问题。但如果你在建立一个可以由多个 PHP 框架使用的扩展包，你可能会希望使用 <code>illuminate/contracts</code> 扩展包来定义该包和 Laravel 集成，而不需要引入完整的 Laravel 实现。</p>
+<p><a name="how-to-use-contracts"></a></p>
+<h2 id="如何使用-contract">如何使用 Contract</h2>
+<p>那么，如何实现契约呢？它其实很简单。</p>
+<p>Laravel 中的许多类都是通过 <a href="https://learnku.com/docs/Laravel/8.x/container">服务容器</a> 解析的，包括控制器、事件侦听器、中间件、队列任务，甚至路由闭包。因此，要实现契约，你只需要在被解析的类的构造函数中「类型提示」接口。</p>
+<p>例如，看看下面的这个事件监听器：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderWasPlaced;
+<span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Contracts\Redis\Factory;
+
+<span class="keyword token">class</span> CacheOrderInformation
+{
+    <span class="comment token">/**
+     * Redis Factory 实现
+     *
+     *<span class="phpdoc token"> @var</span> \Illuminate\Contracts\Redis\Factory
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$redis</span>;
+
+    <span class="comment token">/**
+     * 创建一个新的事件监听器实例
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Contracts\Redis\Factory  $redis
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(Factory <span class="variable token">$redis</span>)
+    {
+        <span class="variable token">$this</span>-&gt;redis = <span class="variable token">$redis</span>;
+    }
+
+    <span class="comment token">/**
+     * 处理事件
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderWasPlaced  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(OrderWasPlaced <span class="variable token">$event</span>)
+    {
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p>当解析事件监听器时，服务容器将读取构造函数上的类型提示，并注入适当的值。 要了解更多有关在服务容器中注册内容的信息，请查看 <a href="/docs/laravel/8.x/container">其文档</a>。</p>
+<p><a name="contract-reference"></a></p>
+<h2 id="contract-参考">Contract 参考</h2>
+<p>下表提供了所有 Laravel Contract 及对应的 Facade 的快速参考：</p>
+<table>
+<thead>
+<tr>
+<th>Contract</th>
+<th>对应的 Facade</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/Access/Authorizable.php">Illuminate\Contracts\Auth\Access\Authorizable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/Access/Gate.php">Illuminate\Contracts\Auth\Access\Gate</a></td>
+<td><code>Gate</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/Authenticatable.php">Illuminate\Contracts\Auth\Authenticatable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/CanResetPassword.php">Illuminate\Contracts\Auth\CanResetPassword</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/Factory.php">Illuminate\Contracts\Auth\Factory</a></td>
+<td><code>Auth</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/Guard.php">Illuminate\Contracts\Auth\Guard</a></td>
+<td><code>Auth::guard()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/PasswordBroker.php">Illuminate\Contracts\Auth\PasswordBroker</a></td>
+<td><code>Password::broker()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/PasswordBrokerFactory.php">Illuminate\Contracts\Auth\PasswordBrokerFactory</a></td>
+<td><code>Password</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/StatefulGuard.php">Illuminate\Contracts\Auth\StatefulGuard</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/SupportsBasicAuth.php">Illuminate\Contracts\Auth\SupportsBasicAuth</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Auth/UserProvider.php">Illuminate\Contracts\Auth\UserProvider</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Bus/Dispatcher.php">Illuminate\Contracts\Bus\Dispatcher</a></td>
+<td><code>Bus</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Bus/QueueingDispatcher.php">Illuminate\Contracts\Bus\QueueingDispatcher</a></td>
+<td><code>Bus::dispatchToQueue()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Broadcasting/Factory.php">Illuminate\Contracts\Broadcasting\Factory</a></td>
+<td><code>Broadcast</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Broadcasting/Broadcaster.php">Illuminate\Contracts\Broadcasting\Broadcaster</a></td>
+<td><code>Broadcast::connection()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Broadcasting/ShouldBroadcast.php">Illuminate\Contracts\Broadcasting\ShouldBroadcast</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Broadcasting/ShouldBroadcastNow.php">Illuminate\Contracts\Broadcasting\ShouldBroadcastNow</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cache/Factory.php">Illuminate\Contracts\Cache\Factory</a></td>
+<td><code>Cache</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cache/Lock.php">Illuminate\Contracts\Cache\Lock</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cache/LockProvider.php">Illuminate\Contracts\Cache\LockProvider</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cache/Repository.php">Illuminate\Contracts\Cache\Repository</a></td>
+<td><code>Cache::driver()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cache/Store.php">Illuminate\Contracts\Cache\Store</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Config/Repository.php">Illuminate\Contracts\Config\Repository</a></td>
+<td><code>Config</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Console/Application.php">Illuminate\Contracts\Console\Application</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Console/Kernel.php">Illuminate\Contracts\Console\Kernel</a></td>
+<td><code>Artisan</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Container/Container.php">Illuminate\Contracts\Container\Container</a></td>
+<td><code>App</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cookie/Factory.php">Illuminate\Contracts\Cookie\Factory</a></td>
+<td><code>Cookie</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Cookie/QueueingFactory.php">Illuminate\Contracts\Cookie\QueueingFactory</a></td>
+<td><code>Cookie::queue()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Database/ModelIdentifier.php">Illuminate\Contracts\Database\ModelIdentifier</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Debug/ExceptionHandler.php">Illuminate\Contracts\Debug\ExceptionHandler</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Encryption/Encrypter.php">Illuminate\Contracts\Encryption\Encrypter</a></td>
+<td><code>Crypt</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Events/Dispatcher.php">Illuminate\Contracts\Events\Dispatcher</a></td>
+<td><code>Event</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Filesystem/Cloud.php">Illuminate\Contracts\Filesystem\Cloud</a></td>
+<td><code>Storage::cloud()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Filesystem/Factory.php">Illuminate\Contracts\Filesystem\Factory</a></td>
+<td><code>Storage</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Filesystem/Filesystem.php">Illuminate\Contracts\Filesystem\Filesystem</a></td>
+<td><code>Storage::disk()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Foundation/Application.php">Illuminate\Contracts\Foundation\Application</a></td>
+<td><code>App</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Hashing/Hasher.php">Illuminate\Contracts\Hashing\Hasher</a></td>
+<td><code>Hash</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Http/Kernel.php">Illuminate\Contracts\Http\Kernel</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Mail/MailQueue.php">Illuminate\Contracts\Mail\MailQueue</a></td>
+<td><code>Mail::queue()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Mail/Mailable.php">Illuminate\Contracts\Mail\Mailable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Mail/Mailer.php">Illuminate\Contracts\Mail\Mailer</a></td>
+<td><code>Mail</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Notifications/Dispatcher.php">Illuminate\Contracts\Notifications\Dispatcher</a></td>
+<td><code>Notification</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Notifications/Factory.php">Illuminate\Contracts\Notifications\Factory</a></td>
+<td><code>Notification</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Pagination/LengthAwarePaginator.php">Illuminate\Contracts\Pagination\LengthAwarePaginator</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Pagination/Paginator.php">Illuminate\Contracts\Pagination\Paginator</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Pipeline/Hub.php">Illuminate\Contracts\Pipeline\Hub</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Pipeline/Pipeline.php">Illuminate\Contracts\Pipeline\Pipeline</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/EntityResolver.php">Illuminate\Contracts\Queue\EntityResolver</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/Factory.php">Illuminate\Contracts\Queue\Factory</a></td>
+<td><code>Queue</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/Job.php">Illuminate\Contracts\Queue\Job</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/Monitor.php">Illuminate\Contracts\Queue\Monitor</a></td>
+<td><code>Queue</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/Queue.php">Illuminate\Contracts\Queue\Queue</a></td>
+<td><code>Queue::connection()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/QueueableCollection.php">Illuminate\Contracts\Queue\QueueableCollection</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/QueueableEntity.php">Illuminate\Contracts\Queue\QueueableEntity</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Queue/ShouldQueue.php">Illuminate\Contracts\Queue\ShouldQueue</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Redis/Factory.php">Illuminate\Contracts\Redis\Factory</a></td>
+<td><code>Redis</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Routing/BindingRegistrar.php">Illuminate\Contracts\Routing\BindingRegistrar</a></td>
+<td><code>Route</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Routing/Registrar.php">Illuminate\Contracts\Routing\Registrar</a></td>
+<td><code>Route</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Routing/ResponseFactory.php">Illuminate\Contracts\Routing\ResponseFactory</a></td>
+<td><code>Response</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Routing/UrlGenerator.php">Illuminate\Contracts\Routing\UrlGenerator</a></td>
+<td><code>URL</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Routing/UrlRoutable.php">Illuminate\Contracts\Routing\UrlRoutable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Session/Session.php">Illuminate\Contracts\Session\Session</a></td>
+<td><code>Session::driver()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/Arrayable.php">Illuminate\Contracts\Support\Arrayable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/Htmlable.php">Illuminate\Contracts\Support\Htmlable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/Jsonable.php">Illuminate\Contracts\Support\Jsonable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/MessageBag.php">Illuminate\Contracts\Support\MessageBag</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/MessageProvider.php">Illuminate\Contracts\Support\MessageProvider</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/Renderable.php">Illuminate\Contracts\Support\Renderable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Support/Responsable.php">Illuminate\Contracts\Support\Responsable</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Translation/Loader.php">Illuminate\Contracts\Translation\Loader</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Translation/Translator.php">Illuminate\Contracts\Translation\Translator</a></td>
+<td><code>Lang</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Validation/Factory.php">Illuminate\Contracts\Validation\Factory</a></td>
+<td><code>Validator</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Validation/ImplicitRule.php">Illuminate\Contracts\Validation\ImplicitRule</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Validation/Rule.php">Illuminate\Contracts\Validation\Rule</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Validation/ValidatesWhenResolved.php">Illuminate\Contracts\Validation\ValidatesWhenResolved</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/Validation/Validator.php">Illuminate\Contracts\Validation\Validator</a></td>
+<td><code>Validator::make()</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/View/Engine.php">Illuminate\Contracts\View\Engine</a></td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/View/Factory.php">Illuminate\Contracts\View\Factory</a></td>
+<td><code>View</code></td>
+</tr>
+<tr>
+<td><a href="https://github.com/illuminate/contracts/blob/laravel/9.x/View/View.php">Illuminate\Contracts\View\View</a></td>
+<td><code>View::make()</code></td>
+</tr>
+</tbody></table>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
