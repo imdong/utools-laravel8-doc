@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="控制台测试">控制台测试</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#success-failure-expectations">期望成功/失败</a></li>
+<li><a href="#input-output-expectations">期望输入/输出</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>除了简化 HTTP 测试之外，Laravel 还提供了一个简单的 API 来测试应用程序的 <a href="artisan.html">自定义控制台命令</a>。</p>
+<p><a name="success-failure-expectations"></a></p>
+<h2 id="期望成功失败">期望成功/失败</h2>
+<p>首先，让我们探索如何对 Artisan 命令的退出代码进行断言。为此，我们将使用 <code>artisan</code> 方法从我们的测试中调用 Artisan 命令。然后，我们将使用 <code>assertExitCode</code> 方法断言该命令以给定的退出代码完成：</p>
+<pre><code><span class="comment token">/**
+ * 测试控制台命令。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command()
+{
+    <span class="variable token">$this</span>-&gt;artisan(<span class="string token">'inspire'</span>)-&gt;assertExitCode(<span class="number token">0</span>);
+}
+</code></pre>
+<p>您可以使用 <code>assertNotExitCode</code> 方法断言命令没有以给定的退出代码退出：</p>
+<pre><code><span class="variable token">$this</span>-&gt;artisan(<span class="string token">'inspire'</span>)-&gt;assertNotExitCode(<span class="number token">1</span>);
+</code></pre>
+<p>当然，所有终端命令通常在成功时以 <code>0</code> 状态码退出，在不成功时以非零退出码退出。因此，为方便起见，您可以使用 <code>assertSuccessful</code> 和 <code>assertFailed</code> 断言来断言给定命令是否以成功的退出代码退出：</p>
+<pre><code><span class="variable token">$this</span>-&gt;artisan(<span class="string token">'inspire'</span>)-&gt;assertSuccessful();
+
+<span class="variable token">$this</span>-&gt;artisan(<span class="string token">'inspire'</span>)-&gt;assertFailed();
+</code></pre>
+<p><a name="input-output-expectations"></a></p>
+<h2 id="期望输入输出">期望输入/输出</h2>
+<p>Laravel 允许您使用 <code>expectsQuestion</code> 方法轻松 「mock」控制台命令的用户输入。此外，您可以使用 <code>assertExitCode</code> 和 <code>expectsOutput</code> 方法指定您希望通过控制台命令输出的退出代码和文本。例如，考虑以下控制台命令：</p>
+<pre><code>Artisan::command(<span class="string token">'question'</span>, <span class="keyword token">function</span> () {
+    <span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;ask(<span class="string token">'What is your name?'</span>);
+
+    <span class="variable token">$language</span> = <span class="variable token">$this</span>-&gt;choice(<span class="string token">'Which language do you prefer?'</span>, [
+        <span class="string token">'PHP'</span>,
+        <span class="string token">'Ruby'</span>,
+        <span class="string token">'Python'</span>,
+    ]);
+
+    <span class="variable token">$this</span>-&gt;line(<span class="string token">'Your name is '</span>.<span class="variable token">$name</span>.<span class="string token">' and you prefer '</span>.<span class="variable token">$language</span>.<span class="string token">'.'</span>);
+});
+</code></pre>
+<p>您可以使用以下测试来测试此命令，该测试利用了 <code>expectsQuestion</code>、<code>expectsOutput</code>、<code>doesntExpectOutput</code> 和 <code>assertExitCode</code> 方法：</p>
+<pre><code><span class="comment token">/**
+ * 测试控制台命令。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command()
+{
+    <span class="variable token">$this</span>-&gt;artisan(<span class="string token">'question'</span>)
+         -&gt;expectsQuestion(<span class="string token">'What is your name?'</span>, <span class="string token">'Taylor Otwell'</span>)
+         -&gt;expectsQuestion(<span class="string token">'Which language do you prefer?'</span>, <span class="string token">'PHP'</span>)
+         -&gt;expectsOutput(<span class="string token">'Your name is Taylor Otwell and you prefer PHP.'</span>)
+         -&gt;doesntExpectOutput(<span class="string token">'Your name is Taylor Otwell and you prefer Ruby.'</span>)
+         -&gt;assertExitCode(<span class="number token">0</span>);
+}
+</code></pre>
+<p><a name="confirmation-expectations"></a></p>
+<h4 id="确认期望">确认期望</h4>
+<p>当编写一个期望以「是」或「否」答案形式确认的命令时，您可以使用 <code>expectsConfirmation</code> 方法：</p>
+<pre><code><span class="variable token">$this</span>-&gt;artisan(<span class="string token">'module:import'</span>)
+    -&gt;expectsConfirmation(<span class="string token">'Do you really wish to run this command?'</span>, <span class="string token">'no'</span>)
+    -&gt;assertExitCode(<span class="number token">1</span>);
+</code></pre>
+<p><a name="table-expectations"></a></p>
+<h4 id="表格期望">表格期望</h4>
+<p>如果您的命令使用 Artisan 的 <code>table</code> 方法显示信息表，则为整个表格编写输出预期会很麻烦。相反，您可以使用 <code>expectsTable</code> 方法。此方法接受表格的标题作为它的第一个参数和表格的数据作为它的第二个参数：</p>
+<pre><code><span class="variable token">$this</span>-&gt;artisan(<span class="string token">'users:all'</span>)
+    -&gt;expectsTable([
+        <span class="string token">'ID'</span>,
+        <span class="string token">'Email'</span>,
+    ], [
+        [<span class="number token">1</span>, <span class="string token">'taylor@example.com'</span>],
+        [<span class="number token">2</span>, <span class="string token">'abigail@example.com'</span>],
+    ]);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><blockquote>
+<h1 id="事件系统">事件系统</h1>
+</blockquote>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#registering-events-and-listeners">注册事件和监听器</a><ul>
+<li><a href="#generating-events-and-listeners">生成事件和监听器</a></li>
+<li><a href="#manually-registering-events">手动注册事件</a></li>
+<li><a href="#event-discovery">发现事件</a></li>
+</ul>
+</li>
+<li><a href="#defining-events">定义事件</a></li>
+<li><a href="#defining-listeners">定义监听器</a></li>
+<li><a href="#queued-event-listeners">队列中的事件和监听器</a><ul>
+<li><a href="#manually-interacting-with-the-queue">手动与队列交互</a></li>
+<li><a href="#queued-event-listeners-and-database-transactions">队列中的事件和监听器以及数据库交互</a></li>
+<li><a href="#handling-failed-jobs">处理失败队列</a></li>
+</ul>
+</li>
+<li><a href="#dispatching-events">调度事件</a></li>
+<li><a href="#event-subscribers">事件订阅者</a><ul>
+<li><a href="#writing-event-subscribers">编写事件订阅者</a></li>
+<li><a href="#registering-event-subscribers">注册事件订阅者</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>Laravel 的事件系统提供了一个简单的观察者模式的实现，允许你能够订阅和监听在你的应用中的发生的各种事件。事件类一般来说存储在 <code>app/Events</code> 目录，监听者的类存储在 <code>app/Listeners</code> 目录。不要担心在你的应用中没有看到这两个目录，因为通过 Artisan 命令行来创建事件和监听者的时候目录会同时被创建。</p>
+<p>事件系统可以作为一个非常棒的方式来解耦你的系统的方方面面，因为一个事件可以有多个完全不相关的监听者。例如，你希望每当有订单发出的时候都给你发送一个 Slack 通知。你大可不必将你的处理订单的代码和发送 slack 消息的代码放在一起，你只需要触发一个 <code>App\Events\OrderShipped</code> 事件，然后事件监听者可以收到这个事件然后发送 slack 通知</p>
+<p><a name="registering-events-and-listeners"></a></p>
+<h2 id="注册事件和监听器">注册事件和监听器</h2>
+<p>在系统的服务提供者 <code>App\Providers\EventServiceProvider</code> 中提供了一个简单的方式来注册你所有的事件监听者。属性 <code>listen</code> 包含所有的事件 (作为键) 和对应的监听器 (值)。你可以添加任意多系统需要的监听器在这个数组中，让我们添加一个 <code>OrderShipped</code> 事件：</p>
+<pre><code><span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> App\Listeners\SendShipmentNotification;
+
+<span class="comment token">/**
+ * 系统中的事件和监听器的对应关系。
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$listen</span> = [
+    OrderShipped::<span class="keyword token">class</span> =&gt; [
+        SendShipmentNotification::<span class="keyword token">class</span>,
+    ],
+];
+</code></pre>
+<blockquote>
+<p>技巧：可以用 Artisan 命令行 <code>event:list</code> 来显示系统注册的事件和监听器的列表。</p>
+</blockquote>
+<p><a name="generating-events-and-listeners"></a></p>
+<h3 id="生成事件和监听器">生成事件和监听器</h3>
+<p>当然，为每个事件和监听器手动创建文件是很麻烦的。相反，将监听器和事件添加到 <code>EventServiceProvider</code> 并使用 <code>event:generate</code> Artisan 命令。此命令将生成 <code>EventServiceProvider</code> 中列出的、尚不存在的任何事件或侦听器：</p>
+<pre><code class="language-shell">php artisan event:generate
+</code></pre>
+<p>或者，你可以使用 <code>make:event</code> 以及 <code>make:listener</code> 用于生成单个事件和监听器的 Artisan 命令：</p>
+<pre><code class="language-shell">php artisan make:event PodcastProcessed
+
+php artisan make:listener SendPodcastNotification --event=PodcastProcessed
+</code></pre>
+<p><a name="manually-registering-events"></a></p>
+<h3 id="手动注册事件">手动注册事件</h3>
+<p>通常，事件应该通过 <code>EventServiceProvider</code> <code>$listen</code> 数组注册；但是，你也可以在 <code>EventServiceProvider</code> 的 <code>boot</code> 方法中手动注册基于类或闭包的事件监听器：</p>
+<pre><code><span class="keyword token">use</span> App\Events\PodcastProcessed;
+<span class="keyword token">use</span> App\Listeners\SendPodcastNotification;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
+
+<span class="comment token">/**
+ * 注册任意的其他事件和监听器。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Event::listen(
+        PodcastProcessed::<span class="keyword token">class</span>,
+        [SendPodcastNotification::<span class="keyword token">class</span>, <span class="string token">'handle'</span>]
+    );
+
+    Event::listen(<span class="keyword token">function</span> (PodcastProcessed <span class="variable token">$event</span>) {
+        <span class="comment token">//</span>
+    });
+}
+</code></pre>
+<p><a name="queuable-anonymous-event-listeners"></a></p>
+<h4 id="可排队匿名事件监听器">可排队匿名事件监听器</h4>
+<p>手动注册基于闭包的事件监听器时，可以将监听器闭包包装在 <code>Illuminate\Events\queueable</code> 函数中，以指示 Laravel 使用 <a href="queues.html">队列</a> 执行侦听器：</p>
+<pre><code><span class="keyword token">use</span> App\Events\PodcastProcessed;
+<span class="keyword token">use</span> <span class="keyword token">function</span> Illuminate\Events\queueable;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
+
+<span class="comment token">/**
+ * 注册任意的其他事件和监听器。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Event::listen(queueable(<span class="keyword token">function</span> (PodcastProcessed <span class="variable token">$event</span>) {
+        <span class="comment token">//</span>
+    }));
+}
+</code></pre>
+<p>与队列任务一样，可以使用 <code>onConnection</code>、<code>onQueue</code> 和 <code>delay</code> 方法自定义队列监听器的执行：</p>
+<pre><code>Event::listen(queueable(<span class="keyword token">function</span> (PodcastProcessed <span class="variable token">$event</span>) {
+    <span class="comment token">//</span>
+})-&gt;onConnection(<span class="string token">'redis'</span>)-&gt;onQueue(<span class="string token">'podcasts'</span>)-&gt;delay(now()-&gt;addSeconds(<span class="number token">10</span>)));
+</code></pre>
+<p>如果你想处理匿名队列监听器失败，你可以在定义 <code>queueable</code> 监听器时为 <code>catch</code> 方法提供一个闭包。这个闭包将接收导致监听器失败的事件实例和 <code>Throwable</code> 实例：</p>
+<pre><code><span class="keyword token">use</span> App\Events\PodcastProcessed;
+<span class="keyword token">use</span> <span class="keyword token">function</span> Illuminate\Events\queueable;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
+<span class="keyword token">use</span> Throwable;
+
+Event::listen(queueable(<span class="keyword token">function</span> (PodcastProcessed <span class="variable token">$event</span>) {
+    <span class="comment token">//</span>
+})-&gt;<span class="keyword token">catch</span>(<span class="keyword token">function</span> (PodcastProcessed <span class="variable token">$event</span>, Throwable <span class="variable token">$e</span>) {
+    <span class="comment token">// 队列监听器</span>
+}));
+</code></pre>
+<p><a name="wildcard-event-listeners"></a></p>
+<h4 id="通配符事件监听器">通配符事件监听器</h4>
+<p>您甚至可以使用 <code>*</code> 作为通配符参数注册监听器，允许您在同一个监听器上捕获多个事件。通配符监听器接收事件名作为其第一个参数，整个事件数据数组作为其第二个参数：</p>
+<pre><code>Event::listen(<span class="string token">'event.*'</span>, <span class="keyword token">function</span> (<span class="variable token">$eventName</span>, <span class="keyword token">array</span> <span class="variable token">$data</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<p><a name="event-discovery"></a></p>
+<h3 id="事件的发现">事件的发现</h3>
+<p>您可以启用自动事件发现，而不是在 <code>EventServiceProvider</code> 的 <code>$listen</code> 数组中手动注册事件和侦听器。当事件发现启用，Laravel 将自动发现和注册你的事件和监听器扫描你的应用程序的 <code>Listeners</code> 目录。此外，在 <code>EventServiceProvider</code> 中列出的任何显式定义的事件仍将被注册。</p>
+<p>Laravel 通过使用 PHP 的反射服务扫描监听器类来查找事件监听器。当 Laravel 发现任何以 <code>handle</code> 或 <code>__invoke</code> 开头的监听器类方法时，Laravel 会将这些方法注册为该方法签名中类型暗示的事件的事件监听器：</p>
+<pre><code>use App\Events\PodcastProcessed;
+
+class SendPodcastNotification
+{
+    /**
+</code></pre>
+<p>         * 处理给定的事件
+         *
+         * @param  \App\Events\PodcastProcessed  $event
+         * @return void
+         */
+        public function handle(PodcastProcessed $event)
+        {
+            //
+        }
+    }</p>
+<p>事件发现在默认情况下是禁用的，但您可以通过重写应用程序的 <code>EventServiceProvider</code> 的 <code>shouldDiscoverEvents</code> 方法来启用它：</p>
+<pre><code><span class="comment token">/**
+ * 确定是否应用自动发现事件和监听器。
+ *
+ *<span class="phpdoc token"> @return</span> bool
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> shouldDiscoverEvents()
+{
+    <span class="keyword token">return</span> <span class="keyword token">true</span>;
+}
+</code></pre>
+<p>默认情况下，应用程序 <code>app/listeners</code> 目录中的所有监听器都将被扫描。如果你想要定义更多的目录来扫描，你可以重写 <code>EventServiceProvider</code> 中的 <code>discoverEventsWithin</code> 方法：</p>
+<pre><code><span class="comment token">/**
+ * 获取应用于发现事件的监听器目录。
+ *
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">function</span> discoverEventsWithin()
+{
+    <span class="keyword token">return</span> [
+        <span class="variable token">$this</span>-&gt;app-&gt;path(<span class="string token">'Listeners'</span>),
+    ];
+}
+</code></pre>
+<p><a name="event-discovery-in-production"></a></p>
+<h4 id="生产中的事件发现">生产中的事件发现</h4>
+<p>在生产环境中，框架在每个请求上扫描所有监听器的效率并不高。因此，在你的部署过程中，你应该运行 <code>event:cache</code> Artisan 命令来缓存你的应用程序的所有事件和监听器清单。框架将使用该清单来加速事件注册过程。<code>event:clear</code> 命令可以用来销毁缓存。</p>
+<p><a name="defining-events"></a></p>
+<h2 id="定义事件">定义事件</h2>
+<p>事件类本质上是一个数据容器，它保存与事件相关的信息。例如，让我们假设一个 <code>App\Events\OrderShipped</code> 事件接收到一个 <a href="eloquent.html">Eloquent ORM</a> 对象：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Events;
+
+<span class="keyword token">use</span> App\Models\Order;
+<span class="keyword token">use</span> Illuminate\Broadcasting\InteractsWithSockets;
+<span class="keyword token">use</span> Illuminate\Foundation\Events\Dispatchable;
+<span class="keyword token">use</span> Illuminate\Queue\SerializesModels;
+
+<span class="keyword token">class</span> OrderShipped
+{
+    <span class="keyword token">use</span> Dispatchable, InteractsWithSockets, SerializesModels;
+
+    <span class="comment token">/**
+     * 订单实例。
+     *
+     *<span class="phpdoc token"> @var</span> \App\Models\Order
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$order</span>;
+
+    <span class="comment token">/**
+     * 创建一个新的事件实例。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Models\Order  $order
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(Order <span class="variable token">$order</span>)
+    {
+        <span class="variable token">$this</span>-&gt;order = <span class="variable token">$order</span>;
+    }
+}
+</code></pre>
+<p>如您所见，这个事件类不包含逻辑。它是一个被购买的 <code>App\Models\Order</code> 实例容器。 如果事件对象是使用 PHP 的 <code>SerializesModels</code> 函数序列化的，事件使用的 <code>SerializesModels</code> trait 将会优雅地序列化任何 Eloquent 模型，比如在使用 <a href="#queued-event-listeners">队列侦听器</a>。</p>
+<p><a name="defining-listeners"></a></p>
+<h2 id="定义监听器">定义监听器</h2>
+<p>接下来，让我们看一下示例事件的侦听器。事件监听器在其 <code>handle</code> 方法中接收事件实例。 <code>artisan</code> 命令 <code>event:generate</code> 和 <code>make:listener</code> 会自动导入正确的事件类，并在 handle 方法中注入提示事件。 在 <code>handle</code> 方法中，你可以执行任何必要的操作来响应事件：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+
+<span class="keyword token">class</span> SendShipmentNotification
+{
+    <span class="comment token">/**
+     * 创建事件监听器
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct()
+    {
+        <span class="comment token">//</span>
+    }
+
+    <span class="comment token">/**
+     * 处理事件
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderShipped  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(OrderShipped <span class="variable token">$event</span>)
+    {
+        <span class="comment token">// 使用 $event-&gt;order 来访问订单 ...</span>
+    }
+}
+</code></pre>
+<blockquote>
+<p>技巧：事件监听器还可以在构造函数中加入任何依赖关系的类型提示。所有的事件监听器都是通过 Laravel 的 <a href="container.html">服务器容器</a> 解析的，因此所有的依赖都将会被自动注入。</p>
+</blockquote>
+<p><a name="stopping-the-propagation-of-an-event"></a></p>
+<h4 id="停止事件传播">停止事件传播</h4>
+<p>有时，您可能希望停止将事件传播到其他侦听器。你可以通过从监听器的 <code>handle</code> 方法返回 <code>false</code> 来做到这一点。</p>
+<p><a name="queued-event-listeners"></a></p>
+<h2 id="事件监听器队列">事件监听器队列</h2>
+<p>如果侦听器执行缓慢的任务如发送电子邮件或发出 HTTP 请求，你可以将任务丢给队列处理。在开始使用队列监听器之前，请确保在你的服务器或者本地开发环境中能够 <a href="queues.html">配置队列</a> 并启动一个队列监听器。</p>
+<p>要指定监听器启动队列，请将 <code>ShouldQueue</code> 接口添加到监听器类。 由 Artisan 命令 <code>event:generate</code> 和 <code>make:listener</code> 生成的监听器已经将此接口导入当前命名空间，因此您可以直接使用：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>就是这样！现在，当这个监听器被事件调用时，事件调度器会自动使用 Laravel 的 <a href="queues.html">队列系统</a> 自动排队。如果在队列中执行监听器时没有抛出异常，任务会在执行完成后自动从队列中删除。</p>
+<p><a name="customizing-the-queue-connection-queue-name"></a></p>
+<h4 id="自定义队列连接--队列名称">自定义队列连接 &amp; 队列名称</h4>
+<p>如果你想自定义事件监听器的队列连接、队列名称或延迟队列时间，你可以在监听器类上定义 <code>$connection</code>、<code>$queue</code> 或 <code>$delay</code> 属性：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="comment token">/**
+     * 任务将被发送到的连接的名称。
+     *
+     *<span class="phpdoc token"> @var</span> string|null
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$connection</span> = <span class="string token">'sqs'</span>;
+
+    <span class="comment token">/**
+     * 任务将被发送到的队列的名称。
+     *
+     *<span class="phpdoc token"> @var</span> string|null
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$queue</span> = <span class="string token">'listeners'</span>;
+
+    <span class="comment token">/**
+     * 任务被处理的延迟时间（秒）。
+     *
+     *<span class="phpdoc token"> @var</span> int
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$delay</span> = <span class="number token">60</span>;
+}
+</code></pre>
+<p>如果您想在运行时定义监听器的队列连接或队列名称，您可以在监听器上定义 <code>viaConnection</code> 或 <code>viaQueue</code> 方法：</p>
+<pre><code><span class="comment token">/**
+ * 获取监听器的队列连接名称。
+ *
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> viaConnection()
+{
+    <span class="keyword token">return</span> <span class="string token">'sqs'</span>;
+}
+
+<span class="comment token">/**
+ * 获取监听器队列的名称。
+ *
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> viaQueue()
+{
+    <span class="keyword token">return</span> <span class="string token">'listeners'</span>;
+}
+</code></pre>
+<p><a name="conditionally-queueing-listeners"></a></p>
+<h4 id="条件监听队列">条件监听队列</h4>
+<p>有时，您可能需要根据一些仅在运行时可用的数据来确定监听器是否应该排队。为此，可以将 <code>shouldQueue</code> 方法添加到监听器中，以确定监听器是否应该排队。如果 <code>shouldQueue</code> 方法返回 <code>false</code>，则监听器将不会执行：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderCreated;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+
+<span class="keyword token">class</span> RewardGiftCard <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="comment token">/**
+     * 给客户奖励礼品卡。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderCreated  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(OrderCreated <span class="variable token">$event</span>)
+    {
+        <span class="comment token">//</span>
+    }
+
+    <span class="comment token">/**
+     * 确定监听器是否应加入队列。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderCreated  $event
+     *<span class="phpdoc token"> @return</span> bool
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> shouldQueue(OrderCreated <span class="variable token">$event</span>)
+    {
+        <span class="keyword token">return</span> <span class="variable token">$event</span>-&gt;order-&gt;subtotal &gt;= <span class="number token">5000</span>;
+    }
+}
+</code></pre>
+<p><a name="manually-interacting-with-the-queue"></a></p>
+<h3 id="手动访问队列">手动访问队列</h3>
+<p>如果你需要手动访问监听器下面队列任务的 <code>delete</code> 和 <code>release</code> 方法，可以使用 <code>Illuminate\Queue\InteractsWithQueue</code>trait 进行访问。默认情况下，此 trait 在生成的监听器上导入，并提供对以下方法的访问：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+<span class="keyword token">use</span> Illuminate\Queue\InteractsWithQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="keyword token">use</span> InteractsWithQueue;
+
+    <span class="comment token">/**
+     * 事件处理。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderShipped  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(OrderShipped <span class="variable token">$event</span>)
+    {
+        <span class="keyword token">if</span> (<span class="keyword token">true</span>) {
+            <span class="variable token">$this</span>-&gt;release(<span class="number token">30</span>);
+        }
+    }
+}
+</code></pre>
+<p><a name="queued-event-listeners-and-database-transactions"></a></p>
+<h3 id="排队事件监听器和数据库事务">排队事件监听器和数据库事务</h3>
+<p>当在数据库事务中调度排队的监听器时，它们可能会在提交数据库事务之前由队列进行处理。发生这种情况时，您在数据库事务期间对模型或数据库记录所做的任何更新可能尚未反映在数据库中。此外，在事务中创建的任何模型或数据库记录可能不存在于数据库中。如果监听器依赖于这些模型，则在处理分派排队监听器的作业时，可能会发生意外错误。</p>
+<p>如果队列连接的 <code>after_commit</code> 配置选项设置为 <code>false</code>，则仍然可以通过在监听器类上定义 <code>$afterCommit</code> 属性来指示在提交所有打开的数据库事务之后应调度特定的队列监听器：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+<span class="keyword token">use</span> Illuminate\Queue\InteractsWithQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="keyword token">use</span> InteractsWithQueue;
+
+    <span class="keyword token">public</span> <span class="variable token">$afterCommit</span> = <span class="keyword token">true</span>;
+}
+</code></pre>
+<blockquote>
+<p>技巧：要了解有关解决这些问题的更多信息，请查看有关 <a href="queues.html#jobs-and-database-transactions">队列任务和数据库事务</a>.</p>
+</blockquote>
+<p><a name="handling-failed-jobs"></a></p>
+<h3 id="处理失败的队列">处理失败的队列</h3>
+<p>有时队列的事件监听器可能会失败。如果排队的监听器超过了队列工作者定义的最大尝试次数，则将对监听器调用 <code>failed</code> 方法。<code>failed</code> 方法接收导致失败的事件实例和 <code>Throwable</code>：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+<span class="keyword token">use</span> Illuminate\Queue\InteractsWithQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="keyword token">use</span> InteractsWithQueue;
+
+    <span class="comment token">/**
+     * 事件处理。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderShipped  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(OrderShipped <span class="variable token">$event</span>)
+    {
+        <span class="comment token">//</span>
+    }
+
+    <span class="comment token">/**
+     * 处理失败任务。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Events\OrderShipped  $event
+     *<span class="phpdoc token"> @param</span>  \Throwable  $exception
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> failed(OrderShipped <span class="variable token">$event</span>, <span class="variable token">$exception</span>)
+    {
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p><a name="specifying-queued-listener-maximum-attempts"></a></p>
+<h4 id="指定队列监听器的最大尝试次数">指定队列监听器的最大尝试次数</h4>
+<p>如果队列中的某个监听器遇到错误，您可能不希望它无限期地重试。因此，Laravel 提供了各种方法来指定监听器的尝试次数或尝试时间。</p>
+<p>您可以在监听器类上定义 <code>$tries</code> 属性，以指定监听器在被认为失败之前可能尝试了多少次：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> Illuminate\Contracts\Queue\ShouldQueue;
+<span class="keyword token">use</span> Illuminate\Queue\InteractsWithQueue;
+
+<span class="keyword token">class</span> SendShipmentNotification <span class="keyword token">implements</span> ShouldQueue
+{
+    <span class="keyword token">use</span> InteractsWithQueue;
+
+    <span class="comment token">/**
+     * 尝试队列监听器的次数
+     *
+     *<span class="phpdoc token"> @var</span> int
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$tries</span> = <span class="number token">5</span>;
+}
+</code></pre>
+<p>作为定义侦听器在失败之前可以尝试多少次的替代方法，您可以定义不再尝试侦听器的时间。这允许在给定的时间范围内尝试多次监听。若要定义不再尝试监听器的时间，请在您的监听器类中添加 <code>retryUntil</code> 方法。此方法应返回一个 <code>DateTime</code> 实例：</p>
+<pre><code><span class="comment token">/**
+ * 确定监听器应该超时的时间。
+ *
+ *<span class="phpdoc token"> @return</span> \DateTime
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> retryUntil()
+{
+    <span class="keyword token">return</span> now()-&gt;addMinutes(<span class="number token">5</span>);
+}
+</code></pre>
+<p><a name="dispatching-events"></a></p>
+<h2 id="调度事件">调度事件</h2>
+<p>要分派一个事件，你可以在事件上调用静态的 <code>dispatch</code> 方法。这个方法是通过 <code> Illuminate\Foundation\Events\Dispatchable</code> 特性提供给事件的。 传递给 <code>dispatch</code> 方法的任何参数都将被传递给事件的构造函数：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> App\Events\OrderShipped;
+<span class="keyword token">use</span> App\Http\Controllers\Controller;
+<span class="keyword token">use</span> App\Models\Order;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+<span class="keyword token">class</span> OrderShipmentController <span class="keyword token">extends</span> Controller
+{
+    <span class="comment token">/**
+     * 运送给定的订单。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+    {
+        <span class="variable token">$order</span> = Order::findOrFail(<span class="variable token">$request</span>-&gt;order_id);
+
+        <span class="comment token">// 订单出货逻辑...</span>
+
+        OrderShipped::dispatch(<span class="variable token">$order</span>);
+    }
+}
+</code></pre>
+<blockquote>
+<p>技巧：在测试时，断言某些事件是在没有实际触发其侦听器的情况下进行的会很有帮助。  Laravel 的 <a href="mocking.html#event-fake">内置助手</a> 让他变得很简单。</p>
+</blockquote>
+<p><a name="event-subscribers"></a></p>
+<h2 id="事件订阅者">事件订阅者</h2>
+<p><a name="writing-event-subscribers"></a></p>
+<h3 id="构建事件订阅者">构建事件订阅者</h3>
+<p>事件订阅者是可以从订阅者类本身中订阅多个事件的类，允许你在单个类中定义多个事件处理程序。订阅者应该定义一个 <code>subscribe</code> 方法，它将被传递一个事件分派器实例。你可以在给定的分派器上调用 <code>listen</code> 方法来注册事件监听器：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> Illuminate\Auth\Events\Login;
+<span class="keyword token">use</span> Illuminate\Auth\Events\Logout;
+
+<span class="keyword token">class</span> UserEventSubscriber
+{
+    <span class="comment token">/**
+     * 处理用户登录事件。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handleUserLogin(<span class="variable token">$event</span>) {}
+
+    <span class="comment token">/**
+     * 处理用户退出事件。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handleUserLogout(<span class="variable token">$event</span>) {}
+
+    <span class="comment token">/**
+     * 为订阅者注册侦听器。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Events\Dispatcher  $events
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> subscribe(<span class="variable token">$events</span>)
+    {
+        <span class="variable token">$events</span>-&gt;listen(
+            Login::<span class="keyword token">class</span>,
+            [UserEventSubscriber::<span class="keyword token">class</span>, <span class="string token">'handleUserLogin'</span>]
+        );
+
+        <span class="variable token">$events</span>-&gt;listen(
+            Logout::<span class="keyword token">class</span>,
+            [UserEventSubscriber::<span class="keyword token">class</span>, <span class="string token">'handleUserLogout'</span>]
+        );
+    }
+}
+</code></pre>
+<p>如果你的事件监听器方法是在订阅者本身中定义的，你可能会发现从订阅者的 <code>subscribe</code> 方法返回一组事件和方法名称更方便。 Laravel 在注册事件监听器时会自动判断订阅者的类名：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> Illuminate\Auth\Events\Login;
+<span class="keyword token">use</span> Illuminate\Auth\Events\Logout;
+
+<span class="keyword token">class</span> UserEventSubscriber
+{
+    <span class="comment token">/**
+     * 处理用户登录事件。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handleUserLogin(<span class="variable token">$event</span>) {}
+
+    <span class="comment token">/**
+     * 处理用户退出事件。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handleUserLogout(<span class="variable token">$event</span>) {}
+
+    <span class="comment token">/**
+     * 为订阅者注册侦听器。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Events\Dispatcher  $events
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> subscribe(<span class="variable token">$events</span>)
+    {
+        <span class="keyword token">return</span> [
+            Login::<span class="keyword token">class</span> =&gt; <span class="string token">'handleUserLogin'</span>,
+            Logout::<span class="keyword token">class</span> =&gt; <span class="string token">'handleUserLogout'</span>,
+        ];
+    }
+}
+</code></pre>
+<p><a name="registering-event-subscribers"></a></p>
+<h3 id="注册事件订阅者">注册事件订阅者</h3>
+<p>当编写完订阅者后，你已经准备好为事件分发器注册它们了。你可以使用 <code>EventServiceProvider</code> 上的 <code>$subscribe</code> 属性来注册订阅者。例如，让我们将 <code>UserEventSubscriber</code> 添加到列表中：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Listeners\UserEventSubscriber;
+<span class="keyword token">use</span> Illuminate\Foundation\Support\Providers\EventServiceProvider <span class="keyword token">as</span> ServiceProvider;
+
+<span class="keyword token">class</span> EventServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 应用的事件监听器映射
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$listen</span> = [
+        <span class="comment token">//</span>
+    ];
+
+    <span class="comment token">/**
+     * 被注册的订阅者类
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$subscribe</span> = [
+        UserEventSubscriber::<span class="keyword token">class</span>,
+    ];
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

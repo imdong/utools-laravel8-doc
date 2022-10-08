@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="部署">部署</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#server-requirements">服务器要求</a></li>
+<li><a href="#server-configuration">服务器配置</a><ul>
+<li><a href="#nginx">Nginx</a></li>
+</ul>
+</li>
+<li><a href="#optimization">优化</a><ul>
+<li><a href="#autoloader-optimization">优化自动加载器</a></li>
+<li><a href="#optimizing-configuration-loading">优化配置加载</a></li>
+<li><a href="#optimizing-route-loading">优化路由加载</a></li>
+<li><a href="#optimizing-view-loading">优化视图加载</a></li>
+</ul>
+</li>
+<li><a href="#debug-mode">Debug 模式</a></li>
+<li><a href="#deploying-with-forge-or-vapor">使用 Forge / Vapor 部署</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>当你准备在生产环境部署 Laravel 应用时，请注意以下几点以使你的应用尽可能高效地运行。本文将会提供几个范本以使你的 Laravel 应用部署妥当。</p>
+<p><a name="server-requirements"></a></p>
+<h2 id="服务器要求">服务器要求</h2>
+<p>Laravel 框架对系统有一些要求，请确保你的 Web 服务器至少满足以下 PHP 版本及扩展需求。</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>PHP &gt;= 8.0</li>
+<li>BCMath PHP 扩展</li>
+<li>Ctype PHP 扩展</li>
+<li>DOM PHP 扩展</li>
+<li>Fileinfo PHP 扩展</li>
+<li>JSON PHP 扩展</li>
+<li>Mbstring PHP 扩展</li>
+<li>OpenSSL PHP 扩展</li>
+<li>PCRE PHP 扩展</li>
+<li>PDO PHP 扩展</li>
+<li>Tokenizer PHP 扩展</li>
+<li>XML PHP 扩展</li>
+</ul>
+</div>
+
+<p><a name="server-configuration"></a></p>
+<h2 id="服务器配置">服务器配置</h2>
+<p><a name="nginx"></a></p>
+<h3 id="nginx">Nginx</h3>
+<p>当你想要部署应用到 Nginx 服务器上时，你可能会用到下面这个配置文件作为一个范本来配置你的 Web 服务器。这份文件很可能需要根据你的服务器配置进行一些自定义的修改。 <strong>如果你想要一些协助以便更好地管理服务器，可以考虑使用 Laravel 服务器管理及部署第一方服务 <a href="https://forge.laravel.com">Laravel Forge</a>。</strong></p>
+<p>请确保，就像下面的配置一样，您的 Web 服务器将所有请求定向到项目目录的 <code>public/index.php</code> 文件。 不应该将 <code>index.php</code> 文件移动到项目的根目录，因为从项目根目录提供应用程序会将许多敏感配置文件暴露到公网：</p>
+<pre><code class="language-nginx">server {
+    listen <span class="number token">80</span>;
+    listen [::]:<span class="number token">80</span>;
+    server_name example.com;
+    root /srv/example.com/<span class="keyword token">public</span>;
+
+    add_header X-Frame-Options <span class="string token">"SAMEORIGIN"</span>;
+    add_header X-Content-Type-Options <span class="string token">"nosniff"</span>;
+
+    index index.php;
+
+    charset utf-<span class="number token">8</span>;
+
+    location / {
+        try_files <span class="variable token">$uri</span> <span class="variable token">$uri</span>/ /index.php?<span class="variable token">$query_string</span>;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page <span class="number token">404</span> /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/<span class="keyword token">var</span>/run/php/php8.<span class="number token">0</span>-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME <span class="variable token">$realpath_root</span><span class="variable token">$fastcgi_script_name</span>;
+        <span class="keyword token">include</span> fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+</code></pre>
+<p><a name="optimization"></a></p>
+<h2 id="优化">优化</h2>
+<p><a name="autoloader-optimization"></a></p>
+<h3 id="优化自动加载">优化自动加载</h3>
+<p>将项目部署到生产环境时，请确保您正在优化 Composer 的类自动加载器映射，以便 Composer 可以快速找到要为给定类加载的正确文件：</p>
+<pre><code class="language-shell">composer install --optimize-autoloader --no-dev
+</code></pre>
+<blockquote>
+<p>技巧：除了优化自动加载器之外，您应该始终确保在项目的源代码控制存储库中包含一个 <code>composer.lock</code> 文件。 当存在 <code>composer.lock</code> 文件时，可以更快地安装项目的依赖项。</p>
+</blockquote>
+<p><a name="optimizing-configuration-loading"></a></p>
+<h3 id="优化配置加载">优化配置加载</h3>
+<p>将应用程序部署到生产环境时，应确保在部署过程中运行 <code>config:cache</code> Artisan 命令 来提前缓存一些 配置 等信息：</p>
+<pre><code class="language-shell">php artisan config:cache
+</code></pre>
+<p>该命令会将 Laravel 的所有配置文件合并到一个缓存文件中，这大大减少了框架在加载配置值时必须访问文件系统的次数。</p>
+<blockquote>
+<p>注意：如果您在部署过程中执行 <code>config:cache</code> 命令，则应确保仅从配置文件中调用 <code>env</code> 函数。 一旦配置被缓存，<code>.env</code> 文件将不会被加载，所有对 <code>.env</code> 变量的 <code>env</code> 函数的调用都将返回 <code>null</code>。</p>
+</blockquote>
+<p><a name="optimizing-route-loading"></a></p>
+<h3 id="优化路由加载">优化路由加载</h3>
+<p>如果您正在构建具有许多路由的大型应用程序，则应确保在部署过程中运行 <code>route:cache</code> Artisan 命令：</p>
+<pre><code class="language-shell">php artisan route:cache
+</code></pre>
+<p>此命令将所有路由注册减少到缓存文件中的单个方法调用中，从而在注册数百条路由时提高路由注册的性能。</p>
+<p><a name="optimizing-view-loading"></a></p>
+<h3 id="优化视图加载">优化视图加载</h3>
+<p>将应用程序部署到生产环境时，应确保在部署过程中运行 <code>view:cache</code> Artisan 命令：</p>
+<pre><code class="language-shell">php artisan view:cache
+</code></pre>
+<p>此命令预编译所有 Blade 视图，因此它们不会按需编译，从而提高返回视图的每个请求的性能。</p>
+<p><a name="debug-mode"></a></p>
+<h2 id="调试模式">调试模式</h2>
+<p><code>config/app.php</code> 配置文件中的调试选项决定了实际向用户显示了多少有关错误的信息。默认情况下，此选项设置为尊重 APP_DEBUG 环境变量的值，该变量存储在您的 <code>.env</code> 文件中。</p>
+<p><strong>在您的生产环境中，此值应始终为 <code>false</code>。 如果在生产环境中将 <code>APP_DEBUG</code> 变量设置为 <code>true</code>，则可能会将敏感配置值暴露给应用程序的最终用户。</strong></p>
+<p><a name="deploying-with-forge-or-vapor"></a></p>
+<h2 id="使用-forge--vapor-进行部署">使用 Forge / Vapor 进行部署</h2>
+<p><a name="laravel-forge"></a></p>
+<h4 id="laravel-forge">Laravel Forge</h4>
+<p>如果您还没有准备好管理自己的服务器配置，或者不习惯配置运行强大的 Laravel 应用程序所需的所有各种服务，<a href="https://forge.laravel.com">Laravel Forge</a> 是一个很棒的选择。</p>
+<p>Laravel Forge 可以在 DigitalOcean、Linode、AWS 等各种基础设施提供商上创建服务器。此外，Forge 安装和管理构建强大的 Laravel 应用程序所需的所有工具，例如 Nginx、MySQL、Redis、Memcached、Beanstalk 等。</p>
+<p><a name="laravel-vapor"></a></p>
+<h4 id="laravel-vapor">Laravel Vapor</h4>
+<p>如果你想要一个为 Laravel 调整的完全无服务器、自动扩展的部署平台，请查看 <a href="https://vapor.laravel.com">Laravel Vapor</a>。 Laravel Vapor 是 Laravel 的无服务器部署平台，由 AWS 提供支持。在 Vapor 上启动您的 Laravel 基础架构，并爱上无服务器的可扩展简单性。Laravel Vapor 由 Laravel 的创建者进行了微调，可以与框架无缝协作，这样你就可以像以前一样继续编写 Laravel 应用程序。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
