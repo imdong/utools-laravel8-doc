@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="目录结构">目录结构</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#the-root-directory">根目录</a><ul>
+<li><a href="#the-root-app-directory"><code>app</code> 目录</a></li>
+<li><a href="#the-bootstrap-directory"><code>bootstrap</code> 目录</a></li>
+<li><a href="#the-config-directory"><code>config</code> 目录</a></li>
+<li><a href="#the-database-directory"><code>database</code> 目录</a></li>
+<li><a href="#the-lang-directory"><code>lang</code> 目录</a></li>
+<li><a href="#the-public-directory"><code>public</code> 目录</a></li>
+<li><a href="#the-resources-directory"><code>resources</code> 目录</a></li>
+<li><a href="#the-routes-directory"><code>routes</code> 目录</a></li>
+<li><a href="#the-storage-directory"><code>storage</code> 目录</a></li>
+<li><a href="#the-tests-directory"><code>tests</code> 目录</a></li>
+<li><a href="#the-vendor-directory"><code>vendor</code> 目录</a></li>
+</ul>
+</li>
+<li><a href="#the-app-directory">App 目录</a><ul>
+<li><a href="#the-broadcasting-directory"><code>Broadcasting</code> 目录</a></li>
+<li><a href="#the-console-directory"><code>Console</code> 目录</a></li>
+<li><a href="#the-events-directory"><code>Events</code> 目录</a></li>
+<li><a href="#the-exceptions-directory"><code>Exceptions</code> 目录</a></li>
+<li><a href="#the-http-directory"><code>Http</code> 目录</a></li>
+<li><a href="#the-jobs-directory"><code>Jobs</code> 目录</a></li>
+<li><a href="#the-listeners-directory"><code>Listeners</code> 目录</a></li>
+<li><a href="#the-mail-directory"><code>Mail</code> 目录</a></li>
+<li><a href="#the-models-directory"><code>Models</code> 目录</a></li>
+<li><a href="#the-notifications-directory"><code>Notifications</code> 目录</a></li>
+<li><a href="#the-policies-directory"><code>Policies</code> 目录</a></li>
+<li><a href="#the-providers-directory"><code>Providers</code> 目录</a></li>
+<li><a href="#the-rules-directory"><code>Rules</code> 目录</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>默认的 Laravel 应用程序结构旨在为大型和小型应用程序提供一个很好的起点。 但是您可以随意组织您的应用程序。 Laravel 几乎不限制任何给定类的位置，只要 Composer 可以自动加载该类。</p>
+<p><a name="the-root-directory"></a></p>
+<h2 id="根目录">根目录</h2>
+<p><a name="the-root-app-directory"></a></p>
+<h4 id="app-目录">App 目录</h4>
+<p><code>app</code> 目录包含应用程序的核心代码。 我们将很快更详细地探索这个目录； 但是，您应用程序中的几乎所有类都将在此目录中。</p>
+<p><a name="the-bootstrap-directory"></a></p>
+<h4 id="bootstrap-目录">Bootstrap 目录</h4>
+<p><code>bootstrap</code> 目录包含启动框架的 <code>app.php</code> 文件。 该目录还包含一个「cache」目录，其中包含用于性能优化的框架生成文件，例如路由和服务缓存文件。 您通常不需要修改此目录中的任何文件。</p>
+<p><a name="the-config-directory"></a></p>
+<h4 id="config-目录">Config 目录</h4>
+<p>顾名思义，<code>config</code>目录包含应用程序的所有配置文件。最好把这些文件都浏览一遍，并熟悉所有可用的选项。</p>
+<p><a name="the-database-directory"></a></p>
+<h4 id="database-目录">Database 目录</h4>
+<p><code>database</code> 目录包含数据库迁移，模型工厂和种子生成器文件。如果你愿意，你还可以把它作为 SQLite 数据库存放目录。</p>
+<p><a name="the-lang-directory"></a></p>
+<h4 id="lang-目录">Lang 目录</h4>
+<p><code>lang</code> 目录包含应用程序的所有语言文件。</p>
+<p><a name="the-public-directory"></a></p>
+<h4 id="public-目录">Public 目录</h4>
+<p><code>public</code> 目录包含 <code>index.php</code> 文件，该文件是进入你应用程序的所有请求的入口，并配置自动加载。该目录还包含你的资源，如图像、JavaScript 脚本和 CSS 样式。</p>
+<p><a name="the-resources-directory"></a></p>
+<h4 id="resources-目录">Resources 目录</h4>
+<p><code>resources</code> 目录包含了 <a href="views.html">views</a> 以及未编译的资源文件（如 CSS 或 JavaScript）。此目录还包含所有的语言文件。</p>
+<p><a name="the-routes-directory"></a></p>
+<h4 id="routes-目录">Routes 目录</h4>
+<p><code>routes</code> 目录包含应用程序的所有路由定义。默认情况下，Laravel 包含几个路由文件： <code>web.php</code>，<code>api.php</code>，<code>console.php</code> 以及 <code>channels.php</code>。</p>
+<p><code>web.php</code> 文件包含 <code>RouteServiceProvider</code> 放置在 <code>web</code> 中间件组中的路由，该中间件组提供会话状态，CSRF 保护和 cookie 加密，如果你的应用程序不提供无状态的 RESTful API，那么你的所有路由都很可能在 <code>web.php</code> 文件。</p>
+<p><code>api.php</code> 文件包含 <code>RouteServiceProvider</code> 放置在 <code>api</code> 中间件组中的路由。 这些路由旨在是无状态的，因此通过这些路由进入应用程序的请求旨在[通过令牌]（sanctum）进行身份验证，并且无法访问会话状态。</p>
+<p><code>console.php</code> 文件是您可以定义所有基于闭包的控制台命令的地方。 每个闭包都绑定到一个命令实例，允许一种简单的方法与每个命令的 IO 方法进行交互。 即使此文件没有定义 HTTP 路由，它也会定义应用程序中基于控制台的入口点（路由）。</p>
+<p><code>channels.php</code> 文件是您可以注册应用程序支持的所有 <a href="/docs/laravel/9.x/broadcasting.html">事件广播</a> 频道的地方。</p>
+<p><a name="the-storage-directory"></a></p>
+<h4 id="storage-目录">Storage 目录</h4>
+<p><code>storage</code> 目录包含你的日志、编译的 Blade 模板、基于文件的会话、文件缓存和框架生成的其他文件。 该目录分为 <code>app</code>、<code>framework</code> 和 <code>logs</code> 目录。 <code>app</code> 目录可用于存储应用程序生成的任何文件。<code>framework</code> 目录用于存储框架生成的文件和缓存。 最后，<code>logs</code> 目录包含应用程序的日志文件。</p>
+<p><code>storage/app/public</code> 目录可用于存储用户生成的文件，例如个人资料头像，这些文件应该可以公开访问。 你应该在 <code>public/storage</code> 创建一个指向这个目录的符号链接。 您可以使用 <code>php artisan storage:link</code> Artisan 命令创建链接。</p>
+<p><a name="the-tests-directory"></a></p>
+<h4 id="tests-目录">Tests 目录</h4>
+<p><code>tests</code> 目录包含您的自动化测试。 开箱即用的示例 <a href="https://phpunit.de/">PHPUnit</a> 单元测试和功能测试。 每个测试类都应以单词「Test」作为后缀。 您可以使用 <code>phpunit</code> 或 <code>php vendor/bin/phpunit</code> 命令运行测试。 或者，如果您想要更详细和更漂亮的测试结果表示，您可以使用 <code>php artisan test</code> Artisan 命令运行测试。</p>
+<p><a name="the-vendor-directory"></a></p>
+<h4 id="vendor-目录">Vendor 目录</h4>
+<p><code>vendor</code> 目录包含您的 <a href="https://getcomposer.org">Composer</a> 依赖项。</p>
+<p><a name="the-app-directory"></a></p>
+<h2 id="app-目录-1">App 目录</h2>
+<p>您的大部分应用程序都位于 <code>app</code> 目录中。默认情况下，此目录在 <code>App</code> 下命名，并由 Composer 使用 [PSR-4 自动加载标准] (<a href="https://www.php-fig.org/psr/psr-4/">https://www.php-fig.org/psr/psr-4/</a>) 自动加载。</p>
+<p><code>app</code> 目录包含各种附加目录，例如 <code>Console</code>、<code>Http</code> 和 <code>Providers</code>。将 <code>Console</code> 和 <code>Http</code> 目录视为为应用程序核心提供 API。 HTTP 协议和 CLI 都是与应用程序交互的机制，但实际上并不包含应用程序逻辑。换句话说，它们是向您的应用程序发出命令的两种方式。 <code>Console</code> 目录包含您的所有 Artisan 命令，而 <code>Http</code> 目录包含您的控制器、中间件和请求。</p>
+<p>当您使用 <code>make</code> Artisan 命令生成类时，会在 <code>app</code> 目录中生成各种其他目录。因此，例如，在您执行 <code>make:job</code> Artisan 命令生成作业类之前，<code>app/Jobs</code> 目录将不存在。</p>
+<blockquote>
+<p>技巧：<code>app</code> 目录中的许多类可以由 Artisan 通过命令生成。 要查看可用命令，请在终端中运行 <code>php artisan list make</code> 命令。</p>
+</blockquote>
+<p><a name="the-broadcasting-directory"></a></p>
+<h4 id="broadcasting-目录">Broadcasting 目录</h4>
+<p><code>Broadcasting</code> 目录包含应用程序的所有广播频道类。 这些类是使用 <code>make:channel</code> 命令生成的。 此目录默认不存在，但会在您创建第一个频道时为您创建。 要了解有关频道的更多信息，请查看有关 <a href="broadcasting.html">事件广播</a> 的文档。</p>
+<p><a name="the-console-directory"></a></p>
+<h4 id="console-目录">Console 目录</h4>
+<p><code>Console</code> 目录包含应用程序的所有自定义 Artisan 命令。 这些命令可以使用 <code>make:command</code> 命令生成。 该目录还包含您的控制台内核，这是您注册自定义 Artisan 命令和定义 <a href="scheduling.html">计划任务</a> 的地方。</p>
+<p><a name="the-events-directory"></a></p>
+<h4 id="events-目录">Events 目录</h4>
+<p>此目录默认不存在，但会由 <code>event:generate</code> 和 <code>make:event</code> Artisan 命令为您创建。 <code>Events</code> 目录包含 <a href="events.html">事件类</a>。 事件可用于提醒应用程序的其他部分发生了给定的操作，从而提供了极大的灵活性和解耦性。</p>
+<p><a name="the-exceptions-directory"></a></p>
+<h4 id="exceptions-目录">Exceptions 目录</h4>
+<p><code>Exceptions</code> 目录包含应用程序的异常处理程序，也是放置应用程序抛出的任何异常的好地方。 如果您想自定义记录或呈现异常的方式，您应该修改此目录中的 <code>Handler</code> 类。</p>
+<p><a name="the-http-directory"></a></p>
+<h4 id="http-目录">Http 目录</h4>
+<p><code>Http</code> 目录包含您的控制器、中间件和表单请求。 几乎所有处理进入应用程序的请求的逻辑都将放在这个目录中。</p>
+<p><a name="the-jobs-directory"></a></p>
+<h4 id="jobs-目录">Jobs 目录</h4>
+<p>该目录默认不存在，但如果您执行 <code>make:job</code> Artisan 命令，则会为您创建。 <code>Jobs</code> 目录包含您的应用程序的 <a href="queues.html">队列作业</a>。 作业可能由您的应用程序排队或在当前请求生命周期内同步运行。 在当前请求期间同步运行的作业有时被称为「命令」，因为它们是 <a href="https://en.wikipedia.org/wiki/Command_pattern">命令模式</a> 的实现。</p>
+<p><a name="the-listeners-directory"></a></p>
+<h4 id="listeners-目录">Listeners 目录</h4>
+<p>此目录默认不存在，但如果您执行 <code>event:generate</code> 或 <code>make:listener</code> Artisan 命令，则会为您创建。 <code>Listeners</code> 目录包含处理你的 <a href="events.html">events</a> 的类。 事件侦听器接收事件实例并执行逻辑以响应被触发的事件。 例如，<code>UserRegistered</code> 事件可能由<code>SendWelcomeEmail</code>监听器处理。</p>
+<p><a name="the-mail-directory"></a></p>
+<h4 id="mail-目录">Mail 目录</h4>
+<p>该目录默认不存在，但如果您执行 <code>make:mail</code> Artisan 命令，则会为您创建。 <code>Mail</code> 目录包含您的应用程序发送的所有 <a href="mail.html">代表电子邮件的类</a>。 Mail 对象允许您将构建电子邮件的所有逻辑封装在一个简单的类中，该类可以使用 <code>Mail::send</code> 方法发送。</p>
+<p><a name="the-models-directory"></a></p>
+<h4 id="models-目录">Models 目录</h4>
+<p><code>Models</code> 目录包含所有 <a href="eloquent.html">Eloquent 模型类</a>。 Laravel 中包含的 Eloquent ORM 提供了一个漂亮、简单的 ActiveRecord 实现来处理你的数据库。 每个数据库表都有一个相应的「模型」，用于与该表进行交互。 模型允许您查询表中的数据，以及将新记录插入表中。</p>
+<p><a name="the-notifications-directory"></a></p>
+<h4 id="notifications-目录">Notifications 目录</h4>
+<p>默认情况下，此目录不存在，但如果你执行 <code>make:notification</code> Artisan 命令时会自动生成。 <code>Notifications</code> 目录包含所有你发送给应用程序的「事务性」 <a href="notifications.html">消息通知</a> 。例如关于应用程序内发生的事件的简单通知。Laravel 的通知功能抽象了通过各种驱动程序发送的通知，如电子邮件通知、Slack 信息、SMS 短信通知或数据库存储。</p>
+<p><a name="the-policies-directory"></a></p>
+<h4 id="policies-目录">Policies 目录</h4>
+<p>默认情况下，此目录不存在，但如果您执行 <code>make:policy</code> Artisan 命令会生成。 <code>Policies</code> 目录包含应用程序的 <a href="authorization.html"> 授权策略类 </a> 。这些类用于确定用户是否可以对资源执行给定的操作。</p>
+<p><a name="the-providers-directory"></a></p>
+<h4 id="providers-目录">Providers 目录</h4>
+<p><code>Providers</code> 目录包含程序中所有的 <a href="providers.html">服务提供者</a> 。服务提供者通过在服务容器中绑定服务、注册事件或执行任何其他任务来引导应用程序以应对传入请求。</p>
+<p>在一个新的 Laravel 应用程序中，这个目录已经包含了几个提供者。您可以根据需要将自己的提供程序添加到此目录。</p>
+<p><a name="the-rules-directory"></a></p>
+<h4 id="rules-目录">Rules 目录</h4>
+<p>默认情况下，此目录不存在，但如果您执行 <code>make:rule</code> Artisan 命令后会生成。 <code>Rules</code> 目录包含应用程序用户自定义的验证规则。这些验证规则用于将复杂的验证逻辑封装在一个简单的对象中。有关更多信息，请查看 <a href="validation.html"> 表单验证</a>。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

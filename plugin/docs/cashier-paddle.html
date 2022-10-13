@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="laravel-交易工具包-paddle">Laravel 交易工具包 (Paddle)</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#upgrading-cashier">升级 Cashier</a></li>
+<li><a href="#installation">安装</a><ul>
+<li><a href="#paddle-sandbox">Paddle 沙盒</a></li>
+<li><a href="#database-migrations">数据迁移</a></li>
+</ul>
+</li>
+<li><a href="#configuration">配置</a><ul>
+<li><a href="#billable-model">Billable 模型</a></li>
+<li><a href="#api-keys">API Keys</a></li>
+<li><a href="#paddle-js">Paddle JS</a></li>
+<li><a href="#currency-configuration">货币配置</a></li>
+<li><a href="#overriding-default-models">扩展默认模型</a></li>
+</ul>
+</li>
+<li><a href="#core-concepts">核心概念</a><ul>
+<li><a href="#pay-links">支付链接</a></li>
+<li><a href="#inline-checkout">內联结账</a></li>
+<li><a href="#user-identification">用户鉴定</a></li>
+</ul>
+</li>
+<li><a href="#prices">价格</a></li>
+<li><a href="#customers">用户</a><ul>
+<li><a href="#customer-defaults">用户默认设置</a></li>
+</ul>
+</li>
+<li><a href="#subscriptions">订阅</a><ul>
+<li><a href="#creating-subscriptions">创建订阅</a></li>
+<li><a href="#checking-subscription-status">检查订阅状态</a></li>
+<li><a href="#subscription-single-charges">订阅一次性收费</a></li>
+<li><a href="#updating-payment-information">更新交易信息</a></li>
+<li><a href="#changing-plans">更新计划</a></li>
+<li><a href="#subscription-quantity">订阅量</a></li>
+<li><a href="#subscription-modifiers">更新订阅</a></li>
+<li><a href="#pausing-subscriptions">暂停订阅</a></li>
+<li><a href="#cancelling-subscriptions">取消订阅</a></li>
+</ul>
+</li>
+<li><a href="#subscription-trials">订阅试用</a><ul>
+<li><a href="#with-payment-method-up-front">预付款方式</a></li>
+<li><a href="#without-payment-method-up-front">非预付款方式</a></li>
+</ul>
+</li>
+<li><a href="#handling-paddle-webhooks">处理 Paddle Webhooks</a><ul>
+<li><a href="#defining-webhook-event-handlers">定义 Webhook 事件处理程序</a></li>
+<li><a href="#verifying-webhook-signatures">校验 Webhook 签名</a></li>
+</ul>
+</li>
+<li><a href="#single-charges">一次性收费</a><ul>
+<li><a href="#simple-charge">简单收费</a></li>
+<li><a href="#charging-products">收费产品</a></li>
+<li><a href="#refunding-orders">退款订单</a></li>
+</ul>
+</li>
+<li><a href="#receipts">收据</a><ul>
+<li><a href="#past-and-upcoming-payments">过去与将来的交易</a></li>
+</ul>
+</li>
+<li><a href="#handling-failed-payments">处理失败交易</a></li>
+<li><a href="#testing">测试</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p><a href="https://github.com/laravel/cashier-paddle">Laravel Cashier Paddle</a> 为 <a href="https://paddle.com">Paddle&#39;s</a> 订阅计费服务提供了一个富有表现力、流畅的界面。它几乎能够处理所有你所恐惧的各种订阅计费逻辑和代码。除了基本的订阅管理，Cashier 还可以处理：优惠券、交换订阅、订阅「数量」、取消宽限期等。</p>
+<p>在使用 Cashier 时，推荐你回顾一下 Paddle 的<a href="https://developer.paddle.com/guides">用户手册</a> and <a href="https://developer.paddle.com/api-reference/intro">API 文档</a>.</p>
+<p><a name="upgrading-cashier"></a></p>
+<h2 id="升级-cashier">升级 Cashier</h2>
+<p>在升级到一个新版本的 Cashier 时，仔细回顾 <a href="https://github.com/laravel/cashier-paddle/blob/master/UPGRADE.md">升级指南</a> 将非常重要。</p>
+<p><a name="installation"></a></p>
+<h2 id="安装">安装</h2>
+<p>首先，使用 Composer 包管理器安装 Paddle 的 Cashier 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/cashier-paddle
+</code></pre>
+<blockquote>
+<p>注意：为了确保 Cashier 正确处理所有 Paddle 事件，请记得 <a href="#handling-paddle-webhooks">配置 Cashier 的 webhook 处理</a>。</p>
+</blockquote>
+<p><a name="paddle-sandbox"></a></p>
+<h3 id="paddle-沙盒">Paddle 沙盒</h3>
+<p>在本地和预发布开发中，你应该 <a href="https://developer.paddle.com/getting-started/sandbox">注册一个 Paddle 沙盒账号</a>。这个账号将为你提供一个沙盒环境来测试和开发你的应用，而不会产生真实的交易。你也许会使用 Paddle 的 <a href="https://developer.paddle.com/getting-started/sandbox#test-cards">测试卡号</a> 来模拟各种交易场景。</p>
+<p>在使用Pable沙盒环境时，你应在应用程序的 <code>.env</code> 环境文件中将 <code>PADDLE_SANDBOX</code> 环境变量设置为 <code>true</code> ：</p>
+<pre><code class="language-ini">PADDLE_SANDBOX=<span class="keyword token">true</span>
+</code></pre>
+<p>在你已经完成你的应用开发之后，你也许会 <a href="https://paddle.com">申请一个 Paddle 正式账号</a> 。 在您的应用程序投入生产之前，Paddle 需要批准您的应用程序的域。</p>
+<p><a name="database-migrations"></a></p>
+<h3 id="数据迁移">数据迁移</h3>
+<p>Cashier 服务提供者注册它自己的数据迁移目录，所以你记得在安装扩展包之后执行数据迁移。 Cashier 数据迁移将生成新的  <code>customers</code> 表。另外，新的 <code>subscriptions</code> 表将被创建，来存储所有你的用户的订阅。最后，新的 <code>receipts</code> 表也将被创建，来存储所有你的收据信息:</p>
+<pre><code class="language-shell">php artisan migrate
+</code></pre>
+<p>如果你需要重写 Cashier 中的数据迁移，你可以使用  <code>vendor:publish</code> Artisan 命令来发布它们：</p>
+<pre><code class="language-shell">php artisan vendor:publish --tag=&quot;cashier-migrations&quot;
+</code></pre>
+<p>如果你想阻止 Cashier 的数据迁移全部执行，你可以使用 Cashier 提供的 <code>ignoreMigrations</code>。通常，这个方法会在 <code>AppServiceProvider</code> 的 <code>register</code> 方法中被调用：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Cashier;
+
+<span class="comment token">/**
+ * 注册服务。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+{
+    Cashier::ignoreMigrations();
+}
+</code></pre>
+<p><a name="configuration"></a></p>
+<h2 id="配置">配置</h2>
+<p><a name="billable-model"></a></p>
+<h3 id="billable-模型">Billable 模型</h3>
+<p>在使用 Cashier 之前，你必须将 <code>Billable</code> trait 添加到你的用户模型定义中。 此 trait 提供了多种方法来允许你执行常见的计费任务，例如创建订阅、应用优惠券和更新付款方式信息：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Billable;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Authenticatable
+{
+    <span class="keyword token">use</span> Billable;
+}
+</code></pre>
+<p>如果你有非用户的计费实体，你还可以将特征添加到这些类中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+<span class="keyword token">use</span> Laravel\Paddle\Billable;
+
+<span class="keyword token">class</span> Team <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">use</span> Billable;
+}
+</code></pre>
+<p><a name="api-keys"></a></p>
+<h3 id="api-keys">API Keys</h3>
+<p>接下来，你应该在应用程序的 <code>.env</code> 文件中配置你的 Paddle 。 你可以从 Paddle 控制面板检索你的 Paddle API 密钥：</p>
+<pre><code class="language-ini">PADDLE_VENDOR_ID=your-paddle-vendor-id
+PADDLE_VENDOR_AUTH_CODE=your-paddle-vendor-auth-code
+PADDLE_PUBLIC_KEY=<span class="string token">"your-paddle-public-key"</span>
+PADDLE_SANDBOX=<span class="keyword token">true</span>
+</code></pre>
+<p>当你使用 <a href="#paddle-sandbox">Paddle 的沙箱环境</a> 时，<code>PADDLE_SANDBOX</code> 环境变量应该设置为 <code>true</code>。 如果你将应用程序部署到生产环境并使用 Paddle 的实时供应商环境，则 <code>PADDLE_SANDBOX</code> 变量应该设置为 <code>false</code>。</p>
+<p><a name="paddle-js"></a></p>
+<h3 id="paddle-js">Paddle JS</h3>
+<p>Paddle 依赖其自己的 JavaScript 库来启动 Paddle 结账小部件。 您可以通过在应用程序布局中的 <code>&lt;/head&gt;</code> 标签关闭之前放置 <code>@paddleJS</code> Blade 指令来加载 JavaScript 库：</p>
+<pre><code class="language-blade">&lt;head&gt;
+    ...
+
+    @paddleJS
+&lt;/head&gt;
+</code></pre>
+<p><a name="currency-configuration"></a></p>
+<h3 id="货币配置">货币配置</h3>
+<p>默认 Cashier 货币是美元（USD）。您可以在 <code>.env</code> 文件中定义 <code>CASHIER_CURRENCY</code> 环境变量来更改默认货币：</p>
+<pre><code class="language-ini">CASHIER_CURRENCY=EUR
+</code></pre>
+<p>除了配置 Cashier 的货币之外，您还可以指定在格式化货币值以显示在发票上时要使用的区域。Cashier 内部利用 PHP 的 <a href="https://www.php.net/manual/en/class.numberformatter.php"> NumberFormatter </a> 类来设置货币区域：</p>
+<pre><code class="language-ini">CASHIER_CURRENCY_LOCALE=nl_BE
+</code></pre>
+<blockquote>
+<p>注意：为了使用 <code>en</code> 以外的语言环境，请确保在您的服务器上安装并配置了 <code>ext-intl</code> PHP 扩展。</p>
+</blockquote>
+<p><a name="overriding-default-models"></a></p>
+<h3 id="覆盖默认模型">覆盖默认模型</h3>
+<p>您可以通过定义自己的模型并继承相应的 Cashier 模型来自由扩展 Cashier 模型：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Subscription <span class="keyword token">as</span> CashierSubscription;
+
+<span class="keyword token">class</span> Subscription <span class="keyword token">extends</span> CashierSubscription
+{
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>定义模型后，您可以通过 <code>Laravel\Paddle\Cashier</code> 类指示 Cashier 使用您的自定义模型。通常，您应该在应用的 <code>App\Providers\AppServiceProvider</code> 类的 <code>boot</code> 方法中通知 Cashier 关于你的自定义模型：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Cashier\Receipt;
+<span class="keyword token">use</span> App\Models\Cashier\Subscription;
+
+<span class="comment token">/**
+ * 引导应用服务.
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Cashier::useReceiptModel(Receipt::<span class="keyword token">class</span>);
+    Cashier::useSubscriptionModel(Subscription::<span class="keyword token">class</span>);
+}
+</code></pre>
+<p><a name="core-concepts"></a></p>
+<h2 id="核心概念">核心概念</h2>
+<p><a name="pay-links"></a></p>
+<h3 id="支付链接">支付链接</h3>
+<p>Paddle 缺乏广泛的 CRUD API 来执行订阅状态更改。 因此，与 Paddle 的大多数交互都是通过其 <a href="https://developer.paddle.com/guides/how-tos/checkout/paddle-checkout">结帐小部件</a> 完成的。 在使用结账小部件之前，我们必须使用 Cashier 生成一个 「支付链接」。 「支付链接」将通知结账小部件我们希望执行的计费操作：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/user/subscribe'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="variable token">$payLink</span> = <span class="variable token">$request</span>-&gt;user()-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$premium</span> = <span class="number token">34567</span>)
+        -&gt;returnTo(route(<span class="string token">'home'</span>))
+        -&gt;create();
+
+    <span class="keyword token">return</span> view(<span class="string token">'billing'</span>, [<span class="string token">'payLink'</span> =&gt; <span class="variable token">$payLink</span>]);
+});
+</code></pre>
+<p>Cashier 包括一个 <code>paddle-button</code> <a href="blade.html#components">Blade 组件</a>。 我们可以将支付链接 URL 作为 「prop」传递给该组件。 单击此按钮时，将显示 Paddle 的结帐小部件：</p>
+<pre><code class="language-html">&lt;x-paddle-button :url=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span>&gt;
+    订阅
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p>默认情况下，这将显示一个具有标准 Paddle 样式的按钮。 你可以通过向组件添加 <code>data-theme=&quot;none&quot;</code> 属性来删除所有 Paddle 样式：</p>
+<pre><code class="language-html">&lt;x-paddle-button :url=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span> data-theme=<span class="string token">"none"</span>&gt;
+    订阅
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p>Paddle 结账小部件是异步的。 一旦用户在小部件中创建或更新订阅，Paddle 将发送你的应用程序 webhook，以便你可以在我们自己的数据库中正确更新订阅状态。 因此，正确 <a href="#handling-paddle-webhooks">设置 webhooks</a> 以同步 Paddle 的状态变化非常重要。</p>
+<p>有关支付链接的更多信息，你可以查看 <a href="https://developer.paddle.com/api-reference/product-api/pay-links/createpaylink">有关支付链接生成的 Paddle API 文档</a>。</p>
+<blockquote>
+<p>注意：订阅状态更改后，接收相应 webhook 的延迟通常很小，但你应该在应用程序中考虑到这一点，因为你的用户订阅在完成结帐后可能不会立即生效。</p>
+</blockquote>
+<p><a name="manually-rendering-pay-links"></a></p>
+<h4 id="手动呈现支付链接">手动呈现支付链接</h4>
+<p>你也可以在不使用 Laravel 内置的 Blade 组件的情况下手动渲染支付链接。 首先，生成支付链接 URL，如先前所示：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$request</span>-&gt;user()-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$premium</span> = <span class="number token">34567</span>)
+    -&gt;returnTo(route(<span class="string token">'home'</span>))
+    -&gt;create();
+</code></pre>
+<p>接下来，只需将支付链接 URL 附加到 HTML 中的 <code>a</code> 元素：</p>
+<pre><code>&lt;a href=<span class="string token">"#!"</span> <span class="keyword token">class</span>=<span class="string token">"ml-4 paddle_button"</span> data-override=<span class="string token">"{{ $payLink }}"</span>&gt;
+    Paddle Checkout
+&lt;/a&gt;
+</code></pre>
+<p><a name="payments-requiring-additional-confirmation"></a></p>
+<h4 id="需要额外确认的付款">需要额外确认的付款</h4>
+<p>有时需要额外的验证才能确认和处理付款。发生这种情况时，Paddle 将显示付款确认屏幕。 Paddle 或 Cashier 显示的付款确认屏幕可能会针对特定银行或发卡机构的付款流程进行定制，并且可能包括额外的卡确认、临时小额费用、单独的设备身份验证或其他形式的验证。</p>
+<p><a name="inline-checkout"></a></p>
+<h3 id="内联结账">内联结账</h3>
+<p>如果你不想使用 Paddle 的 「叠加」样式结帐小部件，Paddle 还提供了内嵌显示小部件的选项。 虽然这种方法不允许你调整任何结帐的 HTML 字段，但它允许你将小部件嵌入到你的应用中。</p>
+<p>为了让你轻松开始内联结账，Cashier 包含一个 <code>paddle-checkout</code> Blade 组件。 首先，你应该 <a href="#pay-links">生成支付链接</a> 并将支付链接传递给组件的<code>override</code> 属性：</p>
+<pre><code class="language-blade">&lt;x-paddle-checkout :override=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"w-full"</span> /&gt;
+</code></pre>
+<p>要调整内联结帐组件的高度，你可以将 <code>height</code> 属性传递给 Blade 组件：</p>
+<pre><code class="language-blade">&lt;x-paddle-checkout :override=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"w-full"</span> height=<span class="string token">"500"</span> /&gt;
+</code></pre>
+<p><a name="inline-checkout-without-pay-links"></a></p>
+<h4 id="没有支付链接的内联结账">没有支付链接的内联结账</h4>
+<p>或者，你可以使用自定义选项而不是使用支付链接来自定义小部件：</p>
+<pre><code class="language-blade">@php
+<span class="variable token">$options</span> = [
+    <span class="string token">'product'</span> =&gt; <span class="variable token">$productId</span>,
+    <span class="string token">'title'</span> =&gt; <span class="string token">'Product Title'</span>,
+];
+@endphp
+
+&lt;x-paddle-checkout :options=<span class="string token">"$options"</span> <span class="keyword token">class</span>=<span class="string token">"w-full"</span> /&gt;
+</code></pre>
+<p>请参阅 Paddle 的 <a href="https://developer.paddle.com/guides/how-tos/checkout/inline-checkout">Inline Checkout 指南</a> 以及他们的 <a href="https://developer.paddle.com/reference/paddle-js/parameters">参数参考</a> 以获取有关内联结帐可用选项的更多详细信息。</p>
+<blockquote>
+<p>注意：如果你想在指定自定义选项时也使用 <code>passthrough</code> 选项，你应该提供一个键/值数组作为其值。 Cashier 将自动处理将数组转换为 JSON 字符串。 此外，<code>customer_id</code> passthrough 选项保留供内部 Cashier 使用。</p>
+</blockquote>
+<p><a name="manually-rendering-an-inline-checkout"></a></p>
+<h4 id="手动呈现内联结账">手动呈现内联结账</h4>
+<p>你也可以在不使用 Laravel 的内置 Blade 组件的情况下手动渲染内联结账。 首先，生成支付链接 URL <a href="#pay-links">如前面示例中所示</a>。</p>
+<p>接下来，你可以使用 Paddle.js 来初始化结帐。 为了让这个例子简单，我们将使用 <a href="https://github.com/alpinejs/alpine">Alpine.js</a> 来演示； 但是，你可以自由地将此示例转换为你自己的前端技术栈：</p>
+<pre><code class="language-alpine">&lt;div <span class="keyword token">class</span>=<span class="string token">"paddle-checkout"</span> x-data=<span class="string token">"{}"</span> x-init=<span class="string token">"
+    Paddle.Checkout.open({
+        override: {{ $payLink }},
+        method: 'inline',
+        frameTarget: 'paddle-checkout',
+        frameInitialHeight: 366,
+        frameStyle: 'width: 100%; background-color: transparent; border: none;'
+    });
+"</span>&gt;
+&lt;/div&gt;
+</code></pre>
+<p><a name="user-identification"></a></p>
+<h3 id="用户识别">用户识别</h3>
+<p>与 Stripe 相比，Paddle 用户在所有 Paddle 中都是独一无二的，而不是每个 Paddle 帐户都是独一无二的。因此，Paddle 的 API 目前不提供更新用户详细信息（例如电子邮件地址）的方法。在生成支付链接时，Paddle 使用 <code>customer_email</code> 参数识别用户。创建订阅时，Paddle 将尝试将用户提供的电子邮件与现有 Paddle 用户进行匹配。</p>
+<p>鉴于这种行为，在使用 Cashier 和 Paddle 时需要记住一些重要的事情。首先，你应该知道，即使 Cashier 中的订阅绑定到同一个应用程序用户，<strong>它们也可能绑定到 Paddle 内部系统中的不同用户</strong>。其次，每个订阅都有自己的连接支付方式信息，并且在 Paddle 的内部系统中也可能有不同的电子邮件地址（取决于创建订阅时分配给用户的电子邮件）。</p>
+<p>因此，在显示订阅时，你应该始终告知用户哪些电子邮件地址或付款方式信息与订阅相关联。可以使用 <code>Laravel\Paddle\Subscription</code> 模型提供的以下方法检索这些信息：</p>
+<pre><code><span class="variable token">$subscription</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>);
+
+<span class="variable token">$subscription</span>-&gt;paddleEmail();
+<span class="variable token">$subscription</span>-&gt;paymentMethod();
+<span class="variable token">$subscription</span>-&gt;cardBrand();
+<span class="variable token">$subscription</span>-&gt;cardLastFour();
+<span class="variable token">$subscription</span>-&gt;cardExpirationDate();
+</code></pre>
+<p>当前，没有办法通过Paddle API修改用户的电子邮件地址。当用户想在Paddle内更新他们的电子邮件地址时，他们唯一的方法是联系Paddle客户支持。在与Paddle沟通时，他们需要提供订阅的<code>paddleEmail</code>，这样Paddle就可以更新正确的用户。</p>
+<p><a name="prices"></a></p>
+<h2 id="定价">定价</h2>
+<p>Paddle允许你自定义每种货币对应的价格，也就是说Paddle允许你为不同国家和地区配置不同的价格。Cashier Paddle允许你使用<code>productPrices</code>方法检索一个特定产品的所有价格。这个方法接受你希望检索价格的产品的产品ID：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Cashier;
+
+<span class="variable token">$prices</span> = Cashier::productPrices([<span class="number token">123</span>, <span class="number token">456</span>]);
+</code></pre>
+<p>货币将根据请求的 IP 地址来确定，当然你也可以传入一个可选的国家和地区参数来检索特定国家和地区的价格：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Cashier;
+
+<span class="variable token">$prices</span> = Cashier::productPrices([<span class="number token">123</span>, <span class="number token">456</span>], [<span class="string token">'customer_country'</span> =&gt; <span class="string token">'BE'</span>]);
+</code></pre>
+<p>检索出价格后，您可以根据需要显示它们：</p>
+<pre><code class="language-blade">&lt;ul&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$prices</span> <span class="keyword token">as</span> <span class="variable token">$price</span>)
+        &lt;li&gt;{{ <span class="variable token">$price</span>-&gt;product_title }} - {{ <span class="variable token">$price</span>-&gt;price()-&gt;gross() }}&lt;/li&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/ul&gt;
+</code></pre>
+<p>你也可以显示净价（不含税）并将税额显示分离：</p>
+<pre><code class="language-blade">&lt;ul&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$prices</span> <span class="keyword token">as</span> <span class="variable token">$price</span>)
+        &lt;li&gt;{{ <span class="variable token">$price</span>-&gt;product_title }} - {{ <span class="variable token">$price</span>-&gt;price()-&gt;net() }} (+ {{ <span class="variable token">$price</span>-&gt;price()-&gt;tax() }} tax)&lt;/li&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/ul&gt;
+</code></pre>
+<p>如果你检索了订阅的价格，你可以分别显示其原始价格和连续订阅价格：</p>
+<pre><code class="language-blade">&lt;ul&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$prices</span> <span class="keyword token">as</span> <span class="variable token">$price</span>)
+        &lt;li&gt;{{ <span class="variable token">$price</span>-&gt;product_title }} - Initial: {{ <span class="variable token">$price</span>-&gt;initialPrice()-&gt;gross() }} - Recurring: {{ <span class="variable token">$price</span>-&gt;recurringPrice()-&gt;gross() }}&lt;/li&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/ul&gt;
+</code></pre>
+<p>更多相关信息，请 <a href="https://developer.paddle.com/api-reference/checkout-api/prices/getprices">查看 Paddle 的价格 API 文档</a>。</p>
+<p><a name="prices-customers"></a></p>
+<h4 id="客户">客户</h4>
+<p>如果用户已经是客户并且您希望显示适用于该客户的价格，您可以通过直接从客户实例检索价格来实现：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$prices</span> = User::find(<span class="number token">1</span>)-&gt;productPrices([<span class="number token">123</span>, <span class="number token">456</span>]);
+</code></pre>
+<p>在内部，Cashier 将使用用户的 <a href="#customer-defaults"><code>paddleCountry</code> 方法</a> 来检索以他们的货币表示的价格。 例如，居住在美国的用户将看到以美元为单位的价格，而位于比利时的用户将看到以欧元为单位的价格。 如果找不到匹配的货币，则将使用产品的默认货币。 您可以在 Paddle 控制面板中自定义产品或订阅计划的所有价格。</p>
+<p><a name="prices-coupons"></a></p>
+<h4 id="优惠券">优惠券</h4>
+<p>你也可以展示选择优惠券后的折扣价。 在调用 <code>productPrices</code> 方法时，优惠券可以作为逗号分隔的字符串传递：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Cashier;
+
+<span class="variable token">$prices</span> = Cashier::productPrices([<span class="number token">123</span>, <span class="number token">456</span>], [
+    <span class="string token">'coupons'</span> =&gt; <span class="string token">'SUMMERSALE,20PERCENTOFF'</span>
+]);
+</code></pre>
+<p>然后，使用 <code>price</code> 方法显示计算出的价格：</p>
+<pre><code class="language-blade">&lt;ul&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$prices</span> <span class="keyword token">as</span> <span class="variable token">$price</span>)
+        &lt;li&gt;{{ <span class="variable token">$price</span>-&gt;product_title }} - {{ <span class="variable token">$price</span>-&gt;price()-&gt;gross() }}&lt;/li&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/ul&gt;
+</code></pre>
+<p>你可以使用 <code>listPrice</code> 方法显示原价（没有优惠券折扣）：</p>
+<pre><code class="language-blade">&lt;ul&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$prices</span> <span class="keyword token">as</span> <span class="variable token">$price</span>)
+        &lt;li&gt;{{ <span class="variable token">$price</span>-&gt;product_title }} - {{ <span class="variable token">$price</span>-&gt;listPrice()-&gt;gross() }}&lt;/li&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/ul&gt;
+</code></pre>
+<blockquote>
+<p>注意：使用价格 API 时，Paddle 仅允许将优惠券应用于一次性购买的产品，而不允许应用于订阅计划。</p>
+</blockquote>
+<p><a name="customers"></a></p>
+<h2 id="客户-1">客户</h2>
+<p><a name="customer-defaults"></a></p>
+<h3 id="客户默认值">客户默认值</h3>
+<p>Cashier 允许你在创建支付链接时为你的客户定义一些默认值。 设置这些默认值允许你预先填写客户的电子邮件地址、国家 / 地区和邮政编码，以便他们可以立即转到结帐小部件的付款部分。 你可以通过覆盖计费模型上的以下方法来设置这些默认值：</p>
+<pre><code><span class="comment token">/**
+ * 获取客户的电子邮件地址以与 Paddle 关联。
+ *
+ *<span class="phpdoc token"> @return</span> string|null
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> paddleEmail()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;email;
+}
+
+<span class="comment token">/**
+ * 获取客户的国家与 Paddle 关联。
+ *
+ * 这需要一个 2 个字母的代码。 有关支持的国家 / 地区，请参阅以下链接。
+ *
+ *<span class="phpdoc token"> @return</span> string|null
+ *<span class="phpdoc token"> @link</span> https://developer.paddle.com/reference/platform-parameters/supported-countries
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> paddleCountry()
+{
+    <span class="comment token">//</span>
+}
+
+<span class="comment token">/**
+ * 获取客户的邮政编码以与 Paddle 关联。
+ *
+ * 有关需要此功能的国家 / 地区，请参阅以下链接。
+ *
+ *<span class="phpdoc token"> @return</span> string|null
+ *<span class="phpdoc token"> @link</span> https://developer.paddle.com/reference/platform-parameters/supported-countries#countries-requiring-postcode
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> paddlePostcode()
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>这些默认值将用于 Cashier 中生成 <a href="#pay-links">支付链接</a> 的每个操作。</p>
+<p><a name="subscriptions"></a></p>
+<h2 id="订阅">订阅</h2>
+<p><a name="creating-subscriptions"></a></p>
+<h3 id="创建订阅">创建订阅</h3>
+<p>要创建订阅，请首先检索计费模型的实例，该实例通常是 <code>App\Models\User</code> 的实例。 检索模型实例后，你可以使用 <code>newSubscription</code> 方法来创建模型的订阅支付链接：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/user/subscribe'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="variable token">$payLink</span> = <span class="variable token">$request</span>-&gt;user()-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$premium</span> = <span class="number token">12345</span>)
+        -&gt;returnTo(route(<span class="string token">'home'</span>))
+        -&gt;create();
+
+    <span class="keyword token">return</span> view(<span class="string token">'billing'</span>, [<span class="string token">'payLink'</span> =&gt; <span class="variable token">$payLink</span>]);
+});
+</code></pre>
+<p>传递给 <code>newSubscription</code> 方法的第一个参数应该是订阅的名称。 如果你的应用只提供一个订阅，你可以将其称为 <code>default</code> 或 <code>primary</code>。 第二个参数是用户订阅的特定计划。 该值应对应于 Paddle 中的计划标识符。 <code>returnTo</code> 方法接受一个 URL，你的用户在成功完成结帐后将被重定向到该 URL。</p>
+<p><code>create</code> 方法将创建一个支付链接，你可以使用它来生成一个支付按钮。 可以使用 Cashier Paddle 附带的 <code>paddle-button</code> <a href="blade.html#components">Blade 组件</a> 生成支付按钮：</p>
+<pre><code class="language-blade">&lt;x-paddle-button :url=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span>&gt;
+    订阅
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p>用户完成结帐后，将从 Paddle 发送一个 <code>subscription_created</code> webhook。 Cashier 将收到此 webhook 并为你的客户设置订阅。 为了确保你的应用程序正确接收和处理所有 webhook，请确保你正确地 <a href="#handling-paddle-webhooks">设置 webhook 处理</a>。</p>
+<p><a name="additional-details"></a></p>
+<h4 id="额外细节">额外细节</h4>
+<p>如果你想指定额外的客户或订阅详细信息，你可以通过将它们作为键 / 值对数组传递给 <code>create</code> 方法来实现。 要了解有关 Paddle 支持的其他字段的更多信息，请查看 Paddle 关于 <a href="https://developer.paddle.com/api-reference/product-api/pay-links/createpaylink">生成支付链接</a> 的文档：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$monthly</span> = <span class="number token">12345</span>)
+    -&gt;returnTo(route(<span class="string token">'home'</span>))
+    -&gt;create([
+        <span class="string token">'vat_number'</span> =&gt; <span class="variable token">$vatNumber</span>,
+    ]);
+</code></pre>
+<p><a name="subscriptions-coupons"></a></p>
+<h4 id="优惠券-1">优惠券</h4>
+<p>如果你想在创建订阅时申请优惠券，你可以使用 <code>withCoupon</code> 方法：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$monthly</span> = <span class="number token">12345</span>)
+    -&gt;returnTo(route(<span class="string token">'home'</span>))
+    -&gt;withCoupon(<span class="string token">'code'</span>)
+    -&gt;create();
+</code></pre>
+<p><a name="metadata"></a></p>
+<h4 id="元数据">元数据</h4>
+<p>你还可以使用 <code>withMetadata</code> 方法传递元数据数组：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$monthly</span> = <span class="number token">12345</span>)
+    -&gt;returnTo(route(<span class="string token">'home'</span>))
+    -&gt;withMetadata([<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>])
+    -&gt;create();
+</code></pre>
+<blockquote>
+<p>注意：提供元数据时，请避免使用 <code>subscription_name</code> 作为元数据键。 此密钥保留供 Cashier 内部使用。</p>
+</blockquote>
+<p><a name="checking-subscription-status"></a></p>
+<h3 id="检查订阅状态">检查订阅状态</h3>
+<p>一旦用户订阅了你的应用程序，你就可以使用各种便利的方法检查他们的订阅状态。 首先，如果用户有活动订阅，<code>subscribed</code> 方法返回 <code>true</code>，即使订阅当前处于试用期：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscribed(<span class="string token">'default'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>该 <code>subscribed</code> 方法也非常适合 <a href="middleware.html">路由中间件</a>，允许您根据用户的订阅状态过滤对路由和控制器的访问：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Middleware;
+
+<span class="keyword token">use</span> Closure;
+
+<span class="keyword token">class</span> EnsureUserIsSubscribed
+{
+    <span class="comment token">/**
+     * 处理请求.
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @param</span>  \Closure  $next
+     *<span class="phpdoc token"> @return</span> mixed
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    {
+        <span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;user() &amp;&amp; ! <span class="variable token">$request</span>-&gt;user()-&gt;subscribed(<span class="string token">'default'</span>)) {
+            <span class="comment token">// 此用户非付费客户...</span>
+            <span class="keyword token">return</span> redirect(<span class="string token">'billing'</span>);
+        }
+
+        <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
+    }
+}
+</code></pre>
+<p>如果您想确定用户是否仍在试用期内，您可以使用 <code>onTrial</code> 方法。此方法可用于确定是否应向用户显示他们仍在试用期的警告：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;onTrial()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>该 <code>subscribedToPlan</code> 方法可用于根据给定的 Paddle 计划 ID 确定用户是否订阅了给定的计划。 在这个例子中，我们将确定用户的 <code>default</code> 订阅是否订阅包月计划：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscribedToPlan(<span class="variable token">$monthly</span> = <span class="number token">12345</span>, <span class="string token">'default'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>通过将数组传递给 <code>subscribedToPlan</code> 方法，您可以确定用户的 <code>default</code> 订阅是积极订阅月度或年度计划：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscribedToPlan([<span class="variable token">$monthly</span> = <span class="number token">12345</span>, <span class="variable token">$yearly</span> = <span class="number token">54321</span>], <span class="string token">'default'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>该 <code>recurring</code> 方法可用于确定用户当前是否已订阅并且不再处于试用期：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;recurring()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="cancelled-subscription-status"></a></p>
+<h4 id="已取消订阅状态">已取消订阅状态</h4>
+<p>要确定用户是否曾经是订阅者但现在已取消订阅，您可以使用 <code>cancelled</code> 方法：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;cancelled()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>你还可以确定用户是否已取消订阅，但在订阅完全到期之前仍处于 「宽限期」。 例如，如果用户在 3 月 5 日取消原定于 3 月 10 日到期的订阅，则用户将处于「宽限期」，直到 3 月 10 日。 请注意，在此期间 <code>subscribed</code> 方法仍然返回 <code>true</code>：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;onGracePeriod()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>要确定用户是否已取消订阅并且不再处于「宽限期」内，你可以使用 <code>ended</code> 方法：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;ended()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="past-due-status"></a></p>
+<h4 id="逾期状态">逾期状态</h4>
+<p>如果订阅的付款失败，它将被标记为 <code>past_due</code>。 当你的订阅处于此状态时，在客户更新其付款信息之前，它不会处于活动状态。 你可以使用订阅实例上的 <code>pastDue</code> 方法来确定订阅是否过期：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;pastDue()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>当订阅过期时，你应该指示用户 <a href="#updating-payment-information">更新他们的付款信息</a>。 你可以在 <a href="https://vendors.paddle.com/subscription-settings">Paddle 订阅设置</a> 中配置逾期订阅的处理方式。</p>
+<p>如果你希望订阅在 <code>past_due</code> 时仍被视为活动，你可以使用 Cashier 提供的 <code>keepPastDueSubscriptionsActive</code> 方法。 通常，此方法应在你的 <code>AppServiceProvider</code> 的 <code>register</code> 方法中调用：</p>
+<pre><code><span class="keyword token">use</span> Laravel\Paddle\Cashier;
+
+<span class="comment token">/**
+ * 注册应用服务
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+{
+    Cashier::keepPastDueSubscriptionsActive();
+}
+</code></pre>
+<blockquote>
+<p>注意：当订阅处于 <code>past_due</code> 状态时，在付款信息更新之前无法更改。 因此，当订阅处于 <code>past_due</code> 状态时，<code>swap</code> 和 <code>updateQuantity</code> 方法将抛出异常。</p>
+</blockquote>
+<p><a name="subscription-scopes"></a></p>
+<h4 id="订阅范围">订阅范围</h4>
+<p>大多数订阅状态也可用作查询范围，以便你可以轻松查询数据库中处于给定状态的订阅：</p>
+<pre><code><span class="comment token">// 获取所有有效订阅...</span>
+<span class="variable token">$subscriptions</span> = Subscription::query()-&gt;active()-&gt;get();
+
+<span class="comment token">// 获取给定用户的所有已取消订阅...</span>
+<span class="variable token">$subscriptions</span> = <span class="variable token">$user</span>-&gt;subscriptions()-&gt;cancelled()-&gt;get();
+</code></pre>
+<p>可用范围的完整列表如下：</p>
+<pre><code>Subscription::query()-&gt;active();
+Subscription::query()-&gt;onTrial();
+Subscription::query()-&gt;notOnTrial();
+Subscription::query()-&gt;pastDue();
+Subscription::query()-&gt;recurring();
+Subscription::query()-&gt;ended();
+Subscription::query()-&gt;paused();
+Subscription::query()-&gt;notPaused();
+Subscription::query()-&gt;onPausedGracePeriod();
+Subscription::query()-&gt;notOnPausedGracePeriod();
+Subscription::query()-&gt;cancelled();
+Subscription::query()-&gt;notCancelled();
+Subscription::query()-&gt;onGracePeriod();
+Subscription::query()-&gt;notOnGracePeriod();
+</code></pre>
+<p><a name="subscription-single-charges"></a></p>
+<h3 id="订阅单次收费">订阅单次收费</h3>
+<p>订阅单次收费允许你在订阅的基础上向订阅者收取一次性费用：</p>
+<pre><code><span class="variable token">$response</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;charge(<span class="number token">12.99</span>, <span class="string token">'Support Add-on'</span>);
+</code></pre>
+<p>与 <a href="#single-charges">单一费用</a> 相比，此方法将立即向客户存储的订阅付款方式收费。 收费金额应始终以订阅的货币定义。</p>
+<p><a name="updating-payment-information"></a></p>
+<h3 id="更新付款信息">更新付款信息</h3>
+<p>Paddle 始终为每个订阅保存一种付款方式。 如果要更新订阅的默认付款方式，则应首先使用订阅模型上的 <code>updateUrl</code> 方法生成订阅 「更新 URL」：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$updateUrl</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;updateUrl();
+</code></pre>
+<p>然后，你可以将生成的 URL 与 Cashier 提供的 <code>paddle-button</code> Blade 组件结合使用，以允许用户启动 Paddle 小部件并更新他们的付款信息：</p>
+<pre><code class="language-html">&lt;x-paddle-button :url=<span class="string token">"$updateUrl"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span>&gt;
+    更新付款信息
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p>当用户更新完他们的信息后，Paddle 将发送一个 <code>subscription_updated</code> webhook，订阅详细信息将在你的应用数据库中更新。</p>
+<p><a name="changing-plans"></a></p>
+<h3 id="改变计划">改变计划</h3>
+<p>用户订阅你的应用程序后，他们可能偶尔想要更改为新的订阅计划。 要为用户更新订阅计划，你应该将 Paddle 计划的标识符传递给订阅的 <code>swap</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;swap(<span class="variable token">$premium</span> = <span class="number token">34567</span>);
+</code></pre>
+<p>如果你想变更计划并立即为用户开具发票，而不是等待他们的下一个计费周期，您可以使用 <code>swapAndInvoice</code> 方法：</p>
+<pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;swapAndInvoice(<span class="variable token">$premium</span> = <span class="number token">34567</span>);
+</code></pre>
+<blockquote>
+<p>注意：试用活动期间不能变更计划。有关此限制的更多信息，请参阅 <a href="https://developer.paddle.com/api-reference/subscription-api/users/updateuser#usage-notes">Paddle 文档</a>。</p>
+</blockquote>
+<p><a name="prorations"></a></p>
+<h4 id="按比例分配">按比例分配</h4>
+<p>默认情况下，Paddle 在计划变更时按比例分配费用。 <code>noProrate</code> 方法可用于在不按比例分配费用的情况下更新订阅：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;noProrate()-&gt;swap(<span class="variable token">$premium</span> = <span class="number token">34567</span>);
+</code></pre>
+<p><a name="subscription-quantity"></a></p>
+<h3 id="订阅数量">订阅数量</h3>
+<p>有时订阅会受到 「数量」的影响。 例如，项目管理应用可能对每个项目每月收费 10 美元。 要增加或减少订阅数量，请使用 <code>incrementQuantity</code> 和 <code>decrementQuantity</code> 方法：</p>
+<pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;incrementQuantity();
+
+<span class="comment token">// 订阅增加 5 个...</span>
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;incrementQuantity(<span class="number token">5</span>);
+
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;decrementQuantity();
+
+<span class="comment token">// 订阅减少 5 个...</span>
+<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;decrementQuantity(<span class="number token">5</span>);
+</code></pre>
+<p>或者，您可以使用 <code>updateQuantity</code> 方法设置特定数量：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;updateQuantity(<span class="number token">10</span>);
+</code></pre>
+<p>该 <code>noProrate</code> 方法可用于更新订阅数量而不按比例分配费用：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;noProrate()-&gt;updateQuantity(<span class="number token">10</span>);
+</code></pre>
+<p><a name="subscription-modifiers"></a></p>
+<h3 id="订阅修饰符">订阅修饰符</h3>
+<p>订阅修饰符允许您实施 <a href="https://developer.paddle.com/guides/how-tos/subscriptions/metered-billing#using-subscription-price-modifiers">计量计费</a> 或使用附加组件扩展订阅。</p>
+<p>例如，您可能想为标准订阅提供 「高级支持」附加组件。 你可以像这样创建这个修饰符：</p>
+<pre><code><span class="variable token">$modifier</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;newModifier(<span class="number token">12.99</span>)-&gt;create();
+</code></pre>
+<p>上例将向订阅添加 $12.99 的附加组件。 默认情况下，此费用将在您为订阅配置的每个时间周期内重复收取。 如果您愿意，可以使用修饰符的 <code>description</code> 方法向修饰符添加可读的描述：</p>
+<pre><code><span class="variable token">$modifier</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;newModifier(<span class="number token">12.99</span>)
+    -&gt;description(<span class="string token">'Premium Support'</span>)
+    -&gt;create();
+</code></pre>
+<p>为了说明如何使用修饰符实现计量计费，假设您的应用程序对用户发送的每条 SMS 消息收费。 首先，您应该在 Paddle 仪表板中创建一个 $0 的计划。 用户订阅此计划后，您可以向订阅添加代表每个单独费用的修饰符：</p>
+<pre><code><span class="variable token">$modifier</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;newModifier(<span class="number token">0.99</span>)
+    -&gt;description(<span class="string token">'New text message'</span>)
+    -&gt;oneTime()
+    -&gt;create();
+</code></pre>
+<p>如您所见，我们在创建此修饰符时调用了 <code>oneTime</code> 方法。此方法将确保修改器只收费一次，并且不会在每个计费周期重复。</p>
+<p><a name="retrieving-modifiers"></a></p>
+<h4 id="检索修饰符">检索修饰符</h4>
+<p>您可以通过 <code>modifiers</code> 方法检索订阅的所有修饰符的列表：</p>
+<pre><code><span class="variable token">$modifiers</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;modifiers();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$modifiers</span> <span class="keyword token">as</span> <span class="variable token">$modifier</span>) {
+    <span class="variable token">$modifier</span>-&gt;amount(); <span class="comment token">// $0.99</span>
+    <span class="variable token">$modifier</span>-&gt;description; <span class="comment token">// New text message.</span>
+}
+</code></pre>
+<p><a name="deleting-modifiers"></a></p>
+<h4 id="删除修饰符">删除修饰符</h4>
+<p>修改器可以通过调用 <code>Laravel\Paddle\Modifier</code> 实例上的 <code>delete</code> 方法来删除：</p>
+<pre><code><span class="variable token">$modifier</span>-&gt;delete();
+</code></pre>
+<p><a name="pausing-subscriptions"></a></p>
+<h3 id="暂停订阅">暂停订阅</h3>
+<p>要暂停订阅，请调用用户订阅的 <code>pause</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;pause();
+</code></pre>
+<p>当订阅暂停时，Cashier 将自动在您的数据库中设置 <code>paused_from</code> 列。此列用于确定 <code>paused</code> 方法何时应该开始返回 <code>true</code>。例如，如果客户在 3 月 1 日暂停订阅，但该订阅直到 3 月 5 日才计划重复发生，则 <code>paused</code> 方法将继续返回 <code>false</code> ，直到 3 月 5 日。这样做是因为通常允许用户继续使用应用程序，直到他们的计费周期结束。</p>
+<p>您可以使用 <code>onPausedGracePeriod</code> 方法确定用户是否已暂停订阅但仍处于 「宽限期」：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;onPausedGracePeriod()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>要恢复暂停的订阅，您可以调用用户订阅的 <code>unpause</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;unpause();
+</code></pre>
+<blockquote>
+<p>注意：订阅暂停时无法修改。 如果您想切换到不同的计划或更新数量，您必须先恢复订阅。</p>
+</blockquote>
+<p><a name="cancelling-subscriptions"></a></p>
+<h3 id="取消订阅">取消订阅</h3>
+<p>要取消订阅，请调用用户订阅的 <code>cancel</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;cancel();
+</code></pre>
+<p>当订阅被取消时，Cashier 将自动在你的数据库中设置 <code>ends_at</code> 列。 此列用于确定 <code>subscribed</code> 方法应该何时开始返回 <code>false</code>。 例如，如果客户在 3 月 1 日取消订阅，但订阅计划在 3 月 5 日之前结束，则 <code>subscribed</code> 方法将在 3 月 5 日之前继续返回 <code>true</code>。 这样做是因为通常允许用户继续使用应用程序，直到他们的计费周期结束。</p>
+<p>你可以使用 <code>onGracePeriod</code> 方法确定用户是否已取消订阅但仍处于「宽限期」：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;onGracePeriod()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>如果你想立即取消订阅，你可以调用用户订阅的 <code>cancelNow</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;cancelNow();
+</code></pre>
+<blockquote>
+<p>注意：取消后无法恢复 Paddle 的订阅。 如果你的客户希望恢复订阅，则他们必须重新订阅。</p>
+</blockquote>
+<p><a name="subscription-trials"></a></p>
+<h2 id="订阅试用">订阅试用</h2>
+<p><a name="with-payment-method-up-front"></a></p>
+<h3 id="预先收集付费方式">预先收集付费方式</h3>
+<blockquote>
+<p>注意：在预先试用和收集付款方式详细信息时，Paddle 会阻止任何订阅更改，例如更换计划或更新数量。 如果你想允许客户在试用期间更换计划，则必须取消并重新创建订阅。</p>
+</blockquote>
+<p>如果你想为你的客户提供试用期，同时仍然预先收集付款方式信息，你应该在创建订阅付款链接时使用 <code>trialDays</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/user/subscribe'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="variable token">$payLink</span> = <span class="variable token">$request</span>-&gt;user()-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$monthly</span> = <span class="number token">12345</span>)
+                -&gt;returnTo(route(<span class="string token">'home'</span>))
+                -&gt;trialDays(<span class="number token">10</span>)
+                -&gt;create();
+
+    <span class="keyword token">return</span> view(<span class="string token">'billing'</span>, [<span class="string token">'payLink'</span> =&gt; <span class="variable token">$payLink</span>]);
+});
+</code></pre>
+<p>此方法将在你的应用数据库中的订阅记录上设置试用期结束日期，并指示 Paddle 在此日期之后才开始向客户收费。</p>
+<blockquote>
+<p>注意：如果客户的订阅未在试用结束日期之前取消，他们将在试用到期后立即收费，因此你务必将试用结束日期通知你的用户。</p>
+</blockquote>
+<p>你可以使用用户实例的 <code>onTrial</code> 方法或订阅实例的 <code>onTrial</code> 方法来确定用户是否在试用期内。 下面的两个例子是等价的：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;onTrial(<span class="string token">'default'</span>)) {
+    <span class="comment token">//</span>
+}
+
+<span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>)-&gt;onTrial()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="defining-trial-days-in-paddle-cashier"></a></p>
+<h4 id="在-paddle--cashier-中定义试用天数">在 Paddle / Cashier 中定义试用天数</h4>
+<p>你可以选择在 Paddle 仪表板中定义你的计划接收的试用天数，或者始终使用 Cashier 明确传递它们。 如果你选择在 Paddle 中定义计划的试用天数，你应该知道新订阅，包括过去订阅过的客户的新订阅，将始终获得试用期，除非你明确调用 <code>trialDays(0)</code> 方法。</p>
+<p><a name="without-payment-method-up-front"></a></p>
+<h3 id="未预先收集付款方式">未预先收集付款方式</h3>
+<p>如果你想提供试用期而不预先收集用户的付款方式信息，你可以将附加到你的用户的客户记录上的 <code>trial_ends_at</code> 列设置为你想要的试用结束日期。 这通常在用户注册期间完成：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::create([
+    <span class="comment token">// ...</span>
+]);
+
+<span class="variable token">$user</span>-&gt;createAsCustomer([
+    <span class="string token">'trial_ends_at'</span> =&gt; now()-&gt;addDays(<span class="number token">10</span>)
+]);
+</code></pre>
+<p>Cashier 将这种类型的试用称为「通用试用」，因为它不附属于任何现有订阅。如果当前日期未超过  <code>trial_ends_at</code> 的值，则 <code>User</code> 实例上的 <code>onTrial</code> 方法将返回 <code>true</code>：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;onTrial()) {
+    <span class="comment token">// 用户在试用期内...</span>
+}
+</code></pre>
+<p>一旦你准备好为用户创建一个实际的订阅，你可以像往常一样使用 <code>newSubscription</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/user/subscribe'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;newSubscription(<span class="string token">'default'</span>, <span class="variable token">$monthly</span> = <span class="number token">12345</span>)
+        -&gt;returnTo(route(<span class="string token">'home'</span>))
+        -&gt;create();
+
+    <span class="keyword token">return</span> view(<span class="string token">'billing'</span>, [<span class="string token">'payLink'</span> =&gt; <span class="variable token">$payLink</span>]);
+});
+</code></pre>
+<p>要检索用户的试用结束日期，您可以使用 <code>trialEndsAt</code> 方法。如果用户正在试用，则此方法将返回一个 Carbon 日期实例，否则将返回 <code>null</code> 。如果您想获取特定订阅而不是默认订阅的试用结束日期，您还可以传递一个可选的订阅名称参数：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;onTrial()) {
+    <span class="variable token">$trialEndsAt</span> = <span class="variable token">$user</span>-&gt;trialEndsAt(<span class="string token">'main'</span>);
+}
+</code></pre>
+<p>如果您希望明确知道用户处于 「通用」试用期内并且尚未创建实际订阅，则可以使用 <code>onGenericTrial</code> 方法：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;onGenericTrial()) {
+    <span class="comment token">// 用户在通用试用期内...</span>
+}
+</code></pre>
+<blockquote>
+<p>注意：创建 Paddle 订阅后，无法延长或修改其试用期。</p>
+</blockquote>
+<p><a name="handling-paddle-webhooks"></a></p>
+<h2 id="处理-paddle-webhooks">处理 Paddle Webhooks</h2>
+<p>Paddle 可以通过 webhook 通知您的应用各种事件。默认情况下，指向 Cashier 的 webhook 控制器的路由由 Cashier 服务提供商注册。该控制器将处理所有传入的 webhook 请求。</p>
+<p>默认情况下，此控制器将自动处理付费失败过多的取消订阅（<a href="https://vendors.paddle.com/subscription-settings">由你的 Paddle 订阅设置定义</a>）、订阅更新和付款方式更改；但是，我们很快就会发现，你可以扩展这个控制器来处理你喜欢的任何 Paddle webhook 事件。</p>
+<p>为确保你的应用可以处理 Paddle webhooks，请务必 <a href="https://vendors.paddle.com/alerts-webhooks">在 Paddle 控制面板中配置 webhook URL</a>。默认情况下，Cashier 的 webhook 控制器响应 <code>/paddle/webhook</code> URL 路径。你应该在 Paddle 控制面板中启用的所有 webhook 的完整列表是：</p>
+<ul>
+<li>订阅创建</li>
+<li>订阅更新</li>
+<li>订阅取消</li>
+<li>付款成功</li>
+<li>订阅付款成功</li>
+</ul>
+<blockquote>
+<p>注意：确保使用 Cashier 包含的 <a href="cashier-paddle.html#verifying-webhook-signatures">webhook 签名验证</a> 中间件保护传入请求。</p>
+</blockquote>
+<p><a name="webhooks-csrf-protection"></a></p>
+<h4 id="webhook-和-csrf-保护">Webhook 和 CSRF 保护</h4>
+<p>由于 Paddle webhooks 需要绕过 Laravel 的 <a href="csrf.html">CSRF 保护</a>，请务必在你的 <code>App\Http\Middleware\VerifyCsrfToken</code> 中间件中将 URI 作为例外列出或列出外面的路由 <code>web</code> 中间件组的：</p>
+<pre><code><span class="keyword token">protected</span> <span class="variable token">$except</span> = [
+    <span class="string token">'paddle/*'</span>,
+];
+</code></pre>
+<p><a name="webhooks-local-development"></a></p>
+<h4 id="webhook-和本地开发">Webhook 和本地开发</h4>
+<p>为了让 Paddle 能够在本地开发期间发送你的应用程序 webhook，你需要通过站点共享服务公开你的应用程序，例如 <a href="https://ngrok.com/">Ngrok</a> 或 <a href="https://expose.dev/docs/introduction">Expose</a>。如果你使用 <a href="sail.html">Laravel Sail</a> 在本地开发应用程序，你可以使用 Sail 的 <a href="sail.html#sharing-your-site">站点共享命令</a>。</p>
+<p><a name="defining-webhook-event-handlers"></a></p>
+<h3 id="定义-webhook-事件处理程序">定义 webhook 事件处理程序</h3>
+<p>Cashier 会自动处理因收费失败和其他常见的 paddle webhook 取消订阅。 但是，如果您有其他想要处理的 webhook 事件，您可以通过收听 Cashier 调度的以下事件来实现：</p>
+<ul>
+<li><code>Laravel\Paddle\Events\WebhookReceived</code></li>
+<li><code>Laravel\Paddle\Events\WebhookHandled</code></li>
+</ul>
+<p>这两个事件都包含 Paddle webhook 的完整负载。 例如，如果你想处理 <code>invoice.payment_succeeded</code> webhook，你可以注册一个 <a href="events.html#defining-listeners">listener</a> 来处理事件：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Listeners;
+
+<span class="keyword token">use</span> Laravel\Paddle\Events\WebhookReceived;
+
+<span class="keyword token">class</span> PaddleEventListener
+{
+    <span class="comment token">/**
+     * 处理收到的 Paddle webhook。
+     *
+     *<span class="phpdoc token"> @param</span>  \Laravel\Paddle\Events\WebhookReceived  $event
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(WebhookReceived <span class="variable token">$event</span>)
+    {
+        <span class="keyword token">if</span> (<span class="variable token">$event</span>-&gt;payload[<span class="string token">'alert_name'</span>] === <span class="string token">'payment_succeeded'</span>) {
+            <span class="comment token">// 处理传入事件...</span>
+        }
+    }
+}
+</code></pre>
+<p>一旦你的监听器被定义，你可以在你的应用程序的<code>EventServiceProvider</code>中注册它：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Listeners\PaddleEventListener;
+<span class="keyword token">use</span> Illuminate\Foundation\Support\Providers\EventServiceProvider <span class="keyword token">as</span> ServiceProvider;
+<span class="keyword token">use</span> Laravel\Paddle\Events\WebhookReceived;
+
+<span class="keyword token">class</span> EventServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="keyword token">protected</span> <span class="variable token">$listen</span> = [
+        WebhookReceived::<span class="keyword token">class</span> =&gt; [
+            PaddleEventListener::<span class="keyword token">class</span>,
+        ],
+    ];
+}
+</code></pre>
+<p>Cashier 还会发出专用于接收到的 webhook 类型的事件。 除了来自 Paddle 的完整有效负载之外，它们还包含用于处理 webhook 的相关模型，例如计费模型、订阅或收据：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><code>Laravel\Paddle\Events\PaymentSucceeded</code></li>
+<li><code>Laravel\Paddle\Events\SubscriptionPaymentSucceeded</code></li>
+<li><code>Laravel\Paddle\Events\SubscriptionCreated</code></li>
+<li><code>Laravel\Paddle\Events\SubscriptionUpdated</code></li>
+<li><code>Laravel\Paddle\Events\SubscriptionCancelled</code></li>
+</ul>
+</div>
+
+
+
+<p>您还可以通过在应用程序的 <code>.env</code> 文件中定义 <code>CASHIER_WEBHOOK</code> 环境变量来覆盖默认的内置 webhook 路由。 此值应该是您的 webhook 路由的完整 URL，并且需要与您在 Paddle 控制面板中设置的 URL 相匹配：</p>
+<pre><code class="language-ini">CASHIER_WEBHOOK=https:<span class="comment token">//example.com/my-paddle-webhook-url</span>
+</code></pre>
+<p><a name="verifying-webhook-signatures"></a></p>
+<h3 id="验证-webhook-签名">验证 Webhook 签名</h3>
+<p>为了保护您的 webhook，您可以使用 <a href="https://developer.paddle.com/webhook-reference/verifying-webhooks">Paddle 的 webhook 签名</a>。 为方便起见，Cashier 自动包含一个中间件，用于验证传入的 Paddle webhook 请求是否有效。</p>
+<p>要启用 webhook 验证，请确保在应用程序的 .env 文件中定义了 <code>PADDLE_PUBLIC_KEY</code> 环境变量。 可以从您的 Paddle 帐户仪表板中检索公钥。</p>
+<p><a name="single-charges"></a></p>
+<h2 id="单次收费">单次收费</h2>
+<p><a name="simple-charge"></a></p>
+<h3 id="simple-charge">Simple Charge</h3>
+<p>如果您想对客户进行一次性收费，您可以在可计费模型实例上使用“charge”方法来生成收费的支付链接。 <code>charge</code> 方法接受费用金额（浮点数）作为它的第一个参数和一个费用描述作为它的第二个参数：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/store'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="keyword token">return</span> view(<span class="string token">'store'</span>, [
+        <span class="string token">'payLink'</span> =&gt; <span class="variable token">$user</span>-&gt;charge(<span class="number token">12.99</span>, <span class="string token">'Action Figure'</span>)
+    ]);
+});
+</code></pre>
+<p>生成支付链接后，您可以使用 Cashier 提供的 <code>paddle-button</code> Blade 组件让用户启动 Paddle 小部件并完成收费：</p>
+<pre><code class="language-blade">&lt;x-paddle-button :url=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span>&gt;
+    Buy
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p><code>charge</code> 方法接受一个数组作为其第三个参数，允许您将任何您希望的选项传递给底层 Paddle 支付链接创建。 请查阅 <a href="https://developer.paddle.com/api-reference/product-api/pay-links/createpaylink">Paddle 文档</a> 了解更多关于创建费用时可用的选项：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;charge(<span class="number token">12.99</span>, <span class="string token">'Action Figure'</span>, [
+    <span class="string token">'custom_option'</span> =&gt; <span class="variable token">$value</span>,
+]);
+</code></pre>
+<p>费用以 <code>cashier.currency</code> 配置选项中指定的货币进行。 默认情况下，这设置为美元。 您可以通过在应用程序的 <code>.env</code> 文件中定义 <code>CASHIER_CURRENCY</code> 环境变量来覆盖默认货币：</p>
+<pre><code class="language-ini">CASHIER_CURRENCY=EUR
+</code></pre>
+<p>您还可以使用 Paddle 的动态定价匹配系统 <a href="https://developer.paddle.com/api-reference/product-api/pay-links/createpaylink#price-overrides">覆盖每种货币的价格</a>。为此，请通过价格数组而不是固定金额：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;charge([
+    <span class="string token">'USD:19.99'</span>,
+    <span class="string token">'EUR:15.99'</span>,
+], <span class="string token">'Action Figure'</span>);
+</code></pre>
+<p><a name="charging-products"></a></p>
+<h3 id="charging-products">Charging Products</h3>
+<p>如果您想对 Paddle 中配置的特定产品进行一次性收费，您可以在计费模型实例上使用 <code>chargeProduct</code> 方法来生成付款链接：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/store'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="keyword token">return</span> view(<span class="string token">'store'</span>, [
+        <span class="string token">'payLink'</span> =&gt; <span class="variable token">$request</span>-&gt;user()-&gt;chargeProduct(<span class="variable token">$productId</span> = <span class="number token">123</span>)
+    ]);
+});
+</code></pre>
+<p>然后，您可以提供 <code>paddle-button</code> 组件的支付链接，以允许用户初始化 Paddle 小部件：</p>
+<pre><code class="language-blade">&lt;x-paddle-button :url=<span class="string token">"$payLink"</span> <span class="keyword token">class</span>=<span class="string token">"px-8 py-4"</span>&gt;
+    Buy
+&lt;/x-paddle-button&gt;
+</code></pre>
+<p><code>chargeProduct</code> 方法接受一个数组作为其第二个参数，允许您将任何您希望的选项传递给底层 Paddle 支付链接创建。 请查阅 <a href="https://developer.paddle.com/api-reference/product-api/pay-links/createpaylink">Paddle 文档</a> 关于创建费用时可用的选项：</p>
+<pre><code><span class="variable token">$payLink</span> = <span class="variable token">$user</span>-&gt;chargeProduct(<span class="variable token">$productId</span>, [
+    <span class="string token">'custom_option'</span> =&gt; <span class="variable token">$value</span>,
+]);
+</code></pre>
+<p><a name="refunding-orders"></a></p>
+<h3 id="退款订单">退款订单</h3>
+<p>如果您需要对桨订单进行退款，您可以使用 <code>refund</code> 方法。 此方法接受 Paddle 订单 ID 作为其第一个参数。 您可以使用 <code>receipts</code> 方法检索给定计费模型的收据：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$receipt</span> = <span class="variable token">$user</span>-&gt;receipts()-&gt;first();
+
+<span class="variable token">$refundRequestId</span> = <span class="variable token">$user</span>-&gt;refund(<span class="variable token">$receipt</span>-&gt;order_id);
+</code></pre>
+<p>您可以选择指定具体的退款金额以及退款原因：</p>
+<pre><code><span class="variable token">$receipt</span> = <span class="variable token">$user</span>-&gt;receipts()-&gt;first();
+
+<span class="variable token">$refundRequestId</span> = <span class="variable token">$user</span>-&gt;refund(
+    <span class="variable token">$receipt</span>-&gt;order_id, <span class="number token">5.00</span>, <span class="string token">'Unused product time'</span>
+);
+</code></pre>
+<blockquote>
+<p>技巧：联系 Paddle 支持时，您可以使用“$refundRequestId”作为退款参考。</p>
+</blockquote>
+<p><a name="receipts"></a></p>
+<h2 id="收据">收据</h2>
+<p>您可以通过 <code>receipts</code> 属性轻松检索可计费模型的收据数组：
+    use App\Models\User;</p>
+<pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$receipts</span> = <span class="variable token">$user</span>-&gt;receipts;
+</code></pre>
+<p>在为客户列出收据时，您可以使用收据实例的方法来显示相关的收据信息。 例如，您可能希望在表格中列出每张收据，以便用户轻松下载任何收据：</p>
+<pre><code class="language-html">&lt;table&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$receipts</span> <span class="keyword token">as</span> <span class="variable token">$receipt</span>)
+        &lt;tr&gt;
+            &lt;td&gt;{{ <span class="variable token">$receipt</span>-&gt;paid_at-&gt;toFormattedDateString() }}&lt;/td&gt;
+            &lt;td&gt;{{ <span class="variable token">$receipt</span>-&gt;amount() }}&lt;/td&gt;
+            &lt;td&gt;&lt;a href=<span class="string token">"{{ $receipt-&gt;receipt_url }}"</span> target=<span class="string token">"_blank"</span>&gt;Download&lt;/a&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/table&gt;
+</code></pre>
+<p><a name="past-and-upcoming-payments"></a></p>
+<h3 id="过去--未来的付款">过去 &amp; 未来的付款</h3>
+<p>您可以使用 <code>lastPayment</code> 和 <code>nextPayment</code> 方法来检索和显示客户过去或即将进行的定期订阅付款：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$subscription</span> = <span class="variable token">$user</span>-&gt;subscription(<span class="string token">'default'</span>);
+
+<span class="variable token">$lastPayment</span> = <span class="variable token">$subscription</span>-&gt;lastPayment();
+<span class="variable token">$nextPayment</span> = <span class="variable token">$subscription</span>-&gt;nextPayment();
+</code></pre>
+<p>这两种方法都会返回一个 <code>Laravel\Paddle\Payment</code> 的实例； 但是，当计费周期结束时（例如取消订阅时），<code>nextPayment</code> 将返回 <code>null</code>：</p>
+<pre><code class="language-blade">Next payment: {{ <span class="variable token">$nextPayment</span>-&gt;amount() }} due on {{ <span class="variable token">$nextPayment</span>-&gt;date()-&gt;format(<span class="string token">'d/m/Y'</span>) }}
+</code></pre>
+<p><a name="handling-failed-payments"></a></p>
+<h2 id="处理失败的付款">处理失败的付款</h2>
+<p>订阅支付失败的原因有多种，例如卡过期或卡资金不足。 发生这种情况时，我们建议您让 Paddle 为您处理付款失败。 具体来说，您可以在您的 Paddle 仪表板中<a href="https://vendors.paddle.com/subscription-settings">设置 Paddle 的自动计费电子邮件</a>。</p>
+<p>或者，您可以通过捕获 <a href="https://developer.paddle.com/webhook-reference/subscription-alerts/subscription-payment-failed"><code>subscription_payment_failed</code></a> webhook 并启用“订阅付款失败”来执行更精确的自定义Paddle 仪表板的 Webhook 设置中的选项：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Laravel\Paddle\Http\Controllers\WebhookController <span class="keyword token">as</span> CashierController;
+
+<span class="keyword token">class</span> WebhookController <span class="keyword token">extends</span> CashierController
+{
+    <span class="comment token">/**
+     * 处理订阅付款失败。
+     *
+     *<span class="phpdoc token"> @param</span>  array  $payload
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handleSubscriptionPaymentFailed(<span class="variable token">$payload</span>)
+    {
+        <span class="comment token">// 处理订阅付款失败...</span>
+    }
+}
+</code></pre>
+<p><a name="testing"></a></p>
+<h2 id="测试">测试</h2>
+<p>在测试时，您应该手动测试您的计费流程，以确保您的集成按预期工作。</p>
+<p>对于自动化测试，包括在 CI 环境中执行的测试，你可以使用 <a href="http-client.html#testing">Laravel 的 HTTP 客户端</a> 来伪造对 Paddle 的 HTTP 调用。 尽管这不会测试来自 Paddle 的实际响应，但它确实提供了一种无需实际调用 Paddle API 即可测试您的应用程序的方法。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="广播系统">广播系统</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#server-side-installation">服务端配置</a><ul>
+<li><a href="#configuration">配置</a></li>
+<li><a href="#pusher-channels">Pusher Channels</a></li>
+<li><a href="#ably">Ably</a></li>
+<li><a href="#open-source-alternatives">开源替代品</a></li>
+</ul>
+</li>
+<li><a href="#client-side-installation">客户端配置</a><ul>
+<li><a href="#client-pusher-channels">Pusher Channels</a></li>
+<li><a href="#client-ably">Ably</a></li>
+</ul>
+</li>
+<li><a href="#concept-overview">概念综述</a><ul>
+<li><a href="#using-example-application">使用示例程序</a></li>
+</ul>
+</li>
+<li><a href="#defining-broadcast-events">定义广播事件</a><ul>
+<li><a href="#broadcast-name">广播名称</a></li>
+<li><a href="#broadcast-data">广播数据</a></li>
+<li><a href="#broadcast-queue">广播队列</a></li>
+<li><a href="#broadcast-conditions">广播条件</a></li>
+<li><a href="#broadcasting-and-database-transactions">广播 &amp; 数据库事务</a></li>
+</ul>
+</li>
+<li><a href="#authorizing-channels">授权频道</a><ul>
+<li><a href="#defining-authorization-routes">定义授权路由</a></li>
+<li><a href="#defining-authorization-callbacks">定义授权回调</a></li>
+<li><a href="#defining-channel-classes">定义频道类</a></li>
+</ul>
+</li>
+<li><a href="#broadcasting-events">广播事件</a><ul>
+<li><a href="#only-to-others">只广播给他人</a></li>
+<li><a href="#customizing-the-connection">自定义连接</a></li>
+</ul>
+</li>
+<li><a href="#receiving-broadcasts">接收广播</a><ul>
+<li><a href="#listening-for-events">对事件进行监听</a></li>
+<li><a href="#leaving-a-channel">退出频道</a></li>
+<li><a href="#namespaces">命名空间</a></li>
+</ul>
+</li>
+<li><a href="#presence-channels">Presence 频道</a><ul>
+<li><a href="#authorizing-presence-channels">授权 Presence 频道</a></li>
+<li><a href="#joining-presence-channels">加入 Presence 频道</a></li>
+<li><a href="#broadcasting-to-presence-channels">广播到 Presence 频道</a></li>
+</ul>
+</li>
+<li><a href="#model-broadcasting">广播模型</a><ul>
+<li><a href="#model-broadcasting-conventions">广播约定模型</a></li>
+<li><a href="#listening-for-model-broadcasts">监听广播模型</a></li>
+</ul>
+</li>
+<li><a href="#client-events">客户端事件</a></li>
+<li><a href="#notifications">消息通知</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>在现代的 web 应用程序中，WebSockets 被用来实现实时、即时更新用户接口。当服务器上的数据更新后，更新信息会通过 WebSocket 连接发送到客户端等待处理。为了在 UI 中展示出这些数据的变化相比于不停地轮询应用程序，WebSockets 是一种更加可靠和高效的选择。</p>
+<p>举一个例子，假设在应用程序中能够导出用户的 CSV 数据并且发送给他们。可是创建 CSV 文件要花费很长时间，因此你选择使用 <a href="queues.html">队列任务</a>去创建文件和发送邮件。当创建了 CSV 文件并将其发送给用户后，我们能够创建使用一个广播事件比如 <code>App\Events\UserDataExported</code> ，然后在应用中利用 JavaScript 来接收这个事件。一旦接收到事件，我们就可以向用户显示一条消息，表明他们的 CSV 已经通过电子邮件发送给他们，而不需要他们刷新页面。</p>
+<p>为了帮助您构建这些类型的功能，Laravel 通过 WebSocket 连接使它很容易的去「广播」您的服务端 Laravel <a href="events.html">事件</a>。广播 Laravel 事件允许您在服务器端 Laravel 应用程序和客户端 JavaScript 应用程序之间共享相同的事件名称和数据。</p>
+<p>广播背后的核心概念很简单：客户端连接到前端的命名频道，而您的 Laravel 应用程序将事件广播到后端的这些频道。这些事件可以包含您希望提供给前端的任何其他数据。</p>
+<p><a name="supported-drivers"></a></p>
+<h4 id="支持的驱动程序">支持的驱动程序</h4>
+<p>默认情况下，Laravel 包含两个服务器端广播驱动程序供您选择：<a href="https://pusher.com/channels">Pusher Channels</a> 和 <a href="https://ably.io">Ably</a>。 但是，社区驱动的软件包，例如 <a href="https://beyondco.de/docs/laravel-websockets/getting-started/introduction">laravel-websockets</a> 和 <a href="https://docs.soketi.app/">soketi</a> 提供 不需要商业广播提供商的其他广播驱动程序。</p>
+<blockquote>
+<p>技巧：在深入了解事件广播之前，请确保您已阅读 Laravel 关于 [事件和监听](events &quot;事件和监听&quot;.html) 的文档。</p>
+</blockquote>
+<p><a name="server-side-installation"></a></p>
+<h2 id="服务器端安装">服务器端安装</h2>
+<p>要开始使用 Laravel 的事件广播，我们需要在 Laravel 应用程序中进行一些配置以及安装一些包。</p>
+<p>事件广播由服务器端广播驱动程序完成，该驱动程序广播您的 Laravel 事件，以便 Laravel Echo（一个 JavaScript 库）可以在浏览器客户端中接收它们。 不用担心 - 我们将逐步完成安装过程的每个部分。</p>
+<p><a name="configuration"></a></p>
+<h3 id="配置">配置</h3>
+<p>您应用程序的所有事件广播配置都存储在 config/broadcasting.php 配置文件中。 Laravel 支持几个开箱即用的广播驱动程序：<a href="https://pusher.com/channels">Pusher Channels</a>、<a href="redis.html">Redis</a> 和一个用于本地的 <code>log</code> 驱动程序 开发和调试。 此外，还包含一个 <code>null</code> 驱动程序，允许您在测试期间完全禁用广播。 <code>config/broadcasting.php</code> 配置文件中包含每个驱动程序的配置示例。</p>
+<p><a name="broadcast-service-provider"></a></p>
+<h4 id="广播服务提供商">广播服务提供商</h4>
+<p>在广播任何事件之前，您首先需要注册 <code>App\Providers\BroadcastServiceProvider</code>。在新的 Laravel 应用程序中，您只需在 <code>config/app.php</code> 配置文件的 <code>providers</code> 数组中取消注释此提供程序。这个 <code>BroadcastServiceProvider</code> 包含注册广播授权路由和回调所需的代码。</p>
+<p><a name="queue-configuration"></a></p>
+<h4 id="队列配置">队列配置</h4>
+<p>您还需要配置和运行 <a href="queues.html">queue worker</a>。所有事件广播都是通过排队作业完成的，因此您的应用程序的响应时间不会受到广播事件的严重影响。</p>
+<p><a name="pusher-channels"></a></p>
+<h3 id="pusher-channels">Pusher Channels</h3>
+<p>如果您计划使用 <a href="https://pusher.com/channels">Pusher Channels</a> 广播您的事件，您应该使用 Composer 包管理器安装 Pusher Channels PHP SDK：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> pusher/pusher-php-server
+</code></pre>
+<p>接下来，您应该在 config/broadcasting.php 配置文件中配置您的 Pusher Channels 凭据。 此文件中已包含一个 Pusher Channels 配置示例，允许您快速指定您的密钥、秘密和应用程序 ID。 通常，这些值应通过 <code>PUSHER_APP_KEY</code>、<code>PUSHER_APP_SECRET</code> 和 <code>PUSHER_APP_ID</code> <a href="configuration.html#environment-configuration">环境变量</a> 设置：</p>
+<pre><code class="language-ini">PUSHER_APP_ID=your-pusher-app-id
+PUSHER_APP_KEY=your-pusher-key
+PUSHER_APP_SECRET=your-pusher-secret
+PUSHER_APP_CLUSTER=mt1
+</code></pre>
+<p><code>config/broadcasting.php</code> 文件的 <code>pusher</code> 配置还允许您指定 Channels 支持的其他 <code>options</code>，例如集群。</p>
+<p>接下来，您需要在 <code>.env</code> 文件中将广播驱动程序更改为 <code>pusher</code>：</p>
+<pre><code class="language-ini">BROADCAST_DRIVER=pusher
+</code></pre>
+<p>最后，您可以安装和配置 <a href="#client-side-installation">Laravel Echo</a>，它将在客户端接收广播事件。</p>
+<p><a name="pusher-compatible-open-source-alternatives"></a></p>
+<h4 id="开源-pusher-替代方案">开源 Pusher 替代方案</h4>
+<p><a href="https://github.com/beyondcode/laravel-websockets">laravel-websockets</a> 和 <a href="https://docs.soketi.app/">soketi</a> 包为 Laravel 提供了与 Pusher 兼容的 WebSocket 服务器。 这些包允许您在没有商业 WebSocket 提供程序的情况下利用 Laravel 广播的全部功能。 有关安装和使用这些软件包的更多信息，请参阅我们关于 <a href="#open-source-alternatives">开源替代品</a> 的文档。</p>
+<p><a name="ably"></a></p>
+<h3 id="ably">Ably</h3>
+<p>如果您计划使用 <a href="https://ably.io">Ably</a> 广播您的活动，您应该使用 Composer 包管理器安装 Ably PHP SDK：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> ably/ably-php
+</code></pre>
+<p>接下来，您应该在 config/broadcasting.php 配置文件中配置您的 Ably 凭据。此文件中已包含一个示例 Ably 配置，允许您快速指定密钥。通常，此值应通过 <code>ABLY_KEY</code> <a href="configuration.html#environment-configuration">环境变量</a> 设置：</p>
+<pre><code class="language-ini">ABLY_KEY=your-ably-key
+</code></pre>
+<p>接下来，您需要在 <code>.env</code> 文件中将广播驱动程序更改为 <code>ably</code>：</p>
+<pre><code class="language-ini">BROADCAST_DRIVER=ably
+</code></pre>
+<p>最后，您可以安装和配置 <a href="#client-side-installation">Laravel Echo</a>，它将在客户端接收广播事件。</p>
+<p><a name="open-source-alternatives"></a></p>
+<h3 id="开源替代方案">开源替代方案</h3>
+<p><a name="open-source-alternatives-php"></a></p>
+<h4 id="php">PHP</h4>
+<p><a href="https://github.com/beyondcode/laravel-websockets">laravel-websockets</a> 包是一个纯 PHP、Pusher 兼容的 Laravel WebSocket 包。 这个包允许你在没有商业 WebSocket 提供者的情况下利用 Laravel 广播的全部功能。 有关安装和使用此软件包的更多信息，请参阅其 <a href="https://beyondco.de/docs/laravel-websockets">官方文档</a>。</p>
+<p><a name="open-source-alternatives-node"></a></p>
+<h4 id="node">Node</h4>
+<p><a href="https://github.com/soketi/soketi">Soketi</a> 是一个基于 Node 的、Pusher 兼容的 Laravel WebSocket 服务器。在底层，Soketi 利用 µWebSockets.js 实现了极高的可扩展性和速度。这个包允许你在没有商业 WebSocket 提供者的情况下利用 Laravel 广播的全部功能。有关安装和使用此软件包的更多信息，请参阅其<a href="https://docs.soketi.app/">官方文档</a>。</p>
+<p><a name="client-side-installation"></a></p>
+<h2 id="客户端安装">客户端安装</h2>
+<p><a name="client-pusher-channels"></a></p>
+<h3 id="pusher-channels-1">Pusher Channels</h3>
+<p><a href="https://github.com/laravel/echo">Laravel Echo</a> 是一个 JavaScript 库，可以轻松订阅频道和收听服务器端广播驱动程序广播的事件。 你可以通过 NPM 包管理器安装 Echo。在此示例中，我们还将安装 <code>pusher-js</code> 包，因为我们将使用 Pusher Channels 广播器：</p>
+<pre><code class="language-shell">npm install --save-dev laravel-<span class="keyword token">echo</span> pusher-js
+</code></pre>
+<p>安装 Echo 后，您就可以在应用程序的 JavaScript 中创建一个新的 Echo 实例了。一个很好的地方是在 Laravel 框架中包含的 <code>resources/js/bootstrap.js</code> 文件的底部。默认情况下，此文件中已包含一个示例 Echo 配置 - 您只需取消注释即可：</p>
+<pre><code class="language-js">import <span class="keyword token">Echo</span> from <span class="string token">'laravel-echo'</span>;
+
+window.Pusher = <span class="keyword token">require</span>(<span class="string token">'pusher-js'</span>);
+
+window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    broadcaster: <span class="string token">'pusher'</span>,
+    key: process.env.MIX_PUSHER_APP_KEY,
+    cluster: process.env.MIX_PUSHER_APP_CLUSTER,
+    forceTLS: <span class="keyword token">true</span>
+});
+</code></pre>
+<p>根据您的需要取消注释并调整 Echo 配置后，您可以编译应用程序的资产：</p>
+<pre><code class="language-shell">npm run dev
+</code></pre>
+<blockquote>
+<p>技巧：要了解有关编译应用程序的 JavaScript 资产的更多信息，请参阅 [Laravel Mix](mix &quot;Laravel Mix&quot;.html) 上的文档。</p>
+</blockquote>
+<p><a name="using-an-existing-client-instance"></a></p>
+<h4 id="使用现有的客户端实例">使用现有的客户端实例</h4>
+<p>如果您已经有一个您希望 Echo 使用的预配置 Pusher Channels 客户端实例，您可以通过 <code>client</code> 配置选项将其传递给 Echo：</p>
+<pre><code class="language-js">import <span class="keyword token">Echo</span> from <span class="string token">'laravel-echo'</span>;
+
+<span class="keyword token">const</span> client = <span class="keyword token">require</span>(<span class="string token">'pusher-js'</span>);
+
+window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    broadcaster: <span class="string token">'pusher'</span>,
+    key: <span class="string token">'your-pusher-channels-key'</span>,
+    client: client
+});
+</code></pre>
+<p><a name="client-ably"></a></p>
+<h3 id="ably-1">Ably</h3>
+<p><a href="https://github.com/laravel/echo">Laravel Echo</a> 是一个 JavaScript 库，可以轻松订阅频道和收听服务器端广播驱动程序广播的事件。你可以通过 NPM 包管理器安装 Echo。 在本例中，我们还将安装 <code>pusher-js</code> 包。</p>
+<p>你可能想知道为什么我们要安装 <code>pusher-js</code> JavaScript 库，即使我们使用 Ably 来广播我们的事件。值得庆幸的是，Ably 包含一个 Pusher 兼容模式，它允许我们在客户端应用程序中侦听事件时使用 Pusher 协议：</p>
+<pre><code class="language-shell">npm install --save-dev laravel-<span class="keyword token">echo</span> pusher-js
+</code></pre>
+<p><strong>在继续之前，您应该在 Ably 应用程序设置中启用 Pusher 协议支持。您可以在 Ably 应用程序设置仪表板的“协议适配器设置”部分启用此功能。</strong></p>
+<p>安装 Echo 后，您就可以在应用程序的 JavaScript 中创建一个新的 Echo 实例了。 一个很好的地方是在 Laravel 框架中包含的 <code>resources/js/bootstrap.js</code> 文件的底部。默认情况下，此文件中已包含示例 Echo 配置；然而，<code>bootstrap.js</code> 文件中的默认配置是为 Pusher 设计的。 您可以复制以下配置以将您的配置转换为 Ably：</p>
+<pre><code class="language-js">import <span class="keyword token">Echo</span> from <span class="string token">'laravel-echo'</span>;
+
+window.Pusher = <span class="keyword token">require</span>(<span class="string token">'pusher-js'</span>);
+
+window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    broadcaster: <span class="string token">'pusher'</span>,
+    key: process.env.MIX_ABLY_PUBLIC_KEY,
+    wsHost: <span class="string token">'realtime-pusher.ably.io'</span>,
+    wsPort: <span class="number token">443</span>,
+    disableStats: <span class="keyword token">true</span>,
+    encrypted: <span class="keyword token">true</span>,
+});
+</code></pre>
+<p>请注意，我们的 Ably Echo 配置引用了一个 <code>MIX_ABLY_PUBLIC_KEY</code> 环境变量。这个变量的值应该是你的 Ably 公钥。您的公钥是出现在 <code>:</code> 字符之前的 Ably 密钥部分。</p>
+<p>根据您的需要取消注释并调整 Echo 配置后，您可以编译应用程序的资产：</p>
+<pre><code class="language-shell">npm run dev
+</code></pre>
+<blockquote>
+<p>技巧：要了解有关编译应用程序的 JavaScript 资产的更多信息，请参阅 [Laravel Mix](mix/ &quot;Laravel Mix&quot;.html) 上的文档。</p>
+</blockquote>
+<p><a name="concept-overview"></a></p>
+<h2 id="概念概述">概念概述</h2>
+<p>Laravel 的事件广播允许您使用基于驱动程序的 WebSockets 方法将服务器端 Laravel 事件广播到客户端 JavaScript 应用程序。 目前，Laravel 附带 <a href="https://pusher.com/channels">Pusher Channels</a> 和 <a href="https://ably.io">Ably</a> 驱动程序。 使用 <a href="#client-side-installation">Laravel Echo</a> JavaScript 包可以在客户端轻松使用这些事件。</p>
+<p>事件通过「频道」广播，可以指定为公共或私人。您的应用程序的任何访问者都可以订阅公共频道而无需任何身份验证或授权；但是，为了订阅私人频道，用户必须经过身份验证并获得授权才能在该频道上收听。</p>
+<blockquote>
+<p>技巧：如果您想探索 Pusher 的开源替代品，请查看 <a href="#open-source-alternatives">开源替代品</a>。</p>
+</blockquote>
+<p><a name="using-example-application"></a></p>
+<h3 id="使用示例应用程序">使用示例应用程序</h3>
+<p>在深入了解事件广播的每个组件之前，让我们以电子商务商店为例进行高级概述。</p>
+<p>在我们的应用程序中，假设我们有一个页面允许用户查看其订单的运输状态。我们还假设在应用程序处理运输状态更新时触发了一个 <code>OrderShipmentStatusUpdated</code> 事件：</p>
+<pre><code><span class="keyword token">use</span> App\Events\OrderShipmentStatusUpdated;
+
+OrderShipmentStatusUpdated::dispatch(<span class="variable token">$order</span>);
+</code></pre>
+<p><a name="the-shouldbroadcast-interface"></a></p>
+<h4 id="shouldbroadcast-接口"><code>ShouldBroadcast</code> 接口</h4>
+<p>当用户查看他们的一个订单时，我们不希望他们必须刷新页面才能查看状态更新。相反，我们希望在创建应用程序时将更新广播到应用程序。所以，我们需要用 <code>ShouldBroadcast</code> 接口标记 <code>OrderShipmentStatusUpdated</code> 事件。这将指示 Laravel 在事件被触发时广播它：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Events;
+
+<span class="keyword token">use</span> App\Order;
+<span class="keyword token">use</span> Illuminate\Broadcasting\Channel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\InteractsWithSockets;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PresenceChannel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PrivateChannel;
+<span class="keyword token">use</span> Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+<span class="keyword token">use</span> Illuminate\Queue\SerializesModels;
+
+<span class="keyword token">class</span> OrderShipmentStatusUpdated <span class="keyword token">implements</span> ShouldBroadcast
+{
+    <span class="comment token">/**
+     * 订单实例。
+     *
+     *<span class="phpdoc token"> @var</span> \App\Order
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$order</span>;
+}
+</code></pre>
+<p><code>ShouldBroadcast</code> 接口要求我们的事件定义一个 <code>broadcastOn</code> 方法。此方法负责返回事件应在其上广播的频道。此方法的空存根已在生成的事件类上定义，因此我们只需填写其详细信息。我们只希望订单的创建者能够查看状态更新，因此我们将在与订单绑定的私人频道上广播该事件：</p>
+<pre><code><span class="comment token">/**
+ * 获取事件应广播的频道.
+ *
+ *<span class="phpdoc token"> @return</span> \Illuminate\Broadcasting\PrivateChannel
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn()
+{
+    <span class="keyword token">return</span> <span class="keyword token">new</span> PrivateChannel(<span class="string token">'orders.'</span>.<span class="variable token">$this</span>-&gt;order-&gt;id);
+}
+</code></pre>
+<p><a name="example-application-authorizing-channels"></a></p>
+<h4 id="授权频道">授权频道</h4>
+<p>请记住，用户必须获得授权才能在私人频道上收听。我们可以在应用程序的 <code>routes/channels.php</code> 文件中定义我们的频道授权规则。在此示例中，我们需要验证任何尝试在私有 <code>orders.1</code> 频道上收听的用户实际上是订单的创建者：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Order;
+
+Broadcast::channel(<span class="string token">'orders.{orderId}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$orderId</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id === Order::findOrNew(<span class="variable token">$orderId</span>)-&gt;user_id;
+});
+</code></pre>
+<p><code>channel</code> 方法接受两个参数：频道名称和返回 <code>true</code> 或 <code>false</code> 指示用户是否有权收听频道的回调。</p>
+<p>所有授权回调都接收当前经过身份验证的用户作为其第一个参数，并将任何其他通配符参数作为其后续参数。在此示例中，我们使用 <code>{orderId}</code> 占位符来指示频道名称的「ID」部分是通配符。</p>
+<p><a name="listening-for-event-broadcasts"></a></p>
+<h4 id="监听事件广播">监听事件广播</h4>
+<p>接下来，剩下的就是在我们的 JavaScript 应用程序中监听事件。我们可以使用 <a href="#client-side-installation">Laravel Echo</a> 来做到这一点。首先，我们将使用 <code>private</code> 方法订阅私人频道。然后，我们可以使用 <code>listen</code> 方法来监听 <code>OrderShipmentStatusUpdated</code> 事件。默认情况下，所有事件的公共属性都将包含在广播事件中：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`orders.${orderId}`)
+    .listen(<span class="string token">'OrderShipmentStatusUpdated'</span>, (e) =&gt; {
+        console.log(e.order);
+    });
+</code></pre>
+<p><a name="defining-broadcast-events"></a></p>
+<h2 id="定义广播事件">定义广播事件</h2>
+<p>为了通知 Laravel 一个给定的事件应该被广播，你必须在事件类上实现 <code>Illuminate\Contracts\Broadcasting\ShouldBroadcast</code> 接口。该接口已经导入到框架生成的所有事件类中，因此您可以轻松地将其添加到您的任何事件中。</p>
+<p><code>ShouldBroadcast</code> 接口要求你实现一个方法：<code>broadcastOn</code>。 <code>broadcastOn</code> 方法应返回事件应在其上广播的频道或频道数组。 频道应该是<code>Channel</code>、<code>PrivateChannel</code>或<code>PresenceChannel</code>的实例。 <code>Channel</code> 的实例代表任何用户都可以订阅的公共频道，而 <code>PrivateChannels</code> 和 <code>PresenceChannels</code> 代表需要 <a href="#authorizing-channels">频道授权</a> 的私人频道：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Events;
+
+<span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Broadcasting\Channel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\InteractsWithSockets;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PresenceChannel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PrivateChannel;
+<span class="keyword token">use</span> Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+<span class="keyword token">use</span> Illuminate\Queue\SerializesModels;
+
+<span class="keyword token">class</span> ServerCreated <span class="keyword token">implements</span> ShouldBroadcast
+{
+    <span class="keyword token">use</span> SerializesModels;
+
+    <span class="comment token">/**
+     * 创建服务器的用户。
+     *
+     *<span class="phpdoc token"> @var</span> \App\Models\User
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$user</span>;
+
+    <span class="comment token">/**
+     * 创建一个新的事件实例。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Models\User  $user
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(User <span class="variable token">$user</span>)
+    {
+        <span class="variable token">$this</span>-&gt;user = <span class="variable token">$user</span>;
+    }
+
+    <span class="comment token">/**
+     * 获取事件应该广播的频道。
+     *
+     *<span class="phpdoc token"> @return</span> Channel|array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn()
+    {
+        <span class="keyword token">return</span> <span class="keyword token">new</span> PrivateChannel(<span class="string token">'user.'</span>.<span class="variable token">$this</span>-&gt;user-&gt;id);
+    }
+}
+</code></pre>
+<p>在实现了 <code>ShouldBroadcast</code> 接口之后，你只需要像往常一样<a href="events.html">触发事件</a>。触发事件后，<a href="queues.html">排队作业</a> 将使用您指定的广播驱动程序自动广播事件。</p>
+<p><a name="broadcast-name"></a></p>
+<h3 id="广播名称">广播名称</h3>
+<p>默认情况下，Laravel 将使用事件的类名广播事件。但是，您可以通过在事件上定义一个 <code>broadcastAs</code> 方法来自定义广播名称：</p>
+<pre><code><span class="comment token">/**
+ * 事件的广播名称。
+ *
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastAs()
+{
+    <span class="keyword token">return</span> <span class="string token">'server.created'</span>;
+}
+</code></pre>
+<p>如果您使用 <code>broadcastAs</code> 方法自定义广播名称，则应确保使用前导 <code>.</code> 字符注册您的侦听器。 这将指示 Echo 不要将应用程序的命名空间添加到事件中：</p>
+<pre><code>.listen(<span class="string token">'.server.created'</span>, <span class="keyword token">function</span> (e) {
+    ....
+});
+</code></pre>
+<p><a name="broadcast-data"></a></p>
+<h3 id="广播数据">广播数据</h3>
+<p>当一个事件被广播时，它的所有 <code>public</code> 属性都会自动序列化并作为事件的有效负载广播，允许您从 JavaScript 应用程序访问它的任何公共数据。因此，例如，如果您的事件有一个包含 Eloquent 模型的公共 <code>$user</code> 属性，则事件的广播负载将是：</p>
+<pre><code class="language-json">{
+    &quot;user&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;Patrick Stewart&quot;
+        ...
+    }
+}
+</code></pre>
+<p>但是，如果您希望对广播负载进行更细粒度的控制，您可以在事件中添加一个 <code>broadcastWith</code> 方法。此方法应返回您希望作为事件有效负载广播的数据数组：</p>
+<pre><code><span class="comment token">/**
+ * 获取要广播的数据。
+ *
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastWith()
+{
+    <span class="keyword token">return</span> [<span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;user-&gt;id];
+}
+</code></pre>
+<p><a name="broadcast-queue"></a></p>
+<h3 id="广播队列">广播队列</h3>
+<p>默认情况下，每个广播事件都放置在 <code>queue.php</code> 配置文件中指定的默认队列连接的默认队列中。 您可以通过在事件类上定义 <code>connection</code> 和 <code>queue</code> 属性来自定义广播者使用的队列连接和名称：</p>
+<pre><code><span class="comment token">/**
+ * 广播事件时使用的队列连接的名称。
+ *
+ *<span class="phpdoc token"> @var</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="variable token">$connection</span> = <span class="string token">'redis'</span>;
+
+<span class="comment token">/**
+ * 放置广播作业的队列的名称。
+ *
+ *<span class="phpdoc token"> @var</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="variable token">$queue</span> = <span class="string token">'default'</span>;
+</code></pre>
+<p>或者，您可以通过在您的事件上定义一个 <code>broadcastQueue</code> 方法来自定义队列名称：</p>
+<pre><code><span class="comment token">/**
+ * 放置广播作业的队列的名称。
+ *
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastQueue()
+{
+    <span class="keyword token">return</span> <span class="string token">'default'</span>;
+}
+</code></pre>
+<p>如果您想使用 <code>sync</code> 队列而不是默认队列驱动程序广播您的事件，您可以实现 <code>ShouldBroadcastNow</code> 接口而不是 <code>ShouldBroadcast</code>：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">use</span> Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+
+<span class="keyword token">class</span> OrderShipmentStatusUpdated <span class="keyword token">implements</span> ShouldBroadcastNow
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="broadcast-conditions"></a></p>
+<h3 id="广播条件">广播条件</h3>
+<p>有时您只想在给定条件为真时才广播您的事件。您可以通过向您的事件类添加一个 <code>broadcastWhen</code> 方法来定义这些条件：</p>
+<pre><code><span class="comment token">/**
+ * 确定是否应广播此事件。
+ *
+ *<span class="phpdoc token"> @return</span> bool
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastWhen()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;order-&gt;value &gt; <span class="number token">100</span>;
+}
+</code></pre>
+<p><a name="broadcasting-and-database-transactions"></a></p>
+<h4 id="广播和数据库事务">广播和数据库事务</h4>
+<p>当广播事件在数据库事务中被分派时，它们可能在数据库事务提交之前由队列处理。发生这种情况时，您在数据库事务期间对模型或数据库记录所做的任何更新可能尚未反映在数据库中。此外，在事务中创建的任何模型或数据库记录可能不存在于数据库中。如果您的事件依赖于这些模型，则在处理广播事件的作业时可能会出现意外错误。</p>
+<p>如果您的队列连接的 <code>after_commit</code> 配置选项设置为 <code>false</code>，您仍然可以通过在事件类上定义 <code>$afterCommit</code> 属性来指示应在提交所有打开的数据库事务后调度特定的广播事件：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Events;
+
+<span class="keyword token">use</span> Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+<span class="keyword token">use</span> Illuminate\Queue\SerializesModels;
+
+<span class="keyword token">class</span> ServerCreated <span class="keyword token">implements</span> ShouldBroadcast
+{
+    <span class="keyword token">use</span> SerializesModels;
+
+    <span class="keyword token">public</span> <span class="variable token">$afterCommit</span> = <span class="keyword token">true</span>;
+}
+</code></pre>
+<blockquote>
+<p>技巧：要了解有关解决这些问题的更多信息，请查看有关 <a href="queues.html#jobs-and-database-transactions" title="队列任务和数据库事务">队列任务和数据库事务</a> 的文档。</p>
+</blockquote>
+<p><a name="authorizing-channels"></a></p>
+<h2 id="授权频道-1">授权频道</h2>
+<p>私人频道要求您授权当前经过身份验证的用户可以实际收听频道。这是通过使用频道名称向您的 Laravel 应用程序发出 HTTP 请求并允许您的应用程序确定用户是否可以在该频道上收听来实现的。 使用 <a href="#client-side-installation">Laravel Echo</a> 时，会自动发出授权订阅私人频道的 HTTP 请求；但是，您确实需要定义正确的路由来响应这些请求。</p>
+<p><a name="defining-authorization-routes"></a></p>
+<h3 id="定义授权路由">定义授权路由</h3>
+<p>值得庆幸的是，Laravel 可以轻松定义响应通道授权请求的路由。在 Laravel 应用程序包含的 <code>App\Providers\BroadcastServiceProvider</code> 中，您将看到对 <code>Broadcast::routes</code> 方法的调用。此方法将注册 <code>/broadcasting/auth</code> 路由来处理授权请求：</p>
+<pre><code>Broadcast::routes();
+</code></pre>
+<p><code>Broadcast::routes</code> 方法会自动将其路由放置在 <code>web</code> 中间件组中；但是，如果您想自定义分配的属性，可以将路由属性数组传递给方法：</p>
+<pre><code>Broadcast::routes(<span class="variable token">$attributes</span>);
+</code></pre>
+<p><a name="customizing-the-authorization-endpoint"></a></p>
+<h4 id="自定义授权端点">自定义授权端点</h4>
+<p>默认情况下，Echo 将使用 <code>/broadcasting/auth</code> 端点来授权频道访问。但是，您可以通过将 <code>authEndpoint</code> 配置选项传递给 Echo 实例来指定自己的授权端点：</p>
+<pre><code class="language-js">window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    broadcaster: <span class="string token">'pusher'</span>,
+    <span class="comment token">// ...</span>
+    authEndpoint: <span class="string token">'/custom/endpoint/auth'</span>
+});
+</code></pre>
+<p><a name="customizing-the-authorization-request"></a></p>
+<h4 id="自定义授权请求">自定义授权请求</h4>
+<p>您可以通过在初始化 Echo 时提供自定义授权器来自定义 Laravel Echo 如何执行授权请求：</p>
+<pre><code class="language-js">window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    <span class="comment token">// ...</span>
+    authorizer: (channel, options) =&gt; {
+        <span class="keyword token">return</span> {
+            authorize: (socketId, callback) =&gt; {
+                axios.post(<span class="string token">'/api/broadcasting/auth'</span>, {
+                    socket_id: socketId,
+                    channel_name: channel.name
+                })
+                .then(response =&gt; {
+                    callback(<span class="keyword token">false</span>, response.data);
+                })
+                .<span class="keyword token">catch</span>(error =&gt; {
+                    callback(<span class="keyword token">true</span>, error);
+                });
+            }
+        };
+    },
+})
+</code></pre>
+<p><a name="defining-authorization-callbacks"></a></p>
+<h3 id="定义授权回调">定义授权回调</h3>
+<p>接下来，我们需要定义实际确定当前经过身份验证的用户是否可以收听给定频道的逻辑。这是在应用程序中包含的 <code>routes/channels.php</code> 文件中完成的。在这个文件中，你可以使用 <code>Broadcast::channel</code> 方法注册频道授权回调：</p>
+<pre><code>Broadcast::channel(<span class="string token">'orders.{orderId}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$orderId</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id === Order::findOrNew(<span class="variable token">$orderId</span>)-&gt;user_id;
+});
+</code></pre>
+<p><code>channel</code> 方法接受两个参数：频道名称和返回 <code>true</code> 或 <code>false</code> 指示用户是否有权收听频道的回调。</p>
+<p>所有授权回调都接收当前经过身份验证的用户作为其第一个参数，并将任何其他通配符参数作为其后续参数。在此示例中，我们使用 <code>{orderId}</code> 占位符来指示频道名称的「ID」部分是通配符。</p>
+<p><a name="authorization-callback-model-binding"></a></p>
+<h4 id="授权回调模型绑定">授权回调模型绑定</h4>
+<p>就像 HTTP 路由一样，通道路由也可以利用隐式和显式 <a href="routing.html#route-model-binding">路由模型绑定</a>。例如，您可以请求一个实际的 <code>Order</code> 模型实例，而不是接收字符串或数字订单 ID：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Order;
+
+Broadcast::channel(<span class="string token">'orders.{order}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, Order <span class="variable token">$order</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id === <span class="variable token">$order</span>-&gt;user_id;
+});
+</code></pre>
+<blockquote>
+<p>注意：与 HTTP 路由模型绑定不同，通道模型绑定不支持自动 <a href="routing.html#implicit-model-binding-scoping">隐式模型绑定范围</a>。但是，这很少会成为问题，因为大多数通道都可以基于单个模型的唯一主键来确定范围。</p>
+</blockquote>
+<p><a name="authorization-callback-authentication"></a></p>
+<h4 id="授权回调认证">授权回调认证</h4>
+<p>私有和在线广播频道通过您应用程序的默认身份验证保护对当前用户进行身份验证。如果用户未通过身份验证，则通道授权将自动被拒绝，并且永远不会执行授权回调。但是，您可以分配多个自定义保护，以在必要时对传入请求进行身份验证：</p>
+<pre><code>Broadcast::channel(<span class="string token">'channel'</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// ...</span>
+}, [<span class="string token">'guards'</span> =&gt; [<span class="string token">'web'</span>, <span class="string token">'admin'</span>]]);
+</code></pre>
+<p><a name="defining-channel-classes"></a></p>
+<h3 id="定义频道类">定义频道类</h3>
+<p>如果您的应用程序使用许多不同的频道，您的 <code>routes/channels.php</code> 文件可能会变得庞大。因此，您可以使用通道类，而不是使用闭包来授权通道。要生成通道类，请使用 <code>make:channel</code> Artisan 命令。此命令将在 <code>App/Broadcasting</code> 目录中放置一个新的频道类。</p>
+<pre><code class="language-shell">php artisan make:channel OrderChannel
+</code></pre>
+<p>接下来，在 <code>routes/channels.php</code> 文件中注册您的频道：</p>
+<pre><code><span class="keyword token">use</span> App\Broadcasting\OrderChannel;
+
+Broadcast::channel(<span class="string token">'orders.{order}'</span>, OrderChannel::<span class="keyword token">class</span>);
+</code></pre>
+<p>最后，您可以将频道的授权逻辑放在频道类的 <code>join</code> 方法中。这个 <code>join</code> 方法将包含您通常放置在通道授权闭包中的相同逻辑。您还可以利用通道模型绑定：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Broadcasting;
+
+<span class="keyword token">use</span> App\Models\Order;
+<span class="keyword token">use</span> App\Models\User;
+
+<span class="keyword token">class</span> OrderChannel
+{
+    <span class="comment token">/**
+     * 创建一个新的通道实例。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct()
+    {
+        <span class="comment token">//</span>
+    }
+
+    <span class="comment token">/**
+     * 验证用户对频道的访问权限。
+     *
+     *<span class="phpdoc token"> @param</span>  \App\Models\User  $user
+     *<span class="phpdoc token"> @param</span>  \App\Models\Order  $order
+     *<span class="phpdoc token"> @return</span> array|bool
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> join(User <span class="variable token">$user</span>, Order <span class="variable token">$order</span>)
+    {
+        <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id === <span class="variable token">$order</span>-&gt;user_id;
+    }
+}
+</code></pre>
+<blockquote>
+<p>技巧：像 Laravel 中的许多其他类一样，通道类将由 <a href="container.html">服务容器</a> 自动解析。因此，您可以在其构造函数中键入提示您的通道所需的任何依赖项。</p>
+</blockquote>
+<p><a name="broadcasting-events"></a></p>
+<h2 id="广播事件">广播事件</h2>
+<p>一旦你定义了一个事件并用 <code>ShouldBroadcast</code> 接口标记了它，你只需要使用事件的 dispatch 方法来触发事件。事件调度器会注意到该事件被标记为 <code>ShouldBroadcast</code> 接口，并将该事件排队以进行广播：</p>
+<pre><code><span class="keyword token">use</span> App\Events\OrderShipmentStatusUpdated;
+
+OrderShipmentStatusUpdated::dispatch(<span class="variable token">$order</span>);
+</code></pre>
+<p><a name="only-to-others"></a></p>
+<h3 id="只广播给其他人">只广播给其他人</h3>
+<p>在构建使用事件广播的应用程序时，您可能偶尔需要将事件广播给给定频道的所有订阅者，但当前用户除外。 您可以使用 <code>broadcast</code> 帮助程序和 <code>toOthers</code> 方法来完成此操作：</p>
+<pre><code><span class="keyword token">use</span> App\Events\OrderShipmentStatusUpdated;
+
+broadcast(<span class="keyword token">new</span> OrderShipmentStatusUpdated(<span class="variable token">$update</span>))-&gt;toOthers();
+</code></pre>
+<p>为了更好地理解何时需要使用 <code>toOthers</code> 方法，让我们想象一个任务列表应用程序，其中用户可以通过输入任务名称来创建新任务。要创建任务，您的应用程序可能会向 <code>/task</code> URL 发出请求，该 URL 会广播任务的创建并返回新任务的 JSON 表示。当您的 JavaScript 应用程序接收到来自端点的响应时，它可能会直接将新任务插入到其任务列表中，如下所示：</p>
+<pre><code class="language-js">axios.post(<span class="string token">'/task'</span>, task)
+    .then((response) =&gt; {
+        <span class="keyword token">this</span>.tasks.push(response.data);
+    });
+</code></pre>
+<p>但是，请记住，我们还广播了任务的创建。如果您的 JavaScript 应用程序也在侦听此事件以将任务添加到任务列表中，那么您的列表中将有重复的任务：一个来自端点，一个来自广播。您可以通过使用 <code>toOthers</code> 方法来指示广播者不要将事件广播给当前用户来解决此问题。</p>
+<blockquote>
+<p>注意：您的事件必须使用 <code>Illuminate\Broadcasting\InteractsWithSockets</code> 特征才能调用 <code>toOthers</code> 方法。</p>
+</blockquote>
+<p><a name="only-to-others-configuration"></a></p>
+<h4 id="配置-1">配置</h4>
+<p>当您初始化 Laravel Echo 实例时，会为连接分配一个套接字 ID。如果您使用全局 <a href="https://github.com/mzabriskie/axios">Axios</a> 实例从 JavaScript 应用程序发出 HTTP 请求，则套接字 ID 将自动附加到每个传出请求作为 <code>X-Socket- ID</code>标头。然后，当你调用 <code>toOthers</code> 方法时，Laravel 将从头中提取套接字 ID 并指示广播器不要广播到具有该套接字 ID 的任何连接。</p>
+<p>如果您没有使用全局 Axios 实例，您将需要手动配置 JavaScript 应用程序以发送带有所有传出请求的“X-Socket-ID”标头。您可以使用 <code>Echo.socketId</code> 方法检索套接字 ID：</p>
+<pre><code class="language-js"><span class="keyword token">var</span> socketId = <span class="keyword token">Echo</span>.socketId();
+</code></pre>
+<p><a name="customizing-the-connection"></a></p>
+<h3 id="自定义连接">自定义连接</h3>
+<p>如果您的应用程序与多个广播连接交互，并且您想使用默认广播器以外的广播器广播事件，您可以使用 <code>via</code> 方法指定将事件推送到哪个连接：</p>
+<pre><code><span class="keyword token">use</span> App\Events\OrderShipmentStatusUpdated;
+
+broadcast(<span class="keyword token">new</span> OrderShipmentStatusUpdated(<span class="variable token">$update</span>))-&gt;via(<span class="string token">'pusher'</span>);
+</code></pre>
+<p>或者，您可以通过在事件的构造函数中调用 <code>broadcastVia</code> 方法来指定事件的广播连接。但是，在这样做之前，您应该确保事件类使用 <code>InteractsWithBroadcasting</code> 特征：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Events;
+
+<span class="keyword token">use</span> Illuminate\Broadcasting\Channel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\InteractsWithBroadcasting;
+<span class="keyword token">use</span> Illuminate\Broadcasting\InteractsWithSockets;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PresenceChannel;
+<span class="keyword token">use</span> Illuminate\Broadcasting\PrivateChannel;
+<span class="keyword token">use</span> Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+<span class="keyword token">use</span> Illuminate\Queue\SerializesModels;
+
+<span class="keyword token">class</span> OrderShipmentStatusUpdated <span class="keyword token">implements</span> ShouldBroadcast
+{
+    <span class="keyword token">use</span> InteractsWithBroadcasting;
+
+    <span class="comment token">/**
+     * 创建一个新的事件实例。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct()
+    {
+        <span class="variable token">$this</span>-&gt;broadcastVia(<span class="string token">'pusher'</span>);
+    }
+}
+</code></pre>
+<p><a name="receiving-broadcasts"></a></p>
+<h2 id="接收广播">接收广播</h2>
+<p><a name="listening-for-events"></a></p>
+<h3 id="监听事件">监听事件</h3>
+<p>一旦你<a href="#client-side-installation">安装并实例化了 Laravel Echo</a>，你就可以开始监听从你的 Laravel 应用程序广播的事件了。首先，使用 <code>channel</code> 方法获取通道实例，然后调用 <code>listen</code> 方法监听指定事件：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.channel(`orders.${<span class="keyword token">this</span>.order.id}`)
+    .listen(<span class="string token">'OrderShipmentStatusUpdated'</span>, (e) =&gt; {
+        console.log(e.order.name);
+    });
+</code></pre>
+<p>如果您想在私人频道上监听事件，请改用 <code>private</code> 方法。 您可以继续调用 <code>listen</code> 方法以在单个通道上侦听多个事件：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`orders.${<span class="keyword token">this</span>.order.id}`)
+    .listen(...)
+    .listen(...)
+    .listen(...);
+</code></pre>
+<p><a name="stop-listening-for-events"></a></p>
+<h4 id="停止监听事件">停止监听事件</h4>
+<p>如果您想在不 <a href="#leaving-a-channel">离开频道</a> 的情况下停止收听给定事件，您可以使用 <code>stopListening</code> 方法：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`orders.${<span class="keyword token">this</span>.order.id}`)
+    .stopListening(<span class="string token">'OrderShipmentStatusUpdated'</span>)
+</code></pre>
+<p><a name="leaving-a-channel"></a></p>
+<h3 id="离开频道">离开频道</h3>
+<p>要离开频道，您可以在 Echo 实例上调用 <code>leaveChannel</code> 方法：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.leaveChannel(`orders.${<span class="keyword token">this</span>.order.id}`);
+</code></pre>
+<p>如果你想离开一个频道及其相关的私人和在线频道，你可以调用 <code>leave</code> 方法：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.leave(`orders.${<span class="keyword token">this</span>.order.id}`);
+</code></pre>
+<p><a name="namespaces"></a></p>
+<h3 id="命名空间">命名空间</h3>
+<p>您可能已经注意到，在上面的示例中，我们没有为事件类指定完整的 <code>App\Events</code> 命名空间。这是因为 Echo 会自动假定事件位于 <code>App\Events</code> 命名空间中。但是，您可以在实例化 Echo 时通过传递 <code>namespace</code> 配置选项来配置根命名空间：</p>
+<pre><code class="language-js">window.<span class="keyword token">Echo</span> = <span class="keyword token">new</span> <span class="keyword token">Echo</span>({
+    broadcaster: <span class="string token">'pusher'</span>,
+    <span class="comment token">// ...</span>
+    <span class="keyword token">namespace</span>: <span class="string token">'App.Other.Namespace'</span>
+});
+</code></pre>
+<p>或者，您可以在使用 Echo 订阅事件类时使用 <code>.</code> 作为事件类的前缀。这将允许您始终指定完全限定的类名：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.channel(<span class="string token">'orders'</span>)
+    .listen(<span class="string token">'.Namespace\\Event\\Class'</span>, (e) =&gt; {
+        <span class="comment token">//</span>
+    });
+</code></pre>
+<p><a name="presence-channels"></a></p>
+<h2 id="存在频道">存在频道</h2>
+<p>在线状态频道建立在私人频道的安全性之上，同时公开了知道谁订阅了频道的附加功能。这使得构建强大的协作应用程序功能变得容易，例如在另一个用户查看同一页面时通知用户或列出聊天室的居民。</p>
+<p><a name="authorizing-presence-channels"></a></p>
+<h3 id="授权存在频道">授权存在频道</h3>
+<p>所有出席频道也是私人频道；因此，用户必须<a href="#authorizing-channels">授权访问他们</a>。但是，在为出席频道定义授权回调时，如果用户被授权加入频道，则不会返回 <code>true</code>。相反，您应该返回有关用户的数据数组。</p>
+<p>授权回调返回的数据将提供给 JavaScript 应用程序中的存在通道事件侦听器。如果用户未被授权加入出席频道，则应返回 <code>false</code> 或 <code>null</code>：</p>
+<pre><code>Broadcast::channel(<span class="string token">'chat.{roomId}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$roomId</span>) {
+    <span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;canJoinRoom(<span class="variable token">$roomId</span>)) {
+        <span class="keyword token">return</span> [<span class="string token">'id'</span> =&gt; <span class="variable token">$user</span>-&gt;id, <span class="string token">'name'</span> =&gt; <span class="variable token">$user</span>-&gt;name];
+    }
+});
+</code></pre>
+<p><a name="joining-presence-channels"></a></p>
+<h3 id="加入存在频道">加入存在频道</h3>
+<p>要加入在线状态频道，您可以使用 Echo 的 <code>join</code> 方法。 <code>join</code> 方法将返回 <code>PresenceChannel</code> 实现，连同公开 <code>listen</code> 方法，允许您订阅 <code>here</code>、<code>joining</code> 和 <code>leaving</code> 事件。</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.join(`chat.${roomId}`)
+    .here((users) =&gt; {
+        <span class="comment token">//</span>
+    })
+    .joining((user) =&gt; {
+        console.log(user.name);
+    })
+    .leaving((user) =&gt; {
+        console.log(user.name);
+    })
+    .error((error) =&gt; {
+        console.error(error);
+    });
+</code></pre>
+<p>加入频道成功后，<code>here</code> 回调将立即执行，并会收到一个数组，其中包含当前订阅频道的所有其他用户的用户信息。 <code>joining</code> 方法会在新用户加入频道时执行，而 <code>leaving</code> 方法会在用户离开频道时执行。 当身份验证端点返回 200 以外的 HTTP 状态码或解析返回的 JSON 出现问题时，将执行 <code>error</code> 方法。</p>
+<p><a name="broadcasting-to-presence-channels"></a></p>
+<h3 id="广播到存在频道">广播到存在频道</h3>
+<p>状态频道可以像公共或私人频道一样接收事件。以聊天室为例，我们可能希望将「NewMessage」事件广播到房间的出席频道。 为此，我们将从事件的 <code>broadcastOn</code> 方法返回一个 <code>PresenceChannel</code> 的实例：</p>
+<pre><code><span class="comment token">/**
+ * 获取事件应该广播的频道。
+ *
+ *<span class="phpdoc token"> @return</span> Channel|array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn()
+{
+    <span class="keyword token">return</span> <span class="keyword token">new</span> PresenceChannel(<span class="string token">'room.'</span>.<span class="variable token">$this</span>-&gt;message-&gt;room_id);
+}
+</code></pre>
+<p>与其他事件一样，您可以使用 <code>broadcast</code> 助手和 <code>toOthers</code> 方法来排除当前用户接收广播：</p>
+<pre><code>broadcast(<span class="keyword token">new</span> NewMessage(<span class="variable token">$message</span>));
+
+broadcast(<span class="keyword token">new</span> NewMessage(<span class="variable token">$message</span>))-&gt;toOthers();
+</code></pre>
+<p>作为典型的其他类型事件，您可以使用 Echo 的 <code>listen</code> 方法监听发送到存在通道的事件：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.join(`chat.${roomId}`)
+    .here(...)
+    .joining(...)
+    .leaving(...)
+    .listen(<span class="string token">'NewMessage'</span>, (e) =&gt; {
+        <span class="comment token">//</span>
+    });
+</code></pre>
+<p><a name="model-broadcasting"></a></p>
+<h2 id="模型广播">模型广播</h2>
+<blockquote>
+<p>注意：在阅读以下有关模型广播的文档之前，我们建议您熟悉 Laravel 模型广播服务的一般概念以及如何手动创建和收听广播事件。</p>
+</blockquote>
+<p>在创建、更新或删除应用程序的 <a href="eloquent.html">Eloquent 模型</a> 时广播事件是很常见的。 当然，这可以通过手动<a href="eloquent.html#events">为 Eloquent 模型状态更改定义自定义事件</a> 并使用 <code>ShouldBroadcast</code> 接口标记这些事件来轻松完成。</p>
+<p>但是，如果您在应用程序中没有将这些事件用于任何其他目的，则仅出于广播它们的目的而创建事件类可能会很麻烦。为了解决这个问题，Laravel 允许您指示 Eloquent 模型应该自动广播其状态更改。</p>
+<p>首先，您的 Eloquent 模型应该使用 <code>Illuminate\Database\Eloquent\BroadcastsEvents</code> 特征。此外，模型应该定义一个 <code>broadcastsOn</code> 方法，该方法将返回模型事件应该在其上广播的频道数组：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Broadcasting\PrivateChannel;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\BroadcastsEvents;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Factories\HasFactory;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Post <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">use</span> BroadcastsEvents, HasFactory;
+
+    <span class="comment token">/**
+     * 获取帖子所属的用户。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> user()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>);
+    }
+
+    <span class="comment token">/**
+     * 获取模型事件应该广播的频道。
+     *
+     *<span class="phpdoc token"> @param</span>  string  $event
+     *<span class="phpdoc token"> @return</span> \Illuminate\Broadcasting\Channel|array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn(<span class="variable token">$event</span>)
+    {
+        <span class="keyword token">return</span> [<span class="variable token">$this</span>, <span class="variable token">$this</span>-&gt;user];
+    }
+}
+</code></pre>
+<p>一旦您的模型包含此特征并定义其广播通道，它将在模型实例被创建、更新、删除、删除或恢复时自动开始广播事件。</p>
+<p>此外，您可能已经注意到 <code>broadcastOn</code> 方法接收字符串 <code>$event</code> 参数。该参数包含模型上发生的事件类型，其值为<code>created</code>、<code>updated</code>、<code>deleted</code>、<code>trashed</code>或<code>restored</code>。通过检查此变量的值，您可以确定模型应该为特定事件广播到哪些频道（如果有）：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取模型事件应该广播的频道。
+ *
+ *<span class="phpdoc token"> @param</span>  string  $event
+ *<span class="phpdoc token"> @return</span> \Illuminate\Broadcasting\Channel|array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn(<span class="variable token">$event</span>)
+{
+    <span class="keyword token">return</span> match (<span class="variable token">$event</span>) {
+        <span class="string token">'deleted'</span> =&gt; [],
+        <span class="keyword token">default</span> =&gt; [<span class="variable token">$this</span>, <span class="variable token">$this</span>-&gt;user],
+    };
+}
+</code></pre>
+<p><a name="customizing-model-broadcasting-event-creation"></a></p>
+<h4 id="自定义模型广播事件创建">自定义模型广播事件创建</h4>
+<p>有时，您可能希望自定义 Laravel 如何创建底层模型广播事件。您可以通过在 Eloquent 模型上定义一个 <code>newBroadcastableEvent</code> 方法来完成此操作。这个方法应该返回一个 <code>Illuminate\Database\Eloquent\BroadcastableModelEventOccurred</code> 实例：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Database\Eloquent\BroadcastableModelEventOccurred;
+
+<span class="comment token">/**
+ * 为模型创建一个新的可广播模型事件。
+ *
+ *<span class="phpdoc token"> @param</span>  string  $event
+ *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\BroadcastableModelEventOccurred
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">function</span> newBroadcastableEvent(<span class="variable token">$event</span>)
+{
+    <span class="keyword token">return</span> (<span class="keyword token">new</span> BroadcastableModelEventOccurred(
+        <span class="variable token">$this</span>, <span class="variable token">$event</span>
+    ))-&gt;dontBroadcastToCurrentUser();
+}
+</code></pre>
+<p><a name="model-broadcasting-conventions"></a></p>
+<h3 id="广播约定模型">广播约定模型</h3>
+<p><a name="model-broadcasting-channel-conventions"></a></p>
+<h4 id="广播约定">广播约定</h4>
+<p>您可能已经注意到，上面模型示例中的 <code>broadcastOn</code> 方法没有返回 <code>Channel</code> 实例。相反，直接返回了 Eloquent 模型。如果模型的 <code>broadcastOn</code> 方法返回 Eloquent 模型实例（或包含在该方法返回的数组中），Laravel 将使用模型的类名和主键标识符作为通道自动为模型实例化一个私有通道实例 姓名。</p>
+<p>因此，<code>id</code>为<code>1</code>的<code>App\Models\User</code>模型将被转换为名称为<code>App.Models.User.1</code>的<code>Illuminate\Broadcasting\PrivateChannel</code>实例。当然，除了从模型的 <code>broadcastOn</code> 方法返回 Eloquent 模型实例之外，您还可以返回完整的 <code>Channel</code> 实例，以便完全控制模型的通道名称：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Broadcasting\PrivateChannel;
+
+<span class="comment token">/**
+ * 获取模型事件应该广播的频道。
+ *
+ *<span class="phpdoc token"> @param</span>  string  $event
+ *<span class="phpdoc token"> @return</span> \Illuminate\Broadcasting\Channel|array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastOn(<span class="variable token">$event</span>)
+{
+    <span class="keyword token">return</span> [<span class="keyword token">new</span> PrivateChannel(<span class="string token">'user.'</span>.<span class="variable token">$this</span>-&gt;id)];
+}
+</code></pre>
+<p>如果您打算从模型的 <code>broadcastOn</code> 方法显式返回一个通道实例，则可以将 Eloquent 模型实例传递给通道的构造函数。这样做时，Laravel 将使用上面讨论的模型通道约定将 Eloquent 模型转换为通道名称字符串：</p>
+<pre><code class="language-php"><span class="keyword token">return</span> [<span class="keyword token">new</span> Channel(<span class="variable token">$this</span>-&gt;user)];
+</code></pre>
+<p>如果需要确定模型的频道名称，可以在任何模型实例上调用 <code>broadcastChannel</code> 方法。例如，此方法为 <code>App\Models\User</code> 模型返回字符串 <code>App.Models.User.1</code>，其 <code>id</code> 为 <code>1</code>：</p>
+<pre><code class="language-php"><span class="variable token">$user</span>-&gt;broadcastChannel()
+</code></pre>
+<p><a name="model-broadcasting-event-conventions"></a></p>
+<h4 id="事件约定">事件约定</h4>
+<p>由于模型广播事件不与应用程序的<code>App\Events</code>目录中的「实际」事件相关联，因此根据约定为它们分配名称和有效负载。Laravel 的约定是使用模型的类名（不包括命名空间）和触发广播的模型事件的名称来广播事件。</p>
+<p>因此，例如，对 <code>App\Models\Post</code> 模型的更新会将事件作为 <code>PostUpdated</code> 广播到您的客户端应用程序，并带有以下有效负载：</p>
+<pre><code class="language-json">{
+    &quot;model&quot;: {
+        &quot;id&quot;: 1,
+        &quot;title&quot;: &quot;My first post&quot;
+        ...
+    },
+    ...
+    &quot;socket&quot;: &quot;someSocketId&quot;,
+}
+</code></pre>
+<p>删除 <code>App\Models\User</code> 模型会广播一个名为 <code>UserDeleted</code> 的事件。</p>
+<p>如果您愿意，您可以通过向模型添加 <code>broadcastAs</code> 和 <code>broadcastWith</code> 方法来定义自定义广播名称和有效负载。这些方法接收正在发生的模型事件/操作的名称，允许您为每个模型操作自定义事件的名称和有效负载。如果从 <code>broadcastAs</code> 方法返回 <code>null</code>，Laravel 将在广播事件时使用上面讨论的模型广播事件名称约定：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 模型事件的广播名称。
+ *
+ *<span class="phpdoc token"> @param</span>  string  $event
+ *<span class="phpdoc token"> @return</span> string|null
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastAs(<span class="variable token">$event</span>)
+{
+    <span class="keyword token">return</span> match (<span class="variable token">$event</span>) {
+        <span class="string token">'created'</span> =&gt; <span class="string token">'post.created'</span>,
+        <span class="keyword token">default</span> =&gt; <span class="keyword token">null</span>,
+    };
+}
+
+<span class="comment token">/**
+ * 获取要为模型广播的数据。
+ *
+ *<span class="phpdoc token"> @param</span>  string  $event
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> broadcastWith(<span class="variable token">$event</span>)
+{
+    <span class="keyword token">return</span> match (<span class="variable token">$event</span>) {
+        <span class="string token">'created'</span> =&gt; [<span class="string token">'title'</span> =&gt; <span class="variable token">$this</span>-&gt;title],
+        <span class="keyword token">default</span> =&gt; [<span class="string token">'model'</span> =&gt; <span class="variable token">$this</span>],
+    };
+}
+</code></pre>
+<p><a name="listening-for-model-broadcasts"></a></p>
+<h3 id="监听模型广播">监听模型广播</h3>
+<p>一旦你为你的模型添加了 <code>BroadcastsEvents</code> 特征并定义了模型的 <code>broadcastOn</code> 方法，你就可以开始在客户端应用程序中监听广播的模型事件了。在开始之前，您可能希望查阅有关 <a href="#listening-for-events">listening for events</a> 的完整文档。</p>
+<p>首先，使用 <code>private</code> 方法获取通道的实例，然后调用 <code>listen</code> 方法来监听指定事件。通常，赋予 <code>private</code> 方法的频道名称应对应于 Laravel 的 <a href="#model-broadcasting-conventions">模型广播约定</a>。</p>
+<p>一旦你获得了一个通道实例，你可以使用 <code>listen</code> 方法来监听一个特定的事件。由于模型广播事件不与应用程序的<code>App\Events</code>目录中的「实际」事件相关联，因此 <a href="#model-broadcasting-event-conventions">事件名称</a> 必须以 <code>.</code> 为前缀以表明它确实如此不属于特定的命名空间。每个模型广播事件都有一个“模型”属性，其中包含模型的所有可广播属性：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`App.Models.User.${<span class="keyword token">this</span>.user.id}`)
+    .listen(<span class="string token">'.PostUpdated'</span>, (e) =&gt; {
+        console.log(e.model);
+    });
+</code></pre>
+<p><a name="client-events"></a></p>
+<h2 id="客户端事件">客户端事件</h2>
+<blockquote>
+<p>技巧：使用 <a href="https://pusher.com/channels">Pusher Channels</a> 时，您必须在 <a href="https://dashboard.pusher.com">应用程序仪表板</a> 的“应用程序设置”部分中启用“客户端事件”选项 /) 以发送客户端事件。</p>
+</blockquote>
+<p>有时您可能希望将事件广播给其他连接的客户端，而根本不影响您的 Laravel 应用程序。这对于诸如「键入」通知之类的事情特别有用，您希望提醒应用程序的用户另一个用户正在给定屏幕上键入消息。</p>
+<p>要广播客户端事件，您可以使用 Echo 的 <code>whisper</code> 方法：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`chat.${roomId}`)
+    .whisper(<span class="string token">'typing'</span>, {
+        name: <span class="keyword token">this</span>.user.name
+    });
+</code></pre>
+<p>要监听客户端事件，您可以使用 <code>listenForWhisper</code> 方法：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`chat.${roomId}`)
+    .listenForWhisper(<span class="string token">'typing'</span>, (e) =&gt; {
+        console.log(e.name);
+    });
+</code></pre>
+<p><a name="notifications"></a></p>
+<h2 id="通知">通知</h2>
+<p>通过将事件广播与 <a href="notifications.html">notifications</a> 配对，您的 JavaScript 应用程序可以在新通知发生时接收它们，而无需刷新页面。在开始之前，请务必阅读有关使用 [广播通知频道] 的文档（notifications.html#broadcast-notifications）。</p>
+<p>一旦你配置了一个使用广播频道的通知，你就可以使用 Echo 的 <code>notification</code> 方法来监听广播事件。请记住，通道名称应与接收通知的实体的类名称匹配：</p>
+<pre><code class="language-js"><span class="keyword token">Echo</span>.<span class="keyword token">private</span>(`App.Models.User.${userId}`)
+    .notification((notification) =&gt; {
+        console.log(notification.type);
+    });
+</code></pre>
+<p>在这个例子中，所有通过 <code>broadcast</code> 通道发送到 <code>App\Models\User</code> 实例的通知都会被回调接收。 <code>App.Models.User.{id}</code> 频道的频道授权回调包含在 Laravel 框架附带的默认 <code>BroadcastServiceProvider</code> 中。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

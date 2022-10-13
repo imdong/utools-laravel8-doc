@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="eloquent-api-资源">Eloquent: API 资源</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#generating-resources">生成资源</a></li>
+<li><a href="#concept-overview">概念综述</a><ul>
+<li><a href="#resource-collections">资源集合</a></li>
+</ul>
+</li>
+<li><a href="#writing-resources">编写资源</a><ul>
+<li><a href="#data-wrapping">数据包裹</a></li>
+<li><a href="#pagination">分页</a></li>
+<li><a href="#conditional-attributes">条件属性</a></li>
+<li><a href="#conditional-relationships">条件关系</a></li>
+<li><a href="#adding-meta-data">添加元数据</a></li>
+</ul>
+</li>
+<li><a href="#resource-responses">资源响应</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>在构建 API 时，你往往需要一个转换层来联结你的 Eloquent 模型和实际返回给用户的 JSON 响应。比如，你可能希望显示部分用户属性而不是全部，或者你可能希望在模型的 JSON 中包括某些关系。Eloquent 的资源类能够让你以更直观简便的方式将模型和模型集合转化成 JSON。</p>
+<p>当然，你可以始终使用 Eloquent 模型或集合的 <code>toJson</code> 方法将其转换为 JSON ；但是，Eloquent 的资源提供了对模型及其关系的 JSON 序列化更加精细和更加健壮的控制。</p>
+<p><a name="generating-resources"></a></p>
+<h2 id="生成资源">生成资源</h2>
+<p>你可以使用 <code>make:resource</code> artisan 命令来生成一个资源类。默认情况下，资源将放在应用程序的 <code>app/Http/Resources</code> 目录下。资源继承自 <code>Illuminate\Http\Resources\Json\JsonResource</code> 类：</p>
+<pre><code class="language-shell">php artisan make:resource UserResource
+</code></pre>
+<p><a name="generating-resource-collections"></a></p>
+<h4 id="资源集合">资源集合</h4>
+<p>除了生成转换单个模型的资源之外，你还可以生成负责转换模型集合的资源。这允许你的响应 JSON 包含与给定资源的整个集合相关的其他信息。</p>
+<p>你应该在创建资源集合时使用 <code>--collection</code> 标志来表明你要生成一个资源集合。或者，在资源名称中包含 <code>Collection</code> 一词将向 Laravel 表明它应该生成一个资源集合。资源集合继承自 <code>Illuminate\Http\Resources\Json\ResourceCollection</code> 类：</p>
+<pre><code class="language-shell">php artisan make:resource User --collection
+
+php artisan make:resource UserCollection
+</code></pre>
+<p><a name="concept-overview"></a></p>
+<h2 id="概念综述">概念综述</h2>
+<blockquote>
+<p>提示：这是对资源和资源集合的高度概述。强烈建议您阅读本文档的其他部分，以深入了解如何更好地自定义和使用资源。</p>
+</blockquote>
+<p>在深入了解如何定制化编写你的资源之前，让我们首先从高层次上了解 Laravel 中如何使用资源。一个资源类表示一个单一模型需要被转换成 JSON 格式。例如，下面是一个简单的 <code>UserResource</code> 资源类：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * 将资源转换为数组。
+     * 
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+            <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+            <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+            <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+            <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+        ];
+    }
+}
+</code></pre>
+<p>每个资源类都定义了一个 <code>toArray</code> 方法，当资源从路由或控制器方法作为响应被调用返回时，该方法返回应该转换为 JSON 的属性数组。</p>
+<p>注意，我们可以直接使用 <code>$this</code> 变量访问模型属性。这是因为资源类将自动代理属性和方法访问到底层模型以方便访问。一旦定义了资源，你可以从路由或控制器中调用并返回它。资源通过其构造函数接受底层模型实例：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserResource(User::findOrFail(<span class="variable token">$id</span>));
+});
+</code></pre>
+<p><a name="resource-collections"></a></p>
+<h3 id="资源集合-1">资源集合</h3>
+<p>如果你要返回一个资源集合或一个分页响应，你应该在路由或控制器中创建资源实例时使用你的资源类提供的 <code>collection</code> 方法</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> UserResource::collection(User::all());
+});
+</code></pre>
+<p>当然了，使用如上方法你将不能添加任何附加的元数据和集合一起返回。如果你需要自定义资源集合响应，你需要创建一个专用的资源来表示集合：</p>
+<pre><code class="language-shell">php artisan make:resource UserCollection
+</code></pre>
+<p>此时，你就可以轻松地自定义响应中应该包含的任何元数据：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * 将资源集合转换为数组
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'data'</span> =&gt; <span class="variable token">$this</span>-&gt;collection,
+            <span class="string token">'links'</span> =&gt; [
+                <span class="string token">'self'</span> =&gt; <span class="string token">'link-value'</span>,
+            ],
+        ];
+    }
+}
+</code></pre>
+<p>你可以在路由或者控制器中返回已定义的资源集合：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserCollection;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserCollection(User::all());
+});
+</code></pre>
+<p><a name="preserving-collection-keys"></a></p>
+<h4 id="保护集合的键">保护集合的键</h4>
+<p>当从路由返回一个资源集合时，Laravel 会重置集合的键，使它们按数字顺序排列。但是，您可以在资源类中添加 <code>preserveKeys</code> 属性，以指示是否应该保留集合的原始键：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * 指示是否应保留资源的集合原始键。
+     *
+     *<span class="phpdoc token"> @var</span> bool
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$preserveKeys</span> = <span class="keyword token">true</span>;
+}
+</code></pre>
+<p>如果 <code>preserveKeys</code> 属性设置为 <code>true</code> ，那么从路由或控制器返回集合时，集合的键将会被保留：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> UserResource::collection(User::all()-&gt;keyBy-&gt;id);
+});
+</code></pre>
+<p><a name="customizing-the-underlying-resource-class"></a></p>
+<h4 id="自定义基础资源类">自定义基础资源类</h4>
+<p>通常，资源集合的 <code>$this-&gt;collection</code> 属性会被自动填充，结果是将集合的每个项映射到其单个资源类。单个资源类被假定为资源的类名，但没有类名末尾的 <code>Collection</code> 部分。 此外，根据您的个人偏好，单个资源类可以带着后缀 <code>Resource</code> ，也可以不带。</p>
+<p>例如，<code>UserCollection</code> 会尝试将给定的用户实例映射到 <code>User</code> 或 <code>UserResource</code> 资源。想要自定义该行为，你可以重写资源集合中的 <code>$collects</code> 属性指定自定义的资源：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * The resource that this resource collects.
+     * 自定义资源类名
+     *
+     *<span class="phpdoc token"> @var</span> string
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$collects</span> = Member::<span class="keyword token">class</span>;
+}
+</code></pre>
+<p><a name="writing-resources"></a></p>
+<h2 id="编写资源">编写资源</h2>
+<blockquote>
+<p>技巧：如果您还没有阅读 <a href="#concept-overview">概念综述</a>，那么在继续阅读本文档前，强烈建议您去阅读一下，会更容易理解本节的内容。</p>
+</blockquote>
+<p>从本质上说，资源的作用很简单，它只需将一个给定的模型转换为一个数组。因此，每个资源都包含一个 <code>toArray</code> 方法，这个方法会将模型的属性转换为一个 API 友好的数组，然后将该数组通过路由或控制器返回给用户：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * Transform the resource into an array.
+     * 将资源转换为数组
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+            <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+            <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+            <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+            <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+        ];
+    }
+}
+</code></pre>
+<p>当 <code>preserveKeys</code> 属性设置为 <code>true</code> 时，当集合从路由或控制器返回时，集合的原始键将被保留</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> UserResource::collection(User::all()-&gt;keyBy-&gt;id);
+});
+</code></pre>
+<p><a name="customizing-the-underlying-resource-class"></a></p>
+<h4 id="自定义基础资源类-1">自定义基础资源类</h4>
+<p>通常，资源集合的 <code>$this-&gt;collection</code> 属性会自动填充该集合的每个项目到其单一资源类的映射结果。单一资源类被假定为集合的类名，不包含类名末尾的 <code>Collection</code>  部分。此外，根据你的个人偏好，单一资源类可以带有或不带有 <code>Resource</code> 后缀。</p>
+<p>例如，<code>UserCollection</code> 将尝试将给定的用户实例映射到 <code>UserResource</code> 资源中。想要自定义这个行为，你可以重写资源集合的 <code>$collects</code> 属性：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * The resource that this resource collects.
+     * collects 属性定义了资源类
+     *
+     *<span class="phpdoc token"> @var</span> string
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$collects</span> = Member::<span class="keyword token">class</span>;
+}
+</code></pre>
+<p><a name="writing-resources"></a></p>
+<h2 id="编写资源-1">编写资源</h2>
+<blockquote>
+<p>技巧：如果你还没有阅读 <a href="#concept-overview">概念综述</a>，强烈建议你在继续阅读本文档之前先去阅读一下。</p>
+</blockquote>
+<p>从本质上说，资源的作用很简单，它只需要将给定的模型转换为数组。所以，每个资源都包含一个 <code>toArray</code> 方法，这个方法将模型的属性转换成一个 API 友好的数组，然后将该数组通过路由或控制器返回给用户：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * Transform the resource into an array.
+     * 将资源转换为数组
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+            <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+            <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+            <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+            <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+        ];
+    }
+}
+</code></pre>
+<p>创建资源之后，就可以在路由或者控制器中直接返回该资源了：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserResource(User::findOrFail(<span class="variable token">$id</span>));
+});
+</code></pre>
+<p><a name="relationships"></a></p>
+<h4 id="关联关系">关联关系</h4>
+<p>如果想在响应中返回关联的资源，你可以在资源类的 <code>toArray</code> 方法中将关联关系添加上。下面的例子会展示如何将文章资源类 <code>PostResource</code> 添加到用户资源类 <code>UserResource</code> 中：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\PostResource;
+
+<span class="comment token">/**
+ * Transform the resource into an array.
+ * 将资源转换为数组
+ * 
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+        <span class="string token">'posts'</span> =&gt; PostResource::collection(<span class="variable token">$this</span>-&gt;posts),
+        <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+        <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+    ];
+}
+</code></pre>
+<blockquote>
+<p>技巧：如果你希望只在关联关系被加载时才会返回，点这里查看文档 <a href="#%E6%9D%A1%E4%BB%B6%E5%85%B3%E8%81%94">conditional relationships</a>.</p>
+</blockquote>
+<p><a name="writing-resource-collections"></a></p>
+<h4 id="资源集合-2">资源集合</h4>
+<p>API 资源类将单个模型转到数组，同理，资源集合是用来将模型集合转为数组的。当然，你并不是必须要为每个类都定义一个资源集合类，因为资源类提供了 <code>collection</code> 方法用来动态的生成「临时」资源集合：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> UserResource::collection(User::all());
+});
+</code></pre>
+<p>如果你需要自定义资源集合返回的元数据，那就需要自己创建资源集合类：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * Transform the resource collection into an array.
+     * 将资源集合转换成数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'data'</span> =&gt; <span class="variable token">$this</span>-&gt;collection,
+            <span class="string token">'links'</span> =&gt; [
+                <span class="string token">'self'</span> =&gt; <span class="string token">'link-value'</span>,
+            ],
+        ];
+    }
+}
+</code></pre>
+<p>一旦资源被定义，它可以直接从路由或控制器返回：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserResource(User::findOrFail(<span class="variable token">$id</span>));
+});
+</code></pre>
+<p><a name="relationships"></a></p>
+<h4 id="关联关系-1">关联关系</h4>
+<p>如果你想在你的响应中包含关联的资源，你可以将它们添加到你的资源的 <code>toArray</code> 方法返回的数组中。在下面的例子中，我们将使用 <code>PostResource</code> 资源的 <code>collection</code> 方法来将用户的博客文章添加到资源响应中：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\PostResource;
+
+<span class="comment token">/**
+ * Transform the resource into an array.
+ * 将资源转换为数组。
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+        <span class="string token">'posts'</span> =&gt; PostResource::collection(<span class="variable token">$this</span>-&gt;posts),
+        <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+        <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+    ];
+}
+</code></pre>
+<blockquote>
+<p>技巧：如果你只希望在已经加载的关联关系中包含它们，点这里查看 <a href="#conditional-relationships">条件关联</a>。</p>
+</blockquote>
+<p><a name="writing-resource-collections"></a></p>
+<h4 id="资源集合-3">资源集合</h4>
+<p>当资源将单个模型转换为数组时，资源集合将模型集合转换为数组。当然，你并不是必须要为每个类都定义一个资源集合类，因为所有的资源都提供了一个 <code>collection </code> 方法来动态地生成一个「临时」资源集合：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> UserResource::collection(User::all());
+});
+</code></pre>
+<p>当然，如果你需要自定义资源集合返回的元数据，那就需要自己创建资源集合类：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * Transform the resource collection into an array.
+     * 将资源集合转换为数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'data'</span> =&gt; <span class="variable token">$this</span>-&gt;collection,
+            <span class="string token">'links'</span> =&gt; [
+                <span class="string token">'self'</span> =&gt; <span class="string token">'link-value'</span>,
+            ],
+        ];
+    }
+}
+</code></pre>
+<p>和单个资源一样，你可以在路由或控制器中直接返回资源集合：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserCollection;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserCollection(User::all());
+});
+</code></pre>
+<p><a name="data-wrapping"></a></p>
+<h3 id="数据包裹">数据包裹</h3>
+<p>默认情况下，当资源响应被转换为 JSON 时，最外层的资源被包裹在 <code>data</code> 键中。因此一个典型的资源收集响应如下所示：</p>
+<pre><code class="language-json">{
+    &quot;data&quot;: [
+        {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;Eladio Schroeder Sr.&quot;,
+            &quot;email&quot;: &quot;therese28@example.com&quot;,
+        },
+        {
+            &quot;id&quot;: 2,
+            &quot;name&quot;: &quot;Liliana Mayert&quot;,
+            &quot;email&quot;: &quot;evandervort@example.com&quot;,
+        }
+    ]
+}
+</code></pre>
+<p>如果你想使用自定义键而不是 <code>data</code>，你可以在资源类上定义一个 <code>$wrap</code> 属性：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * 应该应用的「数据」包装器。
+     *
+     *<span class="phpdoc token"> @var</span> string
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">static</span> <span class="variable token">$wrap</span> = <span class="string token">'user'</span>;
+}
+</code></pre>
+<p>如果你想禁用最外层资源的包裹，你应该调用基类 <code>Illuminate\Http\Resources\Json\JsonResource</code> 的 <code>withoutWrapping</code> 方法。通常，你应该从你的 <code>AppServiceProvider</code> 或其他在程序每一个请求中都会被加载的 <a href="providers.html">服务提供者</a> 中调用这个方法：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 注册任何应用程序服务。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    {
+        <span class="comment token">//</span>
+    }
+
+    <span class="comment token">/**
+     * 引导任何应用程序服务。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    {
+        JsonResource::withoutWrapping();
+    }
+}
+</code></pre>
+<blockquote>
+<p>注意：<code>withoutWrapping</code> 方法只会禁用最外层资源的包裹，不会删除你手动添加到资源集合中的 <code>data</code> 键。</p>
+</blockquote>
+<p><a name="wrapping-nested-resources"></a></p>
+<h4 id="包裹嵌套资源">包裹嵌套资源</h4>
+<p>你可以完全自由地决定资源关联如何被包裹。如果你希望无论怎样嵌套，所有的资源集合都包裹在一个 <code>data</code> 键中，你应该为每个资源定义一个资源集合类，并将返回的集合包裹在 <code>data</code> 键中。</p>
+<p>你可能会担心这是否会导致最外层的资源包裹在两层 <code>data</code> 键中。别担心， Laravel 永远不会让你的资源被双层包裹，所以你不必担心资源集合被多重嵌套的问题：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> CommentsCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * 将资源集合转换成数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [<span class="string token">'data'</span> =&gt; <span class="variable token">$this</span>-&gt;collection];
+    }
+}
+</code></pre>
+<p><a name="data-wrapping-and-pagination"></a></p>
+<h4 id="数据包裹和分页">数据包裹和分页</h4>
+<p>当通过资源响应返回分页集合时，即使你调用了 <code>withoutWrapping</code> 方法，Laravel 也会将你的资源数据包裹在 <code>data</code> 键中。这是因为分页响应总会有 <code>meta</code> 和 <code>links</code> 键包含关于分页状态的信息：</p>
+<pre><code class="language-json">{
+    <span class="string token">"data"</span>: [
+        {
+            <span class="string token">"id"</span>: <span class="number token">1</span>,
+            <span class="string token">"name"</span>: <span class="string token">"Eladio Schroeder Sr."</span>,
+            <span class="string token">"email"</span>: <span class="string token">"therese28@example.com"</span>,
+        },
+        {
+            <span class="string token">"id"</span>: <span class="number token">2</span>,
+            <span class="string token">"name"</span>: <span class="string token">"Liliana Mayert"</span>,
+            <span class="string token">"email"</span>: <span class="string token">"evandervort@example.com"</span>,
+        }
+    ],
+    <span class="string token">"links"</span>:{
+        <span class="string token">"first"</span>: <span class="string token">"http://example.com/pagination?page=1"</span>,
+        <span class="string token">"last"</span>: <span class="string token">"http://example.com/pagination?page=1"</span>,
+        <span class="string token">"prev"</span>: <span class="keyword token">null</span>,
+        <span class="string token">"next"</span>: <span class="keyword token">null</span>
+    },
+    <span class="string token">"meta"</span>:{
+        <span class="string token">"current_page"</span>: <span class="number token">1</span>,
+        <span class="string token">"from"</span>: <span class="number token">1</span>,
+        <span class="string token">"last_page"</span>: <span class="number token">1</span>,
+        <span class="string token">"path"</span>: <span class="string token">"http://example.com/pagination"</span>,
+        <span class="string token">"per_page"</span>: <span class="number token">15</span>,
+        <span class="string token">"to"</span>: <span class="number token">10</span>,
+        <span class="string token">"total"</span>: <span class="number token">10</span>
+    }
+}
+</code></pre>
+<p><a name="pagination"></a></p>
+<h3 id="分页">分页</h3>
+<p>你可以将 Laravel 分页实例传递给资源的 <code>collection</code> 方法或自定义资源集合：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserCollection;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserCollection(User::paginate());
+});
+</code></pre>
+<p>分页响应中总有 <code>meta</code> 和 <code>links</code> 键包含着分页状态信息：</p>
+<pre><code class="language-json">{
+    <span class="string token">"data"</span>: [
+        {
+            <span class="string token">"id"</span>: <span class="number token">1</span>,
+            <span class="string token">"name"</span>: <span class="string token">"Eladio Schroeder Sr."</span>,
+            <span class="string token">"email"</span>: <span class="string token">"therese28@example.com"</span>,
+        },
+        {
+            <span class="string token">"id"</span>: <span class="number token">2</span>,
+            <span class="string token">"name"</span>: <span class="string token">"Liliana Mayert"</span>,
+            <span class="string token">"email"</span>: <span class="string token">"evandervort@example.com"</span>,
+        }
+    ],
+    <span class="string token">"links"</span>:{
+        <span class="string token">"first"</span>: <span class="string token">"http://example.com/pagination?page=1"</span>,
+        <span class="string token">"last"</span>: <span class="string token">"http://example.com/pagination?page=1"</span>,
+        <span class="string token">"prev"</span>: <span class="keyword token">null</span>,
+        <span class="string token">"next"</span>: <span class="keyword token">null</span>
+    },
+    <span class="string token">"meta"</span>:{
+        <span class="string token">"current_page"</span>: <span class="number token">1</span>,
+        <span class="string token">"from"</span>: <span class="number token">1</span>,
+        <span class="string token">"last_page"</span>: <span class="number token">1</span>,
+        <span class="string token">"path"</span>: <span class="string token">"http://example.com/pagination"</span>,
+        <span class="string token">"per_page"</span>: <span class="number token">15</span>,
+        <span class="string token">"to"</span>: <span class="number token">10</span>,
+        <span class="string token">"total"</span>: <span class="number token">10</span>
+    }
+}
+</code></pre>
+<p><a name="conditional-attributes"></a></p>
+<h3 id="条件属性">条件属性</h3>
+<p>有些时候，你可能希望在给定条件满足时添加属性到资源响应里。例如，你可能希望如果当前用户是「管理员」时添加某个值到资源响应中。在这种情况下 Laravel 提供了一些辅助方法来帮助你解决问题。<code>when</code>方法可以被用来有条件地向资源响应添加属性：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Auth;
+
+<span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+        <span class="string token">'secret'</span> =&gt; <span class="variable token">$this</span>-&gt;when(Auth::user()-&gt;isAdmin(), <span class="string token">'secret-value'</span>),
+        <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+        <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+    ];
+}
+</code></pre>
+<p>在上面这个例子中，只有当<code>isAdmin</code>方法返回 <code>true</code> 时，<code>secret</code> 键才会最终在资源响应中被返回。如果该方法返回 <code>false</code>键将会在资源响应被发送给客户端之前被删除。 <code>when</code>方法可以使你避免使用条件语句拼接数组，转而用更优雅的方式来编写你的资源。</p>
+<p><code>when</code> 方法也接受闭包作为其第二个参数，只有在给定条件为<code>true</code> 时，才从闭包中计算返回的值：</p>
+<pre><code><span class="string token">'secret'</span> =&gt; <span class="variable token">$this</span>-&gt;when(Auth::user()-&gt;isAdmin(), <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="string token">'secret-value'</span>;
+}),
+</code></pre>
+<p><a name="merging-conditional-attributes"></a></p>
+<h4 id="有条件地合并数据">有条件地合并数据</h4>
+<p>有些时候，你可能希望在给定条件满足时添加多个属性到资源响应里。在这种情况下，你可以使用<code>mergeWhen</code>方法在给定的条件为<code>true</code>时将多个属性添加到响应中：</p>
+<pre><code><span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+        <span class="variable token">$this</span>-&gt;mergeWhen(Auth::user()-&gt;isAdmin(), [
+            <span class="string token">'first-secret'</span> =&gt; <span class="string token">'value'</span>,
+            <span class="string token">'second-secret'</span> =&gt; <span class="string token">'value'</span>,
+        ]),
+        <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+        <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+    ];
+}
+</code></pre>
+<p>同理，如果给定的条件为<code>false</code>时，则这些属性将会在资源响应被发送给客户端之前被移除。</p>
+<blockquote>
+<p>注意：<code>mergeWhen</code> 方法不应该被使用在混合字符串和数字键的数组中。此外，它也不应该被使用在不按顺序排列的数字键的数组中。</p>
+</blockquote>
+<p><a name="conditional-relationships"></a></p>
+<h3 id="条件关联">条件关联</h3>
+<p>除了有条件地加载属性之外，你还可以根据模型关联是否已加载来有条件地在你的资源响应中包含关联。这允许你在控制器中决定加载哪些模型关联，这样你的资源可以在模型关联被加载后才添加它们。最终，这样做可以使你的资源轻松避免「N+1」查询问题。</p>
+<p>可以使用<code>whenLoaded</code>方法来有条件的加载关联。为了避免加载不必要的关联，此方法接受关联的名称而不是关联本身作为其参数：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\PostResource;
+
+<span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
+        <span class="string token">'posts'</span> =&gt; PostResource::collection(<span class="variable token">$this</span>-&gt;whenLoaded(<span class="string token">'posts'</span>)),
+        <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
+        <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
+    ];
+}
+</code></pre>
+<p>在上面这个例子中，如果关联没有被加载，则<code>posts</code>键将会在资源响应被发送给客户端之前被删除。</p>
+<p><a name="conditional-pivot-information"></a></p>
+<h4 id="条件中间表信息">条件中间表信息</h4>
+<p>除了在你的资源响应中有条件地包含关联外，你还可以使用 <code>whenPivotLoaded</code> 方法有条件地从多对多关联的中间表中添加数据。<code>whenPivotLoaded</code> 方法接受的第一个参数为中间表的名称。第二个参数是一个闭包，它定义了在模型上如果中间表信息可用时要返回的值：</p>
+<pre><code><span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'expires_at'</span> =&gt; <span class="variable token">$this</span>-&gt;whenPivotLoaded(<span class="string token">'role_user'</span>, <span class="keyword token">function</span> () {
+            <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;pivot-&gt;expires_at;
+        }),
+    ];
+}
+</code></pre>
+<p>如果你的关联使用的是 <a href="eloquent-relationships.html#defining-custom-intermediate-table-models">自定义中间表</a>，你可以将中间表模型的实例作为 <code>whenPivotLoaded</code> 方法的第一个参数:</p>
+<pre><code><span class="string token">'expires_at'</span> =&gt; <span class="variable token">$this</span>-&gt;whenPivotLoaded(<span class="keyword token">new</span> Membership, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;pivot-&gt;expires_at;
+}),
+</code></pre>
+<p>如果你的中间表使用的是 <code>pivot</code> 以外的访问器，你可以使用 <code>whenPivotLoadedAs</code>  方法：</p>
+<pre><code><span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'expires_at'</span> =&gt; <span class="variable token">$this</span>-&gt;whenPivotLoadedAs(<span class="string token">'subscription'</span>, <span class="string token">'role_user'</span>, <span class="keyword token">function</span> () {
+            <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;subscription-&gt;expires_at;
+        }),
+    ];
+}
+</code></pre>
+<p><a name="adding-meta-data"></a></p>
+<h3 id="添加元数据">添加元数据</h3>
+<p>一些 JSON API 标准需要你在资源和资源集合响应中添加元数据。这通常包括资源或相关资源的 <code>links</code> ，或一些关于资源本身的元数据。如果你需要返回有关资源的其他元数据，只需要将它们包含在 <code>toArray</code> 方法中即可。例如在转换资源集合时你可能需要添加 <code>link</code> 信息：</p>
+<pre><code><span class="comment token">/**
+ * 将资源转换成数组
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'data'</span> =&gt; <span class="variable token">$this</span>-&gt;collection,
+        <span class="string token">'links'</span> =&gt; [
+            <span class="string token">'self'</span> =&gt; <span class="string token">'link-value'</span>,
+        ],
+    ];
+}
+</code></pre>
+<p>当添加额外的元数据到你的资源中时，你不必担心会覆盖 Laravel 在返回分页响应时自动添加的 <code>links</code> 或 <code>meta</code> 键。你添加的任何其他 <code>links</code> 会与分页响应添加的 <code>links</code> 相合并。</p>
+<p><a name="top-level-meta-data"></a></p>
+<h4 id="顶层元数据">顶层元数据</h4>
+<p>有时候，你可能希望当资源被作为顶层资源返回时添加某些元数据到资源响应中。这通常包括整个响应的元信息。你可以在资源类中添加 <code>with</code> 方法来定义元数据。此方法应返回一个元数据数组，当资源被作为顶层资源渲染时，这个数组将会被包含在资源响应中：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\ResourceCollection;
+
+<span class="keyword token">class</span> UserCollection <span class="keyword token">extends</span> ResourceCollection
+{
+    <span class="comment token">/**
+     * 将资源集合转换成数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> <span class="keyword token">parent</span>::toArray(<span class="variable token">$request</span>);
+    }
+
+    <span class="comment token">/**
+     * 返回应该和资源一起返回的其他数据数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> with(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'meta'</span> =&gt; [
+                <span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>,
+            ],
+        ];
+    }
+}
+</code></pre>
+<p><a name="adding-meta-data-when-constructing-resources"></a></p>
+<h4 id="构造资源时添加元数据">构造资源时添加元数据</h4>
+<p>你还可以在路由或者控制器中构造资源实例时添加顶层数据。所有资源都可以使用 <code>additional</code> 方法来接受应该被添加到资源响应中的数据数组：</p>
+<pre><code><span class="keyword token">return</span> (<span class="keyword token">new</span> UserCollection(User::all()-&gt;load(<span class="string token">'roles'</span>)))
+                -&gt;additional([<span class="string token">'meta'</span> =&gt; [
+                    <span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>,
+                ]]);
+</code></pre>
+<p><a name="resource-responses"></a></p>
+<h2 id="响应资源">响应资源</h2>
+<p>就像你知道的那样，资源可以直接在路由和控制器中被返回：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
+    <span class="keyword token">return</span> <span class="keyword token">new</span> UserResource(User::findOrFail(<span class="variable token">$id</span>));
+});
+</code></pre>
+<p>但有些时候，在发送给客户端前你可能需要自定义 HTTP 响应。你有两种办法。第一，你可以链式调用 <code>response</code> 方法。此方法将会返回  <code>Illuminate\Http\JsonResponse</code>  实例，允许你自定义响应头信息：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/user'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> (<span class="keyword token">new</span> UserResource(User::find(<span class="number token">1</span>)))
+                -&gt;response()
+                -&gt;header(<span class="string token">'X-Value'</span>, <span class="string token">'True'</span>);
+});
+</code></pre>
+<p>另外，你还可以在资源中定义一个 <code>withResponse</code> 方法。此方法将会在资源被作为顶层资源在响应时被调用：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Resources;
+
+<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
+
+<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
+{
+    <span class="comment token">/**
+     * 将资源转换为数组。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
+    {
+        <span class="keyword token">return</span> [
+            <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
+        ];
+    }
+
+    <span class="comment token">/**
+     * 自定义响应信息。
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Response  $response
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> withResponse(<span class="variable token">$request</span>, <span class="variable token">$response</span>)
+    {
+        <span class="variable token">$response</span>-&gt;header(<span class="string token">'X-Value'</span>, <span class="string token">'True'</span>);
+    }
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

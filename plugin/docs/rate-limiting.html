@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="限流">限流</h1>
+<ul>
+<li><a href="#introduction">介绍</a><ul>
+<li><a href="#cache-configuration">缓存配置</a></li>
+</ul>
+</li>
+<li><a href="#basic-usage">基础用法</a><ul>
+<li><a href="#manually-incrementing-attempts">手动增加请求次数</a></li>
+<li><a href="#clearing-attempts">清除请求</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>Laravel 包含了一个开箱即用的，基于缓存实现的限流器，提供了一个简单的方法来限制指定时间内的任何操作。</p>
+<blockquote>
+<p>技巧：了解更多关于如何限制 HTTP 请求，请参考 <a href="https://learnku.com/docs/laravel/8.5/routing/10368#5c3711">请求频率限制中间件</a>.</p>
+</blockquote>
+<p><a name="cache-configuration"></a></p>
+<h3 id="缓存配置">缓存配置</h3>
+<p>通常情况下，限流器使用你默认的缓存驱动，由 <code>cache</code> 配置文件中的 <code>default</code> 键定义。你也可以通过在你的应用程序的 <code>cache</code> 配置文件中定义一个 <code>limiter</code> 来指定限流器应该使用哪一个缓存来驱动：</p>
+<pre><code class="language-php">'default' =&gt; 'memcached',
+'limiter' =&gt; 'redis',
+</code></pre>
+<p><a name="basic-usage"></a></p>
+<h2 id="基础用法">基础用法</h2>
+<p>可以通过 <code>Illuminate\Support\Facades\RateLimiter </code> 来操作限流器。限流器提供的最简单的方法是 <code>attempt</code> 方法，它将一个给定的回调函数执行次数限制在一个给定的秒数内。</p>
+<p>当回调函数执行次数超过限制时， <code>attempt</code> 方法返回 <code>false</code> ；否则， <code>attempt</code> 方法将返回回调的结果或 <code>true</code> 。 <code>attempt</code> 方法接受的第一个参数是一个速率限制器  <code>key</code> ，它可以是你选择的任何字符串，代表被限制速率的动作:</p>
+<pre><code class="language-php">    <span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+    <span class="variable token">$executed</span> = RateLimiter::attempt(
+        <span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id,
+        <span class="variable token">$perMinute</span> = <span class="number token">5</span>,
+        <span class="keyword token">function</span>() {
+            <span class="comment token">// 发送消息...</span>
+        }
+    );
+
+    <span class="keyword token">if</span> (! <span class="variable token">$executed</span>) {
+      <span class="keyword token">return</span> <span class="string token">'Too many messages sent!'</span>;
+    }
+</code></pre>
+<p><a name="manually-incrementing-attempts"></a></p>
+<h3 id="手动配置尝试次数">手动配置尝试次数</h3>
+<p>如果您想手动与限流器交互，可以使用多种方法。例如，您可以调用 <code>tooManyAttempts</code> 方法来确定给定的限流器是否超过了每分钟允许的最大尝试次数</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+<span class="keyword token">if</span> (RateLimiter::tooManyAttempts(<span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id, <span class="variable token">$perMinute</span> = <span class="number token">5</span>)) {
+    <span class="keyword token">return</span> <span class="string token">'Too many attempts!'</span>;
+}
+</code></pre>
+<p>或者，您可以使用 <code>remaining</code> 方法检索给定密钥的剩余尝试次数。如果给定的密钥还有重试次数，您可以调用 <code>hit</code> 方法来增加总尝试次数:</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+<span class="keyword token">if</span> (RateLimiter::remaining(<span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id, <span class="variable token">$perMinute</span> = <span class="number token">5</span>)) {
+    RateLimiter::hit(<span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id);
+
+    <span class="comment token">// 发送消息。。。</span>
+}
+</code></pre>
+<p><a name="determining-limiter-availability"></a></p>
+<h4 id="确定限流器可用性">确定限流器可用性</h4>
+<p>当一个键没有更多的尝试次数时，<code>availableIn</code> 方法返回在更多尝试可用之前剩余的秒数：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+<span class="keyword token">if</span> (RateLimiter::tooManyAttempts(<span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id, <span class="variable token">$perMinute</span> = <span class="number token">5</span>)) {
+    <span class="variable token">$seconds</span> = RateLimiter::availableIn(<span class="string token">'send-message:'</span>.<span class="variable token">$user</span>-&gt;id);
+
+    <span class="keyword token">return</span> <span class="string token">'You may try again in '</span>.<span class="variable token">$seconds</span>.<span class="string token">' seconds.'</span>;
+}
+</code></pre>
+<p><a name="clearing-attempts"></a></p>
+<h3 id="清除尝试次数">清除尝试次数</h3>
+<p>您可以使用 <code>clear</code> 方法重置给定速率限制键的尝试次数。例如，当接收者读取给定消息时，您可以重置尝试次数:</p>
+<pre><code><span class="keyword token">use</span> App\Models\Message;
+<span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+<span class="comment token">/**
+ * 将邮件标记为已读。
+ *
+ *<span class="phpdoc token"> @param</span>  \App\Models\Message  $message
+ *<span class="phpdoc token"> @return</span> \App\Models\Message
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> read(Message <span class="variable token">$message</span>)
+{
+    <span class="variable token">$message</span>-&gt;markAsRead();
+
+    RateLimiter::clear(<span class="string token">'send-message:'</span>.<span class="variable token">$message</span>-&gt;user_id);
+
+    <span class="keyword token">return</span> <span class="variable token">$message</span>;
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

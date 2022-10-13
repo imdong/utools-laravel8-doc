@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="缓存系统">缓存系统</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#configuration">配置</a><ul>
+<li><a href="#driver-prerequisites">驱动的前提条件</a></li>
+</ul>
+</li>
+<li><a href="#cache-usage">缓存使用</a><ul>
+<li><a href="#obtaining-a-cache-instance">获取缓存实例</a></li>
+<li><a href="#retrieving-items-from-the-cache">从缓存获取数据</a></li>
+<li><a href="#storing-items-in-the-cache">向缓存存储数据</a></li>
+<li><a href="#removing-items-from-the-cache">从缓存删除数据</a></li>
+<li><a href="#the-cache-helper">Cache 辅助函数</a></li>
+</ul>
+</li>
+<li><a href="#cache-tags">缓存标记</a><ul>
+<li><a href="#storing-tagged-cache-items">存储被标记的缓存数据</a></li>
+<li><a href="#accessing-tagged-cache-items">访问被标记的缓存数据</a></li>
+<li><a href="#removing-tagged-cache-items">删除被标记的缓存数据</a></li>
+</ul>
+</li>
+<li><a href="#atomic-locks">原子锁</a><ul>
+<li><a href="#lock-driver-prerequisites">驱动的前提条件</a></li>
+<li><a href="#managing-locks">管理锁</a></li>
+<li><a href="#managing-locks-across-processes">跨进程管理锁</a></li>
+</ul>
+</li>
+<li><a href="#adding-custom-cache-drivers">添加自定义缓存驱动</a><ul>
+<li><a href="#writing-the-driver">编写驱动</a></li>
+<li><a href="#registering-the-driver">注册驱动</a></li>
+</ul>
+</li>
+<li><a href="#events">事件</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>在某些应用中，一些查询数据或处理任务的操作会在某段时间里短时间内大量进行，或是一个操作花费好几秒钟。当出现这种情况时，通常会将检索到的数据缓存起来，从而为后面请求同一数据的请求迅速返回结果。这些缓存数据通常会储存在极快的存储系统中，例如 <a href="https://memcached.org">Memcached</a> 和 <a href="https://redis.io">Redis</a>。</p>
+<p>Laravel 为各种缓存后端提供了富有表现力且统一的 API，以便你利用它们极快的查询数据来加快你的应用。</p>
+<p><a name="configuration"></a></p>
+<h2 id="配置">配置</h2>
+<p>缓存配置文件位于 <code>config/cache.php</code>。在这个文件中，你可以指定应用默认使用哪个缓存驱动。Laravel 支持的缓存后端包括 <a href="https://memcached.org">Memcached</a>、<a href="https://redis.io">Redis</a>、<a href="https://aws.amazon.com/dynamodb">DynamoDB</a>，以及现成的关系型数据库。此外，还支持基于文件的缓存驱动，以及方便自动化测试的缓存驱动 <code>array</code> 和 <code>null</code> 。</p>
+<p>缓存配置文件还包含文件中记录的各种其他选项，因此请务必阅读这些选项。默认情况下，Laravel 配置为使用 <code>file</code> 缓存驱动程序，它将序列化的缓存对象存储在服务器的文件系统上。对于较大的应用程序，建议您使用更健壮的驱动程序，例如 Memcached 或 Redis。您甚至可以为同一个驱动程序配置多个缓存配置。</p>
+<p><a name="driver-prerequisites"></a></p>
+<h3 id="驱动程序必备条件">驱动程序必备条件</h3>
+<p><a name="prerequisites-database"></a></p>
+<h4 id="数据库">数据库</h4>
+<p>当使用 <code>database</code> 缓存驱动程序时，您需要设置一个表来包含缓存项。您将在下表中找到一个示例 <code>Schema</code> 声明：</p>
+<pre><code>Schema::create(<span class="string token">'cache'</span>, <span class="keyword token">function</span> (<span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'key'</span>)-&gt;unique();
+    <span class="variable token">$table</span>-&gt;text(<span class="string token">'value'</span>);
+    <span class="variable token">$table</span>-&gt;integer(<span class="string token">'expiration'</span>);
+});
+</code></pre>
+<blockquote>
+<p>技巧：您还可以使用 <code>php artisan cache:table</code> Artisan 命令生成具有正确模式的迁移。</p>
+</blockquote>
+<p><a name="memcached"></a></p>
+<h4 id="memcached">Memcached</h4>
+<p>使用 Memcached 驱动需要安装【Memcached PECL 包】(<a href="https://pecl.php.net/package/memcached)%E3%80%82%E6%82%A8%E5%8F%AF%E4%BB%A5%E5%9C%A8">https://pecl.php.net/package/memcached)。您可以在</a> <code>config/cache.php</code> 配置文件中列出所有 Memcached 服务器。 该文件已经包含一个 <code>memcached.servers</code> 条目以帮助您入门：</p>
+<pre><code>'memcached' =&gt; [
+    'servers' =&gt; [
+        [
+            'host' =&gt; env('MEMCACHED_HOST', '127.0.0.1'),
+            'port' =&gt; env('MEMCACHED_PORT', 11211),
+            'weight' =&gt; 100,
+        ],
+    ],
+],
+</code></pre>
+<p>如果需要，您可以将 <code>host</code> 选项设置为 UNIX 套接字路径。如果你这样做，<code>port</code> 选项应该设置为 <code>0</code>：</p>
+<pre><code>'memcached' =&gt; [
+    [
+        'host' =&gt; '/var/run/memcached/memcached.sock',
+        'port' =&gt; 0,
+        'weight' =&gt; 100
+    ],
+],
+</code></pre>
+<p><a name="redis"></a></p>
+<h4 id="redis">Redis</h4>
+<p>在将 Redis 缓存与 Laravel 一起使用之前，您需要通过 PECL 安装 PhpRedis PHP 扩展或通过 Composer 安装 <code>predis/predis</code> 包（~1.0）。<a href="sail.html">Laravel Sail</a> 已经包含了这个扩展。另外，Laravel 官方部署平台如 <a href="https://forge.laravel.com">Laravel Forge</a> 和 <a href="https://vapor.laravel.com">Laravel Vapor</a> 默认安装了 PhpRedis 扩展。</p>
+<p>有关配置 Redis 的更多信息，请参阅其 <a href="redis.html#configuration">Laravel 文档页面</a>。</p>
+<p><a name="dynamodb"></a></p>
+<h4 id="dynamodb">DynamoDB</h4>
+<p>在使用 <a href="https://aws.amazon.com/dynamodb">DynamoDB</a> 缓存驱动程序之前，您必须创建一个 DynamoDB 表来存储所有缓存的数据。通常，此表应命名为「缓存」。但是，您应该根据应用程序的 <code>cache</code> 配置文件中的 <code>stores.dynamodb.table</code> 配置值来命名表。</p>
+<p>该表还应该有一个字符串分区键，其名称对应于应用程序的 <code>cache</code> 配置文件中的 <code>stores.dynamodb.attributes.key</code> 配置项的值。 默认情况下，分区键应命名为 <code>key</code>。</p>
+<p><a name="cache-usage"></a></p>
+<h2 id="缓存使用">缓存使用</h2>
+<p><a name="obtaining-a-cache-instance"></a></p>
+<h3 id="获取缓存实例">获取缓存实例</h3>
+<p>要获取缓存存储实例，您可以使用 <code>Cache</code> Facade，我们将在本文档中使用它。<code>Cache</code> Facade 提供了对 Laravel 缓存合约底层实现的方便、简洁的访问：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Illuminate\Support\Facades\Cache;
+
+<span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
+{
+    <span class="comment token">/**
+     * 显示应用程序的所有用户的列表。
+     *
+     *<span class="phpdoc token"> @return</span> Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> index()
+    {
+        <span class="variable token">$value</span> = Cache::get(<span class="string token">'key'</span>);
+
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p><a name="accessing-multiple-cache-stores"></a></p>
+<h4 id="访问多个缓存存储">访问多个缓存存储</h4>
+<p>使用 <code>Cache</code> Facade，您可以通过 <code>store</code> 方法访问各种缓存存储。传递给 <code>store</code> 方法的键应该对应于 <code>cache</code> 配置文件中的 <code>stores</code> 配置数组中列出的存储之一：</p>
+<pre><code><span class="variable token">$value</span> = Cache::store(<span class="string token">'file'</span>)-&gt;get(<span class="string token">'foo'</span>);
+
+Cache::store(<span class="string token">'redis'</span>)-&gt;put(<span class="string token">'bar'</span>, <span class="string token">'baz'</span>, <span class="number token">600</span>); <span class="comment token">// 10 Minutes</span>
+</code></pre>
+<p><a name="retrieving-items-from-the-cache"></a></p>
+<h3 id="从缓存中检索项目">从缓存中检索项目</h3>
+<p><code>Cache</code> 门面的 <code>get</code> 方法用于从缓存中检索项目。如果缓存中不存在该项目，则将返回 <code>null</code>。如果您愿意，您可以将第二个参数传递给 <code>get</code> 方法，指定您希望在项目不存在时返回的默认值：</p>
+<pre><code><span class="variable token">$value</span> = Cache::get(<span class="string token">'key'</span>);
+
+<span class="variable token">$value</span> = Cache::get(<span class="string token">'key'</span>, <span class="string token">'default'</span>);
+</code></pre>
+<p>您甚至可以将闭包作为默认值传递。如果指定的项在缓存中不存在，则返回闭包的结果。传递闭包允许您推迟从数据库或其他外部服务中检索默认值：</p>
+<pre><code><span class="variable token">$value</span> = Cache::get(<span class="string token">'key'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> DB::table(...)-&gt;get();
+});
+</code></pre>
+<p><a name="checking-for-item-existence"></a></p>
+<h4 id="检查项目是否存在">检查项目是否存在</h4>
+<p><code>has</code> 方法可用于确定缓存中是否存在项目。如果项目存在但其值为 <code>null</code>，此方法也将返回 <code>false</code>：</p>
+<pre><code><span class="keyword token">if</span> (Cache::has(<span class="string token">'key'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="incrementing-decrementing-values"></a></p>
+<h4 id="递增递减值">递增/递减值</h4>
+<p><code>increment</code> 和 <code>decrement</code> 方法可用于调整缓存中整数项的值。这两种方法都接受一个可选的第二个参数，指示增加或减少项目值的数量：</p>
+<pre><code>Cache::increment(<span class="string token">'key'</span>);
+Cache::increment(<span class="string token">'key'</span>, <span class="variable token">$amount</span>);
+Cache::decrement(<span class="string token">'key'</span>);
+Cache::decrement(<span class="string token">'key'</span>, <span class="variable token">$amount</span>);
+</code></pre>
+<p><a name="retrieve-store"></a></p>
+<h4 id="检索和存储">检索和存储</h4>
+<p>有时您可能希望从缓存中检索一个项目，但如果请求的项目不存在，也存储一个默认值。例如，您可能希望从缓存中检索所有用户，或者，如果它们不存在，则从数据库中检索它们并将它们添加到缓存中。您可以使用 <code>Cache::remember</code> 方法执行此操作：</p>
+<pre><code><span class="variable token">$value</span> = Cache::remember(<span class="string token">'users'</span>, <span class="variable token">$seconds</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> DB::table(<span class="string token">'users'</span>)-&gt;get();
+});
+</code></pre>
+<p>如果缓存中不存在该项，则传递给 <code>remember</code> 方法的闭包将被执行，并将其结果放入缓存中。</p>
+<p>您可以使用 <code>rememberForever</code> 方法从缓存中检索一个项目，或者如果它不存在则永久存储它：</p>
+<pre><code><span class="variable token">$value</span> = Cache::rememberForever(<span class="string token">'users'</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> DB::table(<span class="string token">'users'</span>)-&gt;get();
+});
+</code></pre>
+<p><a name="retrieve-delete"></a></p>
+<h4 id="检索和删除">检索和删除</h4>
+<p>如果您需要从缓存中检索一个项目然后删除该项目，您可以使用 <code>pull</code> 方法。 与 <code>get</code> 方法一样，如果缓存中不存在该项，则将返回 <code>null</code>：</p>
+<pre><code><span class="variable token">$value</span> = Cache::pull(<span class="string token">'key'</span>);
+</code></pre>
+<p><a name="storing-items-in-the-cache"></a></p>
+<h3 id="在缓存中存储项目">在缓存中存储项目</h3>
+<p>您可以使用 <code>Cache</code> Facade 上的 <code>put</code> 方法将项目存储在缓存中：</p>
+<pre><code>Cache::put(<span class="string token">'key'</span>, <span class="string token">'value'</span>, <span class="variable token">$seconds</span> = <span class="number token">10</span>);
+</code></pre>
+<p>如果存储时间没有传递给 <code>put</code> 方法，该项目将被无限期存储：</p>
+<pre><code>Cache::put(&#39;key&#39;, &#39;value&#39;);
+</code></pre>
+<p>除了将秒数作为整数传递之外，您还可以传递一个表示缓存项所需过期时间的 <code>DateTime</code> 实例：</p>
+<pre><code>Cache::put('key', 'value', now()-&gt;addMinutes(10));
+</code></pre>
+<p><a name="store-if-not-present"></a></p>
+<h4 id="如果不存在则存储">如果不存在则存储</h4>
+<p><code>add</code> 方法只会将缓存存储中不存在的项目添加到缓存中。如果项目实际添加到缓存中，该方法将返回 <code>true</code>。 否则，该方法将返回 <code>false</code>。 <code>add</code> 方法是一个原子操作：</p>
+<pre><code>Cache::add(<span class="string token">'key'</span>, <span class="string token">'value'</span>, <span class="variable token">$seconds</span>);
+</code></pre>
+<p><a name="storing-items-forever"></a></p>
+<h4 id="永久存储">永久存储</h4>
+<p><code>forever</code> 方法可用于将项目永久存储在缓存中。由于这些项目不会过期，因此必须使用 <code>forget</code> 方法手动将它们从缓存中删除：</p>
+<pre><code>Cache::forever(&#39;key&#39;, &#39;value&#39;);
+</code></pre>
+<blockquote>
+<p>技巧：如果您使用的是 Memcached 驱动程序，则当缓存达到其大小限制时，可能会删除「永久」存储的项目。</p>
+</blockquote>
+<p><a name="removing-items-from-the-cache"></a></p>
+<h3 id="从缓存中删除项目">从缓存中删除项目</h3>
+<p>您可以使用 <code>forget</code> 方法从缓存中删除项目：</p>
+<pre><code>Cache::forget(&#39;key&#39;);
+</code></pre>
+<p>您还可以通过提供零或负数的过期秒数来删除项目：</p>
+<pre><code>Cache::put(&#39;key&#39;, &#39;value&#39;, 0);
+
+Cache::put(&#39;key&#39;, &#39;value&#39;, -5);
+</code></pre>
+<p>您可以使用 <code>flush</code> 方法清除整个缓存：</p>
+<pre><code>Cache::flush();
+</code></pre>
+<blockquote>
+<p>注意：刷新缓存不会考虑您配置的缓存「前缀」，并且会从缓存中删除所有条目。
+在清除由其他应用程序共享的缓存时，请仔细考虑这一点。</p>
+</blockquote>
+<p><a name="the-cache-helper"></a></p>
+<h3 id="缓存助手函数">缓存助手函数</h3>
+<p>除了使用 <code>Cache</code> 门面之外，您还可以使用全局 <code>cache</code> 函数通过缓存检索和存储数据。当使用单个字符串参数调用 <code>cache</code> 函数时，它将返回给定键的值：</p>
+<pre><code><span class="variable token">$value</span> = cache(<span class="string token">'key'</span>);
+</code></pre>
+<p>如果您向函数提供键/值对数组和过期时间，它将在指定的持续时间内将值存储在缓存中：</p>
+<pre><code>cache([<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>], <span class="variable token">$seconds</span>);
+
+cache([<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>], now()-&gt;addMinutes(<span class="number token">10</span>));
+</code></pre>
+<p>当不带任何参数调用 <code>cache</code> 函数时，它会返回 <code>Illuminate\Contracts\Cache\Factory</code> 实现的实例，允许您调用其他缓存方法：</p>
+<pre><code>cache()-&gt;remember(<span class="string token">'users'</span>, <span class="variable token">$seconds</span>, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> DB::table(<span class="string token">'users'</span>)-&gt;get();
+});
+</code></pre>
+<blockquote>
+<p>技巧：在测试对全局 <code>cache</code> 函数的调用时，您可以使用 <code>Cache::shouldReceive</code> 方法，就像 <a href="mocking.html#mocking-facades">testing the facade</a>。</p>
+</blockquote>
+<p><a name="cache-tags"></a></p>
+<h2 id="缓存标签">缓存标签</h2>
+<blockquote>
+<p>注意：使用 <code>file</code>、<code>dynamodb</code> 或 <code>database</code> 缓存驱动程序时不支持缓存标记。 此外，当使用带有“永久”存储的缓存的多个标签时，使用诸如“memcached”之类的驱动程序会获得最佳性能，它会自动清除陈旧的记录。</p>
+</blockquote>
+<p><a name="storing-tagged-cache-items"></a></p>
+<h3 id="存储缓存标签">存储缓存标签</h3>
+<p>缓存标签允许您在缓存中标记相关项目，然后刷新所有已分配给定标签的缓存值。您可以通过传入标记名称的有序数组来访问标记缓存。例如，让我们访问一个标记的缓存并将一个值「put」缓存中：</p>
+<pre><code>Cache::tags([<span class="string token">'people'</span>, <span class="string token">'artists'</span>])-&gt;put(<span class="string token">'John'</span>, <span class="variable token">$john</span>, <span class="variable token">$seconds</span>);
+
+Cache::tags([<span class="string token">'people'</span>, <span class="string token">'authors'</span>])-&gt;put(<span class="string token">'Anne'</span>, <span class="variable token">$anne</span>, <span class="variable token">$seconds</span>);
+</code></pre>
+<p><a name="accessing-tagged-cache-items"></a></p>
+<h3 id="访问缓存标签">访问缓存标签</h3>
+<p>要检索标记的缓存项，请将相同的有序标签列表传递给 <code>tags</code> 方法，然后使用您要检索的键调用 <code>get</code> 方法：</p>
+<pre><code><span class="variable token">$john</span> = Cache::tags([<span class="string token">'people'</span>, <span class="string token">'artists'</span>])-&gt;get(<span class="string token">'John'</span>);
+
+<span class="variable token">$anne</span> = Cache::tags([<span class="string token">'people'</span>, <span class="string token">'authors'</span>])-&gt;get(<span class="string token">'Anne'</span>);
+</code></pre>
+<p><a name="removing-tagged-cache-items"></a></p>
+<h3 id="删除缓存标签">删除缓存标签</h3>
+<p>您可以刷新所有分配了标签或标签列表的项目。例如，此语句将删除所有标记为「people」、「authors」或两者的缓存。 因此，<code>Anne</code> 和 <code>John</code> 都将从缓存中删除：</p>
+<pre><code>Cache::tags(['people', 'authors'])-&gt;flush();
+</code></pre>
+<p>相反，此语句将仅删除带有 <code>authors</code> 标记的缓存值，因此将删除 <code>Anne</code>，但不会删除 <code>John</code>：</p>
+<pre><code>Cache::tags('authors')-&gt;flush();
+</code></pre>
+<p><a name="atomic-locks"></a></p>
+<h2 id="原子锁">原子锁</h2>
+<blockquote>
+<p>注意：要使用此功能，您的应用程序必须使用<code>memcached</code>、<code>redis</code>、<code>dynamicodb</code>、<code>database</code>、<code>file</code>或<code>array</code>缓存驱动程序作为应用程序的默认缓存驱动程序。
+此外，所有服务器都必须与同一中央缓存服务器通信。</p>
+</blockquote>
+<p><a name="lock-driver-prerequisites"></a></p>
+<h3 id="驱动程序先决条件">驱动程序先决条件</h3>
+<p><a name="atomic-locks-prerequisites-database"></a></p>
+<h4 id="数据库-1">数据库</h4>
+<p>使用“数据库”缓存驱动程序时，您需要设置一个表来包含应用程序的缓存锁。您将在下表中找到一个示例 <code>Schema</code> 声明：</p>
+<pre><code>Schema::create(<span class="string token">'cache_locks'</span>, <span class="keyword token">function</span> (<span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'key'</span>)-&gt;primary();
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'owner'</span>);
+    <span class="variable token">$table</span>-&gt;integer(<span class="string token">'expiration'</span>);
+});
+</code></pre>
+<p><a name="managing-locks"></a></p>
+<h3 id="管理锁">管理锁</h3>
+<p>原子锁允许操作分布式锁而不用担心竞争条件。例如，<a href="https://forge.laravel.com">Laravel Forge</a> 使用原子锁来确保服务器上一次只执行一个远程任务。您可以使用 <code>Cache::lock</code> 方法创建和管理锁：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Cache;
+
+<span class="variable token">$lock</span> = Cache::lock(<span class="string token">'foo'</span>, <span class="number token">10</span>);
+
+<span class="keyword token">if</span> (<span class="variable token">$lock</span>-&gt;get()) {
+    <span class="comment token">// 锁定 10 秒...</span>
+
+    <span class="variable token">$lock</span>-&gt;release();
+}
+</code></pre>
+<p><code>get</code> 方法也接受一个闭包。闭包执行后，Laravel 会自动释放锁：</p>
+<pre><code>Cache::lock(<span class="string token">'foo'</span>)-&gt;get(<span class="keyword token">function</span> () {
+    <span class="comment token">// 锁定无限期获得并自动释放...</span>
+});
+</code></pre>
+<p>如果在您请求时锁不可用，您可以指示 Laravel 等待指定的秒数。如果在指定的时间限制内无法获取锁，则会抛出 <code>Illuminate\Contracts\Cache\LockTimeoutException</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Contracts\Cache\LockTimeoutException;
+
+<span class="variable token">$lock</span> = Cache::lock(<span class="string token">'foo'</span>, <span class="number token">10</span>);
+
+<span class="keyword token">try</span> {
+    <span class="variable token">$lock</span>-&gt;block(<span class="number token">5</span>);
+
+    <span class="comment token">// 等待最多 5 秒后获得锁定...</span>
+} <span class="keyword token">catch</span> (LockTimeoutException <span class="variable token">$e</span>) {
+    <span class="comment token">// 无法获取锁...</span>
+} finally {
+    optional(<span class="variable token">$lock</span>)-&gt;release();
+}
+</code></pre>
+<p>上面的例子可以通过将闭包传递给 <code>block</code> 方法来简化。当一个闭包被传递给这个方法时，Laravel 将尝试在指定的秒数内获取锁，并在闭包执行后自动释放锁：</p>
+<pre><code>Cache::lock(<span class="string token">'foo'</span>, <span class="number token">10</span>)-&gt;block(<span class="number token">5</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// 等待最多 5 秒后获得锁定...</span>
+});
+</code></pre>
+<p><a name="managing-locks-across-processes"></a></p>
+<h3 id="跨进程管理锁">跨进程管理锁</h3>
+<p>有时，您可能希望在一个进程中获取锁并在另一个进程中释放它。例如，您可能在 Web 请求期间获取锁，并希望在由该请求触发的排队作业结束时释放锁。在这种情况下，您应该将锁的作用域「owner 令牌」传递给排队的作业，以便作业可以使用给定的令牌重新实例化锁。</p>
+<p>在下面的示例中，如果成功获取锁，我们将调度一个排队的作业。 此外，我们将通过锁的 <code>owner</code> 方法将锁的所有者令牌传递给排队的作业：</p>
+<pre><code><span class="variable token">$podcast</span> = Podcast::find(<span class="variable token">$id</span>);
+
+<span class="variable token">$lock</span> = Cache::lock(<span class="string token">'processing'</span>, <span class="number token">120</span>);
+
+<span class="keyword token">if</span> (<span class="variable token">$lock</span>-&gt;get()) {
+    ProcessPodcast::dispatch(<span class="variable token">$podcast</span>, <span class="variable token">$lock</span>-&gt;owner());
+}
+</code></pre>
+<p>在我们应用程序的 <code>ProcessPodcast</code> 作业中，我们可以使用所有者令牌恢复和释放锁：</p>
+<pre><code>Cache::restoreLock(<span class="string token">'processing'</span>, <span class="variable token">$this</span>-&gt;owner)-&gt;release();
+</code></pre>
+<p>如果你想释放一个锁而不考虑它的当前所有者，你可以使用 <code>forceRelease</code> 方法：</p>
+<pre><code>Cache::lock('processing')-&gt;forceRelease();
+</code></pre>
+<p><a name="adding-custom-cache-drivers"></a></p>
+<h2 id="添加自定义缓存驱动程序">添加自定义缓存驱动程序</h2>
+<p><a name="writing-the-driver"></a></p>
+<h3 id="编写驱动程序">编写驱动程序</h3>
+<p>要创建我们的自定义缓存驱动程序，我们首先需要实现 <code>Illuminate\Contracts\Cache\Store</code> <a href="contracts.html">contract</a>。 因此，MongoDB 缓存实现可能如下所示：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Extensions;
+
+<span class="keyword token">use</span> Illuminate\Contracts\Cache\Store;
+
+<span class="keyword token">class</span> MongoStore <span class="keyword token">implements</span> Store
+{
+    <span class="keyword token">public</span> <span class="keyword token">function</span> get(<span class="variable token">$key</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> many(<span class="keyword token">array</span> <span class="variable token">$keys</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> put(<span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$seconds</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> putMany(<span class="keyword token">array</span> <span class="variable token">$values</span>, <span class="variable token">$seconds</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> increment(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="number token">1</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> decrement(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="number token">1</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> forever(<span class="variable token">$key</span>, <span class="variable token">$value</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> forget(<span class="variable token">$key</span>) {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> flush() {}
+    <span class="keyword token">public</span> <span class="keyword token">function</span> getPrefix() {}
+}
+</code></pre>
+<p>我们只需要使用 MongoDB 连接来实现这些方法中的每一个。有关如何实现这些方法的示例，请查看 <a href="https://github.com/laravel/framework">Laravel 框架源代码</a> 中的 <code>Illuminate\Cache\MemcachedStore</code>。 一旦我们的实现完成，我们可以通过调用 <code>Cache</code> 门面的 <code>extend</code> 方法来完成我们的自定义驱动程序注册：</p>
+<pre><code>Cache::extend(<span class="string token">'mongo'</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+    <span class="keyword token">return</span> Cache::repository(<span class="keyword token">new</span> MongoStore);
+});
+</code></pre>
+<blockquote>
+<p>技巧：如果您想知道将自定义缓存驱动程序代码放在哪里，您可以在您的 <code>app</code> 目录中创建一个 <code>Extensions</code> 命名空间。 但是请记住，Laravel 没有严格的应用程序结构，您可以根据自己的喜好自由组织应用程序。</p>
+</blockquote>
+<p><a name="registering-the-driver"></a></p>
+<h3 id="注册驱动程序">注册驱动程序</h3>
+<p>要向 Laravel 注册自定义缓存驱动程序，我们将使用 <code>Cache</code> 门面的 <code>extend</code> 方法。 由于其他服务提供者可能会尝试在他们的 <code>boot</code> 方法中读取缓存值，我们将在 <code>booting</code> 回调中注册我们的自定义驱动程序。 通过使用 <code>booting</code> 回调，我们可以确保在应用程序的服务提供者调用 <code>boot</code> 方法之前但在所有服务提供者调用 <code>register</code> 方法之后注册自定义驱动程序。 我们将在应用程序的 <code>App\Providers\AppServiceProvider</code> 类的 <code>register</code> 方法中注册我们的 <code>booting</code> 回调：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Extensions\MongoStore;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Cache;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> CacheServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 注册任何应用程序服务。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    {
+        <span class="variable token">$this</span>-&gt;app-&gt;booting(<span class="keyword token">function</span> () {
+             Cache::extend(<span class="string token">'mongo'</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+                 <span class="keyword token">return</span> Cache::repository(<span class="keyword token">new</span> MongoStore);
+             });
+         });
+    }
+
+    <span class="comment token">/**
+     * 引导任何应用程序服务。
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    {
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p>传递给 <code>extend</code> 方法的第一个参数是驱动程序的名称。这将对应于 <code>config/cache.php</code> 配置文件中的 <code>driver</code> 选项。 第二个参数是一个闭包，它应该返回一个 <code>Illuminate\Cache\Repository</code> 实例。闭包将传递一个 <code>$app</code> 实例，它是 <a href="container.html">服务容器</a> 的一个实例。</p>
+<p>注册扩展程序后，将 <code>config/cache.php</code> 配置文件的 <code>driver</code> 选项更新为扩展程序的名称。</p>
+<p><a name="events"></a></p>
+<h2 id="事件">事件</h2>
+<p>要在每个缓存操作上执行代码，您可以侦听缓存触发的 <a href="events.html">events</a>。 通常，您应该将这些事件侦听器放在应用程序的 <code>App\Providers\EventServiceProvider</code> 类中：</p>
+<pre><code><span class="comment token">/**
+ * The event listener mappings for the application.
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$listen</span> = [
+    <span class="string token">'Illuminate\Cache\Events\CacheHit'</span> =&gt; [
+        <span class="string token">'App\Listeners\LogCacheHit'</span>,
+    ],
+
+    <span class="string token">'Illuminate\Cache\Events\CacheMissed'</span> =&gt; [
+        <span class="string token">'App\Listeners\LogCacheMissed'</span>,
+    ],
+
+    <span class="string token">'Illuminate\Cache\Events\KeyForgotten'</span> =&gt; [
+        <span class="string token">'App\Listeners\LogKeyForgotten'</span>,
+    ],
+
+    <span class="string token">'Illuminate\Cache\Events\KeyWritten'</span> =&gt; [
+        <span class="string token">'App\Listeners\LogKeyWritten'</span>,
+    ],
+];
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

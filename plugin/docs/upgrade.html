@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="升级指南">升级指南</h1>
+<ul>
+<li><a href="#upgrade-9.0">从 8.x 升级到 9.0</a></li>
+</ul>
+<p><a name="high-impact-changes"></a></p>
+<h2 id="高影响变化">高影响变化</h2>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="#updating-dependencies">更新依赖</a></li>
+<li><a href="#flysystem-3">Flysystem 3.x</a></li>
+<li><a href="#symfony-mailer">Symfony Mailer</a></li>
+</ul>
+</div>
+
+<p><a name="medium-impact-changes"></a></p>
+<h2 id="中影响变化">中影响变化</h2>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="#belongs-to-many-first-or-new">Belongs To Many <code>firstOrNew</code>, <code>firstOrCreate</code>, and <code>updateOrCreate</code> 方法</a></li>
+<li><a href="#custom-casts-and-null">Custom Casts &amp; <code>null</code></a></li>
+<li><a href="#http-client-default-timeout">Default HTTP Client Timeout</a></li>
+<li><a href="#php-return-types">PHP Return Types</a></li>
+<li><a href="#postgres-schema-configuration">Postgres &quot;Schema&quot; Configuration</a></li>
+<li><a href="#the-assert-deleted-method">The <code>assertDeleted</code> Method</a></li>
+<li><a href="#the-lang-directory">The <code>lang</code> Directory</a></li>
+<li><a href="#the-password-rule">The <code>password</code> Rule</a></li>
+<li><a href="#when-and-unless-methods">The <code>when</code> / <code>unless</code> Methods</a></li>
+<li><a href="#unvalidated-array-keys">Unvalidated Array Keys</a></li>
+</ul>
+</div>
+
+<p><a name="upgrade-9.0"></a></p>
+<h2 id="从-8x-升级到-90">从 8.x 升级到 9.0</h2>
+<p><a name="estimated-upgrade-time-10-minutes"></a></p>
+<h4 id="预计升级时间-30-分钟">预计升级时间: 30 分钟</h4>
+<blockquote>
+<p>技巧：我们应该试图记录每个可能的重大改变. 由于一些破坏性的变更位于框架的模糊部分，因此这些更改只有一部分可能会实际影响你的应用程序. 想要节省时间? 你可以看 <a href="https://laravelshift.com/">Laravel Shift</a> 来帮助你的应用自动化升级。</p>
+</blockquote>
+<p><a name="updating-dependencies"></a></p>
+<h3 id="更新依赖">更新依赖</h3>
+<p><strong>影响的可能性: 高</strong></p>
+<h4 id="要求-php-802">要求 PHP 8.0.2</h4>
+<p>Laravel 现在 需要 PHP 8.0.2 or 更高。</p>
+<h4 id="composer-依赖">Composer 依赖</h4>
+<p>你应该在你应用程序的 <code>composer.json</code> 文件中更新依赖包的版本</p>
+<ul>
+<li><code>laravel/framework</code> 至 <code>^9.0</code></li>
+<li><code>nunomaduro/collision</code> 至 <code>^6.1</code></li>
+</ul>
+<p>另外，请在 <code>composer.json</code> 文件中用 <code>&quot;spatie/laravel-ignition&quot;: &quot;^1.0&quot;</code> 替换掉 <code>facade/ignition</code></p>
+<p>以下官方包的新版本已经支持 Laravel 9.x 。如有需要，你应该在升级前阅读它们各自的升级指南：</p>
+<ul>
+<li><a href="https://github.com/laravel/vonage-notification-channel/blob/3.x/UPGRADE.md">Vonage Notification Channel (v3.0)</a> (Replaces Nexmo)</li>
+</ul>
+<p>最后，检查应用程序使用的任何其他第三方包，并验证是否使用了正确的支持 Laravel 9 的版本。</p>
+<p><a name="php-return-types"></a></p>
+<h4 id="php-返回类型">PHP 返回类型</h4>
+<p>PHP 开始过渡到要求在 PHP 方法（如 <code>offsetGet</code>、<code>offsetSet</code> 等）上定义返回类型。有鉴于此，Laravel 9 在其代码库中实现了这些返回类型。通常，这应该不会影响用户编写的代码；但是，如果您通过扩展 Laravel 的核心类来重写这些方法之一，则需要将这些返回类型添加到您自己的应用程序或包代码中：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><code>count(): int</code></li>
+<li><code>getIterator(): Traversable</code></li>
+<li><code>getSize(): int</code></li>
+<li><code>jsonSerialize(): array</code></li>
+<li><code>offsetExists($key): bool</code></li>
+<li><code>offsetGet($key): mixed</code></li>
+<li><code>offsetSet($key, $value): void</code></li>
+<li><code>offsetUnset($key): void</code></li>
+</ul>
+</div>
+
+<p>此外，返回类型被添加到实现 PHP 的 <code>SessionHandlerInterface</code> 接口的方法中。同样，这个更改不太可能影响您自己的应用程序或包代码：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><code>open($savePath, $sessionName): bool</code></li>
+<li><code>close(): bool</code></li>
+<li><code>read($sessionId): string|false</code></li>
+<li><code>write($sessionId, $data): bool</code></li>
+<li><code>destroy($sessionId): bool</code></li>
+<li><code>gc($lifetime): int</code></li>
+</ul>
+</div>
+
+<p><a name="application"></a></p>
+<h3 id="application">Application</h3>
+<p><a name="the-application-contract"></a></p>
+<h4 id="application-契约"><code>Application</code> 契约</h4>
+<p><strong>影响程度：低</strong></p>
+<p><code>Illuminate\Contracts\Foundation\Application</code> 接口的 <code>storagePath</code> 方法已更新为接受 <code>$path</code> 参数。如果要实现此接口，则应相应地更新实现代码：</p>
+<pre><code><span class="keyword token">public</span> <span class="keyword token">function</span> storagePath(<span class="variable token">$path</span> = <span class="string token">''</span>);
+</code></pre>
+<p>同样，<code>Illuminate\Foundation\Application</code> 类的 <code>langPath</code> 方法已更新为接受 <code>$path</code> 参数：</p>
+<pre><code><span class="keyword token">public</span> <span class="keyword token">function</span> langPath(<span class="variable token">$path</span> = <span class="string token">''</span>);
+</code></pre>
+<h4 id="异常处理程序ignore方法">异常处理程序<code>ignore</code>方法</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>异常处理程序的 <code>ignore</code> 方法现在是 <code>public</code> 而不是 <code>protected</code>。此方法不包含在默认应用程序框架中；但是，如果您手动定义了此方法，则应将其可见性更新为“public”：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> ignore(string <span class="variable token">$class</span>);
+</code></pre>
+<h3 id="blade">Blade</h3>
+<h4 id="惰性集合和-loop-变量">惰性集合和 <code>$loop</code> 变量</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>当在 Blade 模板中迭代 <code>LazyCollection</code> 实例时，<code>$loop</code> 变量不再可用，因为访问该变量会导致整个 <code>LazyCollection</code> 被加载到内存中，因此在这种情况下使用惰性集合是毫无意义的。</p>
+<h3 id="集合">集合</h3>
+<h4 id="enumerable-契约"><code>Enumerable</code> 契约</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p><code>Illuminate\Support\Enumerable</code> 合约现在定义了 <code>sole</code> 方法。如果您手动实现此接口，则应更新您的实现以显示此新方法：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> sole(<span class="variable token">$key</span> = <span class="keyword token">null</span>, <span class="variable token">$operator</span> = <span class="keyword token">null</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
+</code></pre>
+<h4 id="reducewithkeys-方法"><code>reduceWithKeys</code> 方法</h4>
+<p><code>reduceWithKeys</code> 方法已被删除，因为 <code>reduce</code> 方法提供了相同的功能。你可以简单地更新你的代码来调用 <code>reduce</code> 而不是 <code>reduceWithKeys</code>。</p>
+<h4 id="reducemany-方法"><code>reduceMany</code> 方法</h4>
+<p><code>reduceMany</code> 方法已重命名为 <code>reduceSpread</code>，以便与其他类似方法的命名保持一致。</p>
+<h3 id="容器">容器</h3>
+<h4 id="container-契约"><code>Container</code> 契约</h4>
+<p><strong>影响的可能性：非常低</strong></p>
+<p><code>Illuminate\Contracts\Container\Container</code> 契约有两个方法定义：<code>scoped</code> 和 <code>scopedIf</code>。如果您手动实施此契约，您应该更新您的实施以显示这些新方法。</p>
+<h4 id="contextualbindingbuilder-契约"><code>ContextualBindingBuilder</code> 契约</h4>
+<p><strong>影响的可能性：非常低</strong></p>
+<p><code>Illuminate\Contracts\Container\ContextualBindingBuilder</code> 契约现在定义了 <code>giveConfig</code> 方法。如果您手动实现此接口，则应更新您的实现以显示此新方法：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> giveConfig(<span class="variable token">$key</span>, <span class="variable token">$default</span> = <span class="keyword token">null</span>);
+</code></pre>
+<h3 id="数据库">数据库</h3>
+<p><a name="postgres-schema-configuration"></a></p>
+<h4 id="postgres-schema-配置选项">Postgres &quot;Schema&quot; 配置选项</h4>
+<p><strong>影响程度：中</strong></p>
+<p>在 <code>config/database.php</code> 配置文件中用配置 Postgres 连接搜索路径的 <code>schema</code> 配置选项应重命名为 <code>search_path</code>。</p>
+<p><a name="schema-builder-doctrine-method"></a></p>
+<h4 id="schema-builder-registercustomdoctrinetype-方法">Schema Builder <code>registerCustomDoctrineType</code> 方法</h4>
+<p><strong>影响程度：低</strong></p>
+<p><code>registerCustomDoctrineType</code> 方法已从 <code>Illuminate\Database\Schema\Builder</code> 类中删除。您可以在 <code>DB</code> 上使用 <code>registerDoctrineType</code> 方法，或者在 <code>config/database.php</code> 配置文件中注册自定义的 Doctrine 类型。</p>
+<h3 id="eloquent">Eloquent</h3>
+<p><a name="custom-casts-and-null"></a></p>
+<h4 id="自定义强制转换和-null">自定义强制转换和 <code>null</code></h4>
+<p><strong>影响程度：中</strong></p>
+<p>在 Laravel 的先前版本中，如果将强制转换属性设置为 <code>null</code>，则不会调用自定义强制转换类的 <code>set</code> 方法。但是，此行为与 Laravel 文档不一致。在 Laravel 9.x 中，将调用 cast 类的 <code>set</code> 方法，并使用 <code>null</code> 作为提供的 <code>$value</code> 参数。因此，应确保自定义强制转换能够充分处理这个场景：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * Prepare the given value for storage.
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
+ *<span class="phpdoc token"> @param</span>  string  $key
+ *<span class="phpdoc token"> @param</span>  AddressModel  $value
+ *<span class="phpdoc token"> @param</span>  array  $attributes
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> set(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+{
+    <span class="keyword token">if</span> (! <span class="variable token">$value</span> instanceof AddressModel) {
+        <span class="keyword token">throw</span> <span class="keyword token">new</span> InvalidArgumentException(<span class="string token">'The given value is not an Address instance.'</span>);
+    }
+
+    <span class="keyword token">return</span> [
+        <span class="string token">'address_line_one'</span> =&gt; <span class="variable token">$value</span>-&gt;lineOne,
+        <span class="string token">'address_line_two'</span> =&gt; <span class="variable token">$value</span>-&gt;lineTwo,
+    ];
+}
+</code></pre>
+<p><a name="belongs-to-many-first-or-new"></a></p>
+<h4 id="belongs-to-many-的-firstornew、firstorcreate-和-updateorcreate-方法">Belongs To Many 的 <code>firstOrNew</code>、<code>firstOrCreate</code> 和 <code>updateOrCreate</code> 方法</h4>
+<p><strong>影响程度：中</strong></p>
+<p><code>belongsToMany</code> 关系的 <code>firstOrNew</code>、<code>firstOrCreate</code> 和 <code>updateOrCreate</code> 方法都接受一个属性数组作为其第一个参数。在 Laravel 的先前版本中，这个属性数组相当于现有记录的 <code>pivot</code> 中间表。</p>
+<p>但是，这种行为是意料之外的，通常是不受欢迎的。相反，这些方法现在将属性数组与相关模型的表进行比较：</p>
+<pre><code class="language-php"><span class="variable token">$user</span>-&gt;roles()-&gt;updateOrCreate([
+    <span class="string token">'name'</span> =&gt; <span class="string token">'Administrator'</span>,
+]);
+</code></pre>
+<p>此外，该 <code>firstOrCreate</code> 方法现在接受一个 <code>$values</code> 数组作为其第二个参数。 当创建相关模型时，如果该模型不存在，则该数组将与该方法的第一个参数 (<code>$attributes</code>) 合并。此更改使此方法与其他关系类型提供的 <code>firstOrCreate</code> 方法一致：</p>
+<pre><code class="language-php"><span class="variable token">$user</span>-&gt;roles()-&gt;firstOrCreate([
+    <span class="string token">'name'</span> =&gt; <span class="string token">'Administrator'</span>,
+], [
+    <span class="string token">'created_by'</span> =&gt; <span class="variable token">$user</span>-&gt;id,
+]);
+</code></pre>
+<h4 id="touch-方法"><code>touch</code> 方法</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>该 <code>touch</code> 方法现在接受要触摸的属性。如果你之前覆盖了这个方法，你应该更新你的方法签名来反映这个新参数：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> touch(<span class="variable token">$attribute</span> = <span class="keyword token">null</span>);
+</code></pre>
+<h3 id="encryption">Encryption</h3>
+<h4 id="encrypter-契约">Encrypter 契约</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>该 <code>Illuminate\Contracts\Encryption\Encrypter</code> 合约现在定义了一个方法 <code>getKey</code>。如果您手动实现此接口，则应相应地更新您的实现：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> getKey();
+</code></pre>
+<h3 id="facades">Facades</h3>
+<h4 id="getfacadeaccessor-方法"><code>getFacadeAccessor</code> 方法</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>该 <code>getFacadeAccessor</code> 方法必须始终返回容器绑定键。在之前的 Laravel 版本中，这个方法可以返回一个对象实例；但是，不再支持此行为。如果您已经编写了自己的外观，则应确保此方法返回容器绑定字符串：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * Get the registered name of the component.
+ *
+ *<span class="phpdoc token"> @return</span> string
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">static</span> <span class="keyword token">function</span> getFacadeAccessor()
+{
+    <span class="keyword token">return</span> Example::<span class="keyword token">class</span>;
+}
+</code></pre>
+<h3 id="filesystem">Filesystem</h3>
+<h4 id="filesystem_driver-环境变量"><code>FILESYSTEM_DRIVER</code> 环境变量</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p><code>FILESYSTEM_DRIVER</code> 环境变量已重命名为 <code>FILESYSTEM_DISK</code> 以更准确地反映其用法。此更改仅影响应用程序框架； 但是，如果您愿意，欢迎您更新自己的应用程序的环境变量以反映此更改。</p>
+<h4 id="cloud-磁盘">&quot;Cloud&quot; 磁盘</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p><code>cloud</code> 磁盘配置选项已于 2020 年 11 月从默认应用程序骨架中删除。此更改仅影响应用程序骨架。如果您在应用程序中使用“云”磁盘，则应将此配置值保留在您自己的应用程序的框架中。</p>
+<p><a name="flysystem-3"></a></p>
+<h3 id="flysystem-3x">Flysystem 3.x</h3>
+<p><strong>影响的可能性：高</strong></p>
+<p>Laravel 9.x 已从 <a href="https://flysystem.thephpleague.com/v2/docs/">Flysystem</a> 1.x 迁移到 3.x。 在底层，Flysystem 支持 <code>Storage</code> 门面提供的所有文件操作方法。 鉴于此，您的应用程序中可能需要进行一些更改； 但是，我们已尝试使这种过渡尽可能无缝。</p>
+<h4 id="驱动器前置条件">驱动器前置条件</h4>
+<p>在使用 S3、FTP 或 SFTP 驱动程序之前，您需要通过 Composer 包管理器安装相应的包：</p>
+<ul>
+<li>Amazon S3: <code>composer require -W league/flysystem-aws-s3-v3 &quot;^3.0&quot;</code></li>
+<li>FTP: <code>composer require league/flysystem-ftp &quot;^3.0&quot;</code></li>
+<li>SFTP: <code>composer require league/flysystem-sftp-v3 &quot;^3.0&quot;</code></li>
+</ul>
+<h4 id="覆盖现有文件">覆盖现有文件</h4>
+<p><code>put</code>、<code>write</code>、<code>writeStream</code> 等写操作现在默认覆盖现有文件。 如果您不想覆盖现有文件，则应在执行写入操作之前手动检查文件是否存在。</p>
+<h4 id="读取不存在的文件">读取不存在的文件</h4>
+<p>在之前的 Laravel 版本中，尝试读取不存在的文件会抛出 <code>Illuminate\Contracts\Filesystem\FileNotFoundException</code>,Laravel9 则会返回<code>null</code>。</p>
+<h4 id="删除不存在的文件">删除不存在的文件</h4>
+<p>尝试 <code>删除</code> 一个不存在的文件现在返回 <code>true</code>。</p>
+<h4 id="缓存适配器">缓存适配器</h4>
+<p>Flysystem 不再支持“缓存适配器”。 因此，它们已从 Laravel 中删除，并且任何相关配置（例如磁盘配置中的 <code>cache</code> 键）都可以删除。</p>
+<h4 id="自定义文件系统">自定义文件系统</h4>
+<p>对注册自定义文件系统驱动程序所需的步骤进行了轻微更改。 因此，如果您正在定义自己的自定义文件系统驱动程序，或者使用定义自定义驱动程序的包，您应该更新您的代码和依赖项。</p>
+<p>例如，在 Laravel 8.x 中，自定义文件系统驱动程序可能会像这样注册：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
+<span class="keyword token">use</span> League\Flysystem\Filesystem;
+<span class="keyword token">use</span> Spatie\Dropbox\Client <span class="keyword token">as</span> DropboxClient;
+<span class="keyword token">use</span> Spatie\FlysystemDropbox\DropboxAdapter;
+
+Storage::extend(<span class="string token">'dropbox'</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>, <span class="variable token">$config</span>) {
+    <span class="variable token">$client</span> = <span class="keyword token">new</span> DropboxClient(
+        <span class="variable token">$config</span>[<span class="string token">'authorization_token'</span>]
+    );
+
+    <span class="keyword token">return</span> <span class="keyword token">new</span> Filesystem(<span class="keyword token">new</span> DropboxAdapter(<span class="variable token">$client</span>));
+});
+</code></pre>
+<p>但是，在 Laravel 9.x 中，给 <code>Storage::extend</code> 方法的回调应该直接返回 <code>Illuminate\Filesystem\FilesystemAdapter</code> 的实例：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Filesystem\FilesystemAdapter;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
+<span class="keyword token">use</span> League\Flysystem\Filesystem;
+<span class="keyword token">use</span> Spatie\Dropbox\Client <span class="keyword token">as</span> DropboxClient;
+<span class="keyword token">use</span> Spatie\FlysystemDropbox\DropboxAdapter;
+
+Storage::extend(<span class="string token">'dropbox'</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>, <span class="variable token">$config</span>) {
+    <span class="variable token">$adapter</span> = <span class="keyword token">new</span> DropboxAdapter(<span class="keyword token">new</span> DropboxClient(
+        <span class="variable token">$config</span>[<span class="string token">'authorization_token'</span>]
+    ););
+
+    <span class="keyword token">return</span> <span class="keyword token">new</span> FilesystemAdapter(
+        <span class="keyword token">new</span> Filesystem(<span class="variable token">$adapter</span>, <span class="variable token">$config</span>),
+        <span class="variable token">$adapter</span>,
+        <span class="variable token">$config</span>
+    );
+});
+</code></pre>
+<h3 id="helpers">Helpers</h3>
+<p><a name="data-get-function"></a></p>
+<h4 id="the-data_get-helper--iterable-objects">The <code>data_get</code> Helper &amp; Iterable Objects</h4>
+<p><strong><code>data_get</code> 助手和可迭代对象</strong></p>
+<p>以前，<code>data_get</code> 帮助器可用于检索数组和 <code>Collection</code> 实例上的嵌套数据；然而，这个助手现在可以检索所有可迭代对象的嵌套数据。</p>
+<p><a name="str-function"></a></p>
+<h4 id="str-助手函数"><code>str</code> 助手函数</h4>
+<p><strong>影响的可能性：非常低</strong></p>
+<p>Laravel 9.x 现在包含一个全局 <code>str</code> <a href="helpers.html#method-str">辅助函数</a>。 如果你在你的应用程序中定义了一个全局的 <code>str</code> 助手，你应该重命名或删除它，这样它就不会与 Laravel 自己的 <code>str</code> 助手冲突。</p>
+<p><a name="when-and-unless-methods"></a></p>
+<h4 id="when--unless-方法"><code>when</code> / <code>unless</code> 方法</h4>
+<p><strong>影响的可能性：中等</strong></p>
+<p>你可能知道，<code>when</code> 和 <code>unless</code> 方法由整个框架中的各种类提供。 如果方法的第一个参数的布尔值评估为 <code>true</code> 或 <code>false</code>，则这些方法可用于有条件地执行操作：</p>
+<pre><code class="language-php"><span class="variable token">$collection</span>-&gt;when(<span class="keyword token">true</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="variable token">$collection</span>-&gt;merge([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+});
+</code></pre>
+<p>因此，在 Laravel 的早期版本中，将闭包传递给 <code>when</code> 或 <code>unless</code> 方法意味着条件操作将始终执行，因为与闭包对象（或任何其他对象）的松散比较总是评估为 <code>true</code> . 这通常会导致意想不到的结果，因为开发人员希望将闭包的<strong>结果</strong>用作确定条件操作是否执行的布尔值。</p>
+<p>因此，在 Laravel 9.x 中，任何传递给 <code>when</code> 或 <code>unless</code> 方法的闭包都将被执行，并且闭包返回的值将被视为 <code>when</code> 和 <code>unless</code> 方法使用的布尔值：</p>
+<pre><code class="language-php"><span class="variable token">$collection</span>-&gt;when(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="comment token">// This closure is executed...</span>
+    <span class="keyword token">return</span> <span class="keyword token">false</span>;
+}, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="comment token">// Not executed since first closure returned "false"...</span>
+    <span class="variable token">$collection</span>-&gt;merge([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+});
+</code></pre>
+<h3 id="http-客户端">HTTP 客户端</h3>
+<p><a name="http-client-default-timeout"></a></p>
+<h4 id="默认超时时间">默认超时时间</h4>
+<p><strong>影响的可能性：中等</strong></p>
+<p><a href="http-client.html">HTTP 客户端</a> 现在默认超时为 30 秒。 也就是说，如果服务器在 30 秒内没有响应，就会抛出异常。以前，在 HTTP 客户端上没有配置默认超时长度，导致请求有时会无限期地“挂起”。</p>
+<p>如果您希望为给定请求指定更长的超时时间，您可以使用 <code>timeout</code> 方法：</p>
+<pre><code><span class="variable token">$response</span> = Http::timeout(<span class="number token">120</span>)-&gt;get(...);
+</code></pre>
+<h4 id="http-fake-和-中间件">HTTP Fake 和 中间件</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>以前，当 <a href="http-client.html">HTTP 客户端</a> 被&quot;faked&quot;时，Laravel 不会执行任何提供的 Guzzle HTTP 中间件。 然而，在 Laravel 9.x 中，即使 HTTP 客户端被伪造，Guzzle HTTP 中间件也会被执行。</p>
+<h4 id="http-fake-和-依赖注入">HTTP Fake 和 依赖注入</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>在之前的 Laravel 版本中，调用 <code>Http::fake()</code> 方法不会影响注入到类构造函数中的 <code>Illuminate\Http\Client\Factory</code> 实例。 然而，在 Laravel 9.x 中，<code>Http::fake()</code> 将确保通过依赖注入注入其他服务的 HTTP 客户端返回虚假响应。 这种行为更符合其他 facade 和 fake 的行为。</p>
+<p><a name="symfony-mailer"></a></p>
+<h3 id="symfony-mailer">Symfony Mailer</h3>
+<p><strong>影响的可能性：高</strong></p>
+<p>Laravel 9.x 中最大的变化之一是从 SwiftMailer（截至 2021 年 12 月不再维护）到 Symfony Mailer 的过渡。 但是，我们已尝试使您的应用程序尽可能无缝地过渡。 话虽如此，请仔细查看下面的更改列表，以确保您的应用程序完全兼容。</p>
+<h4 id="驱动程序前置条件">驱动程序前置条件</h4>
+<p>要继续使用 Mailgun 传输，您的应用程序应该需要 <code>symfony/mailgun-mailer</code> 和 <code>symfony/http-client</code> Composer 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> symfony/mailgun-mailer symfony/http-client
+</code></pre>
+<p><code>wildbit/swiftmailer-postmark</code> Composer 包应该从你的应用程序中删除。相反，您的应用程序应该需要 <code>symfony/postmark-mailer</code> 和 <code>symfony/http-client</code> Composer 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> symfony/postmark-mailer symfony/http-client
+</code></pre>
+<h4 id="更新的返回类型">更新的返回类型</h4>
+<p>该 <code>send</code>，<code>html</code>，<code>text</code> 和 <code>plain</code> 方法不再返回接收邮件的收件人数量。相反，返回一个实例 <code>Illuminate\Mail\SentMessage</code> 。 此对象包含一个 <code>Symfony\Component\Mailer\SentMessage</code> 实例，可通过 <code>getSymfonySentMessage</code> 方法或通过在对象上动态调用方法来访问。</p>
+<h4 id="重命名为「swift」方法">重命名为「Swift」方法</h4>
+<p>各种与 SwiftMailer 相关的方法，其中一些没有被记录，已经被重命名为它们的 Symfony Mailer 对应方法。例如，该 <code>withSwiftMessage</code> 方法已重命名为 <code>withSymfonyMessage</code>:</p>
+<pre><code><span class="comment token">// Laravel 8.x...</span>
+<span class="variable token">$this</span>-&gt;withSwiftMessage(<span class="keyword token">function</span> (<span class="variable token">$message</span>) {
+    <span class="variable token">$message</span>-&gt;getHeaders()-&gt;addTextHeader(
+        <span class="string token">'Custom-Header'</span>, <span class="string token">'Header Value'</span>
+    );
+});
+
+<span class="comment token">// Laravel 9.x...</span>
+<span class="keyword token">use</span> Symfony\Component\Mime\Email;
+
+<span class="variable token">$this</span>-&gt;withSymfonyMessage(<span class="keyword token">function</span> (Email <span class="variable token">$message</span>) {
+    <span class="variable token">$message</span>-&gt;getHeaders()-&gt;addTextHeader(
+        <span class="string token">'Custom-Header'</span>, <span class="string token">'Header Value'</span>
+    );
+});
+</code></pre>
+<blockquote>
+<p>注意：请参阅查看 <a href="https://symfony.com/doc/6.0/mailer.html#creating-sending-messages">Symfony Mailer 文档</a> 以了解与 <code>Symfony\Component\Mime\Email</code> 对象的所有可能交互。</p>
+</blockquote>
+<p>下面的列表包含重命名方法的更全面的概述。其中许多方法是用于直接与  <code>SwiftMailer/Symfony Mailer</code> 交互的低级方法，因此在大多数 Laravel 应用程序中可能不常用：</p>
+<pre><code>Message::getSwiftMessage();
+Message::getSymfonyMessage();
+
+Mailable::withSwiftMessage(<span class="variable token">$callback</span>);
+Mailable::withSymfonyMessage(<span class="variable token">$callback</span>);
+
+MailMessage::withSwiftMessage(<span class="variable token">$callback</span>);
+MailMessage::withSymfonyMessage(<span class="variable token">$callback</span>);
+
+Mailer::getSwiftMailer();
+Mailer::getSymfonyTransport();
+
+Mailer::setSwiftMailer(<span class="variable token">$swift</span>);
+Mailer::setSymfonyTransport(TransportInterface <span class="variable token">$transport</span>);
+
+MailManager::createTransport(<span class="variable token">$config</span>);
+MailManager::createSymfonyTransport(<span class="variable token">$config</span>);
+</code></pre>
+<h4 id="代理-illuminatemailmessage-方法">代理 <code>Illuminate\Mail\Message</code> 方法</h4>
+<p>该 <code>Illuminate\Mail\Message</code> 通常将缺少的方法代理给底层的 <code>Swift_Message</code> 实例。 但是，缺少的方法现在被代理为 <code>Symfony\Component\Mime\Email</code> 的实例。 因此，以前依赖缺失方法代理给 Swift Mailer 的任何代码都应该更新为对应的 Symfony Mailer 对应代码。</p>
+<p>同样，许多应用程序可能不会与这些方法交互，因为它们没有记录在 Laravel 文档中：</p>
+<pre><code><span class="comment token">// Laravel 8.x...</span>
+<span class="variable token">$message</span>
+    -&gt;setFrom(<span class="string token">'taylor@laravel.com'</span>)
+    -&gt;setTo(<span class="string token">'example@example.org'</span>)
+    -&gt;setSubject(<span class="string token">'Order Shipped'</span>)
+    -&gt;setBody(<span class="string token">'&lt;h1&gt;HTML&lt;/h1&gt;'</span>, <span class="string token">'text/html'</span>)
+    -&gt;addPart(<span class="string token">'Plain Text'</span>, <span class="string token">'text/plain'</span>);
+
+<span class="comment token">// Laravel 9.x...</span>
+<span class="variable token">$message</span>
+    -&gt;from(<span class="string token">'taylor@laravel.com'</span>)
+    -&gt;to(<span class="string token">'example@example.org'</span>)
+    -&gt;subject(<span class="string token">'Order Shipped'</span>)
+    -&gt;html(<span class="string token">'&lt;h1&gt;HTML&lt;/h1&gt;'</span>)
+    -&gt;text(<span class="string token">'Plain Text'</span>);
+</code></pre>
+<h4 id="生成的消息-id">生成的消息 ID</h4>
+<p>SwiftMailer 提供了定义自定义域以通过 <code>mime.idgenerator.idright</code> 配置选项包含在生成的消息 ID 中的能力。Symfony Mailer 不支持此功能。相反，Symfony Mailer 会根据发件人自动生成一个 Message ID。</p>
+<h4 id="强制重新连接">强制重新连接</h4>
+<p>不再可能强制传输重新连接（例如，当邮件程序通过守护进程运行时）。相反，Symfony Mailer 将尝试自动重新连接到传输并在重新连接失败时抛出异常。</p>
+<h4 id="smtp-流选项">SMTP 流选项</h4>
+<p>不再支持为 SMTP 传输定义流选项。相反，如果支持，您必须直接在配置中定义相关选项。例如，要禁用 TLS 对等验证：</p>
+<pre><code><span class="string token">'smtp'</span> =&gt; [
+    <span class="comment token">// Laravel 8.x...</span>
+    <span class="string token">'stream'</span> =&gt; [
+        <span class="string token">'ssl'</span> =&gt; [
+            <span class="string token">'verify_peer'</span> =&gt; <span class="keyword token">false</span>,
+        ],
+    ],
+
+    <span class="comment token">// Laravel 9.x...</span>
+    <span class="string token">'verify_peer'</span> =&gt; <span class="keyword token">false</span>,
+],
+</code></pre>
+<p>要了解有关可用配置选项的更多信息，请查看 <a href="https://symfony.com/doc/6.0/mailer.html#transport-setup">Symfony Mailer 文档</a>。</p>
+<blockquote>
+<p>注意：尽管有上述示例，但通常不建议您禁用 SSL 验证，因为它引入了「中间人」攻击的可能性。</p>
+</blockquote>
+<h4 id="smtp-授权模式">SMTP <code>授权模式</code></h4>
+<p>不再需要在 <code>mail</code> 配置文件中定义 SMTP <code>auth_mode</code>。 Symfony Mailer 和 SMTP 服务器将自动协商身份验证模式。</p>
+<h4 id="失败的收件人">失败的收件人</h4>
+<p>发送消息后不再检索失败的收件人列表。 相反，如果消息发送失败，则会抛出 <code>Symfony\Component\Mailer\Exception\TransportExceptionInterface</code> 异常。建议在发送消息之前验证电子邮件地址，而不是依赖于在发送消息后检索无效的电子邮件地址。</p>
+<h3 id="扩展包">扩展包</h3>
+<p><a name="the-lang-directory"></a></p>
+<h4 id="lang-目录"><code>lang</code> 目录</h4>
+<p><strong>影响的可能性：中等</strong></p>
+<p>在新的 Laravel 应用程序中，<code>resources/lang</code> 目录现在位于项目根目录（<code>lang</code>）中。如果你的包发布语言文件到这个目录，应该确保你的包发布到 <code>app()-&gt;langPath()</code> 而不是硬编码的路径。</p>
+<p><a name="queue"></a></p>
+<h3 id="队列">队列</h3>
+<p><a name="the-opis-closure-library"></a></p>
+<h4 id="opisclosure-库"><code>opis/closure</code> 库</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>Laravel 对 <code>opis/closure</code> 的依赖已被 <code>laravel/serializable-closure</code> 取代。除非你直接与 <code>opis/closure</code> 库进行交互，否则这不会导致应用程序发生任何重大更改。此外，之前不推荐使用的 <code>Illuminate\Queue\SerializableClosureFactory</code> 和 <code>Illuminate\Queue\SerializableClosure</code> 类已被删除。如果你直接与 <code>opis/closure</code> 库交互或使用任何已删除的类，请改用 <a href="https://github.com/laravel/serializable-closure">Laravel Serializable Closure</a>。</p>
+<h4 id="失败的-job-provider-flush-方法">失败的 Job Provider <code>flush</code> 方法</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p><code>Illuminate\Queue\Failed\FailedJobProviderInterface</code> 接口定义的 <code>flush</code> 方法现在接受一个 <code>$hours</code> 参数，该参数决定失败的任务在被 <code>queue:flush</code> 刷新之前必须存在多长时间（以小时为单位） 命令。如果你手动实现 <code>FailedJobProviderInterface</code>，请更新它以反映此新参数：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> flush(<span class="variable token">$hours</span> = <span class="keyword token">null</span>);
+</code></pre>
+<h3 id="session">Session</h3>
+<h4 id="getsession-方法"><code>getSession</code> 方法</h4>
+<p><strong>影响程度: 低</strong></p>
+<p><code>Symfony\Component\HttpFoundaton\RequestLaravel</code> 类继承于 Laravel 的 <code>Illuminate\Http\Request</code> 类，它提供了 <code>getSession</code> 方法来获取当前的会话存储处理器。Laravel 没有记录此方法，因为大多数 Laravel 应用程序通过 Laravel 的 <code>session</code> 方法与 session 交互。</p>
+<p><code>getSession</code> 方法先前返回了 <code>Illuminate\Session\Store</code> 的实例或者 <code>null</code>；但是，由于 Symfony 6.x 版本强制返回类型为 <code>Symfony\Component\HttpFoundation\Session\SessionInterface</code>, 所以现在 <code>getSession</code> 会返回 <code>SessionInterface</code> 的实现，或者在没有可用的 session 时抛出一个 <code>\Symfony\Component\HttpFoundation\Exception\SessionNotFoundException</code> 的异常。</p>
+<h3 id="测试">测试</h3>
+<p><a name="the-assert-deleted-method"></a></p>
+<h4 id="assertdeleted-方法"><code>assertDeleted</code> 方法</h4>
+<p><strong>影响程度: 中</strong></p>
+<p>所有调用 <code>assertDeleted</code> 的方法应该修改为 <code>assertModelMissing</code> 。</p>
+<h3 id="trustproxies-中间件">TrustProxies 中间件</h3>
+<p><strong>影响程度: 低</strong></p>
+<p>如果您是通过升级 Laravel 8 至 Laravel 9 的方式来导入全新的 Laravel 9 框架，您可能需要更新应用程序的 <code>trusted proxy</code> 中间件。</p>
+<p>在您的 <code>app/Http/Middleware/TrustProxies.php</code> 文件中，修改 <code>use Fideloper\Proxy\TrustProxies as Middleware</code> 为 <code>use Illuminate\Http\Middleware\TrustProxies as Middleware</code>。</p>
+<p>继续在<code>app/Http/Middleware/TrustProxies.php</code>文件 修改注释中的:
+    @var array|string|null
+改为
+    @var array&lt;int, string&gt;|string|null</p>
+<p>接下来, 在 <code>app/Http/Middleware/TrustProxies.php</code>， 您需要更改 <code>$headers</code> 属性的定义:</p>
+<pre><code class="language-php"><span class="comment token">// Before...</span>
+<span class="keyword token">protected</span> <span class="variable token">$headers</span> = Request::HEADER_X_FORWARDED_ALL;
+
+<span class="comment token">// After...</span>
+<span class="keyword token">protected</span> <span class="variable token">$headers</span> =
+    Request::HEADER_X_FORWARDED_FOR |
+    Request::HEADER_X_FORWARDED_HOST |
+    Request::HEADER_X_FORWARDED_PORT |
+    Request::HEADER_X_FORWARDED_PROTO |
+    Request::HEADER_X_FORWARDED_AWS_ELB;
+</code></pre>
+<p>最后，您可以删除 <code>fideloper/proxy</code> 的 Composer 依赖项：</p>
+<pre><code class="language-shell">composer remove fideloper/proxy
+</code></pre>
+<h3 id="验证">验证</h3>
+<h4 id="表单请求-validated-方法">表单请求 <code>validated</code> 方法</h4>
+<p><strong>影响的可能性：低</strong></p>
+<p>表单请求提供的 <code>validated</code> 方法现在接受 <code>$key</code> 和 <code>$default</code> 参数。如果您手动覆盖此方法的定义，则应更新方法的签名以反映这些新参数：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> validated(<span class="variable token">$key</span> = <span class="keyword token">null</span>, <span class="variable token">$default</span> = <span class="keyword token">null</span>)
+</code></pre>
+<p><a name="the-password-rule"></a></p>
+<h4 id="password-规则"><code>password</code> 规则</h4>
+<p><strong>影响的可能性：中等</strong></p>
+<p>验证给定输入值是否与经过身份验证的用户的当前密码匹配的 <code>password</code> 规则已重命名为 <code>current_password</code>。</p>
+<p><a name="unvalidated-array-keys"></a></p>
+<h4 id="未验证的数组键">未验证的数组键</h4>
+<p><strong>影响的可能性：中等</strong></p>
+<p>在以前的 Laravel 版本中，您需要手动指示 Laravel 的验证器从它返回的“已验证”数据中排除未验证的数组键，尤其是结合未指定允许键列表的“数组”规则。</p>
+<p>然而，在 Laravel 9.x 中，即使没有通过 <code>array</code> 规则指定允许的键，未验证的数组键也总是从“已验证”数据中排除。 通常，这种行为是最预期的行为，之前的 <code>excludeUnvalidatedArrayKeys</code> 方法只是作为临时措施添加到 Laravel 8.x 中，以保持向后兼容性。</p>
+<p>尽管不建议这样做，但您可以通过在应用程序的服务提供者之一的 <code>boot</code> 方法中调用新的 <code>includeUnvalidatedArrayKeys</code> 方法来选择加入以前的 Laravel 8.x 行为：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+
+<span class="comment token">/**
+ * Register any application services.
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Validator::includeUnvalidatedArrayKeys();
+}
+</code></pre>
+<h4 id="middleware">Middleware</h4>
+<p>从 Laravel 8 升级到 Laravel 9 的过程中，可能会出现与 <code>TrustedProxy</code> 中间件相关的错误 <code>Undefined constant Illuminate\Http\Request::HEADER_X_FORWARDED_ALL</code> 从而导致升级中断，解决方法如下：</p>
+<p>修改文件 <code>app/Http/Middleware/TrustProxies.php</code>中：</p>
+<p>原文 <code>Use Fideloper\Proxy\TrustProxies as Middle;</code></p>
+<p>修改为 <code>Use Illuminate\Http\Middleware\TrustProxies as Middleware;</code></p>
+<p>修改 <code>$headers</code> 的赋值为：</p>
+<pre><code><span class="keyword token">protected</span> <span class="variable token">$headers</span> =
+    Request::HEADER_X_FORWARDED_FOR |
+    Request::HEADER_X_FORWARDED_HOST |
+    Request::HEADER_X_FORWARDED_PORT |
+    Request::HEADER_X_FORWARDED_PROTO |
+    Request::HEADER_X_FORWARDED_AWS_ELB;
+</code></pre>
+<p>最后，移除旧的依赖： <code>composer remove fideloper/proxy</code> 即可继续执行升级步骤。</p>
+<p><a name="miscellaneous"></a></p>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<p>我们还鼓励您查看 <code>laravel/laravel</code> <a href="https://github.com/laravel/laravel">GitHub 存储库</a> 中的更改 虽然其中许多更改不是必需的，但您可能希望使这些文件与您的应用程序保持同步。 本升级指南将涵盖其中一些更改，但其他更改（例如对配置文件或注释的更改）将不会涵盖。 您可以使用 <a href="https://github.com/laravel/laravel/compare/8.x...9.x">GitHub 比较工具</a> 轻松查看更改并选择哪些更新对您很重要。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

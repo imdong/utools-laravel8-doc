@@ -1,26 +1,26 @@
 {
-    "pluginName": "Laravel 8.x 中文文档",
+    "pluginName": "Laravel 9.x 中文文档",
     "description": "Laravel 中文文档，不定期定期同步自 learnku 社区，感谢社区热心用户与平台。",
     "author": "ImDong",
     "homepage": "https://www.qs5.org/?utools-laravel8-doc",
-    "version": "1.0.3",
+    "version": "1.0.1",
     "logo": "logo.jpg",
     "preload": "preload.js",
     "features": [
         {
-            "code": "laravel8-docs",
-            "explain": "Laravel 8.x 中文文档",
+            "code": "laravel9-docs",
+            "explain": "Laravel 9.x 中文文档",
             "cmds": [
-                "Laravel 8.x Documentation",
-                "Laravel 8.x 中文文档"
+                "Laravel 9.x Documentation",
+                "Laravel 9.x 中文文档"
             ]
         },
         {
-            "code": "laravel8-cheatsheet",
-            "explain": "Laravel 8.x 速查表",
+            "code": "laravel9-cheatsheet",
+            "explain": "Laravel 9.x 速查表",
             "cmds": [
-                "Laravel 8.x Cheat Sheet",
-                "Laravel 8.x 速查表"
+                "Laravel 9.x Cheat Sheet",
+                "Laravel 9.x 速查表"
             ]
         }
     ]

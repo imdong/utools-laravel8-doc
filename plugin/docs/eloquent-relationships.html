@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="eloquent-关联">Eloquent: 关联</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#defining-relationships">定义关联</a><ul>
+<li><a href="#one-to-one">一对一</a></li>
+<li><a href="#one-to-many">一对多</a></li>
+<li><a href="#one-to-many-inverse">一对多 (反向) / 属于</a></li>
+<li><a href="#has-one-of-many">一对多检索</a></li>
+<li><a href="#has-one-through">远程一对一</a></li>
+<li><a href="#has-many-through">远程一对多</a></li>
+</ul>
+</li>
+<li><a href="#many-to-many">多对多关联</a><ul>
+<li><a href="#retrieving-intermediate-table-columns">获取中间表字段</a></li>
+<li><a href="#filtering-queries-via-intermediate-table-columns">通过中间表字段过滤查询</a></li>
+<li><a href="#defining-custom-intermediate-table-models">自定义中间表模型</a></li>
+</ul>
+</li>
+<li><a href="#polymorphic-relationships">多态管理</a><ul>
+<li><a href="#one-to-one-polymorphic-relations">一对一</a></li>
+<li><a href="#one-to-many-polymorphic-relations">一对多</a></li>
+<li><a href="#one-of-many-polymorphic-relations">一对多检索</a></li>
+<li><a href="#many-to-many-polymorphic-relations">多对多</a></li>
+<li><a href="#custom-polymorphic-types">自定义多态模型</a></li>
+</ul>
+</li>
+<li><a href="#dynamic-relationships">动态关联</a></li>
+<li><a href="#querying-relations">查询关联</a><ul>
+<li><a href="#relationship-methods-vs-dynamic-properties">关联方法与动态属性</a></li>
+<li><a href="#querying-relationship-existence">基于存在的关联查询</a></li>
+<li><a href="#querying-relationship-absence">基于不存在的关联查询</a></li>
+<li><a href="#querying-morph-to-relationships">基于多态的关联查询</a></li>
+</ul>
+</li>
+<li><a href="#aggregating-related-models">统计关联模型</a><ul>
+<li><a href="#counting-related-models">关联模型计数</a></li>
+<li><a href="#other-aggregate-functions">其他统计函数</a></li>
+<li><a href="#counting-related-models-on-morph-to-relationships">多态关联数据计数</a></li>
+</ul>
+</li>
+<li><a href="#eager-loading">预加载</a><ul>
+<li><a href="#constraining-eager-loads">约束预加载</a></li>
+<li><a href="#lazy-eager-loading">延迟预加载</a></li>
+<li><a href="#preventing-lazy-loading">阻止延迟加载</a></li>
+</ul>
+</li>
+<li><a href="#inserting-and-updating-related-models">插入及更新关联模型</a><ul>
+<li><a href="#the-save-method"><code>save</code> 方法</a></li>
+<li><a href="#the-create-method"><code>create</code> 方法</a></li>
+<li><a href="#updating-belongs-to-relationships">属于关联</a></li>
+<li><a href="#updating-many-to-many-relationships">多对多关联</a></li>
+</ul>
+</li>
+<li><a href="#touching-parent-timestamps">更新父级时间戳</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>数据库表通常相互关联。例如，一篇博客文章可能有许多评论，或者一个订单对应一个下单用户。Eloquent 让这些关联的管理和使用变得简单，并支持多种常用的关联类型：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li><a href="#one-to-one">一对一</a></li>
+<li><a href="#one-to-many">一对多</a></li>
+<li><a href="#many-to-many">多对多</a></li>
+<li><a href="#has-one-through">远程一对一</a></li>
+<li><a href="#has-many-through">远程一对多</a></li>
+<li><a href="#one-to-one-polymorphic-relations">多态一对一</a></li>
+<li><a href="#one-to-many-polymorphic-relations">多态一对多</a></li>
+<li><a href="#many-to-many-polymorphic-relations">多态多对多</a></li>
+</ul>
+</div>
+
+
+
+<p><a name="defining-relationships"></a></p>
+<h2 id="定义关联">定义关联</h2>
+<p>Eloquent 关联在 Eloquent 模型类中以方法的形式呈现。如同 Eloquent 模型本身，关联也可以作为强大的 <a href="queries.html">查询语句构造器</a>，使用，提供了强大的链式调用和查询功能。例如，我们可以在 <code>posts</code> 关联的链式调用中附加一个约束条件：</p>
+<pre><code><span class="variable token">$user</span>-&gt;posts()-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)-&gt;get();
+</code></pre>
+<p>不过在深入使用关联之前，让我们先学习如何定义每种关联类型。</p>
+<p><a name="one-to-one"></a></p>
+<h3 id="一对一">一对一</h3>
+<p>一对一是最基本的数据库关系。 例如，一个 <code>User</code> 模型可能与一个 <code>Phone</code> 模型相关联。为了定义这个关联关系，我们要在 <code>User</code> 模型中写一个 <code>phone</code> 方法， 在 <code>phone</code> 方法中调用 <code>hasOne</code> 方法并返回其结果。<code>hasOne</code> 方法被定义在 <code>Illuminate\Database\Eloquent\Model</code> 这个模型基类中：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取与用户相关的电话记录
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> phone()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Phone::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p><code>hasOne</code> 方法的第一个参数是关联模型的类名。一旦定义了模型关联，我们就可以使用 Eloquent 的动态属性获得相关的记录。动态属性允许你访问该关联方法，就像访问模型中定义的属性一样：</p>
+<pre><code><span class="variable token">$phone</span> = User::find(<span class="number token">1</span>)-&gt;phone;
+</code></pre>
+<p>Eloquent 基于父模型（<code>User</code>）的名称来确定关联模型（<code>Phone</code>）的外键名称。在本例中，会自动假定 <code>Phone</code> 模型有一个 <code>user_id</code> 的外键。如果你想重写这个约定，可以传递第二个参数给 <code>hasOne</code> 方法：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Phone::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>);
+</code></pre>
+<p>另外，Eloquent 假设外键的值是与父模型的主键（Primary Key）相同的。换句话说，Eloquent 将会通过 <code>Phone</code> 记录的 <code>user_id</code> 列中查找与用户表的 <code>id</code> 列相匹配的值。如果你希望使用自定义的主键值，而不是使用 <code>id</code> 或者模型中的 <code>$primaryKey</code> 属性，你可以给 <code>hasOne</code> 方法传递第三个参数：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Phone::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'local_key'</span>);
+</code></pre>
+<p><a name="one-to-one-defining-the-inverse-of-the-relationship"></a></p>
+<h4 id="定义反向关联">定义反向关联</h4>
+<p>我们已经能从 <code>User</code> 模型访问到 <code>Phone</code> 模型了。接下来，让我们再在 <code>Phone</code> 模型上定义一个关联，它能让我们访问到拥有该电话的用户。我们可以使用 <code>belongsTo</code> 方法来定义反向关联， <code>belongsTo</code> 方法与 <code>hasOne</code> 方法相对应：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Phone <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取拥有此电话的用户
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> user()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>在调用 <code>user</code> 方法时，Eloquent 会尝试查找一个 <code>User</code> 模型，该 <code>User</code> 模型上的 <code>id</code> 字段会与 <code>Phone</code> 模型上的 <code>user_id</code> 字段相匹配。</p>
+<p>Eloquent 通过关联方法（<code>user</code>）的名称并使用 <code>_id</code> 作为后缀名来确定外键名称。因此，在本例中，Eloquent 会假设 <code>Phone</code> 模型有一个 <code>user_id</code> 字段。但是，如果 <code>Phone</code> 模型的外键不是 <code>user_id</code>，这时你可以给 <code>belongsTo</code> 方法的第二个参数传递一个自定义键名：</p>
+<pre><code><span class="comment token">/**
+ * 获取拥有此电话的用户
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> user()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>);
+}
+</code></pre>
+<p>如果父模型的主键未使用 <code>id</code> 作为字段名，或者您想要使用其他的字段来匹配相关联的模型，那么您可以向 <code>belongsTo</code> 方法传递第三个参数，这个参数是在父模型中自己定义的字段名称：</p>
+<pre><code><span class="comment token">/**
+ * 获取当前手机号的用户
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> user()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'owner_key'</span>);
+}
+</code></pre>
+<p><a name="one-to-many"></a></p>
+<h3 id="一对多">一对多</h3>
+<p>当要定义一个模型是其他 （一个或者多个）模型的父模型这种关系时，可以使用一对多关联。例如，一篇博客可以有很多条评论。和其他模型关联一样，一对多关联也是在 Eloquent 模型文件中用一个方法来定义的：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Post <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取这篇博客的所有评论
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> comments()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasMany(Comment::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>注意，Eloquent 将会自动为 <code>Comment</code> 模型选择一个合适的外键。通常，这个外键是通过使用父模型的「蛇形命名」方式，然后再加上 <code>_id</code>. 的方式来命名的。因此，在上面这个例子中，Eloquent 将会默认 <code>Comment</code> 模型的外键是 <code>post_id</code> 字段。</p>
+<p>如果关联方法被定义，那么我们就可以通过 <code>comments</code> 属性来访问相关的评论 <a href="eloquent-collections.html">集合</a>。注意，由于 Eloquent 提供了「动态属性」，所以我们就可以像访问模型属性一样来访问关联方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$comments</span> = Post::find(<span class="number token">1</span>)-&gt;comments;
+
+<span class="keyword token">foreach</span> (<span class="variable token">$comments</span> <span class="keyword token">as</span> <span class="variable token">$comment</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>由于所有的关系都可以看成是查询构造器，所以您也可以通过链式调用的方式，在 <code>comments</code> 方法中继续添加条件约束：</p>
+<pre><code><span class="variable token">$comment</span> = Post::find(<span class="number token">1</span>)-&gt;comments()
+                    -&gt;where(<span class="string token">'title'</span>, <span class="string token">'foo'</span>)
+                    -&gt;first();
+</code></pre>
+<p>像 <code>hasOne</code> 方法一样，<code>hasMany</code> 方法中也可以接受额外的参数，从而来覆盖外键和本地键：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasMany(Comment::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasMany(Comment::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'local_key'</span>);
+</code></pre>
+<p><a name="one-to-many-inverse"></a></p>
+<h3 id="一对多-反向--属于">一对多 (反向) / 属于</h3>
+<p>目前我们可以访问一篇文章的所有评论，下面我们可以定义一个关联关系，从而让我们可以通过一条评论来获取到它所属的文章。这个关联关系是 <code>hasMany</code> 的反向，可以在子模型中通过 <code>belongsTo</code> 方法来定义这种关联关系：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Comment <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取这条评论所属的文章。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> post()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Post::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>如果定义了这种关联关系，那么我们就可以通过 <code>Comment</code> 模型中的 <code>post</code> 「动态属性」来获取到这条评论所属的文章：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Comment;
+
+<span class="variable token">$comment</span> = Comment::find(<span class="number token">1</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$comment</span>-&gt;post-&gt;title;
+</code></pre>
+<p>在上面这个例子中，Eloquent 将会尝试寻找 <code>Post</code> 模型中的 <code>id</code> 字段与 <code>Comment</code> 模型中的 <code>post_id</code> 字段相匹配。</p>
+<p>Eloquent 通过检查关联方法的名称，从而在关联方法名称后面加上 <code>_</code> ，然后再加上父模型 （Post）的主键名称，以此来作为默认的外键名。因此，在上面这个例子中，Eloquent 将会默认 <code>Post</code> 模型在 <code>comments</code> 表中的外键是 <code>post_id</code>。</p>
+<p>但是，如果您的外键不遵循这种约定的话，那么您可以传递一个自定义的外键名来作为 <code>belongsTo</code> 方法的第二个参数：</p>
+<pre><code><span class="comment token">/**
+ * 获取这条评论所属的博客。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> post()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Post::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>);
+}
+</code></pre>
+<p>如果你的主表（Post 表）不使用 id 来作为它的主键的话，或者你想通过其他列来关联相关模型的话，那么可以传递一个参数来作为 belongsTo 方法的第三个参数，这个参数是主表（Post 表）中想要作为关联关系的字段的名称。</p>
+<pre><code><span class="comment token">/**
+ * 获取这条评论所属的博客。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> post()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Post::<span class="keyword token">class</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'owner_key'</span>);
+}
+</code></pre>
+<p><a name="default-models"></a></p>
+<h4 id="默认模型">默认模型</h4>
+<p>当 <code>belongsTo</code>，<code>hasOne</code>，<code>hasOneThrough</code> 和 <code>morphOne</code> 这些关联方法返回为 <code>null</code> 的时候，你可以定义一个默认的模型来返回。这种模式通常被称为 <code>空对象模式</code>，它可以帮你省略代码中的一些条件判断。在下面这个例子中，如果 Post 模型中没有用户，那么 user 关联关系将会返回一个空的 App\Models\User 模型：</p>
+<pre><code><span class="comment token">/**
+ * 获取这篇博客所属的用户。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> user()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>)-&gt;withDefault();
+}
+</code></pre>
+<p>如果想要这个默认模型中包含一些属性的话，可以向 <code>withDefault</code> 方法中传递一个数组或者一个闭包：</p>
+<pre><code><span class="comment token">/**
+ * 获取博客的作者。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> user()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>)-&gt;withDefault([
+        <span class="string token">'name'</span> =&gt; <span class="string token">'Guest Author'</span>,
+    ]);
+}
+
+<span class="comment token">/**
+ * 获取作者发布的博客。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> user()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(User::<span class="keyword token">class</span>)-&gt;withDefault(<span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$post</span>) {
+        <span class="variable token">$user</span>-&gt;name = <span class="string token">'Guest Author'</span>;
+    });
+}
+</code></pre>
+<p><a name="querying-belongs-to-relationships"></a></p>
+<h4 id="查询所属关系">查询所属关系</h4>
+<p>在查询「所属」的子关系时，可以构建 <code>where</code> 语句来检索相应的 Eloquent 模型：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$posts</span> = Post::where(<span class="string token">'user_id'</span>, <span class="variable token">$user</span>-&gt;id)-&gt;get();
+</code></pre>
+<p>但使用 <code>whereBelongsTo</code> 方法更方便，它会自动确定模型的正确关系和外键：</p>
+<pre><code><span class="variable token">$posts</span> = Post::whereBelongsTo(<span class="variable token">$user</span>)-&gt;get();
+</code></pre>
+<p>默认情况下，Laravel 将根据模型的类名确定与给定模型关联的关系； 你也可以通过将关系名称作为 <code>whereBelongsTo</code> 方法的第二个参数来手动指定关系名称：</p>
+<pre><code><span class="variable token">$posts</span> = Post::whereBelongsTo(<span class="variable token">$user</span>, <span class="string token">'author'</span>)-&gt;get();
+</code></pre>
+<p><a name="has-one-of-many"></a></p>
+<h3 id="一对多检索">一对多检索</h3>
+<p>有时一个模型可能有许多相关模型，如果想检索关系的「最新」或「最旧」相关模型。例如，一个 <code>User</code> 模型可能与许多 <code>Order</code> 模型相关，但您想定义一种方便的方式来与用户最近下的订单进行交互。 可以使用 <code>hasOne</code> 关系类型结合 <code>ofMany</code> 方法来完成此操作：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取用户最新的订单。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> latestOrder()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Order::<span class="keyword token">class</span>)-&gt;latestOfMany();
+}
+</code></pre>
+<p>同样，你也可以定义一个方法来检索模型关系最早的或第一个相关模型：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取用户最早的订单。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> oldestOrder()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Order::<span class="keyword token">class</span>)-&gt;oldestOfMany();
+}
+</code></pre>
+<p><code>latestOfMany</code> 和 <code>oldestOfMany</code> 默认根据模型的主键检索最新或最旧的相关记录，所以模型主键必须是 <strong>可排序</strong> 的。 但是，有时你可能希望使用不同的排序条件从更大的关系中检索单个模型。</p>
+<p>例如，使用 <code>ofMany</code> 方法，可以检索用户最昂贵的订单。<code>ofMany</code> 方法接受可排序列作为其第一个参数，以及在查询相关模型时应用哪个聚合函数（<code>min</code> 或 <code>max</code>）：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取用户最昂贵的订单。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> largestOrder()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Order::<span class="keyword token">class</span>)-&gt;ofMany(<span class="string token">'price'</span>, <span class="string token">'max'</span>);
+}
+</code></pre>
+<blockquote>
+<p>注意：因为 PostgreSQL 不支持对 UUID 列执行 <code>MAX</code> 函数，所以目前不可能将多选之一关系与 PostgreSQL UUID 列结合使用。</p>
+</blockquote>
+<p><a name="advanced-has-one-of-many-relationships"></a></p>
+<h4 id="进阶一对多检索">进阶一对多检索</h4>
+<p>例如，一个「产品」模型可能有许多关联的「价格」模型，即使在新定价发布后，这些模型也会保留在系统中。此外，产品的新定价数据可能能够通过「published_at」列提前发布，以便在未来日期生效。</p>
+<p>因此我们需要检索最新发布的定价，并且发布日期不能超过当前时间。 如果两个价格的发布日期相同，我们优先选择 ID 更大的价格。 为此，我们必须将一个数组传递给 <code>ofMany</code> 方法，其中包含确定最新价格的可排序列。为<code>ofMany</code> 方法的第二个参数传递一个闭包。 此闭包将负责为关系查询添加额外的发布日期约束：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取产品的当前定价。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> currentPricing()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(Price::<span class="keyword token">class</span>)-&gt;ofMany([
+        <span class="string token">'published_at'</span> =&gt; <span class="string token">'max'</span>,
+        <span class="string token">'id'</span> =&gt; <span class="string token">'max'</span>,
+    ], <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+        <span class="variable token">$query</span>-&gt;where(<span class="string token">'published_at'</span>, <span class="string token">'&lt;'</span>, now());
+    });
+}
+</code></pre>
+<p><a name="has-one-through"></a></p>
+<h3 id="远程一对一">远程一对一</h3>
+<p>「has-one-through」关联定义了一个模型和另外一个模型之间一对一的关系。同时，这种关联关系是需要第三个模型作为中间模型来实现的。</p>
+<p>例如，在一个汽车维修的应用程序中，每一个 <code>Mechanic</code> 模型都与一个 <code>Car</code> 模型相关联，同时，每一个 <code>Car</code> 模型也和一个 <code>Owner</code> 模型相关联。虽然 <code>mechani</code> 和 <code>owner</code> 在数据库中并没有直接的关系，但是 <code>mechani</code> 可以通过 <code>Car</code> 模型来访问 <code>owner</code>。下面是定义这种关联关系所需要的数据表：</p>
+<pre><code>mechanics
+    id - integer
+    name - string
+
+cars
+    id - integer
+    model - string
+    mechanic_id - integer
+
+owners
+    id - integer
+    name - string
+    car_id - integer
+</code></pre>
+<p>既然我们已经了解了远程一对一的表结构，那么我们就可以在 <code>Mechanic</code> 模型中定义这种关系：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Mechanic <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取汽车的主人。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> carOwner()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOneThrough(Owner::<span class="keyword token">class</span>, Car::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>传递给「hasOneThrough」方法的第一个参数是我们希望访问的最终模型的名称，而第二个参数是中间模型的名称。</p>
+<p><a name="has-one-through-key-conventions"></a></p>
+<h4 id="键名约定">键名约定</h4>
+<p>当使用远程一对一进行关联查询时，Eloquent 将会使用约定的外键名。如果你想要自定义相关联的键名的话，可以传递两个参数来作为「hasOneThrough」 方法的第三个和第四个参数。第三个参数是中间表的外键名。第四个参数是最终想要访问的模型的外键名。第五个参数是当前模型的本地键名，第六个参数是中间模型的本地键名：</p>
+<pre><code><span class="keyword token">class</span> Mechanic <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * Get the car's owner.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> carOwner()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOneThrough(
+            Owner::<span class="keyword token">class</span>,
+            Car::<span class="keyword token">class</span>,
+            <span class="string token">'mechanic_id'</span>, <span class="comment token">// 机械师表的外键...</span>
+            <span class="string token">'car_id'</span>, <span class="comment token">// 车主表的外键...</span>
+            <span class="string token">'id'</span>, <span class="comment token">// 机械师表的本地键...</span>
+            <span class="string token">'id'</span> <span class="comment token">// 汽车表的本地键...</span>
+        );
+    }
+}
+</code></pre>
+<p><a name="has-many-through"></a></p>
+<h3 id="远程一对多">远程一对多</h3>
+<p>「has-many-through」关联是可以通过中间关系来实现远程一对多的。例如，我们正在构建一个像 <a href="https://vapor.laravel.com">Laravel Vapor</a> 这样的部署平台。一个 <code>Project</code> 模型可以通过一个中间的 <code>Environment</code> 模型来访问许多个 <code>Deployment</code> 模型。就像上面的这个例子，您可以在给定的 environment 中很方便的获取所有的 deployments。下面是定义这种关联关系所需要的数据表：</p>
+<pre><code>projects
+    id - integer
+    name - string
+
+environments
+    id - integer
+    project_id - integer
+    name - string
+
+deployments
+    id - integer
+    environment_id - integer
+    commit_hash - string
+</code></pre>
+<p>既然我们已经了解了远程一对多关联的表结构，那么就可以在 <code>Project</code> 模型中来定义这种关联关系：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Project <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取项目的所有部署。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> deployments()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasManyThrough(Deployment::<span class="keyword token">class</span>, Environment::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p><code>hasManyThrough</code> 方法的第一个参数是我们最终想要访问的模型的名称，第二个参数是中间模型的名称。</p>
+<p>虽然 <code>Deployment</code>  模型中没有 <code>project_id</code> 字段，但是在 <code>hasManyThrough</code> 中可以通过 <code>$project-&gt;deployments</code>来访问一个 project 的 deployments。如果想要查询上面的模型，Eloquent 将会检查在中间模型（Environment）中是否存在 <code>project_id</code> 字段。在找到相关的  <code>Environment</code> 的 id 后，就可以查询 <code>Deployment</code> 模型的内容了。</p>
+<p><a name="has-many-through-key-conventions"></a></p>
+<h4 id="约定的键名">约定的键名</h4>
+<p>当使用远程一对多进行查询的时候，Eloquent 将会使用约定的外键名。如果您想要自定义相关联的键名的话，那么您可以传递两个参数来分别作为 <code>hasManyThrough</code> 方法的第三个和第四个参数。第三个参数是中间表的外键名。第四个参数是最终想要访问的模型的外键名。第五个参数是当前模型的本地键名，第六个参数是中间模型的本地键名：</p>
+<pre><code><span class="keyword token">class</span> Project <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">public</span> <span class="keyword token">function</span> deployments()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasManyThrough(
+            Deployment::<span class="keyword token">class</span>,
+            Environment::<span class="keyword token">class</span>,
+            <span class="string token">'project_id'</span>, <span class="comment token">// environments 表的外键名</span>
+            <span class="string token">'environment_id'</span>, <span class="comment token">// deployments 表的外键名</span>
+            <span class="string token">'id'</span>, <span class="comment token">// projects 表的本地键名</span>
+            <span class="string token">'id'</span> <span class="comment token">// environments 表的本地键名</span>
+        );
+    }
+}
+</code></pre>
+<p><a name="many-to-many"></a></p>
+<h2 id="多对多关联">多对多关联</h2>
+<p>多对多关联比 <code>hasOne</code> 和 <code>hasMany</code> 关联稍微复杂些。举个例子，一个用户可以拥有多个角色，同时这些角色也可以分配给其他用户。例如，一个用户可是「作者」和「编辑」；当然，这些角色也可以分配给其他用户。所以，一个用户可以拥有多个角色，一个角色可以分配给多个用户。</p>
+<p><a name="many-to-many-table-structure"></a></p>
+<h4 id="表结构">表结构</h4>
+<p>要定义这种关联，需要三个数据库表: <code>users</code>, <code>roles</code> 和 <code>role_user</code>。<code>role_user</code> 表的命名是由关联的两个模型按照字母顺序来的，并且包含了 <code>user_id</code> 和 <code>role_id</code> 字段。该表用作链接 <code>users</code> 和 <code>roles</code> 的中间表</p>
+<p>特别提醒，由于角色可以属于多个用户，因此我们不能简单地在 <code>roles</code> 表上放置 <code>user_id</code> 列。如果这样，这意味着角色只能属于一个用户。为了支持将角色分配给多个用户，需要使用 <code>role_user</code> 表。我们可以这样定义表结构： </p>
+<pre><code>users
+    id - integer
+    name - string
+
+roles
+    id - integer
+    name - string
+
+role_user
+    user_id - integer
+    role_id - integer
+</code></pre>
+<p><a name="many-to-many-model-structure"></a></p>
+<h4 id="模型结构">模型结构</h4>
+<p>多对多关联是通过调用 <code>belongsToMany</code> 方法结果的方法来定义的。 <code>belongsToMany</code> 方法由 <code>Illuminate\Database\Eloquent\Model</code> 基类提供，所有应用程序的 Eloquent 模型都使用该基类。 例如，让我们在 <code>User</code> 模型上定义一个 <code>roles</code> 方法。 传递给此方法的第一个参数是相关模型类的名称：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 用户所拥有的角色
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> roles()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>定义关系后，可以使用 <code>roles</code> 动态关系属性访问用户的角色：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$user</span>-&gt;roles <span class="keyword token">as</span> <span class="variable token">$role</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>由于所有的关系也可以作为查询构建器，你可以通过调用 <code>roles()</code> 方法查询来为关系添加约束：</p>
+<pre><code><span class="variable token">$roles</span> = User::find(<span class="number token">1</span>)-&gt;roles()-&gt;orderBy(<span class="string token">'name'</span>)-&gt;get();
+</code></pre>
+<p>为了确定关系的中间表的表名，Eloquent 会按字母顺序连接两个相关的模型名。 你也可以随意覆盖此约定。 通过将第二个参数传递给 <code>belongsToMany</code> 方法来做到这一点：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>, <span class="string token">'role_user'</span>);
+</code></pre>
+<p>除了自定义连接表的表名，你还可以通过传递额外的参数到 <code>belongsToMany</code> 方法来定义该表中字段的键名。第三个参数是定义此关联的模型在连接表里的外键名，第四个参数是另一个模型在连接表里的外键名:</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>, <span class="string token">'role_user'</span>, <span class="string token">'user_id'</span>, <span class="string token">'role_id'</span>);
+</code></pre>
+<p><a name="many-to-many-defining-the-inverse-of-the-relationship"></a></p>
+<h4 id="定义反向关联-1">定义反向关联</h4>
+<p>要定义多对多的反向关联，只需要在关联模型中调用 <code>belongsToMany</code> 方法。我们在 <code>Role</code> 模型中定义 <code>users</code> 方法:</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Role <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 拥有此角色的用户
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> users()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(User::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>如你所见，除了引用 <code>App\Models\User</code> 模型之外，该关系的定义与其对应的 <code>User</code> 模型完全相同。 由于我们复用了 <code>belongsToMany</code> 方法，所以在定义多对多关系的「反向」关系时，所有常用的表和键自定义选项都可用。</p>
+<p><a name="retrieving-intermediate-table-columns"></a></p>
+<h3 id="获取中间表字段">获取中间表字段</h3>
+<p>如上所述，处理多对多关系需要一个中间表。 Eloquent 提供了一些非常有用的方式来与它进行交互。 假设我们的 <code>User</code> 对象关联了多个 <code>Role</code> 对象。在获得这些关联对象后，可以使用模型的 <code>pivot</code> 属性访问中间表的属性：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$user</span>-&gt;roles <span class="keyword token">as</span> <span class="variable token">$role</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$role</span>-&gt;pivot-&gt;created_at;
+}
+</code></pre>
+<p>需要注意的是，我们获取的每个 <code>Role</code> 模型对象，都会被自动赋予 <code>pivot</code> 属性，它代表中间表的一个模型对象，并且可以像其他的 Eloquent 模型一样使用。</p>
+<p>默认情况下，<code>pivot</code> 对象只包含两个关联模型的主键，如果你的中间表里还有其他额外字段，你必须在定义关联时明确指出：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>)-&gt;withPivot(<span class="string token">'active'</span>, <span class="string token">'created_by'</span>);
+</code></pre>
+<p>如果你想让中间表自动维护 <code>created_at</code> 和 <code>updated_at</code> 时间戳，那么在定义关联时附加上 <code>withTimestamps</code> 方法即可：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>)-&gt;withTimestamps();
+</code></pre>
+<blockquote>
+<p>注意：使用 Eloquent 自动维护时间戳的中间表需要同时具有 created_at 和 updated_at 时间戳字段。</p>
+</blockquote>
+<p><a name="customizing-the-pivot-attribute-name"></a></p>
+<h4 id="自定义-pivot-属性名称">自定义 pivot 属性名称</h4>
+<p>如前所述，可以通过 <code>pivot</code> 属性在模型上访问中间表中的属性。 但是，你可以随意自定义此属性的名称，以更好地反映其在应用程序中的用途。</p>
+<p>例如，如果你的应用程序包含可能订阅播客的用户，则用户和播客之间可能存在多对多关系。 如果是这种情况，你可能希望将中间表属性重命名为 <code>subscription</code> 而不是 <code>pivot</code>。 这可以在定义关系时使用 <code>as</code> 方法来完成： </p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Podcast::<span class="keyword token">class</span>)
+                -&gt;<span class="keyword token">as</span>(<span class="string token">'subscription'</span>)
+                -&gt;withTimestamps();
+</code></pre>
+<p>一旦定义完成，你可以使用自定义名称访问中间表数据： </p>
+<pre><code><span class="variable token">$users</span> = User::with(<span class="string token">'podcasts'</span>)-&gt;get();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$users</span>-&gt;flatMap-&gt;podcasts <span class="keyword token">as</span> <span class="variable token">$podcast</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$podcast</span>-&gt;subscription-&gt;created_at;
+}
+</code></pre>
+<p><a name="filtering-queries-via-intermediate-table-columns"></a></p>
+<h3 id="通过中间表过滤查询">通过中间表过滤查询</h3>
+<p>你还可以在定义关系时使用 <code>wherePivot</code>、<code>wherePivotIn</code>、<code>wherePivotNotIn</code>、<code>wherePivotBetween</code>、<code>wherePivotNotBetween</code>、<code>wherePivotNull</code> 和 <code>wherePivotNotNull</code> 方法过滤 <code>belongsToMany</code> 关系查询返回的结果：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>)
+                -&gt;wherePivot(<span class="string token">'approved'</span>, <span class="number token">1</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>)
+                -&gt;wherePivotIn(<span class="string token">'priority'</span>, [<span class="number token">1</span>, <span class="number token">2</span>]);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Role::<span class="keyword token">class</span>)
+                -&gt;wherePivotNotIn(<span class="string token">'priority'</span>, [<span class="number token">1</span>, <span class="number token">2</span>]);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Podcast::<span class="keyword token">class</span>)
+                -&gt;<span class="keyword token">as</span>(<span class="string token">'subscriptions'</span>)
+                -&gt;wherePivotBetween(<span class="string token">'created_at'</span>, [<span class="string token">'2020-01-01 00:00:00'</span>, <span class="string token">'2020-12-31 00:00:00'</span>]);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Podcast::<span class="keyword token">class</span>)
+                -&gt;<span class="keyword token">as</span>(<span class="string token">'subscriptions'</span>)
+                -&gt;wherePivotNotBetween(<span class="string token">'created_at'</span>, [<span class="string token">'2020-01-01 00:00:00'</span>, <span class="string token">'2020-12-31 00:00:00'</span>]);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Podcast::<span class="keyword token">class</span>)
+                -&gt;<span class="keyword token">as</span>(<span class="string token">'subscriptions'</span>)
+                -&gt;wherePivotNull(<span class="string token">'expired_at'</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(Podcast::<span class="keyword token">class</span>)
+                -&gt;<span class="keyword token">as</span>(<span class="string token">'subscriptions'</span>)
+                -&gt;wherePivotNotNull(<span class="string token">'expired_at'</span>);
+</code></pre>
+<p><a name="defining-custom-intermediate-table-models"></a></p>
+<h3 id="自定义中间表模型">自定义中间表模型</h3>
+<p>如果你想定义一个自定义模型来表示多对多关系的中间表，你可以在定义关系时调用 <code>using</code> 方法。</p>
+<p>自定义多对多中间表模型都必须继承 <code>Illuminate\Database\Eloquent\Relations\Pivot</code> 类，自定义多对多（多态）中间表模型必须继承 <code>Illuminate\Database\Eloquent\Relations\MorphPivot</code> 类。例如，我们在写 <code>Role</code> 模型的关联时，使用自定义中间表模型 <code>RoleUser</code>：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Role <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 属于该角色的用户。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> users()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(User::<span class="keyword token">class</span>)-&gt;using(RoleUser::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>当定义 <code>RoleUser</code> 模型时，我们要继承 <code>Illuminate\Database\Eloquent\Relations\Pivot</code> 类：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\Pivot;
+
+<span class="keyword token">class</span> RoleUser <span class="keyword token">extends</span> Pivot
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<blockquote>
+<p>注意：Pivot 模型不可以使用 <code>SoftDeletes</code> trait。 如果需要软删除数据关联记录，请考虑将数据关联模型转换为实际的 Eloquent 模型。</p>
+</blockquote>
+<p><a name="custom-pivot-models-and-incrementing-ids"></a></p>
+<h4 id="自定义中继模型和递增-id">自定义中继模型和递增 ID</h4>
+<p>如果你用一个自定义的中继模型定义了多对多的关系，而且这个中继模型拥有一个自增的主键，你应当确保这个自定义中继模型类中定义了一个 <code>incrementing</code> 属性且其值为 <code>true</code>。</p>
+<pre><code><span class="comment token">/**
+ * 标识 ID 是否自增
+ *
+ *<span class="phpdoc token"> @var</span> bool
+ */</span>
+<span class="keyword token">public</span> <span class="variable token">$incrementing</span> = <span class="keyword token">true</span>;
+</code></pre>
+<p><a name="polymorphic-relationships"></a></p>
+<h2 id="多态关系">多态关系</h2>
+<p>多态关联允许目标模型借助单个关联从属于多个模型。例如，你正在构建一个允许用户共享博客文章和视频的应用程序，其中 <code>Comment</code> 模型可能同时从属于 <code>Post</code> 和 <code>Video</code> 模型。</p>
+<p><a name="one-to-one-polymorphic-relations"></a></p>
+<h3 id="一对一-多态">一对一 (多态)</h3>
+<p><a name="one-to-one-polymorphic-table-structure"></a></p>
+<h4 id="表结构-1">表结构</h4>
+<p>一对一多态关联与简单的一对一关联类似，不过，目标模型能够在一个关联上从属于多个模型。例如，博客 <code>Post</code> 和 <code>User</code> 可能共享一个关联到 <code>Image</code> 模型的关系。使用一对一多态关联允许使用一个唯一图片列表同时用于博客文章和用户账户。让我们先看看表结构：</p>
+<pre><code>posts
+    id - integer
+    name - string
+
+users
+    id - integer
+    name - string
+
+images
+    id - integer
+    url - string
+    imageable_id - integer
+    imageable_type - string
+</code></pre>
+<p>要特别留意 <code>images</code> 表的 <code>imageable_id</code> 和 <code>imageable_type</code> 列。 <code>imageable_id</code> 列包含文章或用户的 ID 值，而 <code>imageable_type</code> 列包含的则是父模型的类名。Eloquent 在访问 <code>imageable</code> 时使用 <code>imageable_type</code> 列来判断父模型的「类型」。</p>
+<p><a name="one-to-one-polymorphic-model-structure"></a></p>
+<h4 id="模型结构-1">模型结构</h4>
+<p>接下来，再看看建立关联的模型定义：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Image <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取拥有此图片的模型
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> imageable()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo();
+    }
+}
+
+<span class="keyword token">class</span> Post <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取文章图片
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> image()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphOne(Image::<span class="keyword token">class</span>, <span class="string token">'imageable'</span>);
+    }
+}
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取文章图片
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> image()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphOne(Image::<span class="keyword token">class</span>, <span class="string token">'imageable'</span>);
+    }
+}
+</code></pre>
+<p><a name="one-to-one-polymorphic-retrieving-the-relationship"></a></p>
+<h4 id="获取关联">获取关联</h4>
+<p>一旦定义了表和模型，就可以通过模型访问此关联。比如，要获取文章图片，可以使用 <code>image</code> 动态属性：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$image</span> = <span class="variable token">$post</span>-&gt;image;
+</code></pre>
+<p>还可以通过访问执行 <code>morphTo</code> 调用的方法名来从多态模型中获知父模型。在这个例子中，就是 <code>Image</code> 模型的 <code>imageable</code> 方法。所以，我们可以像动态属性那样访问这个方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Image;
+
+<span class="variable token">$image</span> = Image::find(<span class="number token">1</span>);
+
+<span class="variable token">$imageable</span> = <span class="variable token">$image</span>-&gt;imageable;
+</code></pre>
+<p><code>Image</code> 模型上的 <code>imageable</code> 关系将返回 <code>Post</code> 实例或 <code>User</code> 实例，具体取决于模型拥有图像的类型。</p>
+<p><a name="morph-one-to-one-key-conventions"></a></p>
+<h4 id="自定义列">自定义列</h4>
+<p>如有必要，你可以指定多态子模型使用的 <code>id</code> 和 <code>type</code> 列的名称。 如果这样做，请确保始终将关系名称作为第一个参数传递给 <code>morphTo</code> 方法。 通常，此值应与方法名称匹配，因此你可以使用 PHP 的 <code>__FUNCTION__</code> 常量：</p>
+<pre><code><span class="comment token">/**
+ * 获取 image 实例所属的模型
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> imageable()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo(__FUNCTION__, <span class="string token">'imageable_type'</span>, <span class="string token">'imageable_id'</span>);
+}
+</code></pre>
+<p><a name="one-to-many-polymorphic-relations"></a></p>
+<h3 id="一对多（多态）">一对多（多态）</h3>
+<p><a name="one-to-many-polymorphic-table-structure"></a></p>
+<h4 id="表结构-2">表结构</h4>
+<p>一对多多态关联与简单的一对多关联类似，不过，目标模型可以在一个关联中从属于多个模型。假设应用中的用户可以同时「评论」文章和视频。使用多态关联，可以用单个 <code>comments</code> 表同时满足这些情况。我们还是先来看看用来构建这种关联的表结构：</p>
+<pre><code>posts
+    id - integer
+    title - string
+    body - text
+
+videos
+    id - integer
+    title - string
+    url - string
+
+comments
+    id - integer
+    body - text
+    commentable_id - integer
+    commentable_type - string
+</code></pre>
+<p><a name="one-to-many-polymorphic-model-structure"></a></p>
+<h4 id="模型结构-2">模型结构</h4>
+<p>接下来，看看构建这种关联的模型定义： </p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Comment <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取拥有此评论的模型（Post 或 Video）
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> commentable()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo();
+    }
+}
+
+<span class="keyword token">class</span> Post <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取此文章的所有评论
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> comments()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphMany(Comment::<span class="keyword token">class</span>, <span class="string token">'commentable'</span>);
+    }
+}
+
+<span class="keyword token">class</span> Video <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取此视频的所有评论
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> comments()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphMany(Comment::<span class="keyword token">class</span>, <span class="string token">'commentable'</span>);
+    }
+}
+</code></pre>
+<p><a name="one-to-many-polymorphic-retrieving-the-relationship"></a></p>
+<h4 id="获取关联-1">获取关联</h4>
+<p>一旦定义了数据库表和模型，就可以通过模型访问关联。例如，可以使用 <code>comments</code> 动态属性访问文章的全部评论：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$post</span>-&gt;comments <span class="keyword token">as</span> <span class="variable token">$comment</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>你还可以通过访问执行对 <code>morphTo</code> 的调用的方法名来从多态模型获取其所属模型。在我们的例子中，这就是 <code>Comment</code> 模型上的 <code>commentable</code> 方法。因此，我们将以动态属性的形式访问该方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Comment;
+
+<span class="variable token">$comment</span> = Comment::find(<span class="number token">1</span>);
+
+<span class="variable token">$commentable</span> = <span class="variable token">$comment</span>-&gt;commentable;
+</code></pre>
+<p><code>Comment</code> 模型的 <code>commentable</code> 关联将返回 <code>Post</code> 或 <code>Video</code> 实例，其结果取决于评论所属的模型。</p>
+<p><a name="one-of-many-polymorphic-relations"></a></p>
+<h3 id="一对多（多态）-1">一对多（多态）</h3>
+<p>有时一个模型可能有许多相关模型，要检索关系的「最新」或「最旧」相关模型。 例如，一个 <code>User</code> 模型可能与许多 <code>Image</code> 模型相关，如果你想定义一种方便的方式来与用户上传的最新图像进行交互。 可以使用 <code>morphOne</code> 关系类型结合 <code>ofMany</code> 方法来完成此操作：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取用户最近的图像。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> latestImage()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphOne(Image::<span class="keyword token">class</span>, <span class="string token">'imageable'</span>)-&gt;latestOfMany();
+}
+</code></pre>
+<p>同样，你也可以定义一个方法来检索关系的「最早」或第一个相关模型：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * 获取用户最早的图像。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> oldestImage()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphOne(Image::<span class="keyword token">class</span>, <span class="string token">'imageable'</span>)-&gt;oldestOfMany();
+}
+</code></pre>
+<p><code>latestOfMany</code> 和 <code>oldestOfMany</code> 默认根据模型的主键检索最新或最旧的相关记录，所以模型主键必须是 可排序 的。 如果要使用不同的排序条件从更大的关系中检索单个模型。</p>
+<p>例如，使用 <code>ofMany</code> 方法，可以检索用户点赞最高的图像。<code>ofMany</code> 方法接受可排序列作为其第一个参数，以及在查询相关模型时应用哪个聚合函数（<code>min</code> 或 <code>max</code>）：</p>
+<pre><code class="language-php"><span class="comment token">/**
+ * Get the user's most popular image.
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> bestImage()
+{
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphOne(Image::<span class="keyword token">class</span>, <span class="string token">'imageable'</span>)-&gt;ofMany(<span class="string token">'likes'</span>, <span class="string token">'max'</span>);
+}
+</code></pre>
+<blockquote>
+<p>技巧：要构建更高级的「一对多」关系。 请查看 <a href="#advanced-has-one-of-many-relationships">进阶一对多检索</a>.</p>
+</blockquote>
+<p><a name="many-to-many-polymorphic-relations"></a></p>
+<h3 id="多对多（多态）">多对多（多态）</h3>
+<p><a name="many-to-many-polymorphic-table-structure"></a></p>
+<h4 id="表结构-3">表结构</h4>
+<p>多对多多态关联比 <code>morphOne</code> 和 <code>morphMany</code> 关联略微复杂一些。例如，博客 <code>Post</code> 和 <code>Video</code> 模型能够共享关联到 <code>Tag</code> 模型的多态关系。使用多对多多态关联允许使用一个唯一标签在博客文章和视频间共享。以下是多对多多态关联的表结构：</p>
+<pre><code>posts
+    id - integer
+    name - string
+
+videos
+    id - integer
+    name - string
+
+tags
+    id - integer
+    name - string
+
+taggables
+    tag_id - integer
+    taggable_id - integer
+    taggable_type - string
+</code></pre>
+<blockquote>
+<p>技巧：在深入研究多态多对多关系之前，阅读 <a href="#many-to-many">多对多关系</a> 的文档会对你有帮助。</p>
+</blockquote>
+<p><a name="many-to-many-polymorphic-model-structure"></a></p>
+<h4 id="模型结构-3">模型结构</h4>
+<p>接下来，我们准备在模型上定义关联。Post 和 Video 模型都有调用 Eloquent 基类上 morphToMany 方法的 tags 方法。</p>
+<p><code>morphToMany</code> 方法接受相关模型的名称以及“关系名称”。根据我们分配给中间表名的名称及其包含的键，我们将该关系称为“taggable”</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Post <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取post下所有的标签.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> tags()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphToMany(Tag::<span class="keyword token">class</span>, <span class="string token">'taggable'</span>);
+    }
+}
+</code></pre>
+<p><a name="many-to-many-polymorphic-defining-the-inverse-of-the-relationship"></a></p>
+<h4 id="自定义多态类型">自定义多态类型</h4>
+<p>接下来, 在这个 <code>Tag</code> 模型中, 你应该为每个可能的父模型定义一个方法. 所以, 在这个例子中, 我们将会定义一个  <code>posts</code> 方法 和 一个 <code>videos</code> 方法. 这两个方法都应该返回 <code>morphedByMany</code>  结果</p>
+<p><code>morphedByMany</code> 方法接受相关模型的名称以及&quot;关系名称&quot;。根据我们分配给中间表名的名称及其包含的键，我们将该关系称为“taggable”：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Tag <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取分配给此标签的所有帖子。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> posts()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphedByMany(Post::<span class="keyword token">class</span>, <span class="string token">'taggable'</span>);
+    }
+
+    <span class="comment token">/**
+     * 获取分配给此视频的所有帖子.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> videos()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphedByMany(Video::<span class="keyword token">class</span>, <span class="string token">'taggable'</span>);
+    }
+}
+</code></pre>
+<p><a name="many-to-many-polymorphic-retrieving-the-relationship"></a></p>
+<h4 id="获取关联-2">获取关联</h4>
+<p>一旦定义了数据库表和模型，您就可以通过模型访问关系。 例如，要访问帖子的所有标签，您可以使用 <code>tags</code> 动态关系属性：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$post</span>-&gt;tags <span class="keyword token">as</span> <span class="variable token">$tag</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>还可以访问执行 <code>morphedByMany</code> 方法调用的方法名来从多态模型获取其所属模型。在这个示例中，就是 <code>Tag</code> 模型的 <code>posts</code> 或 <code>videos</code> 方法。可以像动态属性一样访问这些方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Tag;
+
+<span class="variable token">$tag</span> = Tag::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$tag</span>-&gt;posts <span class="keyword token">as</span> <span class="variable token">$post</span>) {
+    <span class="comment token">//</span>
+}
+
+<span class="keyword token">foreach</span> (<span class="variable token">$tag</span>-&gt;videos <span class="keyword token">as</span> <span class="variable token">$video</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="custom-polymorphic-types"></a></p>
+<h3 id="自定义多态类型-1">自定义多态类型</h3>
+<p>默认情况下， Laravel 使用完全限定类名存储关联模型类型。在上面的一对多示例中， 因为 <code>Comment</code> 可能从属于一个 <code>Post</code> 或一个 <code>Video</code>，默认的 <code>commentable_type</code> 就将分别是 <code>App\Post 或 App\Video</code>。不过，你可能希望数据库与应用的内部结构解耦。在这种情况下，可以定义一个「morph 映射」来通知 Eloquent 使用自定义名称代替对应的类名：</p>
+<p>例如，我们可以不使用模型名称作为「类型」，而是使用简单的字符串，例如 <code>post</code> 和 <code>video</code>。 通过这样做，即使模型被重命名，我们数据库中的多态「类型」列值也将保持有效：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\Relation;
+
+Relation::enforceMorphMap([
+    <span class="string token">'post'</span> =&gt; <span class="string token">'App\Models\Post'</span>,
+    <span class="string token">'video'</span> =&gt; <span class="string token">'App\Models\Video'</span>,
+]);
+</code></pre>
+<p>你可以在 <code>App\Providers\AppServiceProvider</code> 类的 <code>boot</code> 方法中调用 <code>enforceMorphMap</code> 方法，或者你也可以创建一个单独的服务提供者。</p>
+<p>你可以在运行时使用 <code>getMorphClass</code> 方法确定给定模型的别名。相反，可以使用 <code>Relation::getMorphedModel</code> 方法来确定与别名相关联的类名：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\Relation;
+
+<span class="variable token">$alias</span> = <span class="variable token">$post</span>-&gt;getMorphClass();
+
+<span class="variable token">$class</span> = Relation::getMorphedModel(<span class="variable token">$alias</span>);
+</code></pre>
+<blockquote>
+<p>注意：向现有应用程序添加「变形映射」时，数据库中仍包含完全限定类的每个可变形 <code>*_type</code> 列值都需要转换为其「映射」名称。</p>
+</blockquote>
+<p><a name="dynamic-relationships"></a></p>
+<h3 id="动态关联">动态关联</h3>
+<p>你可以使用 <code>resolveRelationUsing</code> 方法在运行时定义 Eloquent 模型之间的关系。虽然通常不建议在常规应用程序开发中使用它，但是在开发 Laravel 软件包时，这有时可能会很有用： </p>
+<p><code>resolveRelationUsing</code> 方法的第一个参数是关联名称。传递给该方法的第二个参数应该是一个闭包，闭包接受模型实例并返回一个有效的 Eloquent 关联定义。通常情况下，你应该在<a href="providers.html">服务提供器</a>的启动方法中配置动态关联。</p>
+<pre><code><span class="keyword token">use</span> App\Models\Order;
+<span class="keyword token">use</span> App\Models\Customer;
+
+Order::resolveRelationUsing(<span class="string token">'customer'</span>, <span class="keyword token">function</span> (<span class="variable token">$orderModel</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$orderModel</span>-&gt;belongsTo(Customer::<span class="keyword token">class</span>, <span class="string token">'customer_id'</span>);
+});
+</code></pre>
+<blockquote>
+<p>注意：定义动态关系时，始终为 Eloquent 关系方法提供显式的键名参数。</p>
+</blockquote>
+<p><a name="querying-relations"></a></p>
+<h2 id="查询关联">查询关联</h2>
+<p>因为所有的 Eloquent 关联都是通过方法定义的，你可以调用这些方法来获取关联的实例，而无需真实执行查询来获取相关的模型。此外，所有的 Eloquent 关联也可以用作<a href="queries.html">查询生成器</a>，允许你在最终对数据库执行 SQL 查询之前，继续通过链式调用添加约束条件。 </p>
+<p>例如，假设有一个博客系统，它的 <code>User</code> 模型有许多关联的 <code>Post</code> 模型：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取该用户的所有文章.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> posts()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasMany(Post::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>你可以查询 <code>posts</code> 关联，并给它添加额外的约束条件，如下例所示：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;posts()-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)-&gt;get();
+</code></pre>
+<p>你可以在关联上使用任意的 <a href="queries.html">查询构造器</a> 方法，所以一定要阅读查询构造器的文档，了解它的所有方法，这会对你非常有用。
+<br></p>
+<h4 id="在关联之后链式添加-orwhere-子句">在关联之后链式添加 <code>orWhere</code> 子句</h4>
+<br>
+
+<p>如上例所示，你可以在查询关联时，自由的给关联添加额外的约束条件。但是，在将 <code>orWhere</code> 子句链接到关联上时，一定要小心，因为 <code>orWhere</code> 子句将在逻辑上与关联约束处于同一级别：</p>
+<pre><code><span class="variable token">$user</span>-&gt;posts()
+        -&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)
+        -&gt;orWhere(<span class="string token">'votes'</span>, <span class="string token">'&gt;='</span>, <span class="number token">100</span>)
+        -&gt;get();
+</code></pre>
+<p>上面的例子将生成以下 SQL。像你看到的那样， 这个 <code>or</code> 子句的查询指令，将返回大于 100 票的任一用户，查询不再限于特定的用户：</p>
+<pre><code class="language-sql">select *
+from posts
+where user_id = ? <span class="keyword token">and</span> active = <span class="number token">1</span> <span class="keyword token">or</span> votes &gt;= <span class="number token">100</span>
+</code></pre>
+<p>在大多数情况下，你应该使用 <a href="queries.html#logical-grouping">逻辑组</a> 在括号中对条件检查进行分组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$user</span>-&gt;posts()
+        -&gt;where(<span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+            <span class="keyword token">return</span> <span class="variable token">$query</span>-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)
+                         -&gt;orWhere(<span class="string token">'votes'</span>, <span class="string token">'&gt;='</span>, <span class="number token">100</span>);
+        })
+        -&gt;get();
+</code></pre>
+<p>上面的示例将生成以下 SQL。 请注意，逻辑分组已正确分组约束，并且查询仍然受限于特定用户：</p>
+<pre><code class="language-sql">select *
+from posts
+where user_id = ? <span class="keyword token">and</span> (active = <span class="number token">1</span> <span class="keyword token">or</span> votes &gt;= <span class="number token">100</span>)
+</code></pre>
+<p><a name="relationship-methods-vs-dynamic-properties"></a></p>
+<h3 id="关联方法-vs-动态属性">关联方法 VS 动态属性</h3>
+<p>如果你不需要向 Eloquent 关联查询添加额外的约束，您可以像访问属性一样访问关联。 例如，继续使用我们的 <code>User</code> 和 <code>Post</code> 示例模型，我们可以像这样访问用户的所有帖子：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$user</span>-&gt;posts <span class="keyword token">as</span> <span class="variable token">$post</span>) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>动态属性是 「懒加载」 的，只有实际访问到才会加载关联数据。因此，通常用 <a href="#eager-loading">预加载</a> 来准备模型需要用到的关联数据。预加载能大量减少因加载模型关联执行的 SQL 语句。 </p>
+<p><a name="querying-relationship-existence"></a></p>
+<h3 id="查询已存在的关联">查询已存在的关联</h3>
+<p>检索模型记录时，你可能希望根据关系的存在限制结果。例如，假设要检索至少有一条评论的所有博客文章。 你可以将关系的名称传递给 <code>has</code> 和 <code>orHas</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="comment token">// 检索至少有一条评论的文章...</span>
+<span class="variable token">$posts</span> = Post::has(<span class="string token">'comments'</span>)-&gt;get();
+</code></pre>
+<p>也可以指定运算符和数量来进一步自定义查询：</p>
+<pre><code><span class="comment token">// 查出至少有三条评论的文章...</span>
+<span class="variable token">$posts</span> = Post::has(<span class="string token">'comments'</span>, <span class="string token">'&gt;='</span>, <span class="number token">3</span>)-&gt;get();
+</code></pre>
+<p>也可以用「点」语法构造嵌套的 <code>has</code> 语句。例如，查出至少有一条评论和图片的文章：</p>
+<pre><code><span class="comment token">// 查出至少有一条带图片的评论的文章...</span>
+<span class="variable token">$posts</span> = Post::has(<span class="string token">'comments.images'</span>)-&gt;get();
+</code></pre>
+<p>如果需要更多功能，可以使用 <code>whereHas</code> 和 <code>orWhereHas</code> 方法将「where」条件放到 <code>has</code> 查询上。这些方法允许你向关联加入自定义约束，比如检查评论内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="comment token">// 获取至少带有一条评论内容包含 code% 关键词的文章...</span>
+<span class="variable token">$posts</span> = Post::whereHas(<span class="string token">'comments'</span>, <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'content'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+})-&gt;get();
+
+<span class="comment token">// 获取至少带有十条评论内容包含 code% 关键词的文章...</span>
+<span class="variable token">$posts</span> = Post::whereHas(<span class="string token">'comments'</span>, <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'content'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+}, <span class="string token">'&gt;='</span>, <span class="number token">10</span>)-&gt;get();
+</code></pre>
+<blockquote>
+<p>注意：Eloquent 目前不支持跨数据库查询关系是否存在。 这些关系必须存在于同一数据库中。</p>
+</blockquote>
+<p><a name="inline-relationship-existence-queries"></a></p>
+<h4 id="内联关系存在查询">内联关系存在查询</h4>
+<p>如果你想使用附加到关系查询简单的 <code>where</code> 条件来确认关系是否存在，可以现使用 <code>whereRelation</code> 和 <code>whereMorphRelation</code> 。 例如，查询所有评论未获批准的帖子：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$posts</span> = Post::whereRelation(<span class="string token">'comments'</span>, <span class="string token">'is_approved'</span>, <span class="keyword token">false</span>)-&gt;get();
+</code></pre>
+<p>当然，就像调用查询构建器的 <code>where</code> 方法一样，您也可以指定一个运算符：</p>
+<pre><code><span class="variable token">$posts</span> = Post::whereRelation(
+    <span class="string token">'comments'</span>, <span class="string token">'created_at'</span>, <span class="string token">'&gt;='</span>, now()-&gt;subHour()
+)-&gt;get();
+</code></pre>
+<p><a name="querying-relationship-absence"></a></p>
+<h3 id="查询不存在的关联">查询不存在的关联</h3>
+<p>检索模型记录时，你可能会根据不存在关系来限制结果。例如，要检索<strong>没有</strong>有任何评论的所有博客文章。 可以将关系的名称传递给 <code>doesntHave</code> 和 <code>orDoesntHave</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$posts</span> = Post::doesntHave(<span class="string token">'comments'</span>)-&gt;get();
+</code></pre>
+<p>如果需要更多功能，可以使用 <code>whereDoesntHave</code> 和 <code>orWhereDoesntHave</code> 方法将「where」 条件加到 <code>doesntHave</code> 查询上。这些方法允许你向关联加入自定义限制，比如检测评论内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$posts</span> = Post::whereDoesntHave(<span class="string token">'comments'</span>, <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'content'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+})-&gt;get();
+</code></pre>
+<p>您可以使用「点」符号对嵌套关系执行查询。例如，以下查询将检索所有没有评论的帖子；但是，有未被禁止的作者评论的帖子将包含在结果中:</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$posts</span> = Post::whereDoesntHave(<span class="string token">'comments.author'</span>, <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'banned'</span>, <span class="number token">0</span>);
+})-&gt;get();
+</code></pre>
+<p><a name="querying-morph-to-relationships"></a></p>
+<h3 id="多态关联查询">多态关联查询</h3>
+<p>要查询多态关联关系的存在，可以使用 <code>whereHasMorph</code> 和 <code>whereDoesntHaveMorph</code> 方法。这些方法接受关联名称作为它们的第一个参数。接下来，这些方法接受你想要包含在查询中的相关模型的名称。最后，也可以提供一个自定义关系查询的闭包：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Comment;
+<span class="keyword token">use</span> App\Models\Post;
+<span class="keyword token">use</span> App\Models\Video;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="comment token">// 检索与标题类似 code% 的帖子或视频相关的评论...</span>
+<span class="variable token">$comments</span> = Comment::whereHasMorph(
+    <span class="string token">'commentable'</span>,
+    [Post::<span class="keyword token">class</span>, Video::<span class="keyword token">class</span>],
+    <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+        <span class="variable token">$query</span>-&gt;where(<span class="string token">'title'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+    }
+)-&gt;get();
+
+<span class="comment token">// 检索与标题不类似代码的帖子相关的评论...</span>
+<span class="variable token">$comments</span> = Comment::whereDoesntHaveMorph(
+    <span class="string token">'commentable'</span>,
+    Post::<span class="keyword token">class</span>,
+    <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+        <span class="variable token">$query</span>-&gt;where(<span class="string token">'title'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+    }
+)-&gt;get();
+</code></pre>
+<p>您可能偶尔需要根据相关多态模型的「类型」添加查询约束。 传递给 <code>whereHasMorph</code> 方法的闭包可能会接收一个 <code>$type</code> 值作为它的第二个参数。 此参数允许你检查正在构建的查询的「类型」：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$comments</span> = Comment::whereHasMorph(
+    <span class="string token">'commentable'</span>,
+    [Post::<span class="keyword token">class</span>, Video::<span class="keyword token">class</span>],
+    <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>, <span class="variable token">$type</span>) {
+        <span class="variable token">$column</span> = <span class="variable token">$type</span> === Post::<span class="keyword token">class</span> ? <span class="string token">'content'</span> : <span class="string token">'title'</span>;
+
+        <span class="variable token">$query</span>-&gt;where(<span class="variable token">$column</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+    }
+)-&gt;get();
+</code></pre>
+<p><a name="querying-all-morph-to-related-models"></a></p>
+<h4 id="查询所有关联模型">查询所有关联模型</h4>
+<p>你可以提供 <code>*</code> 作为通配符值，而不是传递可能存在多态模型数组。这将指示 Laravel 从数据库中检索所有可能的多态类型。为了执行此操作，Laravel 将执行一个附加查询：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$comments</span> = Comment::whereHasMorph(<span class="string token">'commentable'</span>, <span class="string token">'*'</span>, <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'title'</span>, <span class="string token">'like'</span>, <span class="string token">'foo%'</span>);
+})-&gt;get();
+</code></pre>
+<p><a name="aggregating-related-models"></a></p>
+<h2 id="聚合关联模型">聚合关联模型</h2>
+<p><a name="counting-related-models"></a></p>
+<h3 id="关联模型计数">关联模型计数</h3>
+<p>有时你可能需要计算给定关系的相关模型的数量，而不实际加载模型。 为此，你可以使用 <code>withCount</code> 方法。 <code>withCount</code> 方法将在生成的模型上放置 <code>{relation}_count</code> 属性：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$posts</span> = Post::withCount(<span class="string token">'comments'</span>)-&gt;get();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$posts</span> <span class="keyword token">as</span> <span class="variable token">$post</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$post</span>-&gt;comments_count;
+}
+</code></pre>
+<p>通过将数组传递到 <code>withCount</code> 方法，可以为多个关系添加「计数」，并向查询添加附加约束：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$posts</span> = Post::withCount([<span class="string token">'votes'</span>, <span class="string token">'comments'</span> =&gt; <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'content'</span>, <span class="string token">'like'</span>, <span class="string token">'code%'</span>);
+}])-&gt;get();
+
+<span class="keyword token">echo</span> <span class="variable token">$posts</span>[<span class="number token">0</span>]-&gt;votes_count;
+<span class="keyword token">echo</span> <span class="variable token">$posts</span>[<span class="number token">0</span>]-&gt;comments_count;
+</code></pre>
+<p>你还可以以别名关系计数结果，允许对同一关系进行多个计数：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$posts</span> = Post::withCount([
+    <span class="string token">'comments'</span>,
+    <span class="string token">'comments as pending_comments_count'</span> =&gt; <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+        <span class="variable token">$query</span>-&gt;where(<span class="string token">'approved'</span>, <span class="keyword token">false</span>);
+    },
+])-&gt;get();
+
+<span class="keyword token">echo</span> <span class="variable token">$posts</span>[<span class="number token">0</span>]-&gt;comments_count;
+<span class="keyword token">echo</span> <span class="variable token">$posts</span>[<span class="number token">0</span>]-&gt;pending_comments_count;
+</code></pre>
+<p><a name="deferred-count-loading"></a></p>
+<h4 id="延迟加载计数">延迟加载计数</h4>
+<p>使用 <code>loadCount</code> 可以在模型获取后加载关联关系的数量。</p>
+<pre><code><span class="variable token">$book</span> = Book::first();
+
+<span class="variable token">$book</span>-&gt;loadCount(<span class="string token">'genres'</span>);
+</code></pre>
+<p>如果你需要在统计时设置额外查询条件，可以通过传递键为关联关系名、值为查询闭包的数组来实现：</p>
+<pre><code><span class="variable token">$book</span>-&gt;loadCount([<span class="string token">'reviews'</span> =&gt; <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'rating'</span>, <span class="number token">5</span>);
+}])
+</code></pre>
+<p><a name="relationship-counting-and-custom-select-statements"></a></p>
+<h4 id="关联关系计数与自定义获取字段">关联关系计数与自定义获取字段</h4>
+<p>如果你的查询同时包含 <code>withCount</code> 和 <code>select</code>，请确保 <code>withCount</code> 一定在 <code>select</code> 之后调用：</p>
+<pre><code><span class="variable token">$posts</span> = Post::select([<span class="string token">'title'</span>, <span class="string token">'body'</span>])
+                -&gt;withCount(<span class="string token">'comments'</span>)
+                -&gt;get();
+</code></pre>
+<p><a name="other-aggregate-functions"></a></p>
+<h3 id="其他聚合函数">其他聚合函数</h3>
+<p>除了 <code>withCount</code> 方法外，Eloquent 还提供了 <code>withMin</code>, <code>withMax</code>, <code>withAvg</code> 和 <code>withSum</code> 等聚合方法。
+这些方法会通过 <code>{relation}_{function}_{column}</code> 的命名方式将聚合结果添加到获取到的模型属性中：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$posts</span> = Post::withSum(<span class="string token">'comments'</span>, <span class="string token">'votes'</span>)-&gt;get();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$posts</span> <span class="keyword token">as</span> <span class="variable token">$post</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$post</span>-&gt;comments_sum_votes;
+}
+</code></pre>
+<p>如果你想使用其他名称访问聚合函数的结果，可以自定义的别名：</p>
+<pre><code><span class="variable token">$posts</span> = Post::withSum(<span class="string token">'comments as total_comments'</span>, <span class="string token">'votes'</span>)-&gt;get();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$posts</span> <span class="keyword token">as</span> <span class="variable token">$post</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$post</span>-&gt;total_comments;
+}
+</code></pre>
+<p>与 <code>loadCount</code> 方法类似，这些方法也有延迟调用的方法。这些延迟方法可在已获取到的 Eloquent 模型上调用：</p>
+<pre><code><span class="variable token">$post</span> = Post::first();
+
+<span class="variable token">$post</span>-&gt;loadSum(<span class="string token">'comments'</span>, <span class="string token">'votes'</span>);
+</code></pre>
+<p>如果你将这些聚合方法和一个 <code>select</code> 语句组合在一起，确保你在 <code>select</code> 方法之后调用聚合方法:</p>
+<pre><code><span class="variable token">$posts</span> = Post::select([<span class="string token">'title'</span>, <span class="string token">'body'</span>])
+                -&gt;withExists(<span class="string token">'comments'</span>)
+                -&gt;get();
+</code></pre>
+<p><a name="counting-related-models-on-morph-to-relationships"></a></p>
+<h3 id="计算多态关联关系的数量">计算多态关联关系的数量</h3>
+<p>如果你想预加载多态关联关系以及这个关联关系关联的其他关联关系的计数统计，可以通过将 <code>with</code> 方法与 <code>morphTo</code> 关系和 <code>morphWithCount</code> 方法结合来实现。</p>
+<p>在这个例子中，我们假设 <code>Photo</code> 和 <code>Post</code> 模型可以创建 <code>ActivityFeed</code> 模型。 我们将假设 <code>ActivityFeed</code>模型定义了一个名为<code>parentable</code>的多态关联关系，它允许我们为给定的 <code>ActivityFeed</code> 实例检索父级 <code>Photo</code> 或 <code>Post</code> 模型。 此外，让我们假设 <code>Photo</code> 模型有很多 <code>Tag</code> 模型、<code>Post</code> 模型有很多 <code>Comment</code> 模型。</p>
+<p>假如我们想要检索 <code>ActivityFeed</code> 实例并为每个 <code>ActivityFeed</code> 实例预先加载 <code>parentable</code> 父模型。 此外，我们想要检索与每张父照片关联的标签数量以及与每个父帖子关联的评论数量：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\MorphTo;
+
+<span class="variable token">$activities</span> = ActivityFeed::with([
+    <span class="string token">'parentable'</span> =&gt; <span class="keyword token">function</span> (MorphTo <span class="variable token">$morphTo</span>) {
+        <span class="variable token">$morphTo</span>-&gt;morphWithCount([
+            Photo::<span class="keyword token">class</span> =&gt; [<span class="string token">'tags'</span>],
+            Post::<span class="keyword token">class</span> =&gt; [<span class="string token">'comments'</span>],
+        ]);
+    }])-&gt;get();
+</code></pre>
+<p><a name="morph-to-deferred-count-loading"></a></p>
+<h4 id="延迟加载计数-1">延迟加载计数</h4>
+<p>假设我们已经检索了一组 <code>ActivityFeed</code> 模型，现在我们想要加载与活动提要关联的各种 <code>parentable</code> 模型的嵌套关系计数。 可以使用 <code>loadMorphCount</code> 方法来完成此操作：</p>
+<pre><code><span class="variable token">$activities</span> = ActivityFeed::with(<span class="string token">'parentable'</span>)-&gt;get();
+
+<span class="variable token">$activities</span>-&gt;loadMorphCount(<span class="string token">'parentable'</span>, [
+    Photo::<span class="keyword token">class</span> =&gt; [<span class="string token">'tags'</span>],
+    Post::<span class="keyword token">class</span> =&gt; [<span class="string token">'comments'</span>],
+]);
+</code></pre>
+<p><a name="eager-loading"></a></p>
+<h2 id="预加载">预加载</h2>
+<p>当将 Eloquent 关系作为属性访问时，相关模型是延迟加载的。 这意味着在你第一次访问该属性之前不会实际加载关联数据。 但是，Eloquent 可以在查询父模型时主动加载关联关系。 预加载减轻了 <code>N + 1</code> 查询问题。 为了说明 <code>N + 1</code> 查询问题，请参考属于 <code>Author</code> 模型的 <code>Book</code> 模型：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Book <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取作者的所有书籍
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> author()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Author::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>我们检索所有书籍及其作者：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Book;
+
+<span class="variable token">$books</span> = Book::all();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$books</span> <span class="keyword token">as</span> <span class="variable token">$book</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$book</span>-&gt;author-&gt;name;
+}
+</code></pre>
+<p>该循环将执行一个查询以检索数据库表中的所有书籍，然后对每本书执行另一个查询以检索该书的作者。 因此，如果我们有 25 本书，上面的代码将运行 26 个查询：一个查询原本的书籍信息，另外 25 个查询来检索每本书的作者。</p>
+<p>值得庆幸的是，我们可以使用预加载将这个操作减少到两个查询。 在构建查询时，可以使用 <code>with</code> 方法指定应该预加载哪些关系： </p>
+<pre><code><span class="variable token">$books</span> = Book::with(<span class="string token">'author'</span>)-&gt;get();
+
+<span class="keyword token">foreach</span> (<span class="variable token">$books</span> <span class="keyword token">as</span> <span class="variable token">$book</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$book</span>-&gt;author-&gt;name;
+}
+</code></pre>
+<p>对于此操作，将只执行两个查询 - 一个查询检索所有书籍，一个查询检索所有书籍的所有作者：</p>
+<pre><code class="language-sql">select * from books
+
+select * from authors where id in (1, 2, 3, 4, 5, ...)
+</code></pre>
+<p><a name="eager-loading-multiple-relationships"></a></p>
+<h4 id="预加载多个关联">预加载多个关联</h4>
+<p>有时，你可能需要在单一操作中预加载几个不同的关联。要达成此目的，只要向 <code>with</code> 方法传递多个关联名称构成的数组参数：</p>
+<pre><code><span class="variable token">$books</span> = Book::with([<span class="string token">'author'</span>, <span class="string token">'publisher'</span>])-&gt;get();
+</code></pre>
+<p><a name="nested-eager-loading"></a></p>
+<h4 id="嵌套预加载">嵌套预加载</h4>
+<p>可以使用 「点」 语法预加载嵌套关联。比如在一个 Eloquent 语句中预加载所有书籍作者及其联系方式：</p>
+<pre><code><span class="variable token">$books</span> = Book::with(<span class="string token">'author.contacts'</span>)-&gt;get();
+</code></pre>
+<p><a name="nested-eager-loading-morphto-relationships"></a></p>
+<h4 id="嵌套预加载-morphto-关联">嵌套预加载 morphTo 关联</h4>
+<p>如果你希望加载一个 <code>morphTo</code> 关系，以及该关系可能返回的各种实体的嵌套关系，可以将 <code>with</code> 方法与 <code>morphTo</code> 关系的 <code>morphWith</code> 方法结合使用。为了说明这种方法，让我们参考以下模型：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> ActivityFeed <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取活动提要记录的父级
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> parentable()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo();
+    }
+}
+</code></pre>
+<p>在这个例子中，我们假设 <code>Event</code>，<code>Photo</code> 和 <code>Post</code> 模型可以创建 <code>ActivityFeed</code> 模型。 另外，我们假设 <code>Event</code> 模型属于 <code>Calendar</code> 模型，<code>Photo</code> 模型与 <code>Tag</code> 模型相关联，<code>Post</code> 模型属于 <code>Author</code> 模型。</p>
+<p>使用这些模型定义和关联，我们可以查询 <code>ActivityFeed</code> 模型实例并预加载所有 <code>parentable</code> 模型及其各自的嵌套关系：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\MorphTo;
+
+<span class="variable token">$activities</span> = ActivityFeed::query()
+    -&gt;with([<span class="string token">'parentable'</span> =&gt; <span class="keyword token">function</span> (MorphTo <span class="variable token">$morphTo</span>) {
+        <span class="variable token">$morphTo</span>-&gt;morphWith([
+            Event::<span class="keyword token">class</span> =&gt; [<span class="string token">'calendar'</span>],
+            Photo::<span class="keyword token">class</span> =&gt; [<span class="string token">'tags'</span>],
+            Post::<span class="keyword token">class</span> =&gt; [<span class="string token">'author'</span>],
+        ]);
+    }])-&gt;get();
+</code></pre>
+<p><a name="eager-loading-specific-columns"></a></p>
+<h4 id="预加载指定列">预加载指定列</h4>
+<p>并不是总需要获取关系的每一列。在这种情况下，Eloquent 允许你为关联指定想要获取的列:</p>
+<pre><code><span class="variable token">$books</span> = Book::with(<span class="string token">'author:id,name,book_id'</span>)-&gt;get();
+</code></pre>
+<blockquote>
+<p>注意：使用此功能时，应始终在要检索的列列表中包括 <code>id</code> 列和任何相关的外键列。</p>
+</blockquote>
+<p><a name="eager-loading-by-default"></a></p>
+<h4 id="默认预加载">默认预加载</h4>
+<p>有时可能希望在查询模型时始终加载某些关联。 为此，你可以在模型上定义 <code>$with</code> 属性</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Book <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 默认加载的关联
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$with</span> = [<span class="string token">'author'</span>];
+
+    <span class="comment token">/**
+     * 获取书籍作者
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> author()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Author::<span class="keyword token">class</span>);
+    }
+
+    <span class="comment token">/**
+     * 获取书籍类型.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> genre()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Genre::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<p>如果你想从单个查询的 <code>$with</code> 属性中删除一个预加载，你可以使用 <code>without</code> 方法：</p>
+<pre><code><span class="variable token">$books</span> = Book::without(<span class="string token">'author'</span>)-&gt;get();
+</code></pre>
+<p>如果你想为单个查询覆盖 <code>$with</code> 属性中的所有项目，可以使用 <code>withOnly</code> 方法：</p>
+<pre><code><span class="variable token">$books</span> = Book::withOnly(<span class="string token">'genre'</span>)-&gt;get();
+</code></pre>
+<p><a name="constraining-eager-loads"></a></p>
+<h3 id="为预加载添加约束">为预加载添加约束</h3>
+<p>有时，你可能希望预加载一个关联，同时为预加载查询添加额外查询条件。您可以通过将一个关联数组传递给 <code>with</code> 方法来实现这一点，其中数组键是关联名称，数组值是一个闭包，它为预先加载查询添加了额外的约束：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$users</span> = User::with([<span class="string token">'posts'</span> =&gt; <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'title'</span>, <span class="string token">'like'</span>, <span class="string token">'%code%'</span>);
+}])-&gt;get();
+</code></pre>
+<p>在这个例子中，Eloquent 只会预加载帖子的 <code>title</code> 列包含单词 <code>code</code> 的帖子。 你可以调用其他 <a href="queries.html">查询构造器</a> 方法来自定义预加载操作：</p>
+<pre><code><span class="variable token">$users</span> = User::with([<span class="string token">'posts'</span> =&gt; <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;orderBy(<span class="string token">'created_at'</span>, <span class="string token">'desc'</span>);
+}])-&gt;get();
+</code></pre>
+<blockquote>
+<p>注意：T在约束预加载时，不能使用 limit 和 take 查询构造器方法。</p>
+</blockquote>
+<p><a name="constraining-eager-loading-of-morph-to-relationships"></a></p>
+<h4 id="morphto-关联预加载添加约束"><code>morphTo</code> 关联预加载添加约束</h4>
+<p>预加载 <code>morphTo</code> 关联关系时，Eloquent 将运行多个查询来获取每种类型的相关模型。 您可以使用 <code>MorphTo</code> 关系的 <code>constrain</code> 方法为每个查询添加额外的约束： </p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\MorphTo;
+
+<span class="variable token">$comments</span> = Comment::with([<span class="string token">'commentable'</span> =&gt; <span class="keyword token">function</span> (MorphTo <span class="variable token">$morphTo</span>) {
+    <span class="variable token">$morphTo</span>-&gt;constrain([
+        Post::<span class="keyword token">class</span> =&gt; <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+            <span class="variable token">$query</span>-&gt;whereNull(<span class="string token">'hidden_at'</span>);
+        },
+        Video::<span class="keyword token">class</span> =&gt; <span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
+            <span class="variable token">$query</span>-&gt;where(<span class="string token">'type'</span>, <span class="string token">'educational'</span>);
+        },
+    ]);
+}])-&gt;get();
+</code></pre>
+<p>在这个例子中，Eloquent 只会预先加载未被隐藏的帖子，并且视频的 <code>type</code> 值为 <code>educational</code>。</p>
+<p><a name="lazy-eager-loading"></a></p>
+<h3 id="延迟预加载">延迟预加载</h3>
+<p>有时你可能需要在已检索到父模型后立即加载关系。例如，你需要动态决定是否加载相关模型，这可能很有用：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Book;
+
+<span class="variable token">$books</span> = Book::all();
+
+<span class="keyword token">if</span> (<span class="variable token">$someCondition</span>) {
+    <span class="variable token">$books</span>-&gt;load(<span class="string token">'author'</span>, <span class="string token">'publisher'</span>);
+}
+</code></pre>
+<p>如果要在渴求式加载的查询语句中进行条件约束，可以通过数组的形式去加载，键为对应的关联关系，值为 <code>Closure</code> 闭包函数，该闭包的参数为一个查询实例：</p>
+<pre><code><span class="variable token">$author</span>-&gt;load([<span class="string token">'books'</span> =&gt; <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;orderBy(<span class="string token">'published_date'</span>, <span class="string token">'asc'</span>);
+}]);
+</code></pre>
+<p>如果希望仅加载未被加载的关联关系时，你可以使用 <code>loadMissing</code> 方法：</p>
+<pre><code><span class="variable token">$book</span>-&gt;loadMissing(<span class="string token">'author'</span>);
+</code></pre>
+<p><a name="nested-lazy-eager-loading-morphto"></a></p>
+<h4 id="嵌套延迟预加载--morphto">嵌套延迟预加载 &amp; <code>morphTo</code></h4>
+<p>如果要预加载 <code>morphTo</code> 关系，以及该关系可能返回的各种实体上的嵌套关系，您可以使用 <code>loadMorph</code> 方法。</p>
+<p>这个方法接受 <code>morphTo</code> 关系的名称作为它的第一个参数，第二个参数接收模型数组、关系数组。例子:</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> ActivityFeed <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 获取活动提要记录的父项。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> parentable()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo();
+    }
+}
+</code></pre>
+<p>在这个例子中，让我们假设 <code>Event</code> 、<code>Photo</code> 和 <code>Post</code> 模型可以创建 <code>ActivityFeed</code> 模型。此外，让我们假设 <code>Event</code> 模型属于 <code>Calendar</code> 模型，<code>Photo</code> 模型与 <code>Tag</code> 模型相关联，<code>Post</code> 模型属于 <code>Author</code> 模型。</p>
+<p>使用这些模型定义和关联关系，我们方可以检索 <code>ActivityFeed</code> 模型实例，并立即加载所有 <code>parentable</code> 模型及其各自的嵌套关系：</p>
+<pre><code><span class="variable token">$activities</span> = ActivityFeed::with(<span class="string token">'parentable'</span>)
+    -&gt;get()
+    -&gt;loadMorph(<span class="string token">'parentable'</span>, [
+        Event::<span class="keyword token">class</span> =&gt; [<span class="string token">'calendar'</span>],
+        Photo::<span class="keyword token">class</span> =&gt; [<span class="string token">'tags'</span>],
+        Post::<span class="keyword token">class</span> =&gt; [<span class="string token">'author'</span>],
+    ]);
+</code></pre>
+<p><a name="preventing-lazy-loading"></a></p>
+<h3 id="防止延迟加载">防止延迟加载</h3>
+<p>如前所述，预加载关系可以为应用程序提供显着的性能优势。 但你也可以指示 Laravel 始终防止延迟加载关系。 你可以调用基本 Eloquent 模型类提供的 <code>preventLazyLoading</code> 方法。 通常，你应该在应用程序的 <code>AppServiceProvider</code> 类的 <code>boot</code> 方法中调用此方法。</p>
+<p><code>preventLazyLoading</code> 方法接受一个可选的布尔类型的参数，表示是否阻止延迟加载。例如，你可能希望只在非生产环境中禁用延迟加载，这样即使在生产环境代码中意外出现了延迟加载关系，你的生产环境也能继续正常运行。</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="comment token">/**
+ * Bootstrap any application services.
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Model::preventLazyLoading(! <span class="variable token">$this</span>-&gt;app-&gt;isProduction());
+}
+</code></pre>
+<p>在阻止延迟加载之后，当你的应用程序尝试延迟加载任何 Eloquent 关系时，Eloquent 将抛出<code>Illuminate\Database\LazyLoadingViolationException</code>异常。</p>
+<p>你可以使用 <code>handleLazyLoadingViolationsUsing</code> 方法自定义延迟加载的违规行为。例如，使用此方法，你可以指示违规行为只被记录，而不是使用异常中断应用程序的执行：</p>
+<pre><code class="language-php">Model::handleLazyLoadingViolationUsing(<span class="keyword token">function</span> (<span class="variable token">$model</span>, <span class="variable token">$relation</span>) {
+    <span class="variable token">$class</span> = get_class(<span class="variable token">$model</span>);
+
+    info(<span class="string token">"Attempted to lazy load [{$relation}] on model [{$class}]."</span>);
+});
+</code></pre>
+<p><a name="inserting-and-updating-related-models"></a></p>
+<h2 id="插入--更新关联模型">插入 &amp; 更新关联模型</h2>
+<p><a name="the-save-method"></a></p>
+<h3 id="save-方法"><code>save</code> 方法</h3>
+<p>Eloquent 提供了向关系中添加新模型的便捷方法。例如，你可能需要向一篇文章（<code>Post</code> 模型）添加一条新的评论（<code>Comment</code> 模型），你不用手动设置 <code>Comment</code> 模型上的 <code>post_id</code> 属性，你可以直接使用关联模型中的 <code>save</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Comment;
+<span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$comment</span> = <span class="keyword token">new</span> Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>]);
+
+<span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$post</span>-&gt;comments()-&gt;save(<span class="variable token">$comment</span>);
+</code></pre>
+<p>注意，我们没有将 <code>comments</code> 关联作为动态属性访问，相反，我们调用了 <code>comments</code> 方法来来获得关联实例， <code>save</code> 方法会自动添加适当的 <code>post_id</code> 值到新的 <code>Comment</code> 模型中。</p>
+<p>如果需要保存多个关联模型，你可以使用 <code>saveMany</code> 方法：</p>
+<pre><code><span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$post</span>-&gt;comments()-&gt;saveMany([
+    <span class="keyword token">new</span> Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>]),
+    <span class="keyword token">new</span> Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'Another new comment.'</span>]),
+]);
+</code></pre>
+<p><code>save</code> 和 <code>saveMany</code> 方法不会将新模型（<code>Comment</code>）加载到父模型（<code>Post</code>) 上， 如果你计划在使用 <code>save</code> 或 <code>saveMany</code> 方法后访问该关联模型（<code>Comment</code>），你需要使用 <code>refresh</code> 方法重新加载模型及其关联，这样你就可以访问到所有评论，包括新保存的评论了：</p>
+<pre><code><span class="variable token">$post</span>-&gt;comments()-&gt;save(<span class="variable token">$comment</span>);
+
+<span class="variable token">$post</span>-&gt;refresh();
+
+<span class="comment token">// 所有评论，包括新保存的评论...</span>
+<span class="variable token">$post</span>-&gt;comments;
+</code></pre>
+<p><a name="the-push-method"></a></p>
+<h4 id="递归保存模型和关联数据">递归保存模型和关联数据</h4>
+<p>如果你想 <code>save</code> 模型及其所有关联数据，你可以使用 <code>push</code> 方法，在此示例中，将保存 <code>Post</code> 模型及其评论和评论作者：</p>
+<pre><code><span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$post</span>-&gt;comments[<span class="number token">0</span>]-&gt;message = <span class="string token">'Message'</span>;
+<span class="variable token">$post</span>-&gt;comments[<span class="number token">0</span>]-&gt;author-&gt;name = <span class="string token">'Author Name'</span>;
+
+<span class="variable token">$post</span>-&gt;push();
+</code></pre>
+<p><a name="the-create-method"></a></p>
+<h3 id="新增方法">新增方法</h3>
+<p>除了 <code>save</code> 和 <code>saveMany</code> 方法外，你还可以使用 <code>create</code> 方法。它接受一个属性数组，同时会创建模型并插入到数据库中。 还有， <code>save</code> 和 <code>create</code> 方法的不同之处在于， <code>save</code> 方法接受一个完整的 Eloquent 模型实例，而 <code>create</code> 则接受普通的 PHP 数组：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+
+<span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$comment</span> = <span class="variable token">$post</span>-&gt;comments()-&gt;create([
+    <span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>,
+]);
+</code></pre>
+<p>你还可以使用 <code>createMany</code> 方法去创建多个关联模型：</p>
+<pre><code><span class="variable token">$post</span> = Post::find(<span class="number token">1</span>);
+
+<span class="variable token">$post</span>-&gt;comments()-&gt;createMany([
+    [<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>],
+    [<span class="string token">'message'</span> =&gt; <span class="string token">'Another new comment.'</span>],
+]);
+</code></pre>
+<p>你还可以使用 <code>findOrNew</code>, <code>firstOrNew</code>, <code>firstOrCreate</code>, 和 <code>updateOrCreate</code> 方法来 <a href="eloquent.html#upserts">创建和更新关系模型</a>。</p>
+<blockquote>
+<p>技巧：在使用 <code>create</code> 方法前，请务必确保查看过本文档的 <a href="eloquent.html#mass-assignment">批量赋值</a> 章节。</p>
+</blockquote>
+<p><a name="updating-belongs-to-relationships"></a></p>
+<h3 id="belongs-to-关联">Belongs To 关联</h3>
+<p>如果您想将子模型分配给新的父模型，您可以使用 <code>associate</code> 方法。在这个例子中，<code>User</code> 模型定义了一个与 <code>Account</code> 模型的 <code>belongsTo</code> 关系。 这个 <code>associate</code> 方法将在子模型上设置外键：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Account;
+
+<span class="variable token">$account</span> = Account::find(<span class="number token">10</span>);
+
+<span class="variable token">$user</span>-&gt;account()-&gt;associate(<span class="variable token">$account</span>);
+
+<span class="variable token">$user</span>-&gt;save();
+</code></pre>
+<p>要从子模型中删除父模型，您可以使用 <code>dissociate</code> 方法。此方法会将关联外键设置为 <code>null</code> ：</p>
+<pre><code><span class="variable token">$user</span>-&gt;account()-&gt;dissociate();
+
+<span class="variable token">$user</span>-&gt;save();
+</code></pre>
+<p><a name="updating-many-to-many-relationships"></a></p>
+<h3 id="多对多关联-1">多对多关联</h3>
+<p><a name="attaching-detaching"></a></p>
+<h4 id="附加--分离">附加 / 分离</h4>
+<p>Eloquent 也提供了一些额外的辅助方法，使相关模型的使用更加方便。例如，我们假设一个用户可以拥有多个角色，并且每个角色都可以被多个用户共享。给某个用户附加一个角色是通过向中间表插入一条记录实现的，可以使用 <code>attach</code> 方法完成该操作：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
+
+<span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;roles()-&gt;attach(<span class="variable token">$roleId</span>);
+</code></pre>
+<p>在将关系附加到模型时，还可以传递一组要插入到中间表中的附加数据：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;attach(<span class="variable token">$roleId</span>, [<span class="string token">'expires'</span> =&gt; <span class="variable token">$expires</span>]);
+</code></pre>
+<p>当然，有时也需要移除用户的角色。可以使用 <code>detach</code> 移除多对多关联记录。<code>detach</code> 方法将会移除中间表对应的记录。但是这两个模型都将会保留在数据库中：</p>
+<pre><code><span class="comment token">// 移除用户的一个角色...</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach(<span class="variable token">$roleId</span>);
+
+<span class="comment token">// 移除用户的所有角色...</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach();
+</code></pre>
+<p>为了方便起见，<code>attach</code> 和 <code>detach</code> 也允许传递一个 ID 数组：</p>
+<pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+
+<span class="variable token">$user</span>-&gt;roles()-&gt;attach([
+    <span class="number token">1</span> =&gt; [<span class="string token">'expires'</span> =&gt; <span class="variable token">$expires</span>],
+    <span class="number token">2</span> =&gt; [<span class="string token">'expires'</span> =&gt; <span class="variable token">$expires</span>],
+]);
+</code></pre>
+<p><a name="syncing-associations"></a></p>
+<h4 id="同步关联">同步关联</h4>
+<p>你也可以使用 <code>sync</code> 方法构建多对多关联。<code>sync</code> 方法接收一个 ID 数组以替换中间表的记录。中间表记录中，所有未在 ID 数组中的记录都将会被移除。所以该操作结束后，只有给出数组的 ID 会被保留在中间表中：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;sync([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+</code></pre>
+<p>你也可以通过 ID 传递额外的附加数据到中间表：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;sync([<span class="number token">1</span> =&gt; [<span class="string token">'expires'</span> =&gt; <span class="keyword token">true</span>], <span class="number token">2</span>, <span class="number token">3</span>]);
+</code></pre>
+<p>如果您想为每个同步的模型 ID 插入相同的中间表，你可以使用 <code>syncWithPivotValues</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;syncWithPivotValues([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>], [<span class="string token">'active'</span> =&gt; <span class="keyword token">true</span>]);
+</code></pre>
+<p>如果你不想移除现有的 ID，可以使用 <code>syncWithoutDetaching</code> 方法：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;syncWithoutDetaching([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+</code></pre>
+<p><a name="toggling-associations"></a></p>
+<h4 id="切换关联">切换关联</h4>
+<p>多对多关联也提供了 <code>toggle</code> 方法用于「切换」给定 ID 数组的附加状态。 如果给定的 ID 已被附加在中间表中，那么它将会被移除，同样，如果给定的 ID 已被移除，它将会被附加：</p>
+<pre><code><span class="variable token">$user</span>-&gt;roles()-&gt;toggle([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+</code></pre>
+<p><a name="updating-a-record-on-the-intermediate-table"></a></p>
+<h4 id="更新中间表上的记录">更新中间表上的记录</h4>
+<p>如果你需要在中间表中更新一条已存在的记录，可以使用 <code>updateExistingPivot</code> 方法。 此方法接收中间表的外键与要更新的数据数组进行更新：</p>
+<pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
+
+<span class="variable token">$user</span>-&gt;roles()-&gt;updateExistingPivot(<span class="variable token">$roleId</span>, [
+    <span class="string token">'active'</span> =&gt; <span class="keyword token">false</span>,
+]);
+</code></pre>
+<p><a name="touching-parent-timestamps"></a></p>
+<h2 id="更新父级时间戳">更新父级时间戳</h2>
+<p>当一个模型属 <code>belongsTo</code> 或者 <code>belongsToMany</code> 另一个模型时， 例如 <code>Comment</code> 属于 <code>Post</code> ，有时更新子模型导致更新父模型时间戳非常有用。</p>
+<p>例如，当 <code>Comment</code> 模型被更新时，你需要自动「触发」父级 <code>Post</code> 模型的 <code>updated_at</code> 时间戳的更新。Eloquent 让它变得简单。只要在子模型加一个包含关联名称的 <code>touches</code> 属性即可：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+
+<span class="keyword token">class</span> Comment <span class="keyword token">extends</span> Model
+{
+    <span class="comment token">/**
+     * 需要触发的所有关联关系。
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$touches</span> = [<span class="string token">'post'</span>];
+
+    <span class="comment token">/**
+     * 获取评论所属文章。
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> post()
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(Post::<span class="keyword token">class</span>);
+    }
+}
+</code></pre>
+<blockquote>
+<p>注意：只有使用 Eloquent 的 <code>save</code> 方法更新子模型时，才会更新父模型时间戳。</p>
+</blockquote>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

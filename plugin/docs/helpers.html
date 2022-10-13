@@ -1,0 +1,3090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="辅助函数">辅助函数</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#available-methods">可用方法</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>Laravel 包含各种各样的全局 PHP 「辅助」函数，框架本身也大量的使用了这些功能函数；如果你觉的方便，你可以在你的应用中任意使用这些函数。</p>
+<p><a name="available-methods"></a></p>
+<h2 id="可用方法">可用方法</h2>
+<style>
+    .collection-method-list > p {
+        column-count: 3; -moz-column-count: 3; -webkit-column-count: 3;
+        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+    }
+
+    .collection-method-list a {
+        display: block;
+    }
+</style>
+
+<p><a name="arrays-and-objects-method-list"></a></p>
+<h3 id="数组--对象">数组 &amp; 对象</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-array-accessible">Arr::accessible</a>
+<a href="#method-array-add">Arr::add</a>
+<a href="#method-array-collapse">Arr::collapse</a>
+<a href="#method-array-crossjoin">Arr::crossJoin</a>
+<a href="#method-array-divide">Arr::divide</a>
+<a href="#method-array-dot">Arr::dot</a>
+<a href="#method-array-except">Arr::except</a>
+<a href="#method-array-exists">Arr::exists</a>
+<a href="#method-array-first">Arr::first</a>
+<a href="#method-array-flatten">Arr::flatten</a>
+<a href="#method-array-forget">Arr::forget</a>
+<a href="#method-array-get">Arr::get</a>
+<a href="#method-array-has">Arr::has</a>
+<a href="#method-array-hasany">Arr::hasAny</a>
+<a href="#method-array-isassoc">Arr::isAssoc</a>
+<a href="#method-array-islist">Arr::isList</a>
+<a href="#method-array-keyby">Arr::keyBy</a>
+<a href="#method-array-last">Arr::last</a>
+<a href="#method-array-only">Arr::only</a>
+<a href="#method-array-pluck">Arr::pluck</a>
+<a href="#method-array-prepend">Arr::prepend</a>
+<a href="#method-array-pull">Arr::pull</a>
+<a href="#method-array-query">Arr::query</a>
+<a href="#method-array-random">Arr::random</a>
+<a href="#method-array-set">Arr::set</a>
+<a href="#method-array-shuffle">Arr::shuffle</a>
+<a href="#method-array-sort">Arr::sort</a>
+<a href="#method-array-sort-recursive">Arr::sortRecursive</a>
+<a href="#method-array-to-css-classes">Arr::toCssClasses</a>
+<a href="#method-array-undot">Arr::undot</a>
+<a href="#method-array-where">Arr::where</a>
+<a href="#method-array-where-not-null">Arr::whereNotNull</a>
+<a href="#method-array-wrap">Arr::wrap</a>
+<a href="#method-data-fill">data_fill</a>
+<a href="#method-data-get">data_get</a>
+<a href="#method-data-set">data_set</a>
+<a href="#method-head">head</a>
+<a href="#method-last">last</a></p>
+</div>
+
+<p><a name="paths-method-list"></a></p>
+<h3 id="路径">路径</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-app-path">app_path</a>
+<a href="#method-base-path">base_path</a>
+<a href="#method-config-path">config_path</a>
+<a href="#method-database-path">database_path</a>
+<a href="#method-mix">mix</a>
+<a href="#method-public-path">public_path</a>
+<a href="#method-resource-path">resource_path</a>
+<a href="#method-storage-path">storage_path</a></p>
+</div>
+
+<p><a name="strings-method-list"></a></p>
+<h3 id="字符串">字符串</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-__">__</a>
+<a href="#method-class-basename">class_basename</a>
+<a href="#method-e">e</a>
+<a href="#method-preg-replace-array">preg_replace_array</a>
+<a href="#method-str-after">Str::after</a>
+<a href="#method-str-after-last">Str::afterLast</a>
+<a href="#method-str-ascii">Str::ascii</a>
+<a href="#method-str-before">Str::before</a>
+<a href="#method-str-before-last">Str::beforeLast</a>
+<a href="#method-str-between">Str::between</a>
+<a href="#method-camel-case">Str::camel</a>
+<a href="#method-str-contains">Str::contains</a>
+<a href="#method-str-contains-all">Str::containsAll</a>
+<a href="#method-ends-with">Str::endsWith</a>
+<a href="#method-excerpt">Str::excerpt</a>
+<a href="#method-str-finish">Str::finish</a>
+<a href="#method-str-headline">Str::headline</a>
+<a href="#method-str-is">Str::is</a>
+<a href="#method-str-is-ascii">Str::isAscii</a>
+<a href="#method-str-is-uuid">Str::isUuid</a>
+<a href="#method-kebab-case">Str::kebab</a>
+<a href="#method-str-length">Str::length</a>
+<a href="#method-str-limit">Str::limit</a>
+<a href="#method-str-lower">Str::lower</a>
+<a href="#method-str-markdown">Str::markdown</a>
+<a href="#method-str-mask">Str::mask</a>
+<a href="#method-str-ordered-uuid">Str::orderedUuid</a>
+<a href="#method-str-padboth">Str::padBoth</a>
+<a href="#method-str-padleft">Str::padLeft</a>
+<a href="#method-str-padright">Str::padRight</a>
+<a href="#method-str-plural">Str::plural</a>
+<a href="#method-str-plural-studly">Str::pluralStudly</a>
+<a href="#method-str-random">Str::random</a>
+<a href="#method-str-remove">Str::remove</a>
+<a href="#method-str-replace">Str::replace</a>
+<a href="#method-str-replace-array">Str::replaceArray</a>
+<a href="#method-str-replace-first">Str::replaceFirst</a>
+<a href="#method-str-replace-last">Str::replaceLast</a>
+<a href="#method-str-reverse">Str::reverse</a>
+<a href="#method-str-singular">Str::singular</a>
+<a href="#method-str-slug">Str::slug</a>
+<a href="#method-snake-case">Str::snake</a>
+<a href="#method-str-start">Str::start</a>
+<a href="#method-starts-with">Str::startsWith</a>
+<a href="#method-studly-case">Str::studly</a>
+<a href="#method-str-substr">Str::substr</a>
+<a href="#method-str-substrcount">Str::substrCount</a>
+<a href="#method-str-substrreplace">Str::substrReplace</a>
+<a href="#method-str-swap">Str::swap</a>
+<a href="#method-title-case">Str::title</a>
+<a href="#method-str-to-html-string">Str::toHtmlString</a>
+<a href="#method-str-ucfirst">Str::ucfirst</a>
+<a href="#method-str-upper">Str::upper</a>
+<a href="#method-str-uuid">Str::uuid</a>
+<a href="#method-str-word-count">Str::wordCount</a>
+<a href="#method-str-words">Str::words</a>
+<a href="#method-str">str</a>
+<a href="#method-trans">trans</a>
+<a href="#method-trans-choice">trans_choice</a></p>
+</div>
+
+<p><a name="fluent-strings-method-list"></a></p>
+<h3 id="字符流处理">字符流处理</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-fluent-str-after">after</a>
+<a href="#method-fluent-str-after-last">afterLast</a>
+<a href="#method-fluent-str-append">append</a>
+<a href="#method-fluent-str-ascii">ascii</a>
+<a href="#method-fluent-str-basename">basename</a>
+<a href="#method-fluent-str-before">before</a>
+<a href="#method-fluent-str-before-last">beforeLast</a>
+<a href="#method-fluent-str-between">between</a>
+<a href="#method-fluent-str-camel">camel</a>
+<a href="#method-fluent-str-contains">contains</a>
+<a href="#method-fluent-str-contains-all">containsAll</a>
+<a href="#method-fluent-str-dirname">dirname</a>
+<a href="#method-fluent-str-ends-with">endsWith</a>
+<a href="#method-fluent-str-excerpt">excerpt</a>
+<a href="#method-fluent-str-exactly">exactly</a>
+<a href="#method-fluent-str-explode">explode</a>
+<a href="#method-fluent-str-finish">finish</a>
+<a href="#method-fluent-str-is">is</a>
+<a href="#method-fluent-str-is-ascii">isAscii</a>
+<a href="#method-fluent-str-is-empty">isEmpty</a>
+<a href="#method-fluent-str-is-not-empty">isNotEmpty</a>
+<a href="#method-fluent-str-is-uuid">isUuid</a>
+<a href="#method-fluent-str-kebab">kebab</a>
+<a href="#method-fluent-str-length">length</a>
+<a href="#method-fluent-str-limit">limit</a>
+<a href="#method-fluent-str-lower">lower</a>
+<a href="#method-fluent-str-ltrim">ltrim</a>
+<a href="#method-fluent-str-markdown">markdown</a>
+<a href="#method-fluent-str-mask">mask</a>
+<a href="#method-fluent-str-match">match</a>
+<a href="#method-fluent-str-match-all">matchAll</a>
+<a href="#method-fluent-str-padboth">padBoth</a>
+<a href="#method-fluent-str-padleft">padLeft</a>
+<a href="#method-fluent-str-padright">padRight</a>
+<a href="#method-fluent-str-pipe">pipe</a>
+<a href="#method-fluent-str-plural">plural</a>
+<a href="#method-fluent-str-prepend">prepend</a>
+<a href="#method-fluent-str-remove">remove</a>
+<a href="#method-fluent-str-replace">replace</a>
+<a href="#method-fluent-str-replace-array">replaceArray</a>
+<a href="#method-fluent-str-replace-first">replaceFirst</a>
+<a href="#method-fluent-str-replace-last">replaceLast</a>
+<a href="#method-fluent-str-replace-matches">replaceMatches</a>
+<a href="#method-fluent-str-rtrim">rtrim</a>
+<a href="#method-fluent-str-scan">scan</a>
+<a href="#method-fluent-str-singular">singular</a>
+<a href="#method-fluent-str-slug">slug</a>
+<a href="#method-fluent-str-snake">snake</a>
+<a href="#method-fluent-str-split">split</a>
+<a href="#method-fluent-str-start">start</a>
+<a href="#method-fluent-str-starts-with">startsWith</a>
+<a href="#method-fluent-str-studly">studly</a>
+<a href="#method-fluent-str-substr">substr</a>
+<a href="#method-fluent-str-substrreplace">substrReplace</a>
+<a href="#method-fluent-str-swap">swap</a>
+<a href="#method-fluent-str-tap">tap</a>
+<a href="#method-fluent-str-test">test</a>
+<a href="#method-fluent-str-title">title</a>
+<a href="#method-fluent-str-trim">trim</a>
+<a href="#method-fluent-str-ucfirst">ucfirst</a>
+<a href="#method-fluent-str-upper">upper</a>
+<a href="#method-fluent-str-when">when</a>
+<a href="#method-fluent-str-when-contains">whenContains</a>
+<a href="#method-fluent-str-when-contains-all">whenContainsAll</a>
+<a href="#method-fluent-str-when-empty">whenEmpty</a>
+<a href="#method-fluent-str-when-not-empty">whenNotEmpty</a>
+<a href="#method-fluent-str-when-starts-with">whenStartsWith</a>
+<a href="#method-fluent-str-when-ends-with">whenEndsWith</a>
+<a href="#method-fluent-str-when-exactly">whenExactly</a>
+<a href="#method-fluent-str-when-is">whenIs</a>
+<a href="#method-fluent-str-when-is-ascii">whenIsAscii</a>
+<a href="#method-fluent-str-when-is-uuid">whenIsUuid</a>
+<a href="#method-fluent-str-when-test">whenTest</a>
+<a href="#method-fluent-str-word-count">wordCount</a>
+<a href="#method-fluent-str-words">words</a></p>
+</div>
+
+<p><a name="urls-method-list"></a></p>
+<h3 id="urls">URLs</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-action">action</a>
+<a href="#method-asset">asset</a>
+<a href="#method-route">route</a>
+<a href="#method-secure-asset">secure_asset</a>
+<a href="#method-secure-url">secure_url</a>
+<a href="#method-to-route">to_route</a>
+<a href="#method-url">url</a></p>
+</div>
+
+<p><a name="miscellaneous-method-list"></a></p>
+<h3 id="其他">其他</h3>
+<div class="collection-method-list" markdown="1">
+
+<p><a href="#method-abort">abort</a>
+<a href="#method-abort-if">abort_if</a>
+<a href="#method-abort-unless">abort_unless</a>
+<a href="#method-app">app</a>
+<a href="#method-auth">auth</a>
+<a href="#method-back">back</a>
+<a href="#method-bcrypt">bcrypt</a>
+<a href="#method-blank">blank</a>
+<a href="#method-broadcast">broadcast</a>
+<a href="#method-cache">cache</a>
+<a href="#method-class-uses-recursive">class_uses_recursive</a>
+<a href="#method-collect">collect</a>
+<a href="#method-config">config</a>
+<a href="#method-cookie">cookie</a>
+<a href="#method-csrf-field">csrf_field</a>
+<a href="#method-csrf-token">csrf_token</a>
+<a href="#method-decrypt">decrypt</a>
+<a href="#method-dd">dd</a>
+<a href="#method-dispatch">dispatch</a>
+<a href="#method-dump">dump</a>
+<a href="#method-encrypt">encrypt</a>
+<a href="#method-env">env</a>
+<a href="#method-event">event</a>
+<a href="#method-filled">filled</a>
+<a href="#method-info">info</a>
+<a href="#method-logger">logger</a>
+<a href="#method-method-field">method_field</a>
+<a href="#method-now">now</a>
+<a href="#method-old">old</a>
+<a href="#method-optional">optional</a>
+<a href="#method-policy">policy</a>
+<a href="#method-redirect">redirect</a>
+<a href="#method-report">report</a>
+<a href="#method-request">request</a>
+<a href="#method-rescue">rescue</a>
+<a href="#method-resolve">resolve</a>
+<a href="#method-response">response</a>
+<a href="#method-retry">retry</a>
+<a href="#method-session">session</a>
+<a href="#method-tap">tap</a>
+<a href="#method-throw-if">throw_if</a>
+<a href="#method-throw-unless">throw_unless</a>
+<a href="#method-today">today</a>
+<a href="#method-trait-uses-recursive">trait_uses_recursive</a>
+<a href="#method-transform">transform</a>
+<a href="#method-validator">validator</a>
+<a href="#method-value">value</a>
+<a href="#method-view">view</a>
+<a href="#method-with">with</a></p>
+</div>
+
+
+
+<p><a name="method-listing"></a></p>
+<h2 id="方法列表">方法列表</h2>
+<style>
+    .collection-method code {
+        font-size: 14px;
+    }
+
+    .collection-method:not(.first-collection-method) {
+        margin-top: 50px;
+    }
+</style>
+
+<p><a name="arrays"></a></p>
+<h2 id="数组--对象-1">数组 &amp; 对象</h2>
+<p><a name="method-array-accessible"></a></p>
+<h4 id="arraccessible-collection-method-first-collection-method"><code>Arr::accessible()</code> {.collection-method .first-collection-method}</h4>
+<p><code>Arr::accessible</code> 函数检查给定的值是否可数组式访问：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+<span class="keyword token">use</span> Illuminate\Support\Collection;
+
+<span class="variable token">$isAccessible</span> = Arr::accessible([<span class="string token">'a'</span> =&gt; <span class="number token">1</span>, <span class="string token">'b'</span> =&gt; <span class="number token">2</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isAccessible</span> = Arr::accessible(<span class="keyword token">new</span> Collection);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isAccessible</span> = Arr::accessible(<span class="string token">'abc'</span>);
+
+<span class="comment token">// false</span>
+
+<span class="variable token">$isAccessible</span> = Arr::accessible(<span class="keyword token">new</span> stdClass);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-add"></a></p>
+<h4 id="arradd-collection-method"><code>Arr::add()</code> {.collection-method}</h4>
+<p>如果给定的键在数组中不存在或给定的键的值被设置为 <code>null</code> ，那么 <code>Arr::add</code> 函数将会把给定的键值对添加到数组中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = Arr::add([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>], <span class="string token">'price'</span>, <span class="number token">100</span>);
+
+<span class="comment token">// ['name' =&gt; 'Desk', 'price' =&gt; 100]</span>
+
+<span class="variable token">$array</span> = Arr::add([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="keyword token">null</span>], <span class="string token">'price'</span>, <span class="number token">100</span>);
+
+<span class="comment token">// ['name' =&gt; 'Desk', 'price' =&gt; 100]</span>
+</code></pre>
+<p><a name="method-array-collapse"></a></p>
+<h4 id="arrcollapse-collection-method"><code>Arr::collapse()</code> {.collection-method}</h4>
+<p><code>Arr::collapse</code> 函数将多个数组合并为一个数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = Arr::collapse([[<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>], [<span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>], [<span class="number token">7</span>, <span class="number token">8</span>, <span class="number token">9</span>]]);
+
+<span class="comment token">// [1, 2, 3, 4, 5, 6, 7, 8, 9]</span>
+</code></pre>
+<p><a name="method-array-crossjoin"></a></p>
+<h4 id="arrcrossjoin-collection-method"><code>Arr::crossJoin()</code> {.collection-method}</h4>
+<p><code>Arr::crossJoin</code> 函数交叉连接给定的数组，返回具有所有可能排列的笛卡尔乘积：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$matrix</span> = Arr::crossJoin([<span class="number token">1</span>, <span class="number token">2</span>], [<span class="string token">'a'</span>, <span class="string token">'b'</span>]);
+
+<span class="comment token">/*
+    [
+        [1, 'a'],
+        [1, 'b'],
+        [2, 'a'],
+        [2, 'b'],
+    ]
+*/</span>
+
+<span class="variable token">$matrix</span> = Arr::crossJoin([<span class="number token">1</span>, <span class="number token">2</span>], [<span class="string token">'a'</span>, <span class="string token">'b'</span>], [<span class="string token">'I'</span>, <span class="string token">'II'</span>]);
+
+<span class="comment token">/*
+    [
+        [1, 'a', 'I'],
+        [1, 'a', 'II'],
+        [1, 'b', 'I'],
+        [1, 'b', 'II'],
+        [2, 'a', 'I'],
+        [2, 'a', 'II'],
+        [2, 'b', 'I'],
+        [2, 'b', 'II'],
+    ]
+*/</span>
+</code></pre>
+<p><a name="method-array-divide"></a></p>
+<h4 id="arrdivide-collection-method"><code>Arr::divide()</code> {.collection-method}</h4>
+<p><code>Arr::divide</code> 函数返回一个二维数组，一个值包含原数组的键，另一个值包含原数组的值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+[<span class="variable token">$keys</span>, <span class="variable token">$values</span>] = Arr::divide([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>]);
+
+<span class="comment token">// $keys: ['name']</span>
+
+<span class="comment token">// $values: ['Desk']</span>
+</code></pre>
+<p><a name="method-array-dot"></a></p>
+<h4 id="arrdot-collection-method"><code>Arr::dot()</code> {.collection-method}</h4>
+<p><code>Arr::dot</code> 函数将多维数组中所有的键平铺到一维数组中，新数组使用「.」符号表示层级包含关系：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+<span class="variable token">$flattened</span> = Arr::dot(<span class="variable token">$array</span>);
+
+<span class="comment token">// ['products.desk.price' =&gt; 100]</span>
+</code></pre>
+<p><a name="method-array-except"></a></p>
+<h4 id="arrexcept-collection-method"><code>Arr::except()</code> {.collection-method}</h4>
+<p><code>Arr::except</code> 函数从数组中删除指定的键值对：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>];
+
+<span class="variable token">$filtered</span> = Arr::except(<span class="variable token">$array</span>, [<span class="string token">'price'</span>]);
+
+<span class="comment token">// ['name' =&gt; 'Desk']</span>
+</code></pre>
+<p><a name="method-array-exists"></a></p>
+<h4 id="arrexists-collection-method"><code>Arr::exists()</code> {.collection-method}</h4>
+<p><code>Arr::exists</code> 检查给定的键是否存在提供的数组中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'John Doe'</span>, <span class="string token">'age'</span> =&gt; <span class="number token">17</span>];
+
+<span class="variable token">$exists</span> = Arr::exists(<span class="variable token">$array</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$exists</span> = Arr::exists(<span class="variable token">$array</span>, <span class="string token">'salary'</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-first"></a></p>
+<h4 id="arrfirst-collection-method"><code>Arr::first()</code> {.collection-method}</h4>
+<p><code>Arr::first</code> 函数返回数组中满足指定条件的第一个元素：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="number token">100</span>, <span class="number token">200</span>, <span class="number token">300</span>];
+
+<span class="variable token">$first</span> = Arr::first(<span class="variable token">$array</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span> &gt;= <span class="number token">150</span>;
+});
+
+<span class="comment token">// 200</span>
+</code></pre>
+<p>将默认值作为第三个参数传递给该方法，如果没有值满足条件，则返回该默认值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$first</span> = Arr::first(<span class="variable token">$array</span>, <span class="variable token">$callback</span>, <span class="variable token">$default</span>);
+</code></pre>
+<p><a name="method-array-flatten"></a></p>
+<h4 id="arrflatten-collection-method"><code>Arr::flatten()</code> {.collection-method}</h4>
+<p> <code>Arr::flatten</code> 函数将多维数组中数组的值取出平铺为一维数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'Joe'</span>, <span class="string token">'languages'</span> =&gt; [<span class="string token">'PHP'</span>, <span class="string token">'Ruby'</span>]];
+
+<span class="variable token">$flattened</span> = Arr::flatten(<span class="variable token">$array</span>);
+
+<span class="comment token">// ['Joe', 'PHP', 'Ruby']</span>
+</code></pre>
+<p><a name="method-array-forget"></a></p>
+<h4 id="arrforget-collection-method"><code>Arr::forget()</code> {.collection-method}</h4>
+<p><code>Arr::forget</code> 函数使用「.」符号从深度嵌套的数组中删除给定的键值对：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+Arr::forget(<span class="variable token">$array</span>, <span class="string token">'products.desk'</span>);
+
+<span class="comment token">// ['products' =&gt; []]</span>
+</code></pre>
+<p><a name="method-array-get"></a></p>
+<h4 id="arrget-collection-method"><code>Arr::get()</code> {.collection-method}</h4>
+<p><code>Arr::get</code> 函数使用「.」符号从深度嵌套的数组根据指定键检索值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+<span class="variable token">$price</span> = Arr::get(<span class="variable token">$array</span>, <span class="string token">'products.desk.price'</span>);
+
+<span class="comment token">// 100</span>
+</code></pre>
+<p><code>Arr::get</code> 函数也可以接受一个默认值，如果没有找到特定的键，将返回默认值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$discount</span> = Arr::get(<span class="variable token">$array</span>, <span class="string token">'products.desk.discount'</span>, <span class="number token">0</span>);
+
+<span class="comment token">// 0</span>
+</code></pre>
+<p><a name="method-array-has"></a></p>
+<h4 id="arrhas-collection-method"><code>Arr::has()</code> {.collection-method}</h4>
+<p><code>Arr::has</code> 函数使用「.」符号判断数组中是否存在指定的一个或多个键：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'product'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>]];
+
+<span class="variable token">$contains</span> = Arr::has(<span class="variable token">$array</span>, <span class="string token">'product.name'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$contains</span> = Arr::has(<span class="variable token">$array</span>, [<span class="string token">'product.price'</span>, <span class="string token">'product.discount'</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-hasany"></a></p>
+<h4 id="arrhasany-collection-method"><code>Arr::hasAny()</code> {.collection-method}</h4>
+<p><code>Arr::hasAny</code> 函数使用「.」符号判断数组中是否存在给定集合中的任一值作为键：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'product'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>]];
+
+<span class="variable token">$contains</span> = Arr::hasAny(<span class="variable token">$array</span>, <span class="string token">'product.name'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$contains</span> = Arr::hasAny(<span class="variable token">$array</span>, [<span class="string token">'product.name'</span>, <span class="string token">'product.discount'</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$contains</span> = Arr::hasAny(<span class="variable token">$array</span>, [<span class="string token">'category'</span>, <span class="string token">'product.discount'</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-isassoc"></a></p>
+<h4 id="arrisassoc-collection-method"><code>Arr::isAssoc()</code> {.collection-method}</h4>
+<p>如果给定数组是关联数组，则 <code>Arr::isAssoc</code> 函数返回 <code>true</code>，如果数组没有以零开头的连续数字键，则将其视为「关联」：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$isAssoc</span> = Arr::isAssoc([<span class="string token">'product'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isAssoc</span> = Arr::isAssoc([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-islist"></a></p>
+<h4 id="arrislist-collection-method"><code>Arr::isList()</code> {.collection-method}</h4>
+<p>如果给定数组的键是从零开始的连续整数，则 <code>Arr::isList</code> 方法返回 <code>true</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$isAssoc</span> = Arr::isList([<span class="string token">'foo'</span>, <span class="string token">'bar'</span>, <span class="string token">'baz'</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isAssoc</span> = Arr::isList([<span class="string token">'product'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-array-keyby"></a></p>
+<h4 id="arrkeyby-collection-method"><code>Arr::keyBy()</code> {.collection-method}</h4>
+<blockquote>
+<p>注意：自 Laravel 9.2 引入</p>
+</blockquote>
+<p>The <code>Arr::keyBy</code> method keys the array by the given key. If multiple items have the same key, only the last one will appear in the new array:</p>
+<p>    use Illuminate\Support\Arr;</p>
+<p>    $array = [</p>
+<p>        [&#39;product_id&#39; =&gt; &#39;prod-100&#39;, &#39;name&#39; =&gt; &#39;Desk&#39;],</p>
+<p>        [&#39;product_id&#39; =&gt; &#39;prod-200&#39;, &#39;name&#39; =&gt; &#39;Chair&#39;],</p>
+<p>    ];</p>
+<p>    $keyed = Arr::keyBy($array, &#39;product_id&#39;);</p>
+<p>    /*</p>
+<p>        [</p>
+<p>            &#39;prod-100&#39; =&gt; [&#39;product_id&#39; =&gt; &#39;prod-100&#39;, &#39;name&#39; =&gt; &#39;Desk&#39;],</p>
+<p>            &#39;prod-200&#39; =&gt; [&#39;product_id&#39; =&gt; &#39;prod-200&#39;, &#39;name&#39; =&gt; &#39;Chair&#39;],</p>
+<p>        ]</p>
+<p>    */</p>
+<p><a name="method-array-last"></a></p>
+<h4 id="arrlast-collection-method"><code>Arr::last()</code> {.collection-method}</h4>
+<p><code>Arr::last</code> 函数返回数组中满足指定条件的最后一个元素：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="number token">100</span>, <span class="number token">200</span>, <span class="number token">300</span>, <span class="number token">110</span>];
+
+<span class="variable token">$last</span> = Arr::last(<span class="variable token">$array</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span> &gt;= <span class="number token">150</span>;
+});
+
+<span class="comment token">// 300</span>
+</code></pre>
+<p>将默认值作为第三个参数传递给该方法，如果没有值满足条件，则返回该默认值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$last</span> = Arr::last(<span class="variable token">$array</span>, <span class="variable token">$callback</span>, <span class="variable token">$default</span>);
+</code></pre>
+<p><a name="method-array-only"></a></p>
+<h4 id="arronly-collection-method"><code>Arr::only()</code> {.collection-method}</h4>
+<p><code>Arr::only</code> 函数只返回给定数组中指定的键值对：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>, <span class="string token">'orders'</span> =&gt; <span class="number token">10</span>];
+
+<span class="variable token">$slice</span> = Arr::only(<span class="variable token">$array</span>, [<span class="string token">'name'</span>, <span class="string token">'price'</span>]);
+
+<span class="comment token">// ['name' =&gt; 'Desk', 'price' =&gt; 100]</span>
+</code></pre>
+<p><a name="method-array-pluck"></a></p>
+<h4 id="arrpluck-collection-method"><code>Arr::pluck()</code> {.collection-method}</h4>
+<p><code>Arr::pluck</code> 函数从数组中检索给定键的所有值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [
+    [<span class="string token">'developer'</span> =&gt; [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>, <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]],
+    [<span class="string token">'developer'</span> =&gt; [<span class="string token">'id'</span> =&gt; <span class="number token">2</span>, <span class="string token">'name'</span> =&gt; <span class="string token">'Abigail'</span>]],
+];
+
+<span class="variable token">$names</span> = Arr::pluck(<span class="variable token">$array</span>, <span class="string token">'developer.name'</span>);
+
+<span class="comment token">// ['Taylor', 'Abigail']</span>
+</code></pre>
+<p>你也可以指定结果的键：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$names</span> = Arr::pluck(<span class="variable token">$array</span>, <span class="string token">'developer.name'</span>, <span class="string token">'developer.id'</span>);
+
+<span class="comment token">// [1 =&gt; 'Taylor', 2 =&gt; 'Abigail']</span>
+</code></pre>
+<p><a name="method-array-prepend"></a></p>
+<h4 id="arrprepend-collection-method"><code>Arr::prepend()</code> {.collection-method}</h4>
+<p><code>Arr::prepend</code> 函数将一个值插入到数组的开始位置：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'one'</span>, <span class="string token">'two'</span>, <span class="string token">'three'</span>, <span class="string token">'four'</span>];
+
+<span class="variable token">$array</span> = Arr::prepend(<span class="variable token">$array</span>, <span class="string token">'zero'</span>);
+
+<span class="comment token">// ['zero', 'one', 'two', 'three', 'four']</span>
+</code></pre>
+<p>你也可以指定插入值的键：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>];
+
+<span class="variable token">$array</span> = Arr::prepend(<span class="variable token">$array</span>, <span class="string token">'Desk'</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// ['name' =&gt; 'Desk', 'price' =&gt; 100]</span>
+</code></pre>
+<p><a name="method-array-pull"></a></p>
+<h4 id="arrpull-collection-method"><code>Arr::pull()</code> {.collection-method}</h4>
+<p><code>Arr::pull</code> 函数从数组中返回指定键的值并删除此键值对：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>];
+
+<span class="variable token">$name</span> = Arr::pull(<span class="variable token">$array</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// $name: Desk</span>
+
+<span class="comment token">// $array: ['price' =&gt; 100]</span>
+</code></pre>
+<p>默认值可以作为第三个参数传递给该方法，如果键不存在，则返回该值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$value</span> = Arr::pull(<span class="variable token">$array</span>, <span class="variable token">$key</span>, <span class="variable token">$default</span>);
+</code></pre>
+<p><a name="method-array-query"></a></p>
+<h4 id="arrquery-collection-method"><code>Arr::query()</code> {.collection-method}</h4>
+<p><code>Arr::query</code> 函数将数组转换为查询字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [
+    <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>,
+    <span class="string token">'order'</span> =&gt; [
+        <span class="string token">'column'</span> =&gt; <span class="string token">'created_at'</span>,
+        <span class="string token">'direction'</span> =&gt; <span class="string token">'desc'</span>
+    ]
+];
+
+Arr::query(<span class="variable token">$array</span>);
+
+<span class="comment token">// name=Taylor&amp;order[column]=created_at&amp;order[direction]=desc</span>
+</code></pre>
+<p><a name="method-array-random"></a></p>
+<h4 id="arrrandom-collection-method"><code>Arr::random()</code> {.collection-method}</h4>
+<p><code>Arr::random</code>  函数从数组中随机返回一个值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>];
+
+<span class="variable token">$random</span> = Arr::random(<span class="variable token">$array</span>);
+
+<span class="comment token">// 4 - (retrieved randomly)</span>
+</code></pre>
+<p>你也可以将返回值的数量作为可选的第二个参数传递给该方法，请注意，提供这个参数会返回一个数组，即使是你只需要一项：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$items</span> = Arr::random(<span class="variable token">$array</span>, <span class="number token">2</span>);
+
+<span class="comment token">// [2, 5] - (retrieved randomly)</span>
+</code></pre>
+<p><a name="method-array-set"></a></p>
+<h4 id="arrset-collection-method"><code>Arr::set()</code> {.collection-method}</h4>
+<p><code>Arr::set</code> 函数使用「.」符号在多维数组中设置指定键的值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+Arr::set(<span class="variable token">$array</span>, <span class="string token">'products.desk.price'</span>, <span class="number token">200</span>);
+
+<span class="comment token">// ['products' =&gt; ['desk' =&gt; ['price' =&gt; 200]]]</span>
+</code></pre>
+<p><a name="method-array-shuffle"></a></p>
+<h4 id="arrshuffle-collection-method"><code>Arr::shuffle()</code> {.collection-method}</h4>
+<p><code>Arr::shuffle</code> 函数将数组中值进行随机排序：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = Arr::shuffle([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
+
+<span class="comment token">// [3, 2, 5, 1, 4] - (generated randomly)</span>
+</code></pre>
+<p><a name="method-array-sort"></a></p>
+<h4 id="arrsort-collection-method"><code>Arr::sort()</code> {.collection-method}</h4>
+<p><code>Arr::sort</code>  函数根据数组的值大小进行排序：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="string token">'Desk'</span>, <span class="string token">'Table'</span>, <span class="string token">'Chair'</span>];
+
+<span class="variable token">$sorted</span> = Arr::sort(<span class="variable token">$array</span>);
+
+<span class="comment token">// ['Chair', 'Desk', 'Table']</span>
+</code></pre>
+<p>你也可以根据给定回调函数返回的结果对数组进行排序：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [
+    [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>],
+    [<span class="string token">'name'</span> =&gt; <span class="string token">'Table'</span>],
+    [<span class="string token">'name'</span> =&gt; <span class="string token">'Chair'</span>],
+];
+
+<span class="variable token">$sorted</span> = array_values(Arr::sort(<span class="variable token">$array</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span>[<span class="string token">'name'</span>];
+}));
+
+<span class="comment token">/*
+    [
+        ['name' =&gt; 'Chair'],
+        ['name' =&gt; 'Desk'],
+        ['name' =&gt; 'Table'],
+    ]
+*/</span>
+</code></pre>
+<p><a name="method-array-sort-recursive"></a></p>
+<h4 id="arrsortrecursive-collection-method"><code>Arr::sortRecursive()</code> {.collection-method}</h4>
+<p><code>Arr::sortRecursive</code> 函数使用 <code>sort</code> 函数对数值子数组进行递归排序，使用 <code>ksort</code> 函数对关联子数组进行递归排序：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [
+    [<span class="string token">'Roman'</span>, <span class="string token">'Taylor'</span>, <span class="string token">'Li'</span>],
+    [<span class="string token">'PHP'</span>, <span class="string token">'Ruby'</span>, <span class="string token">'JavaScript'</span>],
+    [<span class="string token">'one'</span> =&gt; <span class="number token">1</span>, <span class="string token">'two'</span> =&gt; <span class="number token">2</span>, <span class="string token">'three'</span> =&gt; <span class="number token">3</span>],
+];
+
+<span class="variable token">$sorted</span> = Arr::sortRecursive(<span class="variable token">$array</span>);
+
+<span class="comment token">/*
+    [
+        ['JavaScript', 'PHP', 'Ruby'],
+        ['one' =&gt; 1, 'three' =&gt; 3, 'two' =&gt; 2],
+        ['Li', 'Roman', 'Taylor'],
+    ]
+*/</span>
+</code></pre>
+<p><a name="method-array-to-css-classes"></a></p>
+<h4 id="arrtocssclasses-collection-method"><code>Arr::toCssClasses()</code> {.collection-method}</h4>
+<p><code>Arr::toCssClasses</code> 函数根据给定的条件编译并返回 CSS 类字符串。该方法接受一个类数组，其中数组键包含你希望添加的一个或多个 CSS Class，而值是一个布尔表达式。如果数组元素有一个数字键，它将始终包含在呈现的类列表中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$isActive</span> = <span class="keyword token">false</span>;
+<span class="variable token">$hasError</span> = <span class="keyword token">true</span>;
+
+<span class="variable token">$array</span> = [<span class="string token">'p-4'</span>, <span class="string token">'font-bold'</span> =&gt; <span class="variable token">$isActive</span>, <span class="string token">'bg-red'</span> =&gt; <span class="variable token">$hasError</span>];
+
+<span class="variable token">$classes</span> = Arr::toCssClasses(<span class="variable token">$array</span>);
+
+<span class="comment token">/*
+    'p-4 bg-red'
+*/</span>
+</code></pre>
+<p>Laravel 基于该函数实现<a href="blade.html#conditionally-merge-classes">条件类</a> 以及 <code>@class</code> <a href="blade.html#conditional-classes">Blade 指令</a>。</p>
+<p><a name="method-array-undot"></a></p>
+<h4 id="arrundot-collection-method"><code>Arr::undot()</code> {.collection-method}</h4>
+<p><code>Arr::undot</code> 函数将使用「点表示法」的一维数组扩展为多维数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [
+    <span class="string token">'user.name'</span> =&gt; <span class="string token">'Kevin Malone'</span>,
+    <span class="string token">'user.occupation'</span> =&gt; <span class="string token">'Accountant'</span>,
+];
+
+<span class="variable token">$array</span> = Arr::undot(<span class="variable token">$array</span>);
+
+<span class="comment token">// ['user' =&gt; ['name' =&gt; 'Kevin Malone', 'occupation' =&gt; 'Accountant']]</span>
+</code></pre>
+<p><a name="method-array-where"></a></p>
+<h4 id="arrwhere-collection-method"><code>Arr::where()</code> {.collection-method}</h4>
+<p><code>Arr::where</code> 函数使用给定的回调函数返回的结果过滤数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="number token">100</span>, <span class="string token">'200'</span>, <span class="number token">300</span>, <span class="string token">'400'</span>, <span class="number token">500</span>];
+
+<span class="variable token">$filtered</span> = Arr::where(<span class="variable token">$array</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> is_string(<span class="variable token">$value</span>);
+});
+
+<span class="comment token">// [1 =&gt; '200', 3 =&gt; '400']</span>
+</code></pre>
+<p><a name="method-array-where-not-null"></a></p>
+<h4 id="arrwherenotnull-collection-method"><code>Arr::whereNotNull()</code> {.collection-method}</h4>
+<p><code>Arr::whereNotNull</code> 函数将从给定数组中删除所有 <code>null</code> 值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = [<span class="number token">0</span>, <span class="keyword token">null</span>];
+
+<span class="variable token">$filtered</span> = Arr::whereNotNull(<span class="variable token">$array</span>);
+
+<span class="comment token">// [0 =&gt; 0]</span>
+</code></pre>
+<p><a name="method-array-wrap"></a></p>
+<h4 id="arrwrap-collection-method"><code>Arr::wrap()</code> {.collection-method}</h4>
+<p><code>Arr::wrap</code> 函数可以将给定值转换为一个数组，如果给定的值已经是一个数组，它将原样返回：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$string</span> = <span class="string token">'Laravel'</span>;
+
+<span class="variable token">$array</span> = Arr::wrap(<span class="variable token">$string</span>);
+
+<span class="comment token">// ['Laravel']</span>
+</code></pre>
+<p>如果给定值是 <code>null</code>，将返回一个空数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Arr;
+
+<span class="variable token">$array</span> = Arr::wrap(<span class="keyword token">null</span>);
+
+<span class="comment token">// []</span>
+</code></pre>
+<p><a name="method-data-fill"></a></p>
+<h4 id="data_fill-collection-method"><code>data_fill()</code> {.collection-method}</h4>
+<p><code>data_fill</code> 函数使用「.」符号给多维数组或对象设置缺少的值：</p>
+<pre><code><span class="variable token">$data</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+data_fill(<span class="variable token">$data</span>, <span class="string token">'products.desk.price'</span>, <span class="number token">200</span>);
+
+<span class="comment token">// ['products' =&gt; ['desk' =&gt; ['price' =&gt; 100]]]</span>
+
+data_fill(<span class="variable token">$data</span>, <span class="string token">'products.desk.discount'</span>, <span class="number token">10</span>);
+
+<span class="comment token">// ['products' =&gt; ['desk' =&gt; ['price' =&gt; 100, 'discount' =&gt; 10]]]</span>
+</code></pre>
+<p>此函数也可以接收「*」作为通配符，设置相应缺少的值：</p>
+<pre><code><span class="variable token">$data</span> = [
+    <span class="string token">'products'</span> =&gt; [
+        [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 1'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>],
+        [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 2'</span>],
+    ],
+];
+
+data_fill(<span class="variable token">$data</span>, <span class="string token">'products.*.price'</span>, <span class="number token">200</span>);
+
+<span class="comment token">/*
+    [
+        'products' =&gt; [
+            ['name' =&gt; 'Desk 1', 'price' =&gt; 100],
+            ['name' =&gt; 'Desk 2', 'price' =&gt; 200],
+        ],
+    ]
+*/</span>
+</code></pre>
+<p><a name="method-data-get"></a></p>
+<h4 id="data_get-collection-method"><code>data_get()</code> {.collection-method}</h4>
+<p><code>data_get</code>  函数使用「.」符号从多维数组或对象中根据指定键检索值：</p>
+<pre><code><span class="variable token">$data</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+<span class="variable token">$price</span> = data_get(<span class="variable token">$data</span>, <span class="string token">'products.desk.price'</span>);
+
+<span class="comment token">// 100</span>
+</code></pre>
+<p>该函数也接受一个默认值，如果没有找到指定的键，将返回默认值：</p>
+<pre><code><span class="variable token">$discount</span> = data_get(<span class="variable token">$data</span>, <span class="string token">'products.desk.discount'</span>, <span class="number token">0</span>);
+
+<span class="comment token">// 0</span>
+</code></pre>
+<p>该函数还接受「*」为通配符,来指向数组或对象的任何键：</p>
+<pre><code><span class="variable token">$data</span> = [
+    <span class="string token">'product-one'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 1'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>],
+    <span class="string token">'product-two'</span> =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 2'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">150</span>],
+];
+
+data_get(<span class="variable token">$data</span>, <span class="string token">'*.name'</span>);
+
+<span class="comment token">// ['Desk 1', 'Desk 2'];</span>
+</code></pre>
+<p><a name="method-data-set"></a></p>
+<h4 id="data_set-collection-method"><code>data_set()</code> {.collection-method}</h4>
+<p><code>data_set</code> 函数使用「.」符号从多维数组或对象中根据指定键设置值：</p>
+<pre><code><span class="variable token">$data</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+data_set(<span class="variable token">$data</span>, <span class="string token">'products.desk.price'</span>, <span class="number token">200</span>);
+
+<span class="comment token">// ['products' =&gt; ['desk' =&gt; ['price' =&gt; 200]]]</span>
+</code></pre>
+<p>同 <code>data_get</code>一样, 函数也支持使用「*」作为通配符给相应键名赋值：</p>
+<pre><code><span class="variable token">$data</span> = [
+    <span class="string token">'products'</span> =&gt; [
+        [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 1'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>],
+        [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk 2'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">150</span>],
+    ],
+];
+
+data_set(<span class="variable token">$data</span>, <span class="string token">'products.*.price'</span>, <span class="number token">200</span>);
+
+<span class="comment token">/*
+    [
+        'products' =&gt; [
+            ['name' =&gt; 'Desk 1', 'price' =&gt; 200],
+            ['name' =&gt; 'Desk 2', 'price' =&gt; 200],
+        ],
+    ]
+*/</span>
+</code></pre>
+<p>通常情况下，已存在的值将会被覆盖。如果只是希望设置一个目前不存在的值，你可以增加一个 <code>false</code> 作为函数的第四个参数：</p>
+<pre><code><span class="variable token">$data</span> = [<span class="string token">'products'</span> =&gt; [<span class="string token">'desk'</span> =&gt; [<span class="string token">'price'</span> =&gt; <span class="number token">100</span>]]];
+
+data_set(<span class="variable token">$data</span>, <span class="string token">'products.desk.price'</span>, <span class="number token">200</span>, <span class="variable token">$overwrite</span> = <span class="keyword token">false</span>);
+
+<span class="comment token">// ['products' =&gt; ['desk' =&gt; ['price' =&gt; 100]]]</span>
+</code></pre>
+<p><a name="method-head"></a></p>
+<h4 id="head-collection-method"><code>head()</code> {.collection-method}</h4>
+<p><code>head</code> 函数将返回数组中的第一个值：</p>
+<pre><code><span class="variable token">$array</span> = [<span class="number token">100</span>, <span class="number token">200</span>, <span class="number token">300</span>];
+
+<span class="variable token">$first</span> = head(<span class="variable token">$array</span>);
+
+<span class="comment token">// 100</span>
+</code></pre>
+<p><a name="method-last"></a></p>
+<h4 id="last-collection-method"><code>last()</code> {.collection-method}</h4>
+<p><code>last</code> 函数将返回数组中的最后一个值：</p>
+<pre><code><span class="variable token">$array</span> = [<span class="number token">100</span>, <span class="number token">200</span>, <span class="number token">300</span>];
+
+<span class="variable token">$last</span> = last(<span class="variable token">$array</span>);
+
+<span class="comment token">// 300</span>
+</code></pre>
+<p><a name="paths"></a></p>
+<h2 id="路径-1">路径</h2>
+<p><a name="method-app-path"></a></p>
+<h4 id="app_path-collection-method"><code>app_path()</code> {.collection-method}</h4>
+<p><code>app_path</code> 函数返回 app 目录的完整路径。你也可以使用 app_path 函数来生成应用目录下特定文件的完整路径：</p>
+<pre><code><span class="variable token">$path</span> = app_path();
+
+<span class="variable token">$path</span> = app_path(<span class="string token">'Http/Controllers/Controller.php'</span>);
+</code></pre>
+<p><a name="method-base-path"></a></p>
+<h4 id="base_path-collection-method"><code>base_path()</code> {.collection-method}</h4>
+<p><code>base_path</code> 函数返回项目根目录的完整路径。你也可以使用 <code>base_path</code> 函数生成项目根目录下特定文件的完整路径：</p>
+<pre><code><span class="variable token">$path</span> = base_path();
+
+<span class="variable token">$path</span> = base_path(<span class="string token">'vendor/bin'</span>);
+</code></pre>
+<p><a name="method-config-path"></a></p>
+<h4 id="config_path-collection-method"><code>config_path()</code> {.collection-method}</h4>
+<p><code>config_path</code>  函数返回 项目配置目录(config)的完整路径。你也可以使用 <code>config_path</code> 函数来生成应用配置目录中的特定文件的完整路径：</p>
+<pre><code><span class="variable token">$path</span> = config_path();
+
+<span class="variable token">$path</span> = config_path(<span class="string token">'app.php'</span>);
+</code></pre>
+<p><a name="method-database-path"></a></p>
+<h4 id="database_path-collection-method"><code>database_path()</code> {.collection-method}</h4>
+<p><code>database_path</code>函数返回 <code>database</code> 目录的完整路径。你也可以使用 <code>database_path</code> 函数来生成数据库目录下特定文件的完整路径：</p>
+<pre><code><span class="variable token">$path</span> = database_path();
+
+<span class="variable token">$path</span> = database_path(<span class="string token">'factories/UserFactory.php'</span>);
+</code></pre>
+<p><a name="method-mix"></a></p>
+<h4 id="mix-collection-method"><code>mix()</code> {.collection-method}</h4>
+<p><code>mix</code>函数返回 <a href="mix.html">编译前端资源（Mix）</a>的路径,便于加载 css，js 等静态文件：</p>
+<pre><code><span class="variable token">$path</span> = mix(<span class="string token">'css/app.css'</span>);
+</code></pre>
+<p><a name="method-public-path"></a></p>
+<h4 id="public_path-collection-method"><code>public_path()</code> {.collection-method}</h4>
+<p><code>public_path</code> 函数返回 <code>public</code> 目录的完整路径。你可以使用 <code>public_path</code> 函数来生成 <code>public</code> 目录下特定文件的完整路径：</p>
+<pre><code><span class="variable token">$path</span> = public_path();
+
+<span class="variable token">$path</span> = public_path(<span class="string token">'css/app.css'</span>);
+</code></pre>
+<p><a name="method-resource-path"></a></p>
+<h4 id="resource_path-collection-method"><code>resource_path()</code> {.collection-method}</h4>
+<p> <code>resource_path</code> 函数返回 <code>resources</code> 目录的完整路径。你也可以用<code>resource_path</code> 函数来生成位于资源路径中的特定文件路径：</p>
+<pre><code><span class="variable token">$path</span> = resource_path();
+
+<span class="variable token">$path</span> = resource_path(<span class="string token">'sass/app.scss'</span>);
+</code></pre>
+<p><a name="method-storage-path"></a></p>
+<h4 id="storage_path-collection-method"><code>storage_path()</code> {.collection-method}</h4>
+<p><code>storage_path</code> 函数返回 <code>storage</code> 目录的完整路径。 你也可以用<code>storage_path</code> 函数来生成位于资源路径中的特定文件路径：</p>
+<pre><code><span class="variable token">$path</span> = storage_path();
+
+<span class="variable token">$path</span> = storage_path(<span class="string token">'app/file.txt'</span>);
+</code></pre>
+<p><a name="strings"></a></p>
+<h2 id="字符串函数">字符串函数</h2>
+<p><a name="method-__"></a></p>
+<h4 id="__-collection-method"><code>__()</code> {.collection-method}</h4>
+<p> <code>__</code> 函数可使用 <a href="localization/9378.html">本地化文件</a> 来翻译指定的字符串或特定的key：</p>
+<pre><code><span class="keyword token">echo</span> __(<span class="string token">'Welcome to our application'</span>);
+
+<span class="keyword token">echo</span> __(<span class="string token">'messages.welcome'</span>);
+</code></pre>
+<p>如果给定翻译的字符串或者key不存在， 则 <code>__</code> 会返回你指定的值. 所以上述例子中， 如果给定翻译的字符串或者key不存在，则 <code>__</code> 函数会返回<code>messages.welcome</code>。</p>
+<p><a name="method-class-basename"></a></p>
+<h4 id="class_basename-collection-method"><code>class_basename()</code> {.collection-method}</h4>
+<p> <code>class_basename</code> 函数返回不带命名空间的特定类的类名：</p>
+<pre><code><span class="variable token">$class</span> = class_basename(<span class="string token">'Foo\Bar\Baz'</span>);
+
+<span class="comment token">// Baz</span>
+</code></pre>
+<p><a name="method-e"></a></p>
+<h4 id="e-collection-method"><code>e()</code> {.collection-method}</h4>
+<p><code>e</code> 函数运行PHP的<code>htmlspecialchars</code> 函数，且 <code>double_encode</code> 默认设定为 <code>true</code>：</p>
+<pre><code><span class="keyword token">echo</span> e(<span class="string token">'&lt;html&gt;foo&lt;/html&gt;'</span>);
+
+<span class="comment token">// &amp;lt;html&amp;gt;foo&amp;lt;/html&amp;gt;</span>
+</code></pre>
+<p><a name="method-preg-replace-array"></a></p>
+<h4 id="preg_replace_array-collection-method"><code>preg_replace_array()</code> {.collection-method}</h4>
+<p><code>preg_replace_array</code> 函数替换给定顺序模式下字符串中的一个数组：</p>
+<pre><code><span class="variable token">$string</span> = <span class="string token">'The event will take place between :start and :end'</span>;
+
+<span class="variable token">$replaced</span> = preg_replace_array(<span class="string token">'/:[a-z_]+/'</span>, [<span class="string token">'8:30'</span>, <span class="string token">'9:00'</span>], <span class="variable token">$string</span>);
+
+<span class="comment token">// The event will take place between 8:30 and 9:00</span>
+</code></pre>
+<p><a name="method-str-after"></a></p>
+<h4 id="strafter-collection-method"><code>Str::after()</code> {.collection-method}</h4>
+<p><code>Str::after</code> 方法返回字符串中指定值之后的所有内容。如果字符串中不存在这个值，它将返回整个字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::after(<span class="string token">'This is my name'</span>, <span class="string token">'This is'</span>);
+
+<span class="comment token">// ' my name'</span>
+</code></pre>
+<p><a name="method-str-after-last"></a></p>
+<h4 id="strafterlast-collection-method"><code>Str::afterLast()</code> {.collection-method}</h4>
+<p><code>Str::afterLast</code> 方法返回字符串中指定值最后一次出现后的所有内容。如果字符串中不存在这个值，它将返回整个字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::afterLast(<span class="string token">'App\Http\Controllers\Controller'</span>, <span class="string token">'\\'</span>);
+
+<span class="comment token">// 'Controller'</span>
+</code></pre>
+<p><a name="method-str-ascii"></a></p>
+<h4 id="strascii-collection-method"><code>Str::ascii()</code> {.collection-method}</h4>
+<p><code>Str::ascii</code> 方法尝试将字符串转换为 ASCII 值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::ascii(<span class="string token">'û'</span>);
+
+<span class="comment token">// 'u'</span>
+</code></pre>
+<p><a name="method-str-before"></a></p>
+<h4 id="strbefore-collection-method"><code>Str::before()</code> {.collection-method}</h4>
+<p><code>Str::before</code> 方法返回字符串中指定值之前的所有内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::before(<span class="string token">'This is my name'</span>, <span class="string token">'my name'</span>);
+
+<span class="comment token">// 'This is '</span>
+</code></pre>
+<p><a name="method-str-before-last"></a></p>
+<h4 id="strbeforelast-collection-method"><code>Str::beforeLast()</code> {.collection-method}</h4>
+<p><code>Str::beforeLast</code> 方法返回字符串中指定值最后一次出现前的所有内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::beforeLast(<span class="string token">'This is my name'</span>, <span class="string token">'is'</span>);
+
+<span class="comment token">// 'This '</span>
+</code></pre>
+<p><a name="method-str-between"></a></p>
+<h4 id="strbetween-collection-method"><code>Str::between()</code> {.collection-method}</h4>
+<p><code>Str::between</code>  方法返回字符串在指定两个值之间的内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::between(<span class="string token">'This is my name'</span>, <span class="string token">'This'</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// ' is my '</span>
+</code></pre>
+<p><a name="method-camel-case"></a></p>
+<h4 id="strcamel-collection-method"><code>Str::camel()</code> {.collection-method}</h4>
+<p><code>Str::camel</code> 方法将指定字符串转换为 <code>驼峰式</code> 表示方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::camel(<span class="string token">'foo_bar'</span>);
+
+<span class="comment token">// fooBar</span>
+</code></pre>
+<p><a name="method-str-contains"></a></p>
+<h4 id="strcontains-collection-method"><code>Str::contains()</code> {.collection-method}</h4>
+<p><code>Str::contains</code> 方法判断指定字符串中是否包含另一指定字符串（区分大小写）：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$contains</span> = Str::contains(<span class="string token">'This is my name'</span>, <span class="string token">'my'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p>你也可以传递数组的值的形式来判断指定字符串是否包含数组中的任一值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$contains</span> = Str::contains(<span class="string token">'This is my name'</span>, [<span class="string token">'my'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-str-contains-all"></a></p>
+<h4 id="strcontainsall-collection-method"><code>Str::containsAll()</code> {.collection-method}</h4>
+<p><code>Str::containsAll</code> 方法用于判断指定字符串是否包含指定数组中的所有值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$containsAll</span> = Str::containsAll(<span class="string token">'This is my name'</span>, [<span class="string token">'my'</span>, <span class="string token">'name'</span>]);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-ends-with"></a></p>
+<h4 id="strendswith-collection-method"><code>Str::endsWith()</code> {.collection-method}</h4>
+<p><code>Str::endsWith</code> 方法用于判断指定字符串是否以另一指定字符串结尾：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::endsWith(<span class="string token">'This is my name'</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p>你也可以传递数组的值的形式来判断指定字符串是否包含指定数组中的任一值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::endsWith(<span class="string token">'This is my name'</span>, [<span class="string token">'name'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = Str::endsWith(<span class="string token">'This is my name'</span>, [<span class="string token">'this'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-excerpt"></a></p>
+<h4 id="strexcerpt-collection-method"><code>Str::excerpt()</code> {.collection-method}</h4>
+<p><code>Str::excerpt</code> 方法用于从给定字符串中提取与该字符串中短语的第一个实例匹配的片段：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$excerpt</span> = Str::excerpt(<span class="string token">'This is my name'</span>, <span class="string token">'my'</span>, [
+    <span class="string token">'radius'</span> =&gt; <span class="number token">3</span>
+]);
+
+<span class="comment token">// '...is my na...'</span>
+</code></pre>
+<p><code>radius</code> 选项默认为 <code>100</code>，允许你定义应出现在截断字符串前后的字符数。</p>
+<p>此外，你可以使用 <code>omission</code> 选项来定义将附加到截断字符串的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$excerpt</span> = Str::excerpt(<span class="string token">'This is my name'</span>, <span class="string token">'name'</span>, [
+    <span class="string token">'radius'</span> =&gt; <span class="number token">3</span>,
+    <span class="string token">'omission'</span> =&gt; <span class="string token">'(...) '</span>
+]);
+
+<span class="comment token">// '(...) my name'</span>
+</code></pre>
+<p><a name="method-str-finish"></a></p>
+<h4 id="strfinish-collection-method"><code>Str::finish()</code> {.collection-method}</h4>
+<p><code>Str::finish</code> 方法将指定的字符串修改为以指定的值结尾的形式：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$adjusted</span> = Str::finish(<span class="string token">'this/string'</span>, <span class="string token">'/'</span>);
+
+<span class="comment token">// this/string/</span>
+
+<span class="variable token">$adjusted</span> = Str::finish(<span class="string token">'this/string/'</span>, <span class="string token">'/'</span>);
+
+<span class="comment token">// this/string/</span>
+</code></pre>
+<p><a name="method-str-headline"></a></p>
+<h4 id="strheadline-collection-method"><code>Str::headline()</code> {.collection-method}</h4>
+<p><code>Str::headline</code> 方法会将由大小写、连字符或下划线分隔的字符串转换为空格分隔的字符串，同时保证每个单词的首字母大写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$headline</span> = Str::headline(<span class="string token">'steve_jobs'</span>);
+
+<span class="comment token">// Steve Jobs</span>
+
+<span class="variable token">$headline</span> = Str::headline(<span class="string token">'EmailNotificationSent'</span>);
+
+<span class="comment token">// Email Notification Sent</span>
+</code></pre>
+<p><a name="method-str-is"></a></p>
+<h4 id="stris-collection-method"><code>Str::is()</code> {.collection-method}</h4>
+<p><code>Str::is</code> 方法用来判断字符串是否与指定模式匹配。星号 <code>*</code> 可用于表示通配符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$matches</span> = Str::is(<span class="string token">'foo*'</span>, <span class="string token">'foobar'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$matches</span> = Str::is(<span class="string token">'baz*'</span>, <span class="string token">'foobar'</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-str-is-ascii"></a></p>
+<h4 id="strisascii-collection-method"><code>Str::isAscii()</code> {.collection-method}</h4>
+<p><code>Str::isAscii</code> 方法用于判断字符串是否是 7 位 ASCII：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$isAscii</span> = Str::isAscii(<span class="string token">'Taylor'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isAscii</span> = Str::isAscii(<span class="string token">'ü'</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-str-is-uuid"></a></p>
+<h4 id="strisuuid-collection-method"><code>Str::isUuid()</code> {.collection-method}</h4>
+<p><code>Str::isUuid</code> 方法用于判断指定字符串是否是有效的 UUID ：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$isUuid</span> = Str::isUuid(<span class="string token">'a0a2a2d2-0b87-4a18-83f2-2529882be2de'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$isUuid</span> = Str::isUuid(<span class="string token">'laravel'</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-kebab-case"></a></p>
+<h4 id="strkebab-collection-method"><code>Str::kebab()</code> {.collection-method}</h4>
+<p><code>Str::kebab</code> 方法将字符串转换为 <code>烤串式（ kebab-case ）</code> 表示方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::kebab(<span class="string token">'fooBar'</span>);
+
+<span class="comment token">// foo-bar</span>
+</code></pre>
+<p><a name="method-str-length"></a></p>
+<h4 id="strlength-collection-method"><code>Str::length()</code> {.collection-method}</h4>
+<p><code>Str::length</code> 方法返回指定字符串的长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$length</span> = Str::length(<span class="string token">'Laravel'</span>);
+
+<span class="comment token">// 7</span>
+</code></pre>
+<p><a name="method-str-limit"></a></p>
+<h4 id="strlimit-collection-method"><code>Str::limit()</code> {.collection-method}</h4>
+<p><code>Str::limit</code> 方法将字符串以指定长度进行截断：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$truncated</span> = Str::limit(<span class="string token">'The quick brown fox jumps over the lazy dog'</span>, <span class="number token">20</span>);
+
+<span class="comment token">// The quick brown fox...</span>
+</code></pre>
+<p>你也可通过第三个参数来改变追加到末尾的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$truncated</span> = Str::limit(<span class="string token">'The quick brown fox jumps over the lazy dog'</span>, <span class="number token">20</span>, <span class="string token">' (...)'</span>);
+
+<span class="comment token">// The quick brown fox (...)</span>
+</code></pre>
+<p><a name="method-str-lower"></a></p>
+<h4 id="strlower-collection-method"><code>Str::lower()</code> {.collection-method}</h4>
+<p><code>Str::lower</code> 方法用于将字符串转换为小写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::lower(<span class="string token">'LARAVEL'</span>);
+
+<span class="comment token">// laravel</span>
+</code></pre>
+<p><a name="method-str-markdown"></a></p>
+<h4 id="strmarkdown-collection-method"><code>Str::markdown()</code> {.collection-method}</h4>
+<p><code>Str::markdown</code> 方法可以将 <code>GitHub</code> 风格的 <code>Markdown</code> 转换为 <code>HTML</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$html</span> = Str::markdown(<span class="string token">'# Laravel'</span>);
+
+<span class="comment token">// &lt;h1&gt;Laravel&lt;/h1&gt;</span>
+
+<span class="variable token">$html</span> = Str::markdown(<span class="string token">'# Taylor &lt;b&gt;Otwell&lt;/b&gt;'</span>, [
+    <span class="string token">'html_input'</span> =&gt; <span class="string token">'strip'</span>,
+]);
+
+<span class="comment token">// &lt;h1&gt;Taylor Otwell&lt;/h1&gt;</span>
+</code></pre>
+<p><a name="method-str-mask"></a></p>
+<h4 id="strmask-collection-method"><code>Str::mask()</code> {.collection-method}</h4>
+<p><code>Str::mask</code> 方法会使用重复的字符掩盖字符串的一部分，并可用于混淆字符串段，例如电子邮件地址和电话号码：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::mask(<span class="string token">'taylor@example.com'</span>, <span class="string token">'*'</span>, <span class="number token">3</span>);
+
+<span class="comment token">// tay***************</span>
+</code></pre>
+<p>你可以提供一个负数作为 <code>mask</code> 方法的第三个参数，这将指示该方法在距字符串末尾的给定距离处开始屏蔽：</p>
+<pre><code><span class="variable token">$string</span> = Str::mask(<span class="string token">'taylor@example.com'</span>, <span class="string token">'*'</span>, -<span class="number token">15</span>, <span class="number token">3</span>);
+
+<span class="comment token">// tay***@example.com</span>
+</code></pre>
+<p><a name="method-str-ordered-uuid"></a></p>
+<h4 id="strordereduuid-collection-method"><code>Str::orderedUuid()</code> {.collection-method}</h4>
+<p><code>Str::orderedUuid</code> 方法用于生成一个「时间戳优先」的 UUID ，它可作为数据库索引列的有效值。使用此方法生成的每个 UUID 将排在之前使用该方法生成的 UUID 后面：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="keyword token">return</span> (string) Str::orderedUuid();
+</code></pre>
+<p><a name="method-str-padboth"></a></p>
+<h4 id="strpadboth-collection-method"><code>Str::padBoth()</code> {.collection-method}</h4>
+<p><code>Str::padBoth</code> 方法包装了 PHP 的 <code>str_pad 函数</code>，在指定字符串的两侧填充上另一字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::padBoth(<span class="string token">'James'</span>, <span class="number token">10</span>, <span class="string token">'_'</span>);
+
+<span class="comment token">// '__James___'</span>
+
+<span class="variable token">$padded</span> = Str::padBoth(<span class="string token">'James'</span>, <span class="number token">10</span>);
+
+<span class="comment token">// '  James   '</span>
+</code></pre>
+<p><a name="method-str-padleft"></a></p>
+<h4 id="strpadleft-collection-method"><code>Str::padLeft()</code> {.collection-method}</h4>
+<p><code>Str::padLeft</code> 方法包装了 PHP 的 <code>str_pad</code> 函数，在指定字符串的左侧填充上另一字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::padLeft(<span class="string token">'James'</span>, <span class="number token">10</span>, <span class="string token">'-='</span>);
+
+<span class="comment token">// '-=-=-James'</span>
+
+<span class="variable token">$padded</span> = Str::padLeft(<span class="string token">'James'</span>, <span class="number token">10</span>);
+
+<span class="comment token">// '     James'</span>
+</code></pre>
+<p><a name="method-str-padright"></a></p>
+<h4 id="strpadright-collection-method"><code>Str::padRight()</code> {.collection-method}</h4>
+<p><code>Str::padRight</code> 方法包装了 PHP 的 str_pad 函数，在指定字符串的右侧填充上另一字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::padRight(<span class="string token">'James'</span>, <span class="number token">10</span>, <span class="string token">'-'</span>);
+
+<span class="comment token">// 'James-----'</span>
+
+<span class="variable token">$padded</span> = Str::padRight(<span class="string token">'James'</span>, <span class="number token">10</span>);
+
+<span class="comment token">// 'James     '</span>
+</code></pre>
+<p><a name="method-str-plural"></a></p>
+<h4 id="strplural-collection-method"><code>Str::plural()</code> {.collection-method}</h4>
+<p><code>Str::plural</code> 方法将单数形式的字符串转换为复数形式。目前该函数仅支持英语：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::plural(<span class="string token">'car'</span>);
+
+<span class="comment token">// cars</span>
+
+<span class="variable token">$plural</span> = Str::plural(<span class="string token">'child'</span>);
+
+<span class="comment token">// children</span>
+</code></pre>
+<p>你可以提供一个整数作为函数的第二个参数来检索字符串的单数或复数形式：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::plural(<span class="string token">'child'</span>, <span class="number token">2</span>);
+
+<span class="comment token">// children</span>
+
+<span class="variable token">$singular</span> = Str::plural(<span class="string token">'child'</span>, <span class="number token">1</span>);
+
+<span class="comment token">// child</span>
+</code></pre>
+<p><a name="method-str-plural-studly"></a></p>
+<h4 id="strpluralstudly-collection-method"><code>Str::pluralStudly()</code> {.collection-method}</h4>
+<p><code>Str::pluralStudly</code> 方法将以驼峰格式的单数字符串转化为其复数形式。目前该函数仅支持英语：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::pluralStudly(<span class="string token">'VerifiedHuman'</span>);
+
+<span class="comment token">// VerifiedHumans</span>
+
+<span class="variable token">$plural</span> = Str::pluralStudly(<span class="string token">'UserFeedback'</span>);
+
+<span class="comment token">// UserFeedback</span>
+</code></pre>
+<p>你可以提供一个整数作为函数的第二个参数来检索字符串的单数或复数形式：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::pluralStudly(<span class="string token">'VerifiedHuman'</span>, <span class="number token">2</span>);
+
+<span class="comment token">// VerifiedHumans</span>
+
+<span class="variable token">$singular</span> = Str::pluralStudly(<span class="string token">'VerifiedHuman'</span>, <span class="number token">1</span>);
+
+<span class="comment token">// VerifiedHuman</span>
+</code></pre>
+<p><a name="method-str-random"></a></p>
+<h4 id="strrandom-collection-method"><code>Str::random()</code> {.collection-method}</h4>
+<p><code>Str::random</code> 方法用于生成指定长度的随机字符串。这个函数使用了PHP的 <code>random_bytes</code> 函数：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$random</span> = Str::random(<span class="number token">40</span>);
+</code></pre>
+<p><a name="method-str-remove"></a></p>
+<h4 id="strremove-collection-method"><code>Str::remove()</code> {.collection-method}</h4>
+<p><code>Str::remove</code> 方法从字符串中删除给定值或给定数组内的所有值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = <span class="string token">'Peter Piper picked a peck of pickled peppers.'</span>;
+
+<span class="variable token">$removed</span> = Str::remove(<span class="string token">'e'</span>, <span class="variable token">$string</span>);
+
+<span class="comment token">// Ptr Pipr pickd a pck of pickld ppprs.</span>
+</code></pre>
+<p>你还可以将 <code>false</code> 作为第三个参数传递给 <code>remove</code> 方法以在删除字符串时忽略大小写。</p>
+<p><a name="method-str-replace"></a></p>
+<h4 id="strreplace-collection-method"><code>Str::replace()</code> {.collection-method}</h4>
+<p><code>Str::replace</code> 方法用于替换字符串中的给定字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = <span class="string token">'Laravel 8.x'</span>;
+
+<span class="variable token">$replaced</span> = Str::replace(<span class="string token">'8.x'</span>, <span class="string token">'9.x'</span>, <span class="variable token">$string</span>);
+
+<span class="comment token">// Laravel 9.x</span>
+</code></pre>
+<p><a name="method-str-replace-array"></a></p>
+<h4 id="strreplacearray-collection-method"><code>Str::replaceArray()</code> {.collection-method}</h4>
+<p><code>Str::replaceArray</code> 方法使用数组有序的替换字符串中的特定字符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = <span class="string token">'The event will take place between ? and ?'</span>;
+
+<span class="variable token">$replaced</span> = Str::replaceArray(<span class="string token">'?'</span>, [<span class="string token">'8:30'</span>, <span class="string token">'9:00'</span>], <span class="variable token">$string</span>);
+
+<span class="comment token">// The event will take place between 8:30 and 9:00</span>
+</code></pre>
+<p><a name="method-str-replace-first"></a></p>
+<h4 id="strreplacefirst-collection-method"><code>Str::replaceFirst()</code> {.collection-method}</h4>
+<p><code>Str::replaceFirst</code> 函数替换字符串中给定值的第一个匹配项 ：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::replaceFirst(<span class="string token">'the'</span>, <span class="string token">'a'</span>, <span class="string token">'the quick brown fox jumps over the lazy dog'</span>);
+
+<span class="comment token">// a quick brown fox jumps over the lazy dog</span>
+</code></pre>
+<p><a name="method-str-replace-last"></a></p>
+<h4 id="strreplacelast-collection-method"><code>Str::replaceLast()</code> {.collection-method}</h4>
+<p><code>Str::replaceLast</code>  函数替换字符串中最后一次出现的给定值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::replaceLast(<span class="string token">'the'</span>, <span class="string token">'a'</span>, <span class="string token">'the quick brown fox jumps over the lazy dog'</span>);
+
+<span class="comment token">// the quick brown fox jumps over a lazy dog</span>
+</code></pre>
+<p><a name="method-str-reverse"></a></p>
+<h4 id="strreverse-collection-method"><code>Str::reverse()</code> {.collection-method}</h4>
+<p><code>Str::reverse</code> 方法用于反转给定的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$reversed</span> = Str::reverse(<span class="string token">'Hello World'</span>);
+
+<span class="comment token">// dlroW olleH</span>
+</code></pre>
+<p><a name="method-str-singular"></a></p>
+<h4 id="strsingular-collection-method"><code>Str::singular()</code> {.collection-method}</h4>
+<p><code>Str::singular</code> 方法将字符串转换为单数形式。该函数目前仅支持英文：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$singular</span> = Str::singular(<span class="string token">'cars'</span>);
+
+<span class="comment token">// car</span>
+
+<span class="variable token">$singular</span> = Str::singular(<span class="string token">'children'</span>);
+
+<span class="comment token">// child</span>
+</code></pre>
+<p><a name="method-str-slug"></a></p>
+<h4 id="strslug-collection-method"><code>Str::slug()</code> {.collection-method}</h4>
+<p><code>Str::slug</code> 方法将给定的字符串生成一个 URL 友好的「slug」：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slug</span> = Str::slug(<span class="string token">'Laravel 5 Framework'</span>, <span class="string token">'-'</span>);
+
+<span class="comment token">// laravel-5-framework</span>
+</code></pre>
+<p><a name="method-snake-case"></a></p>
+<h4 id="strsnake-collection-method"><code>Str::snake()</code> {.collection-method}</h4>
+<p><code>Str::snake</code> 方法是将驼峰的函数名或者字符串转换成 <code>_</code> 命名的函数或者字符串，例如 <code>snakeCase</code> 转换成 <code>snake_case</code></p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::snake(<span class="string token">'fooBar'</span>);
+
+<span class="comment token">// foo_bar</span>
+
+<span class="variable token">$converted</span> = Str::snake(<span class="string token">'fooBar'</span>, <span class="string token">'-'</span>);
+
+<span class="comment token">// foo-bar</span>
+</code></pre>
+<p><a name="method-str-start"></a></p>
+<h4 id="strstart-collection-method"><code>Str::start()</code> {.collection-method}</h4>
+<p><code>Str::start</code> 方法是将给定的值添加到字符串的开始位置，例如：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$adjusted</span> = Str::start(<span class="string token">'this/string'</span>, <span class="string token">'/'</span>);
+
+<span class="comment token">// /this/string</span>
+
+<span class="variable token">$adjusted</span> = Str::start(<span class="string token">'/this/string'</span>, <span class="string token">'/'</span>);
+
+<span class="comment token">// /this/string</span>
+</code></pre>
+<p><a name="method-starts-with"></a></p>
+<h4 id="strstartswith-collection-method"><code>Str::startsWith()</code> {.collection-method}</h4>
+<p><code>Str::startsWith</code> 方法用来判断给定的字符串是否为给定值的开头：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::startsWith(<span class="string token">'This is my name'</span>, <span class="string token">'This'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p>如果传递了一个可能值的数组且字符串以任何给定值开头，则 <code>startsWith</code> 方法将返回 <code>true</code>：</p>
+<pre><code><span class="variable token">$result</span> = Str::startsWith(<span class="string token">'This is my name'</span>, [<span class="string token">'This'</span>, <span class="string token">'That'</span>, <span class="string token">'There'</span>]);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-studly-case"></a></p>
+<h4 id="strstudly-collection-method"><code>Str::studly()</code> {.collection-method}</h4>
+<p><code>Str::studly</code> 方法将给定的字符串转换为 <code>驼峰命名</code> 的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::studly(<span class="string token">'foo_bar'</span>);
+
+<span class="comment token">// FooBar</span>
+</code></pre>
+<p><a name="method-str-substr"></a></p>
+<h4 id="strsubstr-collection-method"><code>Str::substr()</code> {.collection-method}</h4>
+<p><code>Str::substr</code> 方法与 php 自带的字符串 <code>substr</code> 截取函数相同：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::substr(<span class="string token">'The Laravel Framework'</span>, <span class="number token">4</span>, <span class="number token">7</span>);
+
+<span class="comment token">// Laravel</span>
+</code></pre>
+<p><a name="method-str-substrcount"></a></p>
+<h4 id="strsubstrcount-collection-method"><code>Str::substrCount()</code> {.collection-method}</h4>
+<p><code>Str::substrCount</code> 方法返回给定字符串中给定值出现的次数：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$count</span> = Str::substrCount(<span class="string token">'If you like ice cream, you will like snow cones.'</span>, <span class="string token">'like'</span>);
+
+<span class="comment token">// 2</span>
+</code></pre>
+<p><a name="method-str-substrreplace"></a></p>
+<h4 id="strsubstrreplace-collection-method"><code>Str::substrReplace()</code> {.collection-method}</h4>
+<p><code>Str::substrReplace</code> 方法在字符串的一部分中替换文本，从第三个参数指定的位置开始替换第四个参数指定的字符数。将 <code>0</code> 传递给方法的第四个参数将在指定位置插入字符串，而不替换字符串中的任何现有字符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::substrReplace(<span class="string token">'1300'</span>, <span class="string token">':'</span>, <span class="number token">2</span>); 
+<span class="comment token">// 13:</span>
+
+<span class="variable token">$result</span> = Str::substrReplace(<span class="string token">'1300'</span>, <span class="string token">':'</span>, <span class="number token">2</span>, <span class="number token">0</span>); 
+<span class="comment token">// 13:00</span>
+</code></pre>
+<p><a name="method-str-swap"></a></p>
+<h4 id="strswap-collection-method"><code>Str::swap()</code> {.collection-method}</h4>
+<p><code>Str::swap</code> 方法使用 PHP 的 <code>strtr</code> 函数替换给定字符串中的多个值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::swap([
+    <span class="string token">'Tacos'</span> =&gt; <span class="string token">'Burritos'</span>,
+    <span class="string token">'great'</span> =&gt; <span class="string token">'fantastic'</span>,
+], <span class="string token">'Tacos are great!'</span>);
+
+<span class="comment token">// Burritos are fantastic!</span>
+</code></pre>
+<p><a name="method-title-case"></a></p>
+<h4 id="strtitle-collection-method"><code>Str::title()</code> {.collection-method}</h4>
+<p><code>Str::title</code> 方法是把指定的字符串，每个单词首字母大写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::title(<span class="string token">'a nice title uses the correct case'</span>);
+
+<span class="comment token">// A Nice Title Uses The Correct Case</span>
+</code></pre>
+<p><a name="method-str-to-html-string"></a></p>
+<h4 id="strtohtmlstring-collection-method"><code>Str::toHtmlString()</code> {.collection-method}</h4>
+<p><code>Str::toHtmlString</code> 方法将字符串实例转换为 <code>Illuminate\Support\HtmlString</code> 的实例，它可以显示在 Blade 模板中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$htmlString</span> = Str::of(<span class="string token">'Nuno Maduro'</span>)-&gt;toHtmlString();
+</code></pre>
+<p><a name="method-str-ucfirst"></a></p>
+<h4 id="strucfirst-collection-method"><code>Str::ucfirst()</code> {.collection-method}</h4>
+<p><code>Str::ucfirst</code> 方法是把指定的字符串首字母大写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::ucfirst(<span class="string token">'foo bar'</span>);
+
+<span class="comment token">// Foo bar</span>
+</code></pre>
+<p><a name="method-str-upper"></a></p>
+<h4 id="strupper-collection-method"><code>Str::upper()</code> {.collection-method}</h4>
+<p><code>Str::upper</code> 函数用于将指定字符串转换为大写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::upper(<span class="string token">'laravel'</span>);
+
+<span class="comment token">// LARAVEL</span>
+</code></pre>
+<p><a name="method-str-uuid"></a></p>
+<h4 id="struuid-collection-method"><code>Str::uuid()</code> {.collection-method}</h4>
+<p><code>Str::uuid</code> 方法用于生成一个 UUID （第 4 版）：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="keyword token">return</span> (string) Str::uuid();
+</code></pre>
+<p><a name="method-str-word-count"></a></p>
+<h4 id="strwordcount-collection-method"><code>Str::wordCount()</code> {.collection-method}</h4>
+<p><code>Str::wordCount</code> 方法返回字符串包含的单词数：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Str;
+
+Str::wordCount(<span class="string token">'Hello, world!'</span>); <span class="comment token">// 2</span>
+</code></pre>
+<p><a name="method-str-words"></a></p>
+<h4 id="strwords-collection-method"><code>Str::words()</code> {.collection-method}</h4>
+<p><code>Str::words</code> 方法用于限制字符串中的单词数。 可以通过它的第三个参数将另一个字符串传递给此方法，以指定应将哪个字符串附加到截断的字符串的末尾：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="keyword token">return</span> Str::words(<span class="string token">'Perfectly balanced, as all things should be.'</span>, <span class="number token">3</span>, <span class="string token">' &gt;&gt;&gt;'</span>);
+
+<span class="comment token">// Perfectly balanced, as &gt;&gt;&gt;</span>
+</code></pre>
+<p><a name="method-str"></a></p>
+<h4 id="str-collection-method"><code>str()</code> {.collection-method}</h4>
+<p><code>str</code> 函数返回给定字符串的新 <code>Illuminate\Support\Stringable</code> 实例。这个函数等价于 <code>Str::of</code> 方法：</p>
+<pre><code><span class="variable token">$string</span> = str(<span class="string token">'Taylor'</span>)-&gt;append(<span class="string token">' Otwell'</span>);
+
+<span class="comment token">// 'Taylor Otwell'</span>
+</code></pre>
+<p>如果没有为 <code>str</code> 函数提供参数，则该函数返回 <code>Illuminate\Support\Str</code> 的实例：</p>
+<pre><code><span class="variable token">$snake</span> = str()-&gt;snake(<span class="string token">'FooBar'</span>);
+
+<span class="comment token">// 'foo_bar'</span>
+</code></pre>
+<p><a name="method-trans"></a></p>
+<h4 id="trans-collection-method"><code>trans()</code> {.collection-method}</h4>
+<p>The <code>trans</code> 函数使用你的 <a href="localization.html">本地化文件</a> 翻译给定键：</p>
+<pre><code><span class="keyword token">echo</span> trans(<span class="string token">'messages.welcome'</span>);
+</code></pre>
+<p>如果指定的翻译键不存在，<code>trans</code> 函数将返回给定的键. 因此在上方的例子中，如果翻译键不存在，<code>trans</code> 函数将返回 <code>messages.welcome</code>。</p>
+<p><a name="method-trans-choice"></a></p>
+<h4 id="trans_choice-collection-method"><code>trans_choice()</code> {.collection-method}</h4>
+<p><code>trans_choice</code> 函数将根据词形变化来翻译给定的翻译键：</p>
+<pre><code><span class="keyword token">echo</span> trans_choice(<span class="string token">'messages.notifications'</span>, <span class="variable token">$unreadCount</span>);
+</code></pre>
+<p>如果给定的翻译键不存在，<code>trans_choice</code> 函数将返回给定键。因此在上方的例子中，若翻译键不存在，<code>trans_choice</code> 函数将返回 <code>messages.notifications</code>。</p>
+<p><a name="fluent-strings"></a></p>
+<h2 id="字符流处理-1">字符流处理</h2>
+<p>字符流处理（Fluent strings）提供了一种更流畅的、拥有面向对象接口形式的字符串处理方式，它允许使用比传统字符串操作更具可读性的语法来进行多字符串的链式操作。</p>
+<p><a name="method-fluent-str-after"></a></p>
+<h4 id="after-collection-method"><code>after</code> {.collection-method}</h4>
+<p><code>after</code> 方法将返回字符串中指定值后的所有内容。如果字符串中不存在这个值，它将返回整个字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;after(<span class="string token">'This is'</span>);
+
+<span class="comment token">// ' my name'</span>
+</code></pre>
+<p><a name="method-fluent-str-after-last"></a></p>
+<h4 id="afterlast-collection-method"><code>afterLast</code> {.collection-method}</h4>
+<p><code>afterLast</code>方法返回字符串中指定值最后一次出现后的所有内容。如果字符串中不存在这个值，它将返回整个字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::of(<span class="string token">'App\Http\Controllers\Controller'</span>)-&gt;afterLast(<span class="string token">'\\'</span>);
+
+<span class="comment token">// 'Controller'</span>
+</code></pre>
+<p><a name="method-fluent-str-append"></a></p>
+<h4 id="append-collection-method"><code>append</code> {.collection-method}</h4>
+<p><code>append</code> 方法为字符串附加上指定的值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Taylor'</span>)-&gt;append(<span class="string token">' Otwell'</span>);
+
+<span class="comment token">// 'Taylor Otwell'</span>
+</code></pre>
+<p><a name="method-fluent-str-ascii"></a></p>
+<h4 id="ascii-collection-method"><code>ascii</code> {.collection-method}</h4>
+<p><code>ascii</code> 方法尝试将字符串转换为 ASCII 值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'ü'</span>)-&gt;ascii();
+
+<span class="comment token">// 'u'</span>
+</code></pre>
+<p><a name="method-fluent-str-basename"></a></p>
+<h4 id="basename-collection-method"><code>basename</code> {.collection-method}</h4>
+<p><code>basename</code>方法将返回指定字符串的结尾部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/foo/bar/baz'</span>)-&gt;basename();
+
+<span class="comment token">// 'baz'</span>
+</code></pre>
+<p>如果有必要，你也可以提供提供一个「扩展名」，将从尾部的组件中移除它。</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/foo/bar/baz.jpg'</span>)-&gt;basename(<span class="string token">'.jpg'</span>);
+
+<span class="comment token">// 'baz'</span>
+</code></pre>
+<p><a name="method-fluent-str-before"></a></p>
+<h4 id="before-collection-method"><code>before</code> {.collection-method}</h4>
+<p><code>before</code>方法返回字符串中指定值之前的所有内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;before(<span class="string token">'my name'</span>);
+
+<span class="comment token">// 'This is '</span>
+</code></pre>
+<p><a name="method-fluent-str-before-last"></a></p>
+<h4 id="beforelast-collection-method"><code>beforeLast</code> {.collection-method}</h4>
+<p><code>beforeLast</code> 方法返回字符串中指定值最后一次出现前的所有内容：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slice</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;beforeLast(<span class="string token">'is'</span>);
+
+<span class="comment token">// 'This '</span>
+</code></pre>
+<p><a name="method-fluent-str-between"></a></p>
+<h4 id="between-collection-method"><code>between</code> {.collection-method}</h4>
+<p><code>between</code> 方法返回两个值之间的字符串部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;between(<span class="string token">'This'</span>, <span class="string token">'name'</span>);
+
+<span class="comment token">// ' is my '</span>
+</code></pre>
+<p><a name="method-fluent-str-camel"></a></p>
+<h4 id="camel-collection-method"><code>camel</code> {.collection-method}</h4>
+<p><code>camel</code> 方法将指定字符串转换为 <code>驼峰式</code> 表示方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'foo_bar'</span>)-&gt;camel();
+
+<span class="comment token">// fooBar</span>
+</code></pre>
+<p><a name="method-fluent-str-contains"></a></p>
+<h4 id="contains-collection-method"><code>contains</code> {.collection-method}</h4>
+<p><code>contains</code> 方法判断指定字符串中是否包含另一指定字符串（区分大小写）：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$contains</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;contains(<span class="string token">'my'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p>你也可以传递数组的值的形式来判断指定字符串是否包含数组中的任一值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$contains</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;contains([<span class="string token">'my'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-contains-all"></a></p>
+<h4 id="containsall-collection-method"><code>containsAll</code> {.collection-method}</h4>
+<p><code>containsAll</code> 方法用于判断指定字符串是否包含指定数组中的所有值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$containsAll</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;containsAll([<span class="string token">'my'</span>, <span class="string token">'name'</span>]);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-dirname"></a></p>
+<h4 id="dirname-collection-method"><code>dirname</code> {.collection-method}</h4>
+<p><code>dirname</code> 方法用于返回指定字符串的父级目录部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/foo/bar/baz'</span>)-&gt;dirname();
+
+<span class="comment token">// '/foo/bar'</span>
+</code></pre>
+<p>你也可以指定你想要从字符串中删除多少个目录级别，该参数是可选的：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/foo/bar/baz'</span>)-&gt;dirname(<span class="number token">2</span>);
+
+<span class="comment token">// '/foo'</span>
+</code></pre>
+<p><a name="method-fluent-str-excerpt"></a></p>
+<h4 id="excerpt-collection-method"><code>excerpt</code> {.collection-method}</h4>
+<p><code>excerpt</code> 方法从字符串中提取与该字符串中短语的第一个实例匹配的片段：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$excerpt</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;excerpt(<span class="string token">'my'</span>, [
+    <span class="string token">'radius'</span> =&gt; <span class="number token">3</span>
+]);
+
+<span class="comment token">// '...is my na...'</span>
+</code></pre>
+<p><code>radius</code> 选项默认为 <code>100</code>，允许你定义应出现在截断字符串两侧的字符数。</p>
+<p>此外，你也可以使用 <code>omission</code> 选项来更改将附加到截断字符串的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$excerpt</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;excerpt(<span class="string token">'name'</span>, [
+    <span class="string token">'radius'</span> =&gt; <span class="number token">3</span>,
+    <span class="string token">'omission'</span> =&gt; <span class="string token">'(...) '</span>
+]);
+
+<span class="comment token">// '(...) my name'</span>
+</code></pre>
+<p><a name="method-fluent-str-ends-with"></a></p>
+<h4 id="endswith-collection-method"><code>endsWith</code> {.collection-method}</h4>
+<p><code>endsWith</code> 方法用于判断指定字符串是否以另一指定字符串结尾：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;endsWith(<span class="string token">'name'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p>你也可以传递数组的值的形式来判断指定字符串是否包含指定数组中的任一值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;endsWith([<span class="string token">'name'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;endsWith([<span class="string token">'this'</span>, <span class="string token">'foo'</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-fluent-str-exactly"></a></p>
+<h4 id="exactly-collection-method"><code>exactly</code> {.collection-method}</h4>
+<p><code>exactly</code> 方法用于判断指定字符串是否与另一字符串完全匹配：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Laravel'</span>)-&gt;exactly(<span class="string token">'Laravel'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-explode"></a></p>
+<h4 id="explode-collection-method"><code>explode</code> {.collection-method}</h4>
+<p><code>explode</code> 方法使用指定的分割符分割字符串，并返回包含字符串每个部分的集合：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$collection</span> = Str::of(<span class="string token">'foo bar baz'</span>)-&gt;explode(<span class="string token">' '</span>);
+
+<span class="comment token">// collect(['foo', 'bar', 'baz'])</span>
+</code></pre>
+<p><a name="method-fluent-str-finish"></a></p>
+<h4 id="finish-collection-method"><code>finish</code> {.collection-method}</h4>
+<p><code>finish</code> 方法用于判断指定字符串末尾是否有特定字符，若没有，则将其添加到字符串末尾：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$adjusted</span> = Str::of(<span class="string token">'this/string'</span>)-&gt;finish(<span class="string token">'/'</span>);
+
+<span class="comment token">// this/string/</span>
+
+<span class="variable token">$adjusted</span> = Str::of(<span class="string token">'this/string/'</span>)-&gt;finish(<span class="string token">'/'</span>);
+
+<span class="comment token">// this/string/</span>
+</code></pre>
+<p><a name="method-fluent-str-is"></a></p>
+<h4 id="is-collection-method"><code>is</code> {.collection-method}</h4>
+<p><code>is</code> 方法用于判断字符串是否与指定模式匹配。星号 <code>*</code> 用于表示通配符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$matches</span> = Str::of(<span class="string token">'foobar'</span>)-&gt;is(<span class="string token">'foo*'</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$matches</span> = Str::of(<span class="string token">'foobar'</span>)-&gt;is(<span class="string token">'baz*'</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-fluent-str-is-ascii"></a></p>
+<h4 id="isascii-collection-method"><code>isAscii</code> {.collection-method}</h4>
+<p><code>isAscii</code> 方法用于判断指定字符串是否是 ASCII 字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Taylor'</span>)-&gt;isAscii();
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'ü'</span>)-&gt;isAscii();
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-fluent-str-is-empty"></a></p>
+<h4 id="isempty-collection-method"><code>isEmpty</code> {.collection-method}</h4>
+<p><code>isEmpty</code> 方法用于判断指定字符串是否为空：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'  '</span>)-&gt;trim()-&gt;isEmpty();
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Laravel'</span>)-&gt;trim()-&gt;isEmpty();
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-fluent-str-is-not-empty"></a></p>
+<h4 id="isnotempty-collection-method"><code>isNotEmpty</code> {.collection-method}</h4>
+<p><code>isNotEmpty</code> 方法用于判断指定字符串是否不为空：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'  '</span>)-&gt;trim()-&gt;isNotEmpty();
+
+<span class="comment token">// false</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Laravel'</span>)-&gt;trim()-&gt;isNotEmpty();
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-is-uuid"></a></p>
+<h4 id="isuuid-collection-method"><code>isUuid</code> {.collection-method}</h4>
+<p><code>isUuid</code> 方法确定给定字符串是否为 UUID：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'5ace9ab9-e9cf-4ec6-a19d-5881212a452c'</span>)-&gt;isUuid();
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Taylor'</span>)-&gt;isUuid();
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-fluent-str-kebab"></a></p>
+<h4 id="kebab-collection-method"><code>kebab</code> {.collection-method}</h4>
+<p><code>kebab</code> 方法将指定字符串转换为 <code>烤串式( kebab-case )</code> 表示形式：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'fooBar'</span>)-&gt;kebab();
+
+<span class="comment token">// foo-bar</span>
+</code></pre>
+<p><a name="method-fluent-str-length"></a></p>
+<h4 id="length-collection-method"><code>length</code> {.collection-method}</h4>
+<p><code>length</code> 方法返回指定字符串的长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$length</span> = Str::of(<span class="string token">'Laravel'</span>)-&gt;length();
+
+<span class="comment token">// 7</span>
+</code></pre>
+<p><a name="method-fluent-str-limit"></a></p>
+<h4 id="limit-collection-method"><code>limit</code> {.collection-method}</h4>
+<p><code>limit</code> 方法用于将指定字符串切割为指定长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$truncated</span> = Str::of(<span class="string token">'The quick brown fox jumps over the lazy dog'</span>)-&gt;limit(<span class="number token">20</span>);
+
+<span class="comment token">// The quick brown fox...</span>
+</code></pre>
+<p>你也可以通过第二个参数来改变追加到末尾的字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$truncated</span> = Str::of(<span class="string token">'The quick brown fox jumps over the lazy dog'</span>)-&gt;limit(<span class="number token">20</span>, <span class="string token">' (...)'</span>);
+
+<span class="comment token">// The quick brown fox (...)</span>
+</code></pre>
+<p><a name="method-fluent-str-lower"></a></p>
+<h4 id="lower-collection-method"><code>lower</code> {.collection-method}</h4>
+<p><code>lower</code> 方法将指定字符串转换为小写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'LARAVEL'</span>)-&gt;lower();
+
+<span class="comment token">// 'laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-ltrim"></a></p>
+<h4 id="ltrim-collection-method"><code>ltrim</code> {.collection-method}</h4>
+<p><code>ltrim</code> 方法移除字符串左端指定的字符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'  Laravel  '</span>)-&gt;ltrim();
+
+<span class="comment token">// 'Laravel  '</span>
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/Laravel/'</span>)-&gt;ltrim(<span class="string token">'/'</span>);
+
+<span class="comment token">// 'Laravel/'</span>
+</code></pre>
+<p><a name="method-fluent-str-markdown"></a></p>
+<h4 id="markdown-collection-method"><code>markdown</code> {.collection-method}</h4>
+<p><code>markdown</code> 方法将 Github 风格的 Markdown 转换为 HTML：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$html</span> = Str::of(<span class="string token">'# Laravel'</span>)-&gt;markdown();
+
+<span class="comment token">// &lt;h1&gt;Laravel&lt;/h1&gt;</span>
+
+<span class="variable token">$html</span> = Str::of(<span class="string token">'# Taylor &lt;b&gt;Otwell&lt;/b&gt;'</span>)-&gt;markdown([
+    <span class="string token">'html_input'</span> =&gt; <span class="string token">'strip'</span>,
+]);
+
+<span class="comment token">// &lt;h1&gt;Taylor Otwell&lt;/h1&gt;</span>
+</code></pre>
+<p><a name="method-fluent-str-mask"></a></p>
+<h4 id="mask-collection-method"><code>mask</code> {.collection-method}</h4>
+<p><code>mask</code> 方法用重复字符掩盖字符串的一部分，并可用于混淆字符串段，例如电子邮件地址和电话号码：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'taylor@example.com'</span>)-&gt;mask(<span class="string token">'*'</span>, <span class="number token">3</span>);
+
+<span class="comment token">// tay***************</span>
+</code></pre>
+<p>如果需要，你可以提供一个负数作为 <code>mask</code> 方法的第三个参数，这将指示该方法在距字符串末尾的给定距离处开始屏蔽：</p>
+<pre><code><span class="variable token">$string</span> = Str::of(<span class="string token">'taylor@example.com'</span>)-&gt;mask(<span class="string token">'*'</span>, -<span class="number token">15</span>, <span class="number token">3</span>);
+
+<span class="comment token">// tay***@example.com</span>
+</code></pre>
+<p><a name="method-fluent-str-match"></a></p>
+<h4 id="match-collection-method"><code>match</code> {.collection-method}</h4>
+<p><code>match</code> 方法将会返回字符串和指定正则表达式匹配的部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'foo bar'</span>)-&gt;match(<span class="string token">'/bar/'</span>);
+
+<span class="comment token">// 'bar'</span>
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'foo bar'</span>)-&gt;match(<span class="string token">'/foo (.*)/'</span>);
+
+<span class="comment token">// 'bar'</span>
+</code></pre>
+<p><a name="method-fluent-str-match-all"></a></p>
+<h4 id="matchall-collection-method"><code>matchAll</code> {.collection-method}</h4>
+<p><code>matchAll</code> 方法将会返回一个集合，该集合包含了指定字符串中与指定正则表达式匹配的部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'bar foo bar'</span>)-&gt;matchAll(<span class="string token">'/bar/'</span>);
+
+<span class="comment token">// collect(['bar', 'bar'])</span>
+</code></pre>
+<p>如果你在正则表达式中指定了一个匹配组， Laravel 将会返回与该组匹配的集合：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'bar fun bar fly'</span>)-&gt;matchAll(<span class="string token">'/f(\w*)/'</span>);
+
+<span class="comment token">// collect(['un', 'ly']);</span>
+</code></pre>
+<p>如果没有找到任何匹配项，则返回空集合。</p>
+<p><a name="method-fluent-str-padboth"></a></p>
+<h4 id="padboth-collection-method"><code>padBoth</code> {.collection-method}</h4>
+<p><code>padBoth</code> 方法包装了 PHP 的 <code>str_pad</code> 函数，在指定字符串的两侧填充上另一字符串，直至该字符串到达指定的长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padBoth(<span class="number token">10</span>, <span class="string token">'_'</span>);
+
+<span class="comment token">// '__James___'</span>
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padBoth(<span class="number token">10</span>);
+
+<span class="comment token">// '  James   '</span>
+</code></pre>
+<p><a name="method-fluent-str-padleft"></a></p>
+<h4 id="padleft-collection-method"><code>padLeft</code> {.collection-method}</h4>
+<p>The <code>padLeft</code> 方法包装了 PHP 的 <code>str_pad</code> 函数，在指定字符串的左侧填充上另一字符串，直至该字符串到达指定的长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padLeft(<span class="number token">10</span>, <span class="string token">'-='</span>);
+
+<span class="comment token">// '-=-=-James'</span>
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padLeft(<span class="number token">10</span>);
+
+<span class="comment token">// '     James'</span>
+</code></pre>
+<p><a name="method-fluent-str-padright"></a></p>
+<h4 id="padright-collection-method"><code>padRight</code> {.collection-method}</h4>
+<p><code>padRight</code> 方法包装了 PHP 的 str_pad 函数，在指定字符串的右侧填充上另一字符串，直至该字符串到达指定的长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padRight(<span class="number token">10</span>, <span class="string token">'-'</span>);
+
+<span class="comment token">// 'James-----'</span>
+
+<span class="variable token">$padded</span> = Str::of(<span class="string token">'James'</span>)-&gt;padRight(<span class="number token">10</span>);
+
+<span class="comment token">// 'James     '</span>
+</code></pre>
+<p><a name="method-fluent-str-pipe"></a></p>
+<h4 id="pipe-collection-method"><code>pipe</code> {.collection-method}</h4>
+<p><code>pipe</code> 方法通过将字符串的当前值传递给给定的匿名函数来转换字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$hash</span> = Str::of(<span class="string token">'Laravel'</span>)-&gt;pipe(<span class="string token">'md5'</span>)-&gt;prepend(<span class="string token">'Checksum: '</span>);
+
+<span class="comment token">// 'Checksum: a5c95b86291ea299fcbe64458ed12702'</span>
+
+<span class="variable token">$closure</span> = Str::of(<span class="string token">'foo'</span>)-&gt;pipe(<span class="keyword token">function</span> (<span class="variable token">$str</span>) {
+    <span class="keyword token">return</span> <span class="string token">'bar'</span>;
+});
+
+<span class="comment token">// 'bar'</span>
+</code></pre>
+<p><a name="method-fluent-str-plural"></a></p>
+<h4 id="plural-collection-method"><code>plural</code> {.collection-method}</h4>
+<p><code>plural</code> 方法将单数形式的字符串转换为复数形式。目前该函数仅支持英语：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::of(<span class="string token">'car'</span>)-&gt;plural();
+
+<span class="comment token">// cars</span>
+
+<span class="variable token">$plural</span> = Str::of(<span class="string token">'child'</span>)-&gt;plural();
+
+<span class="comment token">// children</span>
+</code></pre>
+<p>你也可以给该函数提供一个整数作为第二个参数用于检索单数或复数形式：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$plural</span> = Str::of(<span class="string token">'child'</span>)-&gt;plural(<span class="number token">2</span>);
+
+<span class="comment token">// children</span>
+
+<span class="variable token">$plural</span> = Str::of(<span class="string token">'child'</span>)-&gt;plural(<span class="number token">1</span>);
+
+<span class="comment token">// child</span>
+</code></pre>
+<p><a name="method-fluent-str-prepend"></a></p>
+<h4 id="prepend-collection-method"><code>prepend</code> {.collection-method}</h4>
+<p><code>prepend</code> 方法用于在指定字符串的开头插入另一指定字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Framework'</span>)-&gt;prepend(<span class="string token">'Laravel '</span>);
+
+<span class="comment token">// Laravel Framework</span>
+</code></pre>
+<p><a name="method-fluent-str-remove"></a></p>
+<h4 id="remove-collection-method"><code>remove</code> {.collection-method}</h4>
+<p><code>remove</code> 方法从字符串中删除给定的值或值数组：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Arkansas is quite beautiful!'</span>)-&gt;remove(<span class="string token">'quite'</span>);
+
+<span class="comment token">// Arkansas is beautiful!</span>
+</code></pre>
+<p>你还可以传递 <code>false</code> 作为第二个参数以在删除字符串时忽略大小写。</p>
+<p><a name="method-fluent-str-replace"></a></p>
+<h4 id="replace-collection-method"><code>replace</code> {.collection-method}</h4>
+<p><code>replace</code> 方法用于将字符串中的指定字符串替换为另一指定字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="string token">'Laravel 6.x'</span>)-&gt;replace(<span class="string token">'6.x'</span>, <span class="string token">'7.x'</span>);
+
+<span class="comment token">// Laravel 7.x</span>
+</code></pre>
+<p><a name="method-fluent-str-replace-array"></a></p>
+<h4 id="replacearray-collection-method"><code>replaceArray</code> {.collection-method}</h4>
+<p><code>replaceArray</code> 方法使用数组顺序替换字符串中的给定值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = <span class="string token">'The event will take place between ? and ?'</span>;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="variable token">$string</span>)-&gt;replaceArray(<span class="string token">'?'</span>, [<span class="string token">'8:30'</span>, <span class="string token">'9:00'</span>]);
+
+<span class="comment token">// The event will take place between 8:30 and 9:00</span>
+</code></pre>
+<p><a name="method-fluent-str-replace-first"></a></p>
+<h4 id="replacefirst-collection-method"><code>replaceFirst</code> {.collection-method}</h4>
+<p><code>replaceFirst</code>方法替换字符串中给定值的第一个匹配项：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="string token">'the quick brown fox jumps over the lazy dog'</span>)-&gt;replaceFirst(<span class="string token">'the'</span>, <span class="string token">'a'</span>);
+
+<span class="comment token">// a quick brown fox jumps over the lazy dog</span>
+</code></pre>
+<p><a name="method-fluent-str-replace-last"></a></p>
+<h4 id="replacelast-collection-method"><code>replaceLast</code> {.collection-method}</h4>
+<p><code>replaceLast</code>方法替换字符串中给定值的最后一次出现：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="string token">'the quick brown fox jumps over the lazy dog'</span>)-&gt;replaceLast(<span class="string token">'the'</span>, <span class="string token">'a'</span>);
+
+<span class="comment token">// the quick brown fox jumps over a lazy dog</span>
+</code></pre>
+<p><a name="method-fluent-str-replace-matches"></a></p>
+<h4 id="replacematches-collection-method"><code>replaceMatches</code> {.collection-method}</h4>
+<p><code>replaceMatches</code>方法用给定的替换字符串替换与模式匹配的字符串的所有部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="string token">'(+1) 501-555-1000'</span>)-&gt;replaceMatches(<span class="string token">'/[^A-Za-z0-9]++/'</span>, <span class="string token">''</span>)
+
+<span class="comment token">// '15015551000'</span>
+</code></pre>
+<p><code>replaceMatches</code>方法还接受一个闭包，该闭包将被与给定模式匹配的字符串的每个部分调用，从而允许你在闭包中执行替换逻辑并返回替换的值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$replaced</span> = Str::of(<span class="string token">'123'</span>)-&gt;replaceMatches(<span class="string token">'/\d/'</span>, <span class="keyword token">function</span> (<span class="variable token">$match</span>) {
+    <span class="keyword token">return</span> <span class="string token">'['</span>.<span class="variable token">$match</span>[<span class="number token">0</span>].<span class="string token">']'</span>;
+});
+
+<span class="comment token">// '[1][2][3]'</span>
+</code></pre>
+<p><a name="method-fluent-str-rtrim"></a></p>
+<h4 id="rtrim-collection-method"><code>rtrim</code> {.collection-method}</h4>
+<p><code>rtrim</code>方法修剪给定字符串的右侧：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'  Laravel  '</span>)-&gt;rtrim();
+
+<span class="comment token">// '  Laravel'</span>
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/Laravel/'</span>)-&gt;rtrim(<span class="string token">'/'</span>);
+
+<span class="comment token">// '/Laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-scan"></a></p>
+<h4 id="scan-collection-method"><code>scan</code> {.collection-method}</h4>
+<p><code>scan</code> 方法根据 <a href="https://www.php.net/manual/en/function.sscanf.php"><code>sscanf</code> PHP function</a> 支持的格式将字符串中的输入解析为集合：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$collection</span> = Str::of(<span class="string token">'filename.jpg'</span>)-&gt;scan(<span class="string token">'%[^.].%s'</span>);
+
+<span class="comment token">// collect(['filename', 'jpg'])</span>
+</code></pre>
+<p><a name="method-fluent-str-singular"></a></p>
+<h4 id="singular-collection-method"><code>singular</code> {.collection-method}</h4>
+<p><code>singular</code> 方法将字符串转换为其单数形式。此函数当前仅支持英语：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$singular</span> = Str::of(<span class="string token">'cars'</span>)-&gt;singular();
+
+<span class="comment token">// car</span>
+
+<span class="variable token">$singular</span> = Str::of(<span class="string token">'children'</span>)-&gt;singular();
+
+<span class="comment token">// child</span>
+</code></pre>
+<p><a name="method-fluent-str-slug"></a></p>
+<h4 id="slug-collection-method"><code>slug</code> {.collection-method}</h4>
+<p><code>slug</code> 方法从给定字符串生成URL友好的 <code>slug</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$slug</span> = Str::of(<span class="string token">'Laravel Framework'</span>)-&gt;slug(<span class="string token">'-'</span>);
+
+<span class="comment token">// laravel-framework</span>
+</code></pre>
+<p><a name="method-fluent-str-snake"></a></p>
+<h4 id="snake-collection-method"><code>snake</code> {.collection-method}</h4>
+<p><code>snake</code>方法将给定字符串转换为<code>snake_case</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'fooBar'</span>)-&gt;snake();
+
+<span class="comment token">// foo_bar</span>
+</code></pre>
+<p><a name="method-fluent-str-split"></a></p>
+<h4 id="split-collection-method"><code>split</code> {.collection-method}</h4>
+<p><code>split</code> 方法使用正则表达式将字符串拆分为集合：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$segments</span> = Str::of(<span class="string token">'one, two, three'</span>)-&gt;split(<span class="string token">'/[\s,]+/'</span>);
+
+<span class="comment token">// collect(["one", "two", "three"])</span>
+</code></pre>
+<p><a name="method-fluent-str-start"></a></p>
+<h4 id="start-collection-method"><code>start</code> {.collection-method}</h4>
+<p><code>start</code> 方法将给定值的单个实例添加到字符串中，前提是该字符串尚未以该值开头：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$adjusted</span> = Str::of(<span class="string token">'this/string'</span>)-&gt;start(<span class="string token">'/'</span>);
+
+<span class="comment token">// /this/string</span>
+
+<span class="variable token">$adjusted</span> = Str::of(<span class="string token">'/this/string'</span>)-&gt;start(<span class="string token">'/'</span>);
+
+<span class="comment token">// /this/string</span>
+</code></pre>
+<p><a name="method-fluent-str-starts-with"></a></p>
+<h4 id="startswith-collection-method"><code>startsWith</code> {.collection-method}</h4>
+<p><code>startsWith</code>方法确定给定字符串是否以给定值开头：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'This is my name'</span>)-&gt;startsWith(<span class="string token">'This'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-studly"></a></p>
+<h4 id="studly-collection-method"><code>studly</code> {.collection-method}</h4>
+<p><code>studly</code>方法将给定字符串转换为<code>StudlyCase</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'foo_bar'</span>)-&gt;studly();
+
+<span class="comment token">// FooBar</span>
+</code></pre>
+<p><a name="method-fluent-str-substr"></a></p>
+<h4 id="substr-collection-method"><code>substr</code> {.collection-method}</h4>
+<p><code>substr</code>方法返回由给定的起始参数和长度参数指定的字符串部分：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Laravel Framework'</span>)-&gt;substr(<span class="number token">8</span>);
+
+<span class="comment token">// Framework</span>
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Laravel Framework'</span>)-&gt;substr(<span class="number token">8</span>, <span class="number token">5</span>);
+
+<span class="comment token">// Frame</span>
+</code></pre>
+<p><a name="method-fluent-str-substrreplace"></a></p>
+<h4 id="substrreplace-collection-method"><code>substrReplace</code> {.collection-method}</h4>
+<p><code>substrReplace</code> 方法在字符串的一部分中替换文本，从第二个参数指定的位置开始替换第三个参数指定的字符数。将 <code>0</code> 传递给方法的第三个参数将在指定位置插入字符串，而不替换字符串中的任何现有字符：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'1300'</span>)-&gt;substrReplace(<span class="string token">':'</span>, <span class="number token">2</span>);
+
+<span class="comment token">// 13:</span>
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'The Framework'</span>)-&gt;substrReplace(<span class="string token">' Laravel'</span>, <span class="number token">3</span>, <span class="number token">0</span>);
+
+<span class="comment token">// The Laravel Framework</span>
+</code></pre>
+<p><a name="method-fluent-str-swap"></a></p>
+<h4 id="swap-collection-method"><code>swap</code> {.collection-method}</h4>
+<p><code>swap</code> 方法使用 PHP 的 <code>strtr</code> 函数替换字符串中的多个值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Tacos are great!'</span>)
+    -&gt;swap([
+        <span class="string token">'Tacos'</span> =&gt; <span class="string token">'Burritos'</span>,
+        <span class="string token">'great'</span> =&gt; <span class="string token">'fantastic'</span>,
+    ]);
+
+<span class="comment token">// Burritos are fantastic!</span>
+</code></pre>
+<p><a name="method-fluent-str-tap"></a></p>
+<h4 id="tap-collection-method"><code>tap</code> {.collection-method}</h4>
+<p><code>tap</code>方法将字符串传递给给定的闭包，允许你在不影响字符串本身的情况下检查字符串并与之交互。<code>tap</code>方法返回原始字符串，而不管闭包返回什么：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Laravel'</span>)
+    -&gt;append(<span class="string token">' Framework'</span>)
+    -&gt;tap(<span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+        dump(<span class="string token">'String after append: '</span> . <span class="variable token">$string</span>);
+    })
+    -&gt;upper();
+
+<span class="comment token">// LARAVEL FRAMEWORK</span>
+</code></pre>
+<p><a name="method-fluent-str-test"></a></p>
+<h4 id="test-collection-method"><code>test</code> {.collection-method}</h4>
+<p><code>test</code> 方法确定字符串是否与给定的正则表达式模式匹配：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$result</span> = Str::of(<span class="string token">'Laravel Framework'</span>)-&gt;test(<span class="string token">'/Laravel/'</span>);
+
+<span class="comment token">// true</span>
+</code></pre>
+<p><a name="method-fluent-str-title"></a></p>
+<h4 id="title-collection-method"><code>title</code> {.collection-method}</h4>
+<p><code>title</code>方法将给定字符串转换为<code>title Case</code>：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$converted</span> = Str::of(<span class="string token">'a nice title uses the correct case'</span>)-&gt;title();
+
+<span class="comment token">// A Nice Title Uses The Correct Case</span>
+</code></pre>
+<p><a name="method-fluent-str-trim"></a></p>
+<h4 id="trim-collection-method"><code>trim</code> {.collection-method}</h4>
+<p><code>trim</code>方法修剪给定字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'  Laravel  '</span>)-&gt;trim();
+
+<span class="comment token">// 'Laravel'</span>
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'/Laravel/'</span>)-&gt;trim(<span class="string token">'/'</span>);
+
+<span class="comment token">// 'Laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-ucfirst"></a></p>
+<h4 id="ucfirst-collection-method"><code>ucfirst</code> {.collection-method}</h4>
+<p><code>ucfirst</code>方法返回第一个字符大写的给定字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'foo bar'</span>)-&gt;ucfirst();
+
+<span class="comment token">// Foo bar</span>
+</code></pre>
+<p><a name="method-fluent-str-upper"></a></p>
+<h4 id="upper-collection-method"><code>upper</code> {.collection-method}</h4>
+<p><code>upper</code>方法将给定字符串转换为大写：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$adjusted</span> = Str::of(<span class="string token">'laravel'</span>)-&gt;upper();
+
+<span class="comment token">// LARAVEL</span>
+</code></pre>
+<p><a name="method-fluent-str-when"></a></p>
+<h4 id="when-collection-method"><code>when</code> {.collection-method}</h4>
+<p>如果给定的条件为<code>true</code>，则<code>when</code>方法调用给定的闭包。闭包将接收一个流畅字符串实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Taylor'</span>)
+                -&gt;when(<span class="keyword token">true</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+                    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;append(<span class="string token">' Otwell'</span>);
+                });
+
+<span class="comment token">// 'Taylor Otwell'</span>
+</code></pre>
+<p>如果需要，可以将另一个闭包作为第三个参数传递给<code>when</code>方法。如果条件参数的计算结果为<code>false</code>，则将执行此闭包。</p>
+<p><a name="method-fluent-str-when-contains"></a></p>
+<h4 id="whencontains-collection-method"><code>whenContains</code> {.collection-method}</h4>
+<p><code>whenContains</code> 方法会在字符串包含给定的值的前提下，调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'tony stark'</span>)
+            -&gt;whenContains(<span class="string token">'tony'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+                <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+            });
+
+<span class="comment token">// 'Tony Stark'</span>
+</code></pre>
+<p>如有必要，你可以将另一个闭包作为第三个参数传递给 <code>when</code> 方法。如果字符串不包含给定值，则此闭包将执行。</p>
+<p>你还可以传递一个值数组来确定给定的字符串是否包含数组中的任何值：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'tony stark'</span>)
+            -&gt;whenContains([<span class="string token">'tony'</span>, <span class="string token">'hulk'</span>], <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+                <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+            });
+
+<span class="comment token">// Tony Stark</span>
+</code></pre>
+<p><a name="method-fluent-str-when-contains-all"></a></p>
+<h4 id="whencontainsall-collection-method"><code>whenContainsAll</code> {.collection-method}</h4>
+<p><code>whenContainsAll</code> 方法会在字符串包含所有给定的子字符串时，调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'tony stark'</span>)
+                -&gt;whenContainsAll([<span class="string token">'tony'</span>, <span class="string token">'stark'</span>], <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+                    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+                });
+
+<span class="comment token">// 'Tony Stark'</span>
+</code></pre>
+<p>如有必要，你可以将另一个闭包作为第三个参数传递给 <code>when</code> 方法。如果条件参数评估为 <code>false</code>，则此闭包将执行。</p>
+<p><a name="method-fluent-str-when-empty"></a></p>
+<h4 id="whenempty-collection-method"><code>whenEmpty</code> {.collection-method}</h4>
+<p>如果字符串为空，<code>whenEmpty</code>方法将调用给定的闭包。如果闭包返回一个值，<code>whenEmpty</code>方法也将返回该值。如果闭包不返回值，则将返回字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'  '</span>)-&gt;whenEmpty(<span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;trim()-&gt;prepend(<span class="string token">'Laravel'</span>);
+});
+
+<span class="comment token">// 'Laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-not-empty"></a></p>
+<h4 id="whennotempty-collection-method"><code>whenNotEmpty</code> {.collection-method}</h4>
+<p>如果字符串不为空，<code>whenNotEmpty</code> 方法会调用给定的闭包。如果闭包返回一个值，那么 <code>whenNotEmpty</code> 方法也将返回该值。如果闭包没有返回值，则返回字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Framework'</span>)-&gt;whenNotEmpty(<span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;prepend(<span class="string token">'Laravel '</span>);
+});
+
+<span class="comment token">// 'Laravel Framework'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-starts-with"></a></p>
+<h4 id="whenstartswith-collection-method"><code>whenStartsWith</code> {.collection-method}</h4>
+<p>如果字符串以给定的子字符串开头，<code>whenStartsWith</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'disney world'</span>)-&gt;whenStartsWith(<span class="string token">'disney'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+});
+
+<span class="comment token">// 'Disney World'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-ends-with"></a></p>
+<h4 id="whenendswith-collection-method"><code>whenEndsWith</code> {.collection-method}</h4>
+<p>如果字符串以给定的子字符串结尾，<code>whenEndsWith</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'disney world'</span>)-&gt;whenEndsWith(<span class="string token">'world'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+});
+
+<span class="comment token">// 'Disney World'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-exactly"></a></p>
+<h4 id="whenexactly-collection-method"><code>whenExactly</code> {.collection-method}</h4>
+<p>如果字符串与给定字符串完全匹配，<code>whenExactly</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'laravel'</span>)-&gt;whenExactly(<span class="string token">'laravel'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+});
+
+<span class="comment token">// 'Laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-is"></a></p>
+<h4 id="whenis-collection-method"><code>whenIs</code> {.collection-method}</h4>
+<p>如果字符串匹配给定的模式，<code>whenIs</code> 方法会调用给定的闭包。星号可用作通配符值。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'foo/bar'</span>)-&gt;whenIs(<span class="string token">'foo/*'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;append(<span class="string token">'/baz'</span>);
+});
+
+<span class="comment token">// 'foo/bar/baz'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-is-ascii"></a></p>
+<h4 id="whenisascii-collection-method"><code>whenIsAscii</code> {.collection-method}</h4>
+<p>如果字符串是 7 位 ASCII，<code>whenIsAscii</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'foo/bar'</span>)-&gt;whenIsAscii(<span class="string token">'laravel'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+});
+
+<span class="comment token">// 'Laravel'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-is-uuid"></a></p>
+<h4 id="whenisuuid-collection-method"><code>whenIsUuid</code> {.collection-method}</h4>
+<p>如果字符串是有效的 UUID，<code>whenIsUuid</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'foo/bar'</span>)-&gt;whenIsUuid(<span class="string token">'a0a2a2d2-0b87-4a18-83f2-2529882be2de'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;substr(<span class="number token">0</span>, <span class="number token">8</span>);
+});
+
+<span class="comment token">// 'a0a2a2d2'</span>
+</code></pre>
+<p><a name="method-fluent-str-when-test"></a></p>
+<h4 id="whentest-collection-method"><code>whenTest</code> {.collection-method}</h4>
+<p>如果字符串匹配给定的正则表达式，<code>whenTest</code> 方法会调用给定的闭包。闭包将接收字符流处理实例：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'laravel framework'</span>)-&gt;whenTest(<span class="string token">'/laravel/'</span>, <span class="keyword token">function</span> (<span class="variable token">$string</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$string</span>-&gt;title();
+});
+
+<span class="comment token">// 'Laravel Framework'</span>
+</code></pre>
+<p><a name="method-fluent-str-word-count"></a></p>
+<h4 id="wordcount-collection-method"><code>wordCount</code> {.collection-method}</h4>
+<p><code>wordCount</code> 方法返回字符串包含的单词数：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Str;
+
+Str::of(<span class="string token">'Hello, world!'</span>)-&gt;wordCount(); <span class="comment token">// 2</span>
+</code></pre>
+<p><a name="method-fluent-str-words"></a></p>
+<h4 id="words-collection-method"><code>words</code> {.collection-method}</h4>
+<p><code>words</code>方法限制字符串中的字数。如有必要，可以指定附加到截断字符串的附加字符串：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="variable token">$string</span> = Str::of(<span class="string token">'Perfectly balanced, as all things should be.'</span>)-&gt;words(<span class="number token">3</span>, <span class="string token">' &gt;&gt;&gt;'</span>);
+
+<span class="comment token">// Perfectly balanced, as &gt;&gt;&gt;</span>
+</code></pre>
+<p><a name="urls"></a></p>
+<h2 id="urls-1">URLs</h2>
+<p><a name="method-action"></a></p>
+<h4 id="action-collection-method"><code>action()</code> {.collection-method}</h4>
+<p><code>action</code>函数为给定的控制器操作生成URL：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\HomeController;
+
+<span class="variable token">$url</span> = action([HomeController::<span class="keyword token">class</span>, <span class="string token">'index'</span>]);
+</code></pre>
+<p>如果该方法接受路由参数，则可以将它们作为第二个参数传递给该方法：</p>
+<pre><code><span class="variable token">$url</span> = action([UserController::<span class="keyword token">class</span>, <span class="string token">'profile'</span>], [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p><a name="method-asset"></a></p>
+<h4 id="asset-collection-method"><code>asset()</code> {.collection-method}</h4>
+<p><code>asset</code>函数使用请求的当前方案（HTTP或HTTPS）为资产生成URL：</p>
+<pre><code><span class="variable token">$url</span> = asset(<span class="string token">'img/photo.jpg'</span>);
+</code></pre>
+<p>你可以通过在<code>.env</code>文件中设置<code>ASSET_URL</code>变量来配置资产URL主机。如果你将资产托管在外部服务（如 Amazon S3 或其他 CDN）上，这将非常有用：</p>
+<pre><code><span class="comment token">// ASSET_URL=http://example.com/assets</span>
+
+<span class="variable token">$url</span> = asset(<span class="string token">'img/photo.jpg'</span>); <span class="comment token">// http://example.com/assets/img/photo.jpg</span>
+</code></pre>
+<p><a name="method-route"></a></p>
+<h4 id="route-collection-method"><code>route()</code> {.collection-method}</h4>
+<p><code>route</code>函数为给定的 <a href="routing.html#named-routes">命名路由</a>：</p>
+<pre><code><span class="variable token">$url</span> = route(<span class="string token">'route.name'</span>);
+</code></pre>
+<p>如果路由接受参数，则可以将其作为第二个参数传递给函数：</p>
+<pre><code><span class="variable token">$url</span> = route(<span class="string token">'route.name'</span>, [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p>默认情况下，<code>route</code>函数生成一个绝对URL。如果要生成相对URL，可以将<code>false</code>作为第三个参数传递给函数：</p>
+<pre><code><span class="variable token">$url</span> = route(<span class="string token">'route.name'</span>, [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>], <span class="keyword token">false</span>);
+</code></pre>
+<p><a name="method-secure-asset"></a></p>
+<h4 id="secure_asset-collection-method"><code>secure_asset()</code> {.collection-method}</h4>
+<p>The <code>secure_asset</code> function generates a URL for an asset using HTTPS:</p>
+<pre><code><span class="variable token">$url</span> = secure_asset(<span class="string token">'img/photo.jpg'</span>);
+</code></pre>
+<p><a name="method-secure-url"></a></p>
+<h4 id="secure_url-collection-method"><code>secure_url()</code> {.collection-method}</h4>
+<p><code>secure_url</code> 函数为给定路径生成一个完全限定的 HTTPS URL。额外的 URL 段可以在函数的第二个参数中传递：</p>
+<pre><code><span class="variable token">$url</span> = secure_url(<span class="string token">'user/profile'</span>);
+
+<span class="variable token">$url</span> = secure_url(<span class="string token">'user/profile'</span>, [<span class="number token">1</span>]);
+</code></pre>
+<p><a name="method-to-route"></a></p>
+<h4 id="to_route-collection-method"><code>to_route()</code> {.collection-method}</h4>
+<p><code>to_route</code> 函数为给定的 <a href="routing.html#named-routes">命名路由</a> 生成 <a href="responses.html#redirects">重定向 HTTP 响应</a>：</p>
+<pre><code><span class="keyword token">return</span> to_route(<span class="string token">'users.show'</span>, [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p>如有必要，你可以将应分配给重定向的 HTTP 状态代码和任何其他响应头作为第三和第四个参数传递给 <code>to_route</code> 方法：</p>
+<pre><code><span class="keyword token">return</span> to_route(<span class="string token">'users.show'</span>, [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>], <span class="number token">302</span>, [<span class="string token">'X-Framework'</span> =&gt; <span class="string token">'Laravel'</span>]);
+</code></pre>
+<p><a name="method-url"></a></p>
+<h4 id="url-collection-method"><code>url()</code> {.collection-method}</h4>
+<p>使用 <code>url</code> 辅助方法生成指定路径的全路径 URL：</p>
+<pre><code><span class="variable token">$url</span> = url(<span class="string token">'user/profile'</span>);
+
+<span class="variable token">$url</span> = url(<span class="string token">'user/profile'</span>, [<span class="number token">1</span>]);
+</code></pre>
+<p>如果没有指定路径，则返回 <code>Illuminate\Routing\UrlGenerator</code> 实例：</p>
+<pre><code><span class="variable token">$current</span> = url()-&gt;current();
+
+<span class="variable token">$full</span> = url()-&gt;full();
+
+<span class="variable token">$previous</span> = url()-&gt;previous();
+</code></pre>
+<p><a name="miscellaneous"></a></p>
+<h2 id="杂项">杂项</h2>
+<p><a name="method-abort"></a></p>
+<h4 id="abort-collection-method"><code>abort()</code> {.collection-method}</h4>
+<p>使用 <code>abort</code> 方法抛出<a href="errors.html#http-exceptions">一个 HTTP 异常</a>交给<a href="errors.html#the-exception-handler">异常处理</a>：</p>
+<pre><code>abort(403);
+</code></pre>
+<p>你还可以提供应发送到浏览器的异常消息和自定义 HTTP 响应标头：</p>
+<pre><code>abort(<span class="number token">403</span>, <span class="string token">'Unauthorized.'</span>, <span class="variable token">$headers</span>);
+</code></pre>
+<p><a name="method-abort-if"></a></p>
+<h4 id="abort_if-collection-method"><code>abort_if()</code> {.collection-method}</h4>
+<p>如果给定的布尔表达式评估为<code>true</code>，<code>abort_if</code>函数将引发HTTP异常：</p>
+<pre><code>abort_if(! Auth::user()-&gt;isAdmin(), 403);
+</code></pre>
+<p>像<code>abort</code>方法一样，你也可以将异常的响应文本作为第三个参数，并将自定义响应标头的数组作为该函数的第四个参数。</p>
+<p><a name="method-abort-unless"></a></p>
+<h4 id="abort_unless-collection-method"><code>abort_unless()</code> {.collection-method}</h4>
+<p>如果给定的布尔表达式评估为<code> false</code>，则<code>abort_unless</code>函数将引发 HTTP 异常：</p>
+<pre><code>abort_unless(Auth::user()-&gt;isAdmin(), 403);
+</code></pre>
+<p>像<code>abort</code>方法一样，你也可以将异常的响应文本作为第三个参数，并将自定义响应标头的数组作为该函数的第四个参数。</p>
+<p><a name="method-app"></a></p>
+<h4 id="app"><code>app()</code></h4>
+<p><code>app</code> 方法返回 <a href="container.html">服务容器</a> 实例：</p>
+<pre><code><span class="variable token">$container</span> = app();
+</code></pre>
+<p>你可以传递类或接口名称来从容器中解析它：</p>
+<pre><code><span class="variable token">$api</span> = app(<span class="string token">'HelpSpot\API'</span>);
+</code></pre>
+<p><a name="method-auth"></a></p>
+<h4 id="auth-collection-method"><code>auth()</code> {.collection-method}</h4>
+<p><code>auth</code> 函数返回一个 <a href="authentication.html">认证器</a> 实例. 你可以使用它来替代 <code>Auth</code> 门面：</p>
+<pre><code><span class="variable token">$user</span> = auth()-&gt;user();
+</code></pre>
+<p>如果需要，你可以指定你想要访问的认证实例：</p>
+<pre><code><span class="variable token">$user</span> = auth(<span class="string token">'admin'</span>)-&gt;user();
+</code></pre>
+<p><a name="method-back"></a></p>
+<h4 id="back-collection-method"><code>back()</code> {.collection-method}</h4>
+<p><code>back</code> 函数生成一个 <a href="responses.html#redirects">重定向 HTTP 响应</a> 到用户之前的位置</p>
+<pre><code><span class="keyword token">return</span> back(<span class="variable token">$status</span> = <span class="number token">302</span>, <span class="variable token">$headers</span> = [], <span class="variable token">$fallback</span> = <span class="string token">'/'</span>);
+
+<span class="keyword token">return</span> back();
+</code></pre>
+<p><a name="method-bcrypt"></a></p>
+<h4 id="bcrypt-collection-method"><code>bcrypt()</code> {.collection-method}</h4>
+<p>The <code>bcrypt</code> 函数 <a href="hashing.html">哈希</a> 使用 Bcrypt 对给定的值进行散列。 你可以使用它替代 <code>Hash</code> 门面：</p>
+<pre><code><span class="variable token">$password</span> = bcrypt(<span class="string token">'my-secret-password'</span>);
+</code></pre>
+<p><a name="method-blank"></a></p>
+<h4 id="blank-collection-method"><code>blank()</code> {.collection-method}</h4>
+<p><code>blank</code> 函数判断给定的值是否为空：</p>
+<pre><code>blank(<span class="string token">''</span>);
+blank(<span class="string token">'   '</span>);
+blank(<span class="keyword token">null</span>);
+blank(collect());
+
+<span class="comment token">// true</span>
+
+blank(<span class="number token">0</span>);
+blank(<span class="keyword token">true</span>);
+blank(<span class="keyword token">false</span>);
+
+<span class="comment token">// false</span>
+</code></pre>
+<p>如果想使用与 <code>blank</code>, 函数相反的方法，请看 <a href="#method-filled"><code>filled</code></a> 函数.</p>
+<p><a name="method-broadcast"></a></p>
+<h4 id="broadcast-collection-method"><code>broadcast()</code> {.collection-method}</h4>
+<p><code>broadcast</code> 函数将 <a href="broadcasting.html">广播</a> 给定的 <a href="events.html">事件</a> 到它的监听器：</p>
+<pre><code>broadcast(<span class="keyword token">new</span> UserRegistered(<span class="variable token">$user</span>));
+
+broadcast(<span class="keyword token">new</span> UserRegistered(<span class="variable token">$user</span>))-&gt;toOthers();
+</code></pre>
+<p><a name="method-cache"></a></p>
+<h4 id="cache-collection-method"><code>cache()</code> {.collection-method}</h4>
+<p><code>cache</code> 函数可以从 <a href="cache.html">缓存</a> 中获取值, 如果缓存中给定的键不存在，将返回一个可选的默认值：</p>
+<pre><code><span class="variable token">$value</span> = cache(<span class="string token">'key'</span>);
+
+<span class="variable token">$value</span> = cache(<span class="string token">'key'</span>, <span class="string token">'default'</span>);
+</code></pre>
+<p>你可以通过向函数添加键值对数组来设置缓存项。与此同时，你还应该传递有效的秒数或者缓存的持续时间来设置缓存过期时间 ：</p>
+<pre><code>cache(['key' =&gt; 'value'], 300);
+
+cache(['key' =&gt; 'value'], now()-&gt;addSeconds(10));
+</code></pre>
+<p><a name="method-class-uses-recursive"></a></p>
+<h4 id="class_uses_recursive-collection-method"><code>class_uses_recursive()</code> {.collection-method}</h4>
+<p><code>class_uses_recursive</code> 函数返回一个类使用的所有 traits, 包括它所有父类使用的 traits ：</p>
+<pre><code><span class="variable token">$traits</span> = class_uses_recursive(App\Models\User::<span class="keyword token">class</span>);
+</code></pre>
+<p><a name="method-collect"></a></p>
+<h4 id="collect-collection-method"><code>collect()</code> {.collection-method}</h4>
+<p><code>collect</code> 函数根据给定的值创建一个 <a href="collections.html">collection</a> 实例：</p>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'taylor'</span>, <span class="string token">'abigail'</span>]);
+</code></pre>
+<p><a name="method-config"></a></p>
+<h4 id="config-collection-method"><code>config()</code> {.collection-method}</h4>
+<p><code>config</code> 函数获取 <a href="configuration.html">configuration</a> 变量的值。 可以使用「点」语法访问配置的值，其中包括文件的名称和访问的选项，如果访问的配置选项不存在，你可以指定一个默认值并且返回这个默认值：</p>
+<pre><code><span class="variable token">$value</span> = config(<span class="string token">'app.timezone'</span>);
+
+<span class="variable token">$value</span> = config(<span class="string token">'app.timezone'</span>, <span class="variable token">$default</span>);
+</code></pre>
+<p>你也可以在运行时通过传递一个键／值对数组来设置配置变量, 但是，请注意，此函数仅影响当前请求的配置值，不会更新实际的配置值：</p>
+<pre><code>config([<span class="string token">'app.debug'</span> =&gt; <span class="keyword token">true</span>]);
+</code></pre>
+<p><a name="method-cookie"></a></p>
+<h4 id="cookie-collection-method"><code>cookie()</code> {.collection-method}</h4>
+<p><code>cookie</code>  函数创建一个新的 <a href="requests.html#cookies">cookie</a> 实例 ：</p>
+<pre><code><span class="variable token">$cookie</span> = cookie(<span class="string token">'name'</span>, <span class="string token">'value'</span>, <span class="variable token">$minutes</span>);
+</code></pre>
+<p><a name="method-csrf-field"></a></p>
+<h4 id="csrf_field-collection-method"><code>csrf_field()</code> {.collection-method}</h4>
+<p><code>csrf_field</code> 函数生成一个包含 CSRF 令牌值的 HTML 输入表单字段 <code>hidden</code> 。例如，使用 <a href="blade.html">Blade</a>语法：</p>
+<pre><code>{{ csrf_field() }}
+</code></pre>
+<p><a name="method-csrf-token"></a></p>
+<h4 id="csrf_token-collection-method"><code>csrf_token()</code> {.collection-method}</h4>
+<p><code>csrf_token</code> 函数获取当前 CSRF 令牌的值：</p>
+<pre><code><span class="variable token">$token</span> = csrf_token();
+</code></pre>
+<p><a name="method-decrypt"></a></p>
+<h4 id="decrypt-collection-method"><code>decrypt()</code> {.collection-method}</h4>
+<p><code>decrypt</code> 函数 <a href="encryption.html">解密</a> 给定的值。你可以使用这个函数作为 <code>Crypt</code> 门面的替代：</p>
+<pre><code><span class="variable token">$password</span> = decrypt(<span class="variable token">$value</span>);
+</code></pre>
+<p><a name="method-dd"></a></p>
+<h4 id="dd-collection-method"><code>dd()</code> {.collection-method}</h4>
+<p><code>dd</code> 函数打印输出给定的变量并且结束脚本运行：</p>
+<pre><code>dd(<span class="variable token">$value</span>);
+
+dd(<span class="variable token">$value1</span>, <span class="variable token">$value2</span>, <span class="variable token">$value3</span>, ...);
+</code></pre>
+<p>如果你不停止执行脚本，那么可以使用 <a href="#method-dump"><code>dump</code></a> 函数。</p>
+<p><a name="method-dispatch"></a></p>
+<h4 id="dispatch-collection-method"><code>dispatch()</code> {.collection-method}</h4>
+<p><code>dispatch</code> 函数将给定的 <a href="queues.html#creating-jobs">任务</a> 推送到 Laravel <a href="queues.html">任务队列</a>：</p>
+<pre><code>dispatch(<span class="keyword token">new</span> App\Jobs\SendEmails);
+</code></pre>
+<p><a name="method-dump"></a></p>
+<h4 id="dump-collection-method"><code>dump()</code> {.collection-method}</h4>
+<p><code>dump</code> 打印给定的变量：</p>
+<pre><code>dump(<span class="variable token">$value</span>);
+
+dump(<span class="variable token">$value1</span>, <span class="variable token">$value2</span>, <span class="variable token">$value3</span>, ...);
+</code></pre>
+<p>如果你想要在打印后停止执行脚本，可以使用 <a href="#method-dd"><code>dd</code></a> 函数。</p>
+<p><a name="method-encrypt"></a></p>
+<h4 id="encrypt-collection-method"><code>encrypt()</code> {.collection-method}</h4>
+<p><code>encrypt</code> 函数 <a href="encryption.html">加密</a> 给定的值。你可以使用这个函数作为 <code>Crypt</code>  门面的替代：</p>
+<pre><code><span class="variable token">$secret</span> = encrypt(<span class="string token">'my-secret-value'</span>);
+</code></pre>
+<p><a name="method-env"></a></p>
+<h4 id="env-collection-method"><code>env()</code> {.collection-method}</h4>
+<p><code>env</code> 函数可以获取 <a href="configuration.html#environment-configuration">环境变量</a> 配置的值或者返回默认值：</p>
+<pre><code><span class="variable token">$env</span> = env(<span class="string token">'APP_ENV'</span>);
+
+<span class="variable token">$env</span> = env(<span class="string token">'APP_ENV'</span>, <span class="string token">'production'</span>);
+</code></pre>
+<blockquote>
+<p>注意：如果你在部署过程中执行了 <code>config:cache</code> 命令 , 那么你应该确保只从配置文件中调用 <code>env</code> 函数. 一旦配置被缓存， <code>.env</code> 文件将不再次加载，所有对 <code>env</code> 函数的调用将返回 <code>null</code>。</p>
+</blockquote>
+<p><a name="method-event"></a></p>
+<h4 id="event-collection-method"><code>event()</code> {.collection-method}</h4>
+<p><code>event</code>函数向监听器派发给定 <a href="events.html">事件</a> ：</p>
+<pre><code>event(<span class="keyword token">new</span> UserRegistered(<span class="variable token">$user</span>));
+</code></pre>
+<p><a name="method-filled"></a></p>
+<h4 id="filled-collection-method"><code>filled()</code> {.collection-method}</h4>
+<p><code>filled</code> 函数返回是否不为「空」：</p>
+<pre><code>filled(<span class="number token">0</span>);
+filled(<span class="keyword token">true</span>);
+filled(<span class="keyword token">false</span>);
+
+<span class="comment token">// true</span>
+
+filled(<span class="string token">''</span>);
+filled(<span class="string token">'   '</span>);
+filled(<span class="keyword token">null</span>);
+filled(collect());
+
+<span class="comment token">// false</span>
+</code></pre>
+<p>对于作用与 <code>filled</code>, 相反的方法，可以查看 <a href="#method-blank"><code>blank</code></a> 方法。</p>
+<p><a name="method-info"></a></p>
+<h4 id="info-collection-method"><code>info()</code> {.collection-method}</h4>
+<p><code>info</code> 函数将信息写入 <a href="logging.html">log</a>：</p>
+<pre><code>info(&#39;Some helpful information!&#39;);
+</code></pre>
+<p>可以将上下文数据数组传递给此函数：</p>
+<pre><code>info(<span class="string token">'User login attempt failed.'</span>, [<span class="string token">'id'</span> =&gt; <span class="variable token">$user</span>-&gt;id]);
+</code></pre>
+<p><a name="method-logger"></a></p>
+<h4 id="logger-collection-method"><code>logger()</code> {.collection-method}</h4>
+<p><code>logger</code> 函数可以被用于将 <code>debug</code> 级别的消息写入 <a href="logging.html">log</a>：</p>
+<pre><code>logger(&#39;Debug message&#39;);
+</code></pre>
+<p>上下文数据数组也可以传递给函数：</p>
+<pre><code>logger(<span class="string token">'User has logged in.'</span>, [<span class="string token">'id'</span> =&gt; <span class="variable token">$user</span>-&gt;id]);
+</code></pre>
+<p>如果不带参数调用此函数，它将返回 <a href="errors.html#logging">logger</a> 实例：</p>
+<pre><code>logger()-&gt;error('You are not allowed here.');
+</code></pre>
+<p><a name="method-method-field"></a></p>
+<h4 id="method_field-collection-method"><code>method_field()</code> {.collection-method}</h4>
+<p><code>method_field</code> 函数生成包含模仿表单 HTTP 动作的 HTML <code>hidden</code> 域。下面的例子使用了 <a href="blade.html">Blade 语法</a>：</p>
+<pre><code>&lt;form method="POST"&gt;
+    {{ method_field('DELETE') }}
+&lt;/form&gt;
+</code></pre>
+<p><a name="method-now"></a></p>
+<h4 id="now-collection-method"><code>now()</code> {.collection-method}</h4>
+<p><code>now</code> 函数为当前时间创建一个新的 <code>Illuminate\Support\Carbon</code> 实例：</p>
+<pre><code><span class="variable token">$now</span> = now();
+</code></pre>
+<p><a name="method-old"></a></p>
+<h4 id="old-collection-method"><code>old()</code> {.collection-method}</h4>
+<p><code>old</code> 函数 <a href="requests.html#retrieving-input">获取</a> 写入 <code>session</code> 的 <a href="requests.html#old-input">旧的输入值</a> ：</p>
+<pre><code><span class="variable token">$value</span> = old(<span class="string token">'value'</span>);
+
+<span class="variable token">$value</span> = old(<span class="string token">'value'</span>, <span class="string token">'default'</span>);
+</code></pre>
+<p><a name="method-optional"></a></p>
+<h4 id="optional-collection-method"><code>optional()</code> {.collection-method}</h4>
+<p><code>optional</code> 函数接受任何参数，并允许你访问该对象的属性或调用方法。如果给定的对象为 null，属性和方法将返回 null 而不是导致错误：</p>
+<pre><code><span class="keyword token">return</span> optional(<span class="variable token">$user</span>-&gt;address)-&gt;street;
+
+{!! old(<span class="string token">'name'</span>, optional(<span class="variable token">$user</span>)-&gt;name) !!}
+</code></pre>
+<p><code>optional</code> 函数也接受闭包作为第二个参数。如果第一个参数提供的值不为空，闭包将被调用：</p>
+<pre><code><span class="keyword token">return</span> optional(User::find(<span class="variable token">$id</span>), <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;name;
+});
+</code></pre>
+<p><a name="method-policy"></a></p>
+<h4 id="policy-collection-method"><code>policy()</code> {.collection-method}</h4>
+<p><code>policy</code> 方法为给定的类获取 <a href="authorization.html#creating-policies">policy</a> 实例</p>
+<pre><code><span class="variable token">$policy</span> = policy(App\Models\User::<span class="keyword token">class</span>);
+</code></pre>
+<p><a name="method-redirect"></a></p>
+<h4 id="redirect-collection-method"><code>redirect()</code> {.collection-method}</h4>
+<p><code>redirect</code> 函数返回 <a href="responses.html#redirects">重定向 HTTP 响应</a>，如果不带参数调用则返回重定向器实例：</p>
+<pre><code><span class="keyword token">return</span> redirect(<span class="variable token">$to</span> = <span class="keyword token">null</span>, <span class="variable token">$status</span> = <span class="number token">302</span>, <span class="variable token">$headers</span> = [], <span class="variable token">$https</span> = <span class="keyword token">null</span>);
+
+<span class="keyword token">return</span> redirect(<span class="string token">'/home'</span>);
+
+<span class="keyword token">return</span> redirect()-&gt;route(<span class="string token">'route.name'</span>);
+</code></pre>
+<p><a name="method-report"></a></p>
+<h4 id="report-collection-method"><code>report()</code> {.collection-method}</h4>
+<p><code>report</code> 函数使用 <a href="errors.html#the-exception-handler">异常处理器</a> 的 <code>report</code> 方法报告异常：</p>
+<pre><code>report(<span class="variable token">$e</span>);
+</code></pre>
+<p><code>report</code> 函数也接受一个字符串作为参数。当给函数一个字符串时，函数将创建一个异常，并将该字符串作为其消息：</p>
+<pre><code>report(&#39;Something went wrong.&#39;);
+</code></pre>
+<p><a name="method-request"></a></p>
+<h4 id="request-collection-method"><code>request()</code> {.collection-method}</h4>
+<p><code>request</code> 函数返回当前的 <a href="requests.html">request</a>实例或从当前请求中获取输入字段的值：</p>
+<pre><code><span class="variable token">$request</span> = request();
+
+<span class="variable token">$value</span> = request(<span class="string token">'key'</span>, <span class="variable token">$default</span>);
+</code></pre>
+<p><a name="method-rescue"></a></p>
+<h4 id="rescue-collection-method"><code>rescue()</code> {.collection-method}</h4>
+<p><code>rescue</code> 函数执行给定的闭包，并且捕获其执行过程中引发的任何异常。捕获的所有异常都将传递给 <a href="errors.html#the-exception-handler">异常处理器</a>；然后继续处理此次请求：</p>
+<pre><code><span class="keyword token">return</span> rescue(<span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;method();
+});
+</code></pre>
+<p>还可以为其传递第二个参数。这个参数将作为执行闭包引发异常时的「默认」值：</p>
+<pre><code><span class="keyword token">return</span> rescue(<span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;method();
+}, <span class="keyword token">false</span>);
+
+<span class="keyword token">return</span> rescue(<span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;method();
+}, <span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;failure();
+});
+</code></pre>
+<p><a name="method-resolve"></a></p>
+<h4 id="resolve-collection-method"><code>resolve()</code> {.collection-method}</h4>
+<p><code>resolve</code> 使用 <a href="container.html">服务容器</a> 解析给定名称的类或接口的实例：</p>
+<pre><code><span class="variable token">$api</span> = resolve(<span class="string token">'HelpSpot\API'</span>);
+</code></pre>
+<p><a name="method-response"></a></p>
+<h4 id="response-collection-method"><code>response()</code> {.collection-method}</h4>
+<p><code>response</code> 函数创建 <a href="responses.html">响应</a> 实例，或者获取响应工厂的实例：</p>
+<pre><code><span class="keyword token">return</span> response(<span class="string token">'Hello World'</span>, <span class="number token">200</span>, <span class="variable token">$headers</span>);
+
+<span class="keyword token">return</span> response()-&gt;json([<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>], <span class="number token">200</span>, <span class="variable token">$headers</span>);
+</code></pre>
+<p><a name="method-retry"></a></p>
+<h4 id="retry-collection-method"><code>retry()</code> {.collection-method}</h4>
+<p><code>retry</code> 函数尝试执行给定的回调，直到达到给定的最大尝试阈值。如果回调没有抛出异常，回调返回值将被返回。如果回调抛出异常，将自动重试。达到最大尝试次数，将抛出异常：</p>
+<pre><code><span class="keyword token">return</span> retry(<span class="number token">5</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// Attempt 5 times while resting 100ms between attempts...</span>
+}, <span class="number token">100</span>);
+</code></pre>
+<p>如果你想手动计算两次尝试之间休眠的毫秒数，您可以将闭包作为第三个参数传递给 <code>retry</code> 函数：</p>
+<pre><code><span class="keyword token">return</span> retry(<span class="number token">5</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// ...</span>
+}, <span class="keyword token">function</span> (<span class="variable token">$attempt</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$attempt</span> * <span class="number token">100</span>;
+});
+</code></pre>
+<p>方便起见，你可以提供一个数组作为 <code>retry</code> 函数的第一个参数。该数组将用于确定后续尝试之间要休眠的毫秒数：</p>
+<pre><code><span class="keyword token">return</span> retry([<span class="number token">100</span>, <span class="number token">200</span>] <span class="keyword token">function</span> () {
+    <span class="comment token">// Sleep for 100ms on first retry, 200ms on second retry...</span>
+});
+</code></pre>
+<p>要仅在特定条件下重试，你可以将闭包作为第四个参数传递给 <code>retry</code> 函数：</p>
+<pre><code><span class="keyword token">return</span> retry(<span class="number token">5</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// ...</span>
+}, <span class="number token">100</span>, <span class="keyword token">function</span> (<span class="variable token">$exception</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$exception</span> instanceof RetryException;
+});
+</code></pre>
+<p><a name="method-session"></a></p>
+<h4 id="session-collection-method"><code>session()</code> {.collection-method}</h4>
+<p><code>session</code> 函数用于获取或设置 <a href="session.html">session</a> 值：</p>
+<pre><code><span class="variable token">$value</span> = session(<span class="string token">'key'</span>);
+</code></pre>
+<p>可以向该函数传递键值对数组来设置 session 值：</p>
+<pre><code>session(['chairs' =&gt; 7, 'instruments' =&gt; 3]);
+</code></pre>
+<p>不带参数调用此函数，则返回 session 实例：</p>
+<pre><code><span class="variable token">$value</span> = session()-&gt;get(<span class="string token">'key'</span>);
+
+session()-&gt;put(<span class="string token">'key'</span>, <span class="variable token">$value</span>);
+</code></pre>
+<p><a name="method-tap"></a></p>
+<h4 id="tap-collection-method-1"><code>tap()</code> {.collection-method}</h4>
+<p><code>tap</code> 函数接受两个参数： 任意 <code>$value</code> 和闭包。 <code>$value</code> 将被传递给闭包，并被 <code>tap</code> 函数返回。与闭包的返回值无关：</p>
+<pre><code><span class="variable token">$user</span> = tap(User::first(), <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+    <span class="variable token">$user</span>-&gt;name = <span class="string token">'taylor'</span>;
+
+    <span class="variable token">$user</span>-&gt;save();
+});
+</code></pre>
+<p>如果没有向 <code>tap</code> 函数传递闭包，可以调用给定 <code>$value</code> 的任意方法。调用此方法的返回值永远是 <code>$value</code> ，无论方法在其定义中返回什么。例如，Eloquent 的 <code>update</code> 方法指定返回一个整数。但是，我们可以通过 <code>tap</code> 函数链式调用 <code>update</code> 方法强制其返回模型自身：</p>
+<pre><code><span class="variable token">$user</span> = tap(<span class="variable token">$user</span>)-&gt;update([
+    <span class="string token">'name'</span> =&gt; <span class="variable token">$name</span>,
+    <span class="string token">'email'</span> =&gt; <span class="variable token">$email</span>,
+]);
+</code></pre>
+<p>要向类中添加 <code>tap</code> 方法，可以将 <code>Illuminate\Support\Traits\Tappable</code> 特征添加到类中。 此特征的 <code>tap</code> 方法接受闭包作为其唯一参数。 对象实例本身将传递给闭包，然后由 <code>tap</code> 方法返回：</p>
+<pre><code><span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;tap(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<p><a name="method-throw-if"></a></p>
+<h4 id="throw_if-collection-method"><code>throw_if()</code> {.collection-method}</h4>
+<p>在给定的布尔表达式结果为 <code>true</code> 时，<code>throw_if</code> 函数抛出给定的异常：</p>
+<pre><code>throw_if(! Auth::user()-&gt;isAdmin(), AuthorizationException::<span class="keyword token">class</span>);
+
+throw_if(
+    ! Auth::user()-&gt;isAdmin(),
+    AuthorizationException::<span class="keyword token">class</span>,
+    <span class="string token">'You are not allowed to access this page.'</span>
+);
+</code></pre>
+<p><a name="method-throw-unless"></a></p>
+<h4 id="throw_unless-collection-method"><code>throw_unless()</code> {.collection-method}</h4>
+<p>在给定的布尔表达式结果为 <code>false</code> 时，<code>throw_unless</code> 函数抛出给定的异常：</p>
+<pre><code>throw_unless(Auth::user()-&gt;isAdmin(), AuthorizationException::<span class="keyword token">class</span>);
+
+throw_unless(
+    Auth::user()-&gt;isAdmin(),
+    AuthorizationException::<span class="keyword token">class</span>,
+    <span class="string token">'You are not allowed to access this page.'</span>
+);
+</code></pre>
+<p><a name="method-today"></a></p>
+<h4 id="today-collection-method"><code>today()</code> {.collection-method}</h4>
+<p><code>today</code> 函数根据当前日期创建新的 <code>Illuminate\Support\Carbon</code> 实例：</p>
+<pre><code><span class="variable token">$today</span> = today();
+</code></pre>
+<p><a name="method-trait-uses-recursive"></a></p>
+<h4 id="trait_uses_recursive-collection-method"><code>trait_uses_recursive()</code> {.collection-method}</h4>
+<p><code>trait_uses_recursive</code> 返回被 <code>trait</code> 使用的全部 <code>trait</code>：</p>
+<pre><code><span class="variable token">$traits</span> = trait_uses_recursive(\Illuminate\Notifications\Notifiable::<span class="keyword token">class</span>);
+</code></pre>
+<p><a name="method-transform"></a></p>
+<h4 id="transform-collection-method"><code>transform()</code> {.collection-method}</h4>
+<p><code>transform</code> 函数执行基于（非<a href="#method-blank">空</a>）给定值的 闭包，并返回闭包的结果：</p>
+<pre><code><span class="variable token">$callback</span> = <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span> * <span class="number token">2</span>;
+};
+
+<span class="variable token">$result</span> = transform(<span class="number token">5</span>, <span class="variable token">$callback</span>);
+
+<span class="comment token">// 10</span>
+</code></pre>
+<p>还可以传递一个默认值或闭包作为该函数的第三个参数。如果给定的值为空时，返回该值：</p>
+<pre><code><span class="variable token">$result</span> = transform(<span class="keyword token">null</span>, <span class="variable token">$callback</span>, <span class="string token">'The value is blank'</span>);
+
+<span class="comment token">// The value is blank</span>
+</code></pre>
+<p><a name="method-validator"></a></p>
+<h4 id="validator-collection-method"><code>validator()</code> {.collection-method}</h4>
+<p><code>validator</code> 函数根据指定的参数创建一个新的 <a href="validation.html">验证器</a> 实例。方便起见可以用它来代替 <code>Validator</code> facade：</p>
+<pre><code><span class="variable token">$validator</span> = validator(<span class="variable token">$data</span>, <span class="variable token">$rules</span>, <span class="variable token">$messages</span>);
+</code></pre>
+<p><a name="method-value"></a></p>
+<h4 id="value-collection-method"><code>value()</code> {.collection-method}</h4>
+<p><code>value</code> 函数返回给定值。如果传递闭包给此函数，将执行闭包并返回闭包调用的结果：</p>
+<pre><code><span class="variable token">$result</span> = value(<span class="keyword token">true</span>);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$result</span> = value(<span class="keyword token">function</span> () {
+    <span class="keyword token">return</span> <span class="keyword token">false</span>;
+});
+
+<span class="comment token">// false</span>
+</code></pre>
+<p><a name="method-view"></a></p>
+<h4 id="view-collection-method"><code>view()</code> {.collection-method}</h4>
+<p><code>view</code> 函数获取一个 <a href="views.html">视图</a> 实例：</p>
+<pre><code><span class="keyword token">return</span> view(<span class="string token">'auth.login'</span>);
+</code></pre>
+<p><a name="method-with"></a></p>
+<h4 id="with-collection-method"><code>with()</code> {.collection-method}</h4>
+<p><code>with</code> 函数返回给定的值。如果传递了一个 <code>闭包</code> 给第二个参数，那么会返回 <code>闭包</code> 执行的结果：</p>
+<pre><code><span class="variable token">$callback</span> = <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    <span class="keyword token">return</span> is_numeric(<span class="variable token">$value</span>) ? <span class="variable token">$value</span> * <span class="number token">2</span> : <span class="number token">0</span>;
+};
+
+<span class="variable token">$result</span> = with(<span class="number token">5</span>, <span class="variable token">$callback</span>);
+
+<span class="comment token">// 10</span>
+
+<span class="variable token">$result</span> = with(<span class="keyword token">null</span>, <span class="variable token">$callback</span>);
+
+<span class="comment token">// 0</span>
+
+<span class="variable token">$result</span> = with(<span class="number token">5</span>, <span class="keyword token">null</span>);
+
+<span class="comment token">// 5</span>
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

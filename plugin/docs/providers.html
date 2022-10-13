@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="服务提供者">服务提供者</h1>
+<ul>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#%E7%BC%96%E5%86%99%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85">编写服务提供者</a><ul>
+<li><a href="#%E6%B3%A8%E5%86%8C%E6%96%B9%E6%B3%95">注册方法</a></li>
+<li><a href="#%E5%BC%95%E5%AF%BC%E6%96%B9%E6%B3%95">引导方法</a></li>
+</ul>
+</li>
+<li><a href="#%E6%B3%A8%E5%86%8C%E6%8F%90%E4%BE%9B%E8%80%85">注册提供者</a></li>
+<li><a href="#%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD%E6%8F%90%E4%BE%9B%E8%80%85">延迟加载提供者</a></li>
+</ul>
+<p><a name="简介"></a></p>
+<h2 id="简介">简介</h2>
+<p>服务提供者是所有 Laravel 应用程序的引导中心。你的应用程序，以及通过服务器引导的 Laravel 核心服务都是通过服务提供器引导。</p>
+<p>但是，「引导」是什么意思呢？通常，我们可以理解为 <strong>注册</strong>，比如注册服务容器绑定，事件监听器，中间件，甚至是路由。服务提供者是配置应用程序的中心。</p>
+<p>当你打开 Laravel 的 <code>config/app.php</code> 文件时，你会看到 <code>providers</code> 数组。数组中的内容是应用程序要加载的所有服务提供者的类。当然，其中有很多「延迟」提供者，他们并不会在每次请求的时候都加载，只有他们的服务实际被需要时才会加载。</p>
+<p>本篇你将会学到如何编写自己的服务提供者，并将其注册到你的 Laravel 应用程序中。</p>
+<blockquote>
+<p>技巧 如果您想了解有关 Laravel 如何处理请求并在内部工作的更多信息，请查看有关 Laravel 的文档 <a href="lifecycle.html">请求生命周期</a>。</p>
+</blockquote>
+<p><a name="编写服务提供者"></a></p>
+<h2 id="编写服务提供者">编写服务提供者</h2>
+<p>所有的服务提供者都会继承 <code>Illuminate\Support\ServiceProvider</code> 类。大多服务提供者都包含一个 <code>register</code> 和一个 <code>boot</code> 方法。在 <code>register</code> 方法中，你只需要将服务绑定到 <a href="container.html">服务容器</a>。而不要尝试在 <code>register</code> 方法中注册任何监听器，路由，或者其他任何功能。</p>
+<p>使用 Artisan 命令行工具，通过 <code>make:provider</code> 命令可以生成一个新的提供者：</p>
+<pre><code class="language-shell">php artisan make:provider RiakServiceProvider
+</code></pre>
+<p><a name="注册方法"></a></p>
+<h3 id="注册方法">注册方法</h3>
+<p>如上所述，在 <code>register</code> 方法中，你只需要将服务绑定到 <a href="container.html">服务容器</a> 中。而不要尝试在 <code>register</code> 方法中注册任何监听器，路由，或者其他任何功能。否则，你可能会意外地使用到尚未加载的服务提供者提供的服务。</p>
+<p>让我们来看一个基础的服务提供者。在任何服务提供者方法中，你总是通过 <code>$app</code> 属性来访问服务容器：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Services\Riak\Connection;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> RiakServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 注册应用服务
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    {
+        <span class="variable token">$this</span>-&gt;app-&gt;singleton(Connection::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+            <span class="keyword token">return</span> <span class="keyword token">new</span> Connection(config(<span class="string token">'riak'</span>));
+        });
+    }
+}
+</code></pre>
+<p>这个服务提供者只是定义了一个 <code>register</code> 方法，并且使用这个方法在服务容器中定义了一个 <code>Riak\Connection</code> 接口。如果你不理解服务容器的工作原理，请查看其 <a href="container.html">文档</a>。</p>
+<p><a name="bindings 和 singletons 的特性"></a></p>
+<h4 id="bindings-和-singletons-的特性">bindings 和 singletons 的特性</h4>
+<p>如果你的服务提供器注册了许多简单的绑定，你可能想用 <code>bindings</code> 和 <code>singletons</code> 属性替代手动注册每个容器绑定。当服务提供器被框架加载时，将自动检查这些属性并注册相应的绑定：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Contracts\DowntimeNotifier;
+<span class="keyword token">use</span> App\Contracts\ServerProvider;
+<span class="keyword token">use</span> App\Services\DigitalOceanServerProvider;
+<span class="keyword token">use</span> App\Services\PingdomDowntimeNotifier;
+<span class="keyword token">use</span> App\Services\ServerToolsProvider;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 所有需要注册的容器绑定
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$bindings</span> = [
+        ServerProvider::<span class="keyword token">class</span> =&gt; DigitalOceanServerProvider::<span class="keyword token">class</span>,
+    ];
+
+    <span class="comment token">/**
+     * 所有需要注册的容器单例
+     *
+     *<span class="phpdoc token"> @var</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="variable token">$singletons</span> = [
+        DowntimeNotifier::<span class="keyword token">class</span> =&gt; PingdomDowntimeNotifier::<span class="keyword token">class</span>,
+        ServerProvider::<span class="keyword token">class</span> =&gt; ServerToolsProvider::<span class="keyword token">class</span>,
+    ];
+}
+</code></pre>
+<p><a name="引导方法"></a></p>
+<h3 id="引导方法">引导方法</h3>
+<p>如果我们要在服务提供者中注册一个 <a href="views.html#view-composers">视图合成器</a> 该怎么做？这就需要用到 <code>boot</code> 方法了。<strong>该方法在所有服务提供者被注册以后才会被调用</strong>，这就是说我们可以在其中访问框架已注册的所有其它服务：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> Illuminate\Support\Facades\View;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> ComposerServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+    <span class="comment token">/**
+     * 启动所有的应用服务
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    {
+        View::composer(<span class="string token">'view'</span>, <span class="keyword token">function</span> () {
+            <span class="comment token">//</span>
+        });
+    }
+}
+</code></pre>
+<p><a name="启动方法的依赖注入"></a></p>
+<h4 id="启动方法的依赖注入">启动方法的依赖注入</h4>
+<p>你可以为服务提供者的 <code>boot</code> 方法设置类型提示。<a href="container.html">服务容器</a> 会自动注入你所需要的依赖：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Contracts\Routing\ResponseFactory;
+
+<span class="comment token">/**
+ * 引导所有的应用服务
+ *
+ *<span class="phpdoc token"> @param</span>  \Illuminate\Contracts\Routing\ResponseFactory  $response
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(ResponseFactory <span class="variable token">$response</span>)
+{
+    <span class="variable token">$response</span>-&gt;macro(<span class="string token">'serialized'</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+        <span class="comment token">//</span>
+    });
+}
+</code></pre>
+<p><a name="注册服务提供者"></a></p>
+<h2 id="注册服务提供者">注册服务提供者</h2>
+<p>所有服务提供者都是通过配置文件 <code>config/app.php</code> 进行注册。该文件包含了一个列出所有服务提供者名字的 <code>providers</code> 数组，默认情况下，其中列出了所有核心服务提供者，这些服务提供者启动 Laravel 核心组件，比如邮件、队列、缓存等等。</p>
+<p>要注册提供器，只需要将其添加到数组：</p>
+<pre><code><span class="string token">'providers'</span> =&gt; [
+    <span class="comment token">// 其他服务提供者</span>
+
+    App\Providers\ComposerServiceProvider::<span class="keyword token">class</span>,
+],
+</code></pre>
+<p><a name="延迟加载提供者"></a></p>
+<h2 id="延迟加载提供者">延迟加载提供者</h2>
+<p>如果你的服务提供者 <strong>只</strong> 在 <a href="container.html">服务容器</a> 中注册，可以选择延迟加载该绑定直到注册绑定的服务真的需要时再加载，延迟加载这样的一个提供者将会提升应用的性能，因为它不会在每次请求时都从文件系统加载。</p>
+<p>Laravel 编译并保存延迟服务提供者提供的所有服务的列表，以及其服务提供者类的名称。因此，只有当你在尝试解析其中一项服务时，Laravel 才会加载服务提供者。</p>
+<p>要延迟加载提供者，需要实现 <code>\Illuminate\Contracts\Support\DeferrableProvider</code> 接口并置一个 <code>provides</code> 方法。这个 <code>provides</code> 方法返回该提供者注册的服务容器绑定：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Services\Riak\Connection;
+<span class="keyword token">use</span> Illuminate\Contracts\Support\DeferrableProvider;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+
+<span class="keyword token">class</span> RiakServiceProvider <span class="keyword token">extends</span> ServiceProvider <span class="keyword token">implements</span> DeferrableProvider
+{
+    <span class="comment token">/**
+     * 注册所有的应用服务
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    {
+        <span class="variable token">$this</span>-&gt;app-&gt;singleton(Connection::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+            <span class="keyword token">return</span> <span class="keyword token">new</span> Connection(<span class="variable token">$app</span>[<span class="string token">'config'</span>][<span class="string token">'riak'</span>]);
+        });
+    }
+
+    <span class="comment token">/**
+     * 获取服务提供者的服务
+     * 
+     *<span class="phpdoc token"> @return</span> array
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> provides()
+    {
+        <span class="keyword token">return</span> [Connection::<span class="keyword token">class</span>];
+    }
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

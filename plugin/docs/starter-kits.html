@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="入门套件">入门套件</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#laravel-breeze">Laravel Breeze</a><ul>
+<li><a href="#laravel-breeze-installation">安装</a></li>
+<li><a href="#breeze-and-inertia">Breeze &amp; Inertia</a></li>
+<li><a href="#breeze-and-next">Breeze &amp; Next.js / API</a></li>
+</ul>
+</li>
+<li><a href="#laravel-jetstream">Laravel Jetstream</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>为了让您开始构建新的 Laravel 应用程序，我们很高兴提供身份验证和应用程序入门工具包。 这些工具包会自动为您的应用程序提供注册和验证应用程序用户所需的路由、控制器和视图。</p>
+<p>虽然欢迎您使用这些入门套件，但它们不是必需的。 只需安装一个新的 Laravel 副本，您就可以自由地从头开始构建自己的应用程序。 无论哪种方式，我们都知道你会创造出伟大的东西！</p>
+<p><a name="laravel-breeze"></a></p>
+<h2 id="laravel-breeze">Laravel Breeze</h2>
+<p><a href="https://github.com/laravel/breeze">Laravel Breeze</a> 是 Laravel 的所有 <a href="authentication.html">认证功能</a> 的最小、简单的实现，包括登录、注册、密码重置、电子邮件验证和密码确认。 Laravel Breeze 的默认视图层由简单的 <a href="blade.html">Blade 模板</a> 组成，并使用 <a href="https://tailwindcss.com">Tailwind CSS</a> 进行样式设置。</p>
+<p>Breeze 为开始一个全新的 Laravel 应用程序提供了一个很好的起点，对于计划使用 <a href="https://laravel-livewire.com">Laravel Livewire</a> 将其 Blade 模板提升到新水平的项目来说，它也是一个很好的选择。</p>
+<p><a name="laravel-breeze-installation"></a></p>
+<h3 id="安装">安装</h3>
+<p>首先，你应该<a href="installation.html">创建一个新的 Laravel 应用程序</a>，配置你的数据库，然后运行你的<a href="migrations.html">数据库迁移</a>：</p>
+<pre><code class="language-shell">curl -s https:<span class="comment token">//laravel.build/example-app | bash</span>
+
+cd example-app
+
+php artisan migrate
+</code></pre>
+<p>一旦你创建了一个新的 Laravel 应用程序，你就可以使用 Composer 安装 Laravel Breeze：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/breeze --dev
+</code></pre>
+<p>Composer 安装好 Laravel Breeze 包后，你可以运行 <code>breeze:install</code> Artisan 命令。 此命令将身份验证视图、路由、控制器和其他资源发布到您的应用程序。 Laravel Breeze 将其所有代码发布到您的应用程序，以便您可以完全控制和查看其功能和实现。 安装 Breeze 后，您还应该编译您的资产，以便您的应用程序的 CSS 文件可用：</p>
+<pre><code class="language-shell">php artisan breeze:install
+
+npm install
+npm run dev
+php artisan migrate
+</code></pre>
+<p>接下来，您可以在 Web 浏览器中导航到应用程序的 <code>/login</code> 或 <code>/register</code> URL。 Breeze 的所有路由都在 <code>routes/auth.php</code> 文件中定义。</p>
+<blockquote>
+<p>技巧：要了解有关编译应用程序的 CSS 和 JavaScript 的更多信息，请查看 <a href="mix.html#running-mix">Laravel Mix 文档</a>。</p>
+</blockquote>
+<p><a name="breeze-and-inertia"></a></p>
+<h3 id="breeze--inertia">Breeze &amp; Inertia</h3>
+<p>Laravel Breeze 还提供了一个由 Vue 或 React 提供支持的 <a href="https://inertiajs.com">Inertia.js</a> 前端实现。 要使用 Inertia 堆栈，请在执行 <code>breeze:install</code> Artisan 命令时指定 <code>vue</code> 或 <code>react</code> 作为所需的堆栈：</p>
+<pre><code class="language-shell">php artisan breeze:install vue
+
+<span class="comment token">// 或...</span>
+
+php artisan breeze:install react
+
+npm install
+npm run dev
+php artisan migrate
+</code></pre>
+<p><a name="breeze-and-next"></a></p>
+<h3 id="breeze--nextjs--api">Breeze &amp; Next.js / API</h3>
+<p>Laravel Breeze 还可以构建一个身份验证 API，该 API 已准备好对现代 JavaScript 应用程序进行身份验证，例如由 <a href="https://nextjs.org">Next</a>、<a href="https://nuxtjs.org">Nuxt</a> 等提供支持的应用程序。 首先，在执行 <code>breeze:install</code> Artisan 命令时，将 <code>api</code> 堆栈指定为所需的堆栈：</p>
+<pre><code class="language-shell">php artisan breeze:install api
+
+php artisan migrate
+</code></pre>
+<p>在安装过程中，Breeze 会在您的应用程序 <code>.env</code> 文件中添加一个 <code>FRONTEND_URL</code> 环境变量。此 URL 应该是您的 JavaScript 应用程序的 URL。在本地开发期间这通常是 <code>http://localhost:3000</code>。此外，您应该确保您 <code>APP_URL</code> 的设置为 <code>http://localhost:8000</code>，这是 <code>serve</code> Artisan 命令使用的默认 URL。</p>
+<p><a name="next-reference-implementation"></a></p>
+<h4 id="nextjs-参考实现">Next.js 参考实现</h4>
+<p>最后，您已准备好将此后端与您选择的前端配对。 <a href="https://github.com/laravel/breeze-next">GitHub 上提供</a>了 Breeze 前端的 Next 参考实现。该前端由 Laravel 维护，包含与 Breeze 提供的传统 Blade 和 Inertia 堆栈相同的用户界面。</p>
+<p><a name="laravel-jetstream"></a></p>
+<h2 id="laravel-jetstream">Laravel Jetstream</h2>
+<p>Laravel Breeze 提供了一个简单的、最小化的起点来构建 Laravel 应用，而 Jetstream 则通过更强大的功能和额外的前端技术堆栈来对应用功能进行增强。 <strong>对于那些刚接触 Laravel 的人，我们建议在学习 Laravel Jetstream 之前先学习 Laravel Breeze。</strong></p>
+<p>Jetstream 为 Laravel 提供了精美设计的应用程序脚手架代码，包括登录、注册、邮箱验证、双因子认证、会话管理、基于 Laravel Sanctum 的 API 支持，以及可选的团队管理功能。Jetstream 使用  <a href="https://tailwindcss.com">Tailwind CSS</a> 设计样式，并提供 <a href="https://laravel-livewire.com">Livewire</a> 或 <a href="https://inertiajs.com">Inertia.js</a> 驱动的前端脚手架技术栈供你选择。</p>
+<p>Laravel Jetstream 的安装使用完整文档位于 <a href="https://jetstream.laravel.com/2.x/introduction.html">Jetstream 官方文档</a>.</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

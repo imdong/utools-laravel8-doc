@@ -1,11 +1,11 @@
 window.exports = {
-    'laravel8-docs': {
+    'laravel9-docs': {
         mode: 'doc',
         args: {
             indexes: require('./docs-indexes.json')
         }
     },
-    'laravel8-cheatsheet': {
+    'laravel9-cheatsheet': {
         mode: 'doc',
         args: {
             indexes: require('./cheatsheets-indexes.json')

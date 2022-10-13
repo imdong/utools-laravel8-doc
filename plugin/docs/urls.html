@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="生成-url">生成 URL</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#the-basics">基础</a><ul>
+<li><a href="#generating-basic-urls">生成基础 URL</a></li>
+<li><a href="#accessing-the-current-url">访问当前 URL</a></li>
+</ul>
+</li>
+<li><a href="#urls-for-named-routes">命名路由的URL</a><ul>
+<li><a href="#signed-urls">签名 URL</a></li>
+</ul>
+</li>
+<li><a href="#urls-for-controller-actions">控制器行为的URL</a></li>
+<li><a href="#default-values">默认值</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>Laravel 提供了几个辅助函数来为应用程序生成 URL。主要用于在模板和 API 响应中构建 URL 或者在应用程序的其它部分生成重定向响应。</p>
+<p><a name="the-basics"></a></p>
+<h2 id="基础">基础</h2>
+<p><a name="generating-basic-urls"></a></p>
+<h3 id="生成基础-url">生成基础 URL</h3>
+<p>辅助函数 <code>url</code> 可以用于应用的任何一个 URL。生成的 URL 将自动使用当前请求中的方案 (HTTP 或 HTTPS) 和主机：</p>
+<pre><code><span class="variable token">$post</span> = App\Models\Post::find(<span class="number token">1</span>);
+
+<span class="keyword token">echo</span> url(<span class="string token">"/posts/{$post-&gt;id}"</span>);
+
+<span class="comment token">// http://example.com/posts/1</span>
+</code></pre>
+<p><a name="accessing-the-current-url"></a></p>
+<h3 id="访问当前-url">访问当前 URL</h3>
+<p>如果没有给辅助函数 <code>url</code> 提供路径，则会返回一个 <code>Illuminate\Routing\UrlGenerator</code> 实例，来允许你访问有关当前 URL 的信息：</p>
+<pre><code><span class="comment token">// 获取当前 URL 没有 query string...</span>
+<span class="keyword token">echo</span> url()-&gt;current();
+
+<span class="comment token">// 获取当前 URL 包括 query string...</span>
+<span class="keyword token">echo</span> url()-&gt;full();
+
+<span class="comment token">// 获取上个请求 URL</span>
+<span class="keyword token">echo</span> url()-&gt;previous();
+</code></pre>
+<p>上面的这些方法都可以通过 <code>URL</code> <a href="facades.html">facade</a> 访问：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\URL;
+
+<span class="keyword token">echo</span> URL::current();
+</code></pre>
+<p><a name="urls-for-named-routes"></a></p>
+<h2 id="命名路由的-url">命名路由的 URL</h2>
+<p>辅助函数 <code>route</code> 可以用于生成指定 <a href="routing.html#named-routes">命名路由</a> 的 URL。命名路由生成的 URL 不与路由上定义的 URL 相耦合。因此，就算路由的 URL 有任何改变，都不需要对 <code>route</code> 函数调用进行任何更改。例如，假设你的应用程序包含以下路由：</p>
+<pre><code>Route::get(<span class="string token">'/post/{post}'</span>, <span class="keyword token">function</span> (Post <span class="variable token">$post</span>) {
+    <span class="comment token">//</span>
+})-&gt;name(<span class="string token">'post.show'</span>);
+</code></pre>
+<p>要生成此路由的 URL ，可以像这样使用辅助函数 <code>route</code> ：</p>
+<pre><code><span class="keyword token">echo</span> route(<span class="string token">'post.show'</span>, [<span class="string token">'post'</span> =&gt; <span class="number token">1</span>]);
+
+<span class="comment token">// http://example.com/post/1</span>
+</code></pre>
+<p>当然，辅助函数 <code>route</code> 也可以用于为具有多个参数的路由生成 URL：</p>
+<pre><code>Route::get(<span class="string token">'/post/{post}/comment/{comment}'</span>, <span class="keyword token">function</span> (Post <span class="variable token">$post</span>, Comment <span class="variable token">$comment</span>) {
+    <span class="comment token">//</span>
+})-&gt;name(<span class="string token">'comment.show'</span>);
+
+<span class="keyword token">echo</span> route(<span class="string token">'comment.show'</span>, [<span class="string token">'post'</span> =&gt; <span class="number token">1</span>, <span class="string token">'comment'</span> =&gt; <span class="number token">3</span>]);
+
+<span class="comment token">// http://example.com/post/1/comment/3</span>
+</code></pre>
+<p>任何与路由定义参数对应不上的附加数组元素都将添加到 URL 的查询字符串中：</p>
+<pre><code><span class="keyword token">echo</span> route(<span class="string token">'post.show'</span>, [<span class="string token">'post'</span> =&gt; <span class="number token">1</span>, <span class="string token">'search'</span> =&gt; <span class="string token">'rocket'</span>]);
+
+<span class="comment token">// http://example.com/post/1?search=rocket</span>
+</code></pre>
+<p><a name="eloquent-models"></a></p>
+<h4 id="eloquent-models">Eloquent Models</h4>
+<p>你通常使用 <a href="eloquent.html">Eloquent 模型</a> 的主键生成 URL。因此，您可以将 Eloquent 模型作为参数值传递。<code>route</code> 辅助函数将自动提取模型的主键：</p>
+<pre><code><span class="keyword token">echo</span> route(<span class="string token">'post.show'</span>, [<span class="string token">'post'</span> =&gt; <span class="variable token">$post</span>]);
+</code></pre>
+<p><a name="signed-urls"></a></p>
+<h3 id="签名-url">签名 URL</h3>
+<p>Laravel 允许你轻松地为命名路径创建「签名」URL，这些 URL 在查询字符串后附加了「签名」哈希，允许 Laravel 验证 URL 自创建以来未被修改过。签名 URL 对于可公开访问但需要一层防止 URL 操作的路由特别有用。</p>
+<p>例如，你可以使用签名 URL 来实现通过电子邮件发送给客户的公共「取消订阅」链接。要创建指向路径的签名 URL ，请使用 <code>URL</code> facade 的 <code>signedRoute</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\URL;
+
+<span class="keyword token">return</span> URL::signedRoute(<span class="string token">'unsubscribe'</span>, [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p>如果要生成具有有效期的临时签名路由 URL，可以使用以下 <code>temporarySignedRoute</code> 方法，当 Laravel 验证一个临时的签名路由 URL 时，它会确保编码到签名 URL 中的过期时间戳没有过期：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\URL;
+
+<span class="keyword token">return</span> URL::temporarySignedRoute(
+    <span class="string token">'unsubscribe'</span>, now()-&gt;addMinutes(<span class="number token">30</span>), [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>]
+);
+</code></pre>
+<p><a name="validating-signed-route-requests"></a></p>
+<h4 id="验证签名路由请求">验证签名路由请求</h4>
+<p>要验证传入请求是否具有有效签名，你应该对传入的 <code>Illuminate\Http\Request</code> 实例中调用 <code>hasValidSignature</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/unsubscribe/{user}'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="keyword token">if</span> (! <span class="variable token">$request</span>-&gt;hasValidSignature()) {
+        abort(<span class="number token">401</span>);
+    }
+
+    <span class="comment token">// ...</span>
+})-&gt;name(<span class="string token">'unsubscribe'</span>);
+</code></pre>
+<p>有时，你可能需要允许你的应用程序前端将数据附加到签名 URL，例如在执行客户端分页时。因此，你可以指定在使用 <code>hasValidSignatureWhileIgnoring</code> 方法验证签名 URL 时应忽略的请求查询参数。请记住，忽略参数将允许任何人根据请求修改这些参数：</p>
+<pre><code><span class="keyword token">if</span> (! <span class="variable token">$request</span>-&gt;hasValidSignatureWhileIgnoring([<span class="string token">'page'</span>, <span class="string token">'order'</span>])) {
+    abort(<span class="number token">401</span>);
+}
+</code></pre>
+<p>或者，你可以将 <code>Illuminate\Routing\Middleware\ValidateSignature</code> <a href="middleware.html">中间件</a> 分配给路由。如果它不存在，则应该在 HTTP 内核的 <code>routeMiddleware</code> 数组中为此中间件分配一个键：</p>
+<pre><code><span class="comment token">/**
+ * 应用程序的路由中间件
+ *
+ * 这些中间件可以分配给组或单独使用
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$routeMiddleware</span> = [
+    <span class="string token">'signed'</span> =&gt; \Illuminate\Routing\Middleware\ValidateSignature::<span class="keyword token">class</span>,
+];
+</code></pre>
+<p>一旦在内核中注册了中间件，就可以将其附加到路由。如果传入的请求没有有效的签名，中间件将自动返回 <code>403</code> HTTP 响应：</p>
+<pre><code>Route::post(<span class="string token">'/unsubscribe/{user}'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="comment token">// ...</span>
+})-&gt;name(<span class="string token">'unsubscribe'</span>)-&gt;middleware(<span class="string token">'signed'</span>);
+</code></pre>
+<p><a name="responding-to-invalid-signed-routes"></a></p>
+<h4 id="响应无效的签名路由">响应无效的签名路由</h4>
+<p>当有人访问已过期的签名 URL 时，他们将收到一个通用的错误页面，显示 <code>403</code> HTTP 状态代码。然而，你可以通过在异常处理程序中为 <code>InvalidSignatureException</code> 异常定义自定义“可渲染”闭包来自定义此行为。这个闭包应该返回一个 HTTP 响应：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Routing\Exceptions\InvalidSignatureException;
+
+<span class="comment token">/**
+ * 为应用程序注册异常处理回调
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+{
+    <span class="variable token">$this</span>-&gt;renderable(<span class="keyword token">function</span> (InvalidSignatureException <span class="variable token">$e</span>) {
+        <span class="keyword token">return</span> response()-&gt;view(<span class="string token">'error.link-expired'</span>, [], <span class="number token">403</span>);
+    });
+}
+</code></pre>
+<p><a name="urls-for-controller-actions"></a></p>
+<h2 id="控制器行为的-url">控制器行为的 URL</h2>
+<p><code>action</code> 功能可以为给定的控制器行为生成 URL。</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\HomeController;
+
+<span class="variable token">$url</span> = action([HomeController::<span class="keyword token">class</span>, <span class="string token">'index'</span>]);
+</code></pre>
+<p>如果控制器方法接收路由参数，你可以通过第二个参数传递：</p>
+<pre><code><span class="variable token">$url</span> = action([UserController::<span class="keyword token">class</span>, <span class="string token">'profile'</span>], [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p><a name="default-values"></a></p>
+<h2 id="默认值">默认值</h2>
+<p>对于某些应用程序，你可能希望为某些 URL 参数的请求范围指定默认值。例如，假设有些路由定义了 <code>{locale}</code> 参数：</p>
+<pre><code>Route::get(<span class="string token">'/{locale}/posts'</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">//</span>
+})-&gt;name(<span class="string token">'post.index'</span>);
+</code></pre>
+<p>每次都通过 <code>locale</code> 来调用辅助函数 <code>route</code> 也是一件很麻烦的事情。因此，使用 <code>URL::defaults</code> 方法定义这个参数的默认值，可以让该参数始终存在当前请求中。然后就能从 <a href="middleware.html#assigning-middleware-to-routes">路由中间件</a> 调用此方法来访问当前请求：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Middleware;
+
+<span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Support\Facades\URL;
+
+<span class="keyword token">class</span> SetDefaultLocaleForUrls
+{
+    <span class="comment token">/**
+     * 处理传入的请求
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @param</span>  \Closure  $next
+     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    {
+        URL::defaults([<span class="string token">'locale'</span> =&gt; <span class="variable token">$request</span>-&gt;user()-&gt;locale]);
+
+        <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
+    }
+}
+</code></pre>
+<p>一旦设置了 <code>locale</code> 参数的默认值，你就不再需要通过辅助函数 <code>route</code> 生成 URL 时传递它的值。</p>
+<p><a name="url-defaults-middleware-priority"></a></p>
+<h4 id="默认-url--中间件优先级">默认 URL &amp; 中间件优先级</h4>
+<p>设置 URL 的默认值会影响 Laravel 对隐式模型绑定的处理。因此，你应该通过<a href="/docs/9.x/middleware#sorting-middleware">设置中间件优先级</a>来确保在 Laravel 自己的 <code>SubstituteBindings</code> 中间件执行之前设置 URL 的默认值。你可以通过在您的应用的 HTTP kernel 文件中的 <code>$middlewarePriority</code> 属性里把您的中间件放在 <code>SubstituteBindings</code> 中间件之前。</p>
+<p><code>$middlewarePriority</code> 这个属性在 <code>Illuminate\Foundation\Http\Kernel</code> 这个基类里。你可以复制一份到你的应用程序的 HTTP kernel 文件中以便做修改:</p>
+<pre><code><span class="comment token">/**
+ * 根据优先级排序的中间件列表
+ *
+ * 这将保证非全局中间件按照既定顺序排序
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$middlewarePriority</span> = [
+    <span class="comment token">// ...</span>
+     \App\Http\Middleware\SetDefaultLocaleForUrls::<span class="keyword token">class</span>,
+     \Illuminate\Routing\Middleware\SubstituteBindings::<span class="keyword token">class</span>,
+     <span class="comment token">// ...</span>
+];
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

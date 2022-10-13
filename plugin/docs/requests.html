@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="请求-请求">请求 请求</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#interacting-with-the-request">与请求交互</a><ul>
+<li><a href="#accessing-the-request">访问请求</a></li>
+<li><a href="#request-path-and-method">请求路径和方法</a></li>
+<li><a href="#request-headers">请求头</a></li>
+<li><a href="#request-ip-address">请求 IP 地址</a></li>
+<li><a href="#content-negotiation">内容协商</a></li>
+<li><a href="#psr7-requests">PSR-7 请求</a></li>
+</ul>
+</li>
+<li><a href="#input">接收数据</a><ul>
+<li><a href="#retrieving-input">检索数据</a></li>
+<li><a href="#determining-if-input-is-present">确定是否存在数据</a></li>
+<li><a href="#merging-additional-input">合并新增数据</a></li>
+<li><a href="#old-input">旧数据</a></li>
+<li><a href="#cookies">Cookies</a></li>
+<li><a href="#nput-trimming-and-normalization">输入整理和规范化</a></li>
+</ul>
+</li>
+<li><a href="#files">文件</a><ul>
+<li><a href="#retrieving-uploaded-files">检索上传的文件</a></li>
+<li><a href="#storing-uploaded-files">存储上传的文件</a></li>
+</ul>
+</li>
+<li><a href="#configuring-trusted-proxies">配置受信任的代理</a></li>
+<li><a href="#configuring-trusted-hosts">配置受信任的主机</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>Laravel 的 <code>Illuminate\Http\Request</code>  类提供了一种面向对象的方法,可以与应用程序处理的当前 HTTP 请求进行交互, 以及检索与请求一起提交的输入内容，cookies 和文件。</p>
+<p><a name="interacting-with-the-request"></a></p>
+<h2 id="与请求交互">与请求交互</h2>
+<p><a name="accessing-the-request"></a></p>
+<h3 id="访问请求">访问请求</h3>
+<p>要通过依赖注入获得当前 HTTP 请求的实例，您应该在路由闭包或控制器方法上导入 <code>Illuminate\Http\Request</code> 类。 传入的请求实例将由 Laravel <a href="container.html">服务容器</a> 自动注入：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+<span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
+{
+    <span class="comment token">/**
+     * 存储一个新用户.
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+    {
+        <span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'name'</span>);
+
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p>如上所述，你也可以在路由闭包上导入<code>Illuminate\Http\Request</code> 类。服务容器在执行时将自动传入请求注入到闭包中：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
+
+Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<p><a name="dependency-injection-route-parameters"></a></p>
+<h4 id="依赖注入和路由参数">依赖注入和路由参数</h4>
+<p>如果控制器方法也需要路由的参数传入，则应在其引入的依赖后面列出路由参数。您的路由应该定义如下：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\UserController;
+
+Route::put(<span class="string token">'/user/{id}'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'update'</span>]);
+</code></pre>
+<p>您应该注入 <code>Illuminate\Http\Request</code>, 并通过如下定义控制器方法，来访问 <code>id</code> 路由参数：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+<span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
+{
+    <span class="comment token">/**
+     * 更新指定用户
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @param</span>  string  $id
+     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>, <span class="variable token">$id</span>)
+    {
+        <span class="comment token">//</span>
+    }
+}
+</code></pre>
+<p><a name="request-path-and-method"></a></p>
+<h3 id="请求路径和方法">请求路径和方法</h3>
+<p><code>Illuminate\Http\Request</code> 实例提供了多种方法来检查传入的 Http 请求，并扩展了 <code>Symfony\Component\HttpFoundation\Request</code> 类。下面我们将讨论几个最重要的方法。</p>
+<p><a name="retrieving-the-request-path"></a></p>
+<h4 id="检索请求路径">检索请求路径</h4>
+<p><code>path</code> 方法返回请求的路径信息。因此，如果传入请求的目标是 <code>http://example.com/foo/bar</code>，则 <code>path</code> 方法将返回 <code>foo/bar</code>：</p>
+<pre><code><span class="variable token">$uri</span> = <span class="variable token">$request</span>-&gt;path();
+</code></pre>
+<p><a name="inspecting-the-request-path"></a></p>
+<h4 id="检查请求路径--路由">检查请求路径 / 路由</h4>
+<p><code>is</code> 方法允许您验证传入的请求路径是否与给定的模式匹配。使用此方法时，可以使用 <code>*</code> 字符作为通配符：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;is(<span class="string token">'admin/*'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>使用 <code>routeIs</code> 方法，可以确定传入请求是否与<a href="routing.html#named-routes">命名路由</a>匹配：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;routeIs(<span class="string token">'admin.*'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="retrieving-the-request-url"></a></p>
+<h4 id="检索请求-url">检索请求 URL</h4>
+<p>要检索传入请求的完整 URL，你可以使用 <code>url</code> 或 <code>fullUrl</code> 方法。<code>url</code> 方法将返回不包含查询字符串的 URL，而 <code>fullUrl</code> 方法包含查询字符串：</p>
+<pre><code><span class="variable token">$url</span> = <span class="variable token">$request</span>-&gt;url();
+
+<span class="variable token">$urlWithQueryString</span> = <span class="variable token">$request</span>-&gt;fullUrl();
+</code></pre>
+<p>如果要将查询字符串数据附加到当前URL，可以调用 <code>fullUrlWithQuery</code> 方法。此方法将给定的查询字符串变量数组与当前查询字符串合并：</p>
+<pre><code><span class="variable token">$request</span>-&gt;fullUrlWithQuery([<span class="string token">'type'</span> =&gt; <span class="string token">'phone'</span>]);
+</code></pre>
+<p><a name="retrieving-the-request-method"></a></p>
+<h4 id="检索请求方法">检索请求方法</h4>
+<p><code>method</code> 方法将返回请求的 HTTP 动词。你可以使用 <code>isMethod</code> 方法来验证 HTTP 动词是否匹配给定的字符串：</p>
+<pre><code><span class="variable token">$method</span> = <span class="variable token">$request</span>-&gt;method();
+
+<span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;isMethod(<span class="string token">'post'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="request-headers"></a></p>
+<h3 id="请求头">请求头</h3>
+<p>你可以使用 <code>header</code> 方法从 <code>Illuminate\Http\Request</code> 实例中检索一个请求头。如果请求中不存在该头，将返回 <code>null</code>。然而，<code>header</code> 方法接受一个可选的第二个参数，如果请求中不存在该头，将返回该参数：</p>
+<pre><code><span class="variable token">$value</span> = <span class="variable token">$request</span>-&gt;header(<span class="string token">'X-Header-Name'</span>);
+
+<span class="variable token">$value</span> = <span class="variable token">$request</span>-&gt;header(<span class="string token">'X-Header-Name'</span>, <span class="string token">'default'</span>);
+</code></pre>
+<p><code>hasHeader</code> 方法可用来确定请求是否包含一个给定的头：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;hasHeader(<span class="string token">'X-Header-Name'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>为了方便起见，<code>bearerToken</code> 方法可用来从 <code>Authorization</code> 头中检索一个 bearer 令牌。如果这样的头不存在，将返回一个空字符串：</p>
+<pre><code><span class="variable token">$token</span> = <span class="variable token">$request</span>-&gt;bearerToken();
+</code></pre>
+<p><a name="request-ip-address"></a></p>
+<h3 id="请求-ip-地址">请求 IP 地址</h3>
+<p><code>ip</code> 方法可用来检索向你的应用程序发出请求的客户机的 <code>IP</code> 地址：</p>
+<pre><code><span class="variable token">$ipAddress</span> = <span class="variable token">$request</span>-&gt;ip();
+</code></pre>
+<p><a name="content-negotiation"></a></p>
+<h3 id="请求协商">请求协商</h3>
+<p><code>Laravel</code> 提供一些通过 <code>Accept</code> 头检查传入请求的请求内容类型的方法。首先，<code>getAcceptableContentTypes</code> 方法将返回一个包含通过请求接受的所有内容类型的数组：</p>
+<pre><code><span class="variable token">$contentTypes</span> = <span class="variable token">$request</span>-&gt;getAcceptableContentTypes();
+</code></pre>
+<p><code>accepts</code> 方法接受内容类型的数组，如果请求接受任何内容类型，则返回 <code>true</code>。否则，将返回 <code>false</code>：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;accepts([<span class="string token">'text/html'</span>, <span class="string token">'application/json'</span>])) {
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>你可以使用 <code>prefers</code> 方法来确定给定内容类型数组中哪种内容类型最受请求青睐。如果请求不接受任何提供的内容类型，则将返回 <code>null</code>：</p>
+<pre><code><span class="variable token">$preferred</span> = <span class="variable token">$request</span>-&gt;prefers([<span class="string token">'text/html'</span>, <span class="string token">'application/json'</span>]);
+</code></pre>
+<p>由于许多应用程序仅提供 <code>HTML</code> 或 <code>JSON</code>，因此你可以使用 <code>expectsJson</code> 方法来快速确定传入的请求是否需要 <code>JSON</code> 响应：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;expectsJson()) {
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p><a name="psr7-requests"></a></p>
+<h3 id="psr-7-requests">PSR-7 Requests</h3>
+<p><a href="https://www.php-fig.org/psr/psr-7/">PSR-7 标准</a> 指定 HTTP 消息的接口，包括请求和响应。如果要获取 PSR-7 请求的实例而不是 Laravel 请求，则首先需要安装一些库。Laravel 使用 <em>Symfony HTTP Message Bridge</em> 组件将典型的 Laravel 请求和响应转换为 PSR-7 兼容的实现：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> symfony/psr-http-message-bridge
+composer <span class="keyword token">require</span> nyholm/psr7
+</code></pre>
+<p>一旦安装了这些库，就可以通过在路由闭包或控制器方法上键入请求接口的类型来获取 PSR-7 请求：</p>
+<pre><code><span class="keyword token">use</span> Psr\Http\Message\ServerRequestInterface;
+
+Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> (ServerRequestInterface <span class="variable token">$request</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<blockquote>
+<p>技巧：如果从路由或控制器返回 PSR-7 响应实例，它将自动转换回 Laravel 响应实例并由框架显示。</p>
+</blockquote>
+<p><a name="input"></a></p>
+<h2 id="输入">输入</h2>
+<p><a name="retrieving-input"></a></p>
+<h3 id="检索输入">检索输入</h3>
+<p><a name="retrieving-all-input-data"></a></p>
+<h4 id="检索所有输入数据">检索所有输入数据</h4>
+<p>可以使用 <code>all</code> 方法以 <code>array</code> 的形式检索所有传入请求的输入数据。无论传入的请求是来自 HTML 表单还是 XHR 请求，都可以使用此方法。</p>
+<pre><code><span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;all();
+</code></pre>
+<p>使用 <code>collect</code> 方法，您可以将所有传入请求的输入数据检索为<a href="collections.html">collection</a>：</p>
+<pre><code><span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;collect();
+</code></pre>
+<p><code>collect</code> 方法还允许您以集合的形式检索传入请求输入的子集：</p>
+<pre><code><span class="variable token">$request</span>-&gt;collect(<span class="string token">'users'</span>)-&gt;each(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+    <span class="comment token">// ...</span>
+});
+</code></pre>
+<p><a name="retrieving-an-input-value"></a></p>
+<h4 id="检索一个输入值">检索一个输入值</h4>
+<p>使用一些简单的方法，可以从 <code>Illuminate\Http\Request</code> 实例获取所有的用户输入数据，而不用在意用户使用的是哪种 HTTP 动词。不管是什么 HTTP 动词， <code>input</code> 方法都可以用来获取用户的输入数据：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'name'</span>);
+</code></pre>
+<p>可以将默认值作为第二个参数传递给 <code>input</code> 方法。如果请求中不存在第一个参数指定的字段的输入值，则将返回此值：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'name'</span>, <span class="string token">'Sally'</span>);
+</code></pre>
+<p>当使用包含数组输入的表单时，请使用「.」符号来访问数组：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'products.0.name'</span>);
+
+<span class="variable token">$names</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'products.*.name'</span>);
+</code></pre>
+<p>可以不带任何参数地调用 <code>input</code> 方法，以便将所有输入值作为关联数组进行检索：</p>
+<pre><code><span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;input();
+</code></pre>
+<p><a name="retrieving-input-from-the-query-string"></a></p>
+<h4 id="从查询字符串中检索输入">从查询字符串中检索输入</h4>
+<p>当 <code>input</code> 方法从整个请求有效负载（包括查询字符串）中检索值时，<code>query</code> 方法将仅从查询字符串中检索值：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;query(<span class="string token">'name'</span>);
+</code></pre>
+<p>如果请求的查询字符串的值不存在，则将返回此方法的第二个参数：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;query(<span class="string token">'name'</span>, <span class="string token">'Helen'</span>);
+</code></pre>
+<p>你可以不带任何参数地调用 <code>query</code> 方法，以将所有查询字符串值作为关联数组来检索：</p>
+<pre><code><span class="variable token">$query</span> = <span class="variable token">$request</span>-&gt;query();
+</code></pre>
+<p><a name="retrieving-json-input-values"></a></p>
+<h4 id="检索-json-输入值">检索 JSON 输入值</h4>
+<p>向应用程序发送 JSON 请求时，只要将请求的 <code>Content-Type</code> 标头正确设置为 <code>application/json</code>，就可以通过 <code>input</code> 方法访问 JSON 数据。甚至可以使用 <code>.</code> 语法来检索嵌套在 JSON 数组中的值：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;input(<span class="string token">'user.name'</span>);
+</code></pre>
+<p><a name="retrieving-boolean-input-values"></a></p>
+<h4 id="检索布尔输入值">检索布尔输入值</h4>
+<p>当处理诸如复选框之类的 HTML 元素时，你的应用程序可能会收到实际上是字符串的「true」值。例如，「true」或「on」。为了方便起见，你可以使用 boolean 方法将这些值作为布尔值检索。<code>boolean</code> 方法为 1，「1」，true，「true」，「on」和「yes」返回 <code>true</code>。所有其他值将返回 <code>false</code>：</p>
+<pre><code><span class="variable token">$archived</span> = <span class="variable token">$request</span>-&gt;boolean(<span class="string token">'archived'</span>);
+</code></pre>
+<p><a name="retrieving-date-input-values"></a></p>
+<h4 id="检索日期输入值">检索日期输入值</h4>
+<p>为方便起见，包含日期/时间的输入值可以使用 <code>date</code> 方法作为实例检索。如果请求不包含具有给定名称的输入值，则返回 <code>null</code>：</p>
+<pre><code><span class="variable token">$birthday</span> = <span class="variable token">$request</span>-&gt;date(<span class="string token">'birthday'</span>);
+</code></pre>
+<p><code>date</code> 方法接受的第二个和第三个参数可分别用于指定日期的格式和时区：</p>
+<pre><code><span class="variable token">$elapsed</span> = <span class="variable token">$request</span>-&gt;date(<span class="string token">'elapsed'</span>, <span class="string token">'!H:i'</span>, <span class="string token">'Europe/Madrid'</span>);
+</code></pre>
+<p>如果输入值存在，但格式无效，将抛出 <code>InvalidArgumentException</code>；因此，建议您在调用 <code>date</code> 方法之前验证输入。</p>
+<p><a name="retrieving-input-via-dynamic-properties"></a></p>
+<h4 id="通过动态属性检索输入">通过动态属性检索输入</h4>
+<p>您还可以使用 <code>Illuminate\Http\Request</code> 实例上的动态属性访问用户输入。例如，如果你的应用程序形式之一包含一个 <code>name</code> 字段，则可以像下面这样访问该字段的值：</p>
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;name;
+</code></pre>
+<p>使用动态属性时，Laravel 将首先在请求有效负载中查找参数的值。如果不存在，Laravel 将在匹配的路线参数中搜索该字段。</p>
+<p><a name="retrieving-a-portion-of-the-input-data"></a></p>
+<h4 id="检索输入数据的一部分">检索输入数据的一部分</h4>
+<p>如果需要检索输入数据的子集，则可以使用 <code>only</code> 和 <code>except</code> 方法。这两种方法都接受单个 <code>数组</code> 或动态参数列表：</p>
+<pre><code><span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;only([<span class="string token">'username'</span>, <span class="string token">'password'</span>]);
+
+<span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;only(<span class="string token">'username'</span>, <span class="string token">'password'</span>);
+
+<span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;except([<span class="string token">'credit_card'</span>]);
+
+<span class="variable token">$input</span> = <span class="variable token">$request</span>-&gt;except(<span class="string token">'credit_card'</span>);
+</code></pre>
+<blockquote>
+<p>注意：<code>only</code> 方法返回你请求的所有键 / 值对；但是，它不会返回请求中不存在的键 / 值对。</p>
+</blockquote>
+<p><a name="determining-if-input-is-present"></a></p>
+<h3 id="判断输入值是否存在">判断输入值是否存在</h3>
+<p>你可以使用 <code>has</code> 来判断当前请求中是否含有指定的值。如果请求中存在该值则 <code>has</code> 方法将会返回 <code>true</code>：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;has(<span class="string token">'name'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>当给定一个数组时，<code>has</code> 将会判断指定的值是否全部存在：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;has([<span class="string token">'name'</span>, <span class="string token">'email'</span>])) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>如果请求中存在该值则 <code>whenHas</code> 方法将会执行指定的闭包：</p>
+<pre><code><span class="variable token">$request</span>-&gt;whenHas(<span class="string token">'name'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<p>第二个闭包可以传递给 <code>whenHas</code> 方法，如果请求中不存在指定的值，则将执行该方法：</p>
+<pre><code><span class="variable token">$request</span>-&gt;whenHas(<span class="string token">'name'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+    <span class="comment token">// "name" 值存在...</span>
+}, <span class="keyword token">function</span> () {
+    <span class="comment token">// "name" 值不存在...</span>
+});
+</code></pre>
+<p><code>hasAny</code> 方法将会在指定的值有一个存在的情况下返回 <code>true</code>：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;hasAny([<span class="string token">'name'</span>, <span class="string token">'email'</span>])) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>如果你想要判断一个值在请求中是否存在，并且不为空，可以使用 <code>filled</code> 方法：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;filled(<span class="string token">'name'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p>如果请求中存在该值且不为空则 <code>whenFilled</code> 方法将会执行指定的闭包：</p>
+<pre><code><span class="variable token">$request</span>-&gt;whenFilled(<span class="string token">'name'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+    <span class="comment token">//</span>
+});
+</code></pre>
+<p>第二个闭包可以传递给 <code>WhenFilled</code> 方法，如果指定的值不存在或为空，则将执行该方法：</p>
+<pre><code><span class="variable token">$request</span>-&gt;whenFilled(<span class="string token">'name'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+    <span class="comment token">// "name" 存在且不为空...</span>
+}, <span class="keyword token">function</span> () {
+    <span class="comment token">// "name" 不存在或为空...</span>
+});
+</code></pre>
+<p>如果你想要判断一个值在请求中是否缺失，可以使用 <code>missing</code> 方法：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;missing(<span class="string token">'name'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="merging-additional-input"></a></p>
+<h3 id="合并附加输入">合并附加输入</h3>
+<p>有时您可能需要手动将其他输入合并到请求的现有输入数据中。为此，您可以使用 <code>merge</code> 方法：</p>
+<pre><code><span class="variable token">$request</span>-&gt;merge([<span class="string token">'votes'</span> =&gt; <span class="number token">0</span>]);
+</code></pre>
+<p>如果请求的输入数据中不存在相应的键，则可以使用 <code>mergeIfMissing</code> 方法将输入合并到请求中：</p>
+<pre><code><span class="variable token">$request</span>-&gt;mergeIfMissing([<span class="string token">'votes'</span> =&gt; <span class="number token">0</span>]);
+</code></pre>
+<p><a name="old-input"></a></p>
+<h3 id="旧数据">旧数据</h3>
+<p>Laravel 允许你在两次请求之间保持数据。这个特性在有效性校验出错后重新填充表单时非常有用。不过，如果你使用 Laravel 自带的 <a href="validation.html">表单验证</a>，不需要自己手动调用这些方法，因为一些 Laravel 内置的验证功能会自动调用它们。</p>
+<p><a name="flashing-input-to-the-session"></a></p>
+<h4 id="将输入数据闪存到-session">将输入数据闪存到 Session</h4>
+<p><code>Illuminate\Http\Request</code> 类的 <code>flash</code> 方法可以把当前的输入闪存到 <a href="session.html">session</a>，因此在用户向应用发起的下一次请求时它们仍然可用：</p>
+<pre><code><span class="variable token">$request</span>-&gt;flash();
+</code></pre>
+<p>你也可以使用 <code>flashOnly</code> 方法和 <code>flashExcept</code> 方法将请求数据的子集传送给 Session。这些方法在将密码之类的敏感数据排除在 Session 外的情况下非常有用：</p>
+<pre><code><span class="variable token">$request</span>-&gt;flashOnly([<span class="string token">'username'</span>, <span class="string token">'email'</span>]);
+
+<span class="variable token">$request</span>-&gt;flashExcept(<span class="string token">'password'</span>);
+</code></pre>
+<p><a name="flashing-input-then-redirecting"></a></p>
+<h4 id="闪存数据并跳转">闪存数据并跳转</h4>
+<p>如果你需要经常保存输入到 Session 然后重定向到之前的页面，可以通过在跳转函数后链式调用 <code>withInput</code> 方法轻易地实现：</p>
+<pre><code><span class="keyword token">return</span> redirect(<span class="string token">'form'</span>)-&gt;withInput();
+
+<span class="keyword token">return</span> redirect()-&gt;route(<span class="string token">'user.create'</span>)-&gt;withInput();
+
+<span class="keyword token">return</span> redirect(<span class="string token">'form'</span>)-&gt;withInput(
+    <span class="variable token">$request</span>-&gt;except(<span class="string token">'password'</span>)
+);
+</code></pre>
+<p><a name="retrieving-old-input"></a></p>
+<h4 id="获取旧数据">获取旧数据</h4>
+<p>若要获取上一次请求所保存的旧数据，可以使用 <code>Illuminate\Http\Request</code> 实例的 <code>old</code> 方法。<code>old</code> 方法会从 <a href="session.html">Session</a> 取出之前被闪存的输入数据：</p>
+<pre><code><span class="variable token">$username</span> = <span class="variable token">$request</span>-&gt;old(<span class="string token">'username'</span>);
+</code></pre>
+<p>Laravel 也提供了全局辅助函数 <code>old</code>。如果你要在 <a href="blade.html">Blade 模板</a> 中显示旧的输入，使用 <code>old</code> 辅助函数将会更加方便。如果给定字段没有旧的输入，则会返回 <code>null</code>：</p>
+<pre><code>&lt;input type="text" name="username" value="{{ old('username') }}"&gt;
+</code></pre>
+<p><a name="cookies"></a></p>
+<h3 id="cookies">Cookies</h3>
+<p><a name="retrieving-cookies-from-requests"></a></p>
+<h4 id="从请求中获取-cookie">从请求中获取 Cookie</h4>
+<p>Laravel 框架创建的所有 <code>cookie</code> 均已加密并使用身份验证代码签名，这意味着如果客户端更改了它们，它们将被视为无效。若要从请求中检索 <code>cookie</code> 值，请在 <code>Illuminate\Http\Request</code> 实例上使用 <code>cookie</code> 方法：</p>
+<pre><code><span class="variable token">$value</span> = <span class="variable token">$request</span>-&gt;cookie(<span class="string token">'name'</span>);
+</code></pre>
+<p><a name="input-trimming-and-normalization"></a></p>
+<h2 id="输入过滤--规范化">输入过滤 &amp; 规范化</h2>
+<p>默认情况下，Laravel 在应用程序的全局中间件堆栈中包含 <code>App\Http\Middleware\TrimStrings</code> 和 <code>App\Http\Middleware\ConvertEmptyStringsToNull</code> 中间件。 这些中间件在 <code>App\Http\Kernel</code> 类的全局中间件堆栈中列出。 这些中间件将自动修剪请求中的所有传入字符串字段，并将所有空字符串字段转换为 <code>null</code>。 这使您不必担心路由和控制器中的这些规范化问题。</p>
+<p>如果您想禁用此行为，则可以通过从 <code>App\Http\Kernel</code> 类的 <code>$middleware</code> 属性中删除这两个中间件，将它们从应用程序的中间件堆栈中删除。</p>
+<p><a name="files"></a></p>
+<h2 id="文件">文件</h2>
+<p><a name="retrieving-uploaded-files"></a></p>
+<h3 id="获取上传的文件">获取上传的文件</h3>
+<p>您可以使用 <code>file</code> 方法或使用动态属性从 <code>Illuminate\Http\Request</code> 实例中访问上传的文件。 该 <code>file</code> 方法返回 <code>Illuminate\Http\UploadedFile</code> 的实例，该类继承了 PHP 的 <code>SplFileInfo</code> 类的同时也提供了各种与文件交互的方法：</p>
+<pre><code><span class="variable token">$file</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'photo'</span>);
+
+<span class="variable token">$file</span> = <span class="variable token">$request</span>-&gt;photo;
+</code></pre>
+<p>当然你也可以使用 <code>hasFile</code> 确认请求中是否存在文件：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;hasFile(<span class="string token">'photo'</span>)) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="validating-successful-uploads"></a></p>
+<h4 id="验证成功上传">验证成功上传</h4>
+<p>除了检查上传的文件是否存在外，你也可以通过 <code>isValid</code> 方法验证上传的文件是否有效：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;file(<span class="string token">'photo'</span>)-&gt;isValid()) {
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="file-paths-extensions"></a></p>
+<h4 id="文件路径和扩展名">文件路径和扩展名</h4>
+<p><code>UploadedFile</code> 类还包含用于访问文件的全限定路径及其扩展名的方法。 <code>extension</code> 方法会根据文件内容判断文件的扩展名。该扩展名可能会和客户端提供的扩展名不同：</p>
+<pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;photo-&gt;path();
+
+<span class="variable token">$extension</span> = <span class="variable token">$request</span>-&gt;photo-&gt;extension();
+</code></pre>
+<p><a name="other-file-methods"></a></p>
+<h4 id="其他文件方法">其他文件方法</h4>
+<p><code>UploadedFile</code> 实例上还有许多可用的方法。可以查看该类的 <a href="https://github.com/symfony/symfony/blob/6.0/src/Symfony/Component/HttpFoundation/File/UploadedFile.php">API 文档</a> 了解这些方法的详细信息。</p>
+<p><a name="storing-uploaded-files"></a></p>
+<h3 id="存储上传的文件">存储上传的文件</h3>
+<p>要存储上传的文件，通常会使用已配置的 <a href="filesystem.html">文件系统</a>。你可以使用 <code>UploadedFile</code> 的 <code>store</code> 方法把上传文件移动到你的某个磁盘上，该文件可能是本地文件系统中的一个位置，甚至像 Amazon S3 这样的云存储位置。</p>
+<p><code>store</code> 方法接受相对于文件系统配置的根目录应存储文件的路径。 该路径不能包含文件名，因为将自动生成一个唯一的 ID 作为文件名。</p>
+<p><code>store</code> 方法还接受一个可选的第二个参数作为应用于存储文件的磁盘的名称。 该方法将返回文件相对于磁盘根目录的路径：</p>
+<pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;photo-&gt;store(<span class="string token">'images'</span>);
+
+<span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;photo-&gt;store(<span class="string token">'images'</span>, <span class="string token">'s3'</span>);
+</code></pre>
+<p>如果您不希望自动生成文件名，则可以使用 <code>storeAs</code> 方法，它接受路径、文件名和磁盘名作为其参数：</p>
+<pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;photo-&gt;storeAs(<span class="string token">'images'</span>, <span class="string token">'filename.jpg'</span>);
+
+<span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;photo-&gt;storeAs(<span class="string token">'images'</span>, <span class="string token">'filename.jpg'</span>, <span class="string token">'s3'</span>);
+</code></pre>
+<blockquote>
+<p>技巧：有关 Laravel 中文件存储的更多信息，请查看完整的 <a href="filesystem.html">文件存储文档</a>。</p>
+</blockquote>
+<p><a name="configuring-trusted-proxies"></a></p>
+<h2 id="配置受信任的代理">配置受信任的代理</h2>
+<p>在终止 TLS / SSL 证书的负载平衡器后面运行应用程序时，您可能会注意到，使用 <code>url</code> 帮助程序时，应用程序有时不会生成 HTTPS 链接。通常，这是因为正在从端口 <code>80</code> 上的负载平衡器转发应用程序的流量，并且不知道它应该生成安全链接。</p>
+<p>为了解决这个问题，您可以使用 Laravel 应用程序中包含的 <code>App\Http\Middleware\TrustProxies</code> 中间件，该中间件可让您快速自定义应用程序应信任的负载均衡器或代理。您的受信任代理应该在此中间件的 <code>$proxies</code> 属性上以数组形式列出。 除了配置受信任的代理外，您还可以配置应受信任的代理 <code>$headers</code> ：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Middleware;
+
+<span class="keyword token">use</span> Illuminate\Http\Middleware\TrustProxies <span class="keyword token">as</span> Middleware;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+<span class="keyword token">class</span> TrustProxies <span class="keyword token">extends</span> Middleware
+{
+    <span class="comment token">/**
+     * 此应用程序的受信任代理。
+     *
+     *<span class="phpdoc token"> @var</span> string|array
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$proxies</span> = [
+        <span class="string token">'192.168.1.1'</span>,
+        <span class="string token">'192.168.1.2'</span>,
+    ];
+
+    <span class="comment token">/**
+     * 应用于检测代理的标头。
+     *
+     *<span class="phpdoc token"> @var</span> int
+     */</span>
+    <span class="keyword token">protected</span> <span class="variable token">$headers</span> = Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO;
+}
+</code></pre>
+<blockquote>
+<p>技巧：技巧：如果你使用 AWS 弹性负载平衡，你的 <code>$headers</code> 值应该是 <code>Request::HEADER_X_FORWARDED_AWS_ELB</code>。如果您想查看更多可用于 <code>$headers</code> 的属性信息，请查阅 Symfony 的文档 <a href="https://symfony.com/doc/current/deployment/proxies.html">信任代理</a>。</p>
+</blockquote>
+<p><a name="trusting-all-proxies"></a></p>
+<h4 id="信任所有代理">信任所有代理</h4>
+<p>如果你正在使用 Amazon AWS 或者其它「云」的负载均衡服务，当你不知道负载均衡的实际 IP 地址时，你可以使用 <code>*</code> 来信任所有代理：</p>
+<pre><code><span class="comment token">/**
+ * 当前应用的可信代理
+ *
+ *<span class="phpdoc token"> @var</span> string|array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$proxies</span> = <span class="string token">'*'</span>;
+</code></pre>
+<p><a name="configuring-trusted-hosts"></a></p>
+<h2 id="配置受信任的-host">配置受信任的 Host</h2>
+<p>默认情况下，Laravel 将响应它收到的所有请求，而不管 HTTP 请求的 <code>Host</code> 头的内容如何。此外，在 web 请求期间生成应用程序的绝对 URL 时，将使用 <code>Host</code> 头的值。</p>
+<p>通常，您应该将 web 服务器（如 Nginx 或 Apache）配置为只向应用程序发送与给定主机名匹配的请求。但是，如果您无法直接自定义 web 服务器，并且需要指示 Laravel 仅响应某些主机名，则可以通过为应用程序启用<code>App\Http\Middleware\TrustHosts</code> 中间件来实现。</p>
+<p><code>TrustHosts</code> 中间件已包含在应用程序的 <code>$middleware</code> 堆栈中；但是，您应该取消注释以使其变为活动状态。在此中间件的 <code>hosts</code> 方法中，您可以指定应用程序应响应的主机名。带有其他 <code>Host</code> 值标头的传入请求将被拒绝：</p>
+<pre><code><span class="comment token">/**
+ * 获取应该信任的主机模式。
+ *
+ *<span class="phpdoc token"> @return</span> array
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> hosts()
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'laravel.test'</span>,
+        <span class="variable token">$this</span>-&gt;allSubdomainsOfApplicationUrl(),
+    ];
+}
+</code></pre>
+<p><code>allSubdomainsOfApplicationUrl</code> 辅助方法将返回一个正则表达式，匹配应用程序的 <code>app.url</code> 配置值的所有子域。在构建使用通配符子域的应用程序时，此帮助方法提供了一种方便的方法来允许应用程序的所有子域。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

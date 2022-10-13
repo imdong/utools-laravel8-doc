@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="发行说明">发行说明</h1>
+<ul>
+<li><a href="#versioning-scheme">版本化方案</a></li>
+<li><a href="#support-policy">支持策略</a></li>
+<li><a href="#laravel-9">Laravel 9</a></li>
+</ul>
+<p><a name="versioning-scheme"></a></p>
+<h2 id="版本化方案">版本化方案</h2>
+<p>Laravel 及官方发布的包皆遵循 <a href="https://semver.org">语义化版本</a>。主要的框架版本每年「2 月」发布，而次要的和补丁版本可能每周发布一次。次要版本和修补程序版本应 <strong>从不</strong> 包含非兼容性的更改。</p>
+<p>你从应用或包中引用 Laravel 框架或其组件时，应始终使用版本约束，如 <code>^9.0</code>，因为 Laravel 的主要版本确实包含非兼容性更改。但是，我们努力确保您可以在一天或更短的时间内更新到新的主要版本。</p>
+<p><a name="named-arguments"></a></p>
+<h4 id="命名参数">命名参数</h4>
+<p>目前，PHP 的 <a href="https://www.php.net/manual/zh/functions.arguments.php#functions.named-arguments">命名参数</a>  功能还没有被 Laravel 的向后兼容性指南所涵盖。我们可以在必要时选择重命名函数参数，以改进 Laravel 代码库。因此，在调用 Laravel 方法时使用命名参数应该谨慎，并且要理解参数名将来可能会改变。</p>
+<p><a name="support-policy"></a></p>
+<h2 id="支持策略">支持策略</h2>
+<p>对于所有 Laravel 发行版本，BUG 修复的期限为 18 个月，安全修复的期限为 2 年。对于包括 Lumen 在内的所有额外的库，只有最新的版本才会得到 BUG 修复。此外，请查阅 Laravel 支持的 <a href="database.html#introduction">数据库版本</a>。</p>
+<table><tbody>
+    <tr>
+        <th>版本</th><th> PHP (*) </th><th>发行时间</th><th>Bug 修复截止时间</th><th>安全修复截止时间</th>
+    </tr>
+    <tr>
+        <td style="background:rgb(244 157 55); ">6 (LTS)  </td>
+        <td>7.2 - 8.0</td>
+        <td>2019年9月3日  </td>
+        <td>2022年1月25日 </td>
+        <td>2022年9月6日 </td>
+    </tr>
+    <tr>
+        <td style ="background:rgba(249 50 44);">7</td>
+        <td> 7.2 - 8.0</td>
+         <td>2020年3月3日  </td>
+        <td>2020年10月6日 </td>
+        <td>2021年3月3日 </td>
+    </tr>
+     <tr>
+        <td >8</td>
+        <td> 7.3 - 8.1</td>
+         <td>2020年9月8日  </td>
+        <td>2022年7月26日 </td>
+        <td>2023年1月24日 </td>
+    </tr>
+    <tr>
+        <td >9</td>
+        <td>8.0 - 8.1</td>
+         <td>2022年2月8日  </td>
+        <td>2023年8月8日 </td>
+        <td>2024年2月8日 </td>
+    </tr>
+<tr>
+        <td >10</td>
+        <td>8.0 - 8.1</td>
+         <td>2023年2月7日  </td>
+        <td>2024年8月7日 </td>
+        <td>2025年2月7日 </td>
+    </tr>
+</table>
+        <span><div style="height:0.75rem; margin-right:0.5rem; width:0.75rem;background:rgba(249 50 44);display:inline-block; "></div>
+        <div style=" display:inline;">生命周期结束</div></span>
+        <div style="height:0.75rem; margin-right:0.5rem; width:0.75rem;background:rgb(244 157 55); display:inline-block; "></div>
+        <div style=" display:inline;">仅安全修复</div>
+        
+(*) 支持的PHP版本
+
+<p><a name="laravel-9"></a></p>
+<h2 id="laravel-9">Laravel 9</h2>
+<p>正如你所知，随着 Laravel 8 的发布，Laravel 已经过渡到了年度发布。以前，主要版本每6个月发布一次。这一转变旨在减轻社区的维护负担，并挑战我们的开发团队在不引入突破性更改的情况下提供惊人、强大的新功能。因此，我们在不破坏向后兼容性的情况下，向 Laravel 8 提供了各种强大的功能，例如并行测试支持、改进的 Breeze starter 工具包、HTTP 客户端改进，甚至还有新的 Eloquent  关联关系类型，例如<code>oFMany</code>(一对多检索)。</p>
+<p>因此，在当前版本中发布新功能的承诺可能会导致未来的「主要」版本主要用于「维护」任务，例如升级上游依赖项，这可以在这些发行说明中看到。</p>
+<p>Laravel 9 延续了 Laravel 8.x 的改进通过引入对 Symfony 6.0 组件、Symfony Mailer、Flysystem 3.0、改进的 <code>routes:list</code> 输出、Laravel Scout 数据库驱动程序、新的 Eloquent 访问器 / 修改器语法、通过枚举的隐式路由绑定，以及其他各种错误修复和可用性改进。</p>
+<p><a name="php-8"></a></p>
+<h3 id="php-80">PHP 8.0</h3>
+<p>Laravel 9.x 至少需要 PHP8.0.2。</p>
+<p><a name="symfony-mailer"></a></p>
+<h3 id="symfony-mailer">Symfony Mailer</h3>
+<p><em>Symfony Mailer 的支持是由 <a href="https://github.com/driesvints">Dries Vints</a></em>, <a href="https://github.com/jbrooksuk">James Brooks</a>, 和 <a href="https://github.com/Jubeki">Julius Kiekbusch</a>.</p>
+<p>Laravel 以前的版本使用了 <a href="https://swiftmailer.symfony.com/docs/introduction.html">Swift Mailer</a> 库发送外发邮件。然而，该库已不再维护，由 Symfony Mailer 继承。</p>
+<p>请查看 <a href="upgrade.html#symfony-mailer">升级指南</a> 以了解有关确保您的应用程序与 Symfony Mailer 兼容的更多信息。</p>
+<p><a name="flysystem-3"></a></p>
+<h3 id="flysystem-3x">Flysystem 3.x</h3>
+<p>Flysystem 3.x 的支持由 <a href="https://github.com/driesvints">Dries Vints</a> 提供。
+Laravel 9.x 将我们上游的 Flysystem 依赖升级到 Flysystem 3.x。 Flysystem 为 <code>Storage</code> 门面提供的所有文件系统交互提供支持。</p>
+<p>请查看 <a href="upgrade.html#flysystem-3">升级指南</a> 以了解有关确保您的应用程序与 Flysystem 3.x 兼容的更多信息。</p>
+<p><a name="eloquent-accessors-and-mutators"></a></p>
+<h3 id="eloquent-访问器修改器-改进">Eloquent 访问器/修改器 改进</h3>
+<p>改进的 Eloquent 访问器/修改器由 <a href="https://github.com/taylorotwell">Taylor Otwell</a> 贡献。</p>
+<p>Laravel 9.x 提供了一种新的方式来定义 Eloquent <a href="eloquent-mutators.html#accessors-and-mutators">访问器和修改器</a>。在以前的 Laravel 版本中，定义访问器和修改器的唯一方法是在模型上定义前缀方法，如下所示：</p>
+<pre><code class="language-php"><span class="keyword token">public</span> <span class="keyword token">function</span> getNameAttribute(<span class="variable token">$value</span>)
+{
+    <span class="keyword token">return</span> strtoupper(<span class="variable token">$value</span>);
+}
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> setNameAttribute(<span class="variable token">$value</span>)
+{
+    <span class="variable token">$this</span>-&gt;attributes[<span class="string token">'name'</span>] = <span class="variable token">$value</span>;
+}
+</code></pre>
+<p>然而，在 Laravel 9.x 中，你可以使用一个不带前缀的方法定义访问器和修改器，该方法的返回类型是<code>Illuminate\Database\Eloquent\Casts\Attribute</code>：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> name(): Attribute
+{
+    <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
+        get: fn (<span class="variable token">$value</span>) =&gt; strtoupper(<span class="variable token">$value</span>),
+        set: fn (<span class="variable token">$value</span>) =&gt; <span class="variable token">$value</span>,
+    );
+}
+</code></pre>
+<p>此外，这种定义访问器的新方法将缓存由属性返回的对象值，就像 <a href="eloquent-mutators.html#custom-casts">自定义转换类</a>：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Support\Address;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> address(): Attribute
+{
+    <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
+        get: fn (<span class="variable token">$value</span>, <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
+            <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
+            <span class="variable token">$attributes</span>[<span class="string token">'address_line_two'</span>],
+        ),
+        set: fn (Address <span class="variable token">$value</span>) =&gt; [
+            <span class="string token">'address_line_one'</span> =&gt; <span class="variable token">$value</span>-&gt;lineOne,
+            <span class="string token">'address_line_two'</span> =&gt; <span class="variable token">$value</span>-&gt;lineTwo,
+        ],
+    );
+}
+</code></pre>
+<p><a name="enum-casting"></a></p>
+<h3 id="enum-eloquent-属性转换">Enum Eloquent 属性转换</h3>
+<blockquote>
+<p>注意：枚举转换仅适用于 PHP 8.1+。</p>
+</blockquote>
+<p>枚举转换由 <a href="https://github.com/themsaid">Mohamed Said</a> 贡献。</p>
+<p>Eloquent 现在允许您将属性值转换为 PHP <a href="https://www.php.net/manual/en/language.enumerations.backed.php">&quot;backed&quot; enums</a>。 为此，您可以在模型的 <code>$casts</code> 属性数组中指定要转换的属性和枚举：</p>
+<pre><code><span class="keyword token">use</span> App\Enums\ServerStatus;
+
+<span class="comment token">/**
+ * The attributes that should be cast.
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$casts</span> = [
+    <span class="string token">'status'</span> =&gt; ServerStatus::<span class="keyword token">class</span>,
+];
+</code></pre>
+<p>一旦你在你的模型上定义了转换，当你与属性交互时，指定的属性将自动转换为枚举：</p>
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$server</span>-&gt;status == ServerStatus::provisioned) {
+    <span class="variable token">$server</span>-&gt;status = ServerStatus::ready;
+
+    <span class="variable token">$server</span>-&gt;save();
+}
+</code></pre>
+<p><a name="implicit-route-bindings-with-enums"></a></p>
+<h3 id="使用枚举的隐式路由绑定">使用枚举的隐式路由绑定</h3>
+<p>隐式路由绑定由 <a href="https://github.com/nunomaduro">Nuno Maduro</a>贡献。</p>
+<p>PHP 8.1 引入了对 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">Enums</a> 的支持。 Laravel 9.x 引入了在路由定义中键入提示 Enum 的能力，并且 Laravel 只会在该路由段是 URI 中的有效 Enum 值时调用该路由。 否则，将自动返回 HTTP 404 响应。 例如，给定以下枚举：</p>
+<pre><code class="language-php">enum Category: string
+{
+    <span class="keyword token">case</span> Fruits = <span class="string token">'fruits'</span>;
+    <span class="keyword token">case</span> People = <span class="string token">'people'</span>;
+}
+</code></pre>
+<p>你可以定义一个只有在 <code>{category}</code> 路由段是 <code>fruits</code> 或 <code>people</code> 时才会被调用的路由。 否则，将返回 HTTP 404 响应：</p>
+<pre><code class="language-php">Route::get(<span class="string token">'/categories/{category}'</span>, <span class="keyword token">function</span> (Category <span class="variable token">$category</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$category</span>-&gt;value;
+});
+</code></pre>
+<p><a name="forced-scoping-of-route-bindings"></a></p>
+<h3 id="路由绑定的强制作用域">路由绑定的强制作用域</h3>
+<p>路由绑定的强制作用域由 <a href="https://github.com/claudiodekker">Claudio Dekker</a>贡献.</p>
+<p>在之前的 Laravel 版本中，您可能希望在路由定义中限定第二个 Eloquent 模型，使其必须是之前 Eloquent 模型的子模型。 例如，考虑这个通过 slug 为特定用户检索博客文章的路由定义：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users/{user}/posts/{post:slug}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>, Post <span class="variable token">$post</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$post</span>;
+});
+</code></pre>
+<p>当使用自定义键控隐式绑定作为嵌套路由参数时，Laravel 将自动限定查询范围以通过其父级检索嵌套模型，使用约定来猜测父级上的关系名称。 但是，当自定义键用于子路由绑定时，Laravel 之前仅支持此行为。</p>
+<p>然而，在 Laravel 9.x 中，即使没有提供自定义键，你现在也可以指示 Laravel 限定“子”绑定。 为此，您可以在定义路由时调用 <code>scopeBindings</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Post;
+<span class="keyword token">use</span> App\Models\User;
+
+Route::get(<span class="string token">'/users/{user}/posts/{post}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>, Post <span class="variable token">$post</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$post</span>;
+})-&gt;scopeBindings();
+</code></pre>
+<p>或者，您可以指示整个路由定义组使用范围绑定：</p>
+<pre><code>Route::scopeBindings()-&gt;group(<span class="keyword token">function</span> () {
+    Route::get(<span class="string token">'/users/{user}/posts/{post}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>, Post <span class="variable token">$post</span>) {
+        <span class="keyword token">return</span> <span class="variable token">$post</span>;
+    });
+});
+</code></pre>
+<p><a name="controller-route-groups"></a></p>
+<h3 id="控制器路由组">控制器路由组</h3>
+<p>控制器路由组改进由 <a href="https://github.com/lukeraymonddowning">Luke Downing</a>贡献.</p>
+<p>您现在可以使用 <code>controller</code> 方法为组内的所有路由定义公共控制器。 然后，在定义路由时，您只需要提供它们调用的控制器方法：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\OrderController;
+
+Route::controller(OrderController::<span class="keyword token">class</span>)-&gt;group(<span class="keyword token">function</span> () {
+    Route::get(<span class="string token">'/orders/{id}'</span>, <span class="string token">'show'</span>);
+    Route::post(<span class="string token">'/orders'</span>, <span class="string token">'store'</span>);
+});
+</code></pre>
+<p><a name="full-text"></a></p>
+<h3 id="全文索引--where-子句">全文索引 / Where 子句</h3>
+<p>全文索引和&quot;where&quot;子句由 <a href="https://github.com/taylorotwell">Taylor Otwell</a> 和 <a href="https://github.com/driesvints">Dries Vints</a>贡献。</p>
+<p>使用 MySQL 或 PostgreSQL 时，现在可以将 <code>fullText</code> 方法添加到列定义中以生成全文索引：</p>
+<pre><code><span class="variable token">$table</span>-&gt;text(<span class="string token">'bio'</span>)-&gt;fullText();
+</code></pre>
+<p>此外，<code>whereFullText</code> 和 <code>orWhereFullText</code> 方法可用于将全文“where”子句添加到具有[全文索引]的列的查询中（migrations.html#available-index -类型）。 这些方法将被 Laravel 转换成适合底层数据库系统的 SQL。 例如，将为使用 MySQL 的应用程序生成一个 <code>MATCH AGAINST</code> 子句：</p>
+<pre><code><span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+           -&gt;whereFullText(<span class="string token">'bio'</span>, <span class="string token">'web developer'</span>)
+           -&gt;get();
+</code></pre>
+<p><a name="laravel-scout-database-engine"></a></p>
+<h3 id="laravel-scout-数据库引擎">Laravel Scout 数据库引擎</h3>
+<p>Laravel Scout 数据库引擎由 <a href="https://github.com/taylorotwell">Taylor Otwell</a> and <a href="https://github.com/driesvints">Dries Vints</a>贡献。</p>
+<p>如果您的应用程序与中小型数据库交互或工作量较小，您现在可以使用 Scout 的“数据库”引擎，而不是 Algolia 或 MeiliSearch 等专用搜索服务。 数据库引擎将在过滤现有数据库的结果时使用“where like”子句和全文索引，以确定查询的适用搜索结果。</p>
+<p>要了解有关 Scout 数据库引擎的更多信息，请参阅 <a href="scout.html">Scout 文档</a>。</p>
+<p><a name="rendering-inline-blade-templates"></a></p>
+<h3 id="渲染内联-blade-模板">渲染内联 Blade 模板</h3>
+<p>渲染内联 Blade 模板由 <a href="https://github.com/jasonlbeggs">Jason Beggs</a> 和 <a href="https://github.com/tobyzerner">Toby Zerner</a>贡献。</p>
+<p>有时您可能需要将原始 Blade 模板字符串转换为有效的 HTML。 您可以使用 <code>Blade</code> 门面提供的 <code>render</code> 方法来完成此操作。 <code>render</code> 方法接受 Blade 模板字符串和提供给模板的可选数据数组：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
+
+<span class="keyword token">return</span> Blade::render(<span class="string token">'Hello, {{ $name }}'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Julian Bashir'</span>]);
+</code></pre>
+<p>类似地，<code>renderComponent</code> 方法可用于通过将组件实例传递给该方法来渲染给定的类组件：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\View\Components\HelloComponent;
+
+<span class="keyword token">return</span> Blade::renderComponent(<span class="keyword token">new</span> HelloComponent(<span class="string token">'Julian Bashir'</span>));
+</code></pre>
+<p><a name="slot-name-shortcut"></a></p>
+<h3 id="slot-名称快捷方式">Slot 名称快捷方式</h3>
+<p>Slot 名称快捷方式由 <a href="https://github.com/calebporzio">Caleb Porzio</a>贡献。</p>
+<p>在以前的 Laravel 版本中，slot名称是使用 <code>x-slot</code> 标签上的 <code>name</code> 属性提供的：</p>
+<pre><code class="language-blade">&lt;x-alert&gt;
+    &lt;x-slot name="title"&gt;
+        Server Error
+    &lt;/x-slot&gt;
+
+    &lt;strong&gt;Whoops!&lt;/strong&gt; Something went wrong!
+&lt;/x-alert&gt;
+</code></pre>
+<p>但是，从 Laravel 9.x 开始，您可以使用更方便、更短的语法来指定slot的名称：</p>
+<pre><code class="language-xml">&lt;x-slot:title&gt;
+    Server Error
+&lt;/x-slot&gt;
+</code></pre>
+<p><a name="checked-selected-blade-directives"></a></p>
+<h3 id="checked--selected-blade指令">Checked / Selected blade指令</h3>
+<p>Checked and selected Blade 指令由 <a href="https://github.com/ash-jc-allen">Ash Allen</a> 和 <a href="https://github.com/taylorotwell">Taylor Otwell</a>贡献。</p>
+<p>为方便起见，您现在可以使用 <code>@checked</code> 指令轻松指示给定的 HTML 复选框输入是否已“选中”。 如果提供的条件评估为 <code>true</code>，则此指令将回显 <code>checked</code>：</p>
+<pre><code class="language-blade">&lt;input type=<span class="string token">"checkbox"</span>
+        name=<span class="string token">"active"</span>
+        value=<span class="string token">"active"</span>
+        @checked(old(<span class="string token">'active'</span>, <span class="variable token">$user</span>-&gt;active)) /&gt;
+</code></pre>
+<p>同样，<code>@selected</code> 指令可用于指示是否应该“选择”给定的选择选项：</p>
+<pre><code class="language-blade">&lt;select name=<span class="string token">"version"</span>&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$product</span>-&gt;versions <span class="keyword token">as</span> <span class="variable token">$version</span>)
+        &lt;option value=<span class="string token">"{{ $version }}"</span> @selected(old(<span class="string token">'version'</span>) == <span class="variable token">$version</span>)&gt;
+            {{ <span class="variable token">$version</span> }}
+        &lt;/option&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/select&gt;
+</code></pre>
+<p><a name="bootstrap-5-pagination-views"></a></p>
+<h3 id="bootstrap-5-分页视图">Bootstrap 5 分页视图</h3>
+<p>Bootstrap 5 分页视图由 <a href="https://github.com/jrd-lewis">Jared Lewis</a>贡献。</p>
+<p>Laravel 现在包含使用 <a href="https://getbootstrap.com/">Bootstrap 5</a> 构建的分页视图。 要使用这些视图而不是默认的 Tailwind 视图，您可以在 <code>App\Providers\AppServiceProvider</code> 类的 <code>boot</code> 方法中调用分页器的 <code>useBootstrapFive</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Pagination\Paginator;
+
+<span class="comment token">/**
+ * Bootstrap any application services.
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Paginator::useBootstrapFive();
+}
+</code></pre>
+<p><a name="improved-validation-of-nested-array-data"></a></p>
+<h3 id="改进了嵌套数组数据的验证">改进了嵌套数组数据的验证</h3>
+<p>嵌套数组数据的验证由 <a href="https://github.com/stevebauman">Steve Bauman</a>贡献。</p>
+<p>有时，在为属性分配验证规则时，您可能需要访问给定嵌套数组元素的值。 您现在可以使用 <code>Rule::forEach</code> 方法完成此操作。 <code>forEach</code> 方法接受一个闭包，该闭包将为验证中的数组属性的每次迭代调用，并将接收属性的值和显式的、完全扩展的属性名称。 闭包应该返回一个规则数组来分配给数组元素：</p>
+<pre><code><span class="keyword token">use</span> App\Rules\HasPermission;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+<span class="keyword token">use</span> Illuminate\Validation\Rule;
+
+<span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+    <span class="string token">'companies.*.id'</span> =&gt; Rule::<span class="keyword token">forEach</span>(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$attribute</span>) {
+        <span class="keyword token">return</span> [
+            Rule::exists(Company::<span class="keyword token">class</span>, <span class="string token">'id'</span>),
+            <span class="keyword token">new</span> HasPermission(<span class="string token">'manage-company'</span>, <span class="variable token">$value</span>),
+        ];
+    }),
+]);
+</code></pre>
+<p><a name="laravel-breeze-api"></a></p>
+<h3 id="laravel-breeze-api--nextjs">Laravel Breeze API &amp; Next.js</h3>
+<p>Laravel Breeze API 和 Next.js 由 <a href="https://github.com/taylorotwell">Taylor Otwell</a> and <a href="https://twitter.com/m1guelpf">Miguel Piedrafita</a>贡献。</p>
+<p><a href="starter-kits.html#breeze-and-next">Laravel Breeze</a> 入门套件已获得“API”脚手架模式和免费 <a href="https://nextjs.org">Next.js</a> <a href="https://github.com/laravel/breeze-next">前端实现</a>。 这个初学者工具包脚手架可用于快速启动用作后端的 Laravel 应用程序，以及用于 JavaScript 前端的 Laravel Sanctum 认证 API。</p>
+<p><a name="exception-page"></a></p>
+<h3 id="改进-ignition-错误页面">改进 Ignition 错误页面</h3>
+<p>Ignition由 <a href="https://spatie.be/">Spatie</a>贡献。</p>
+<p>Spatie 创建的开源异常调试页面 Ignition 已经从头开始重新设计。 新的、改进的 Ignition 随 Laravel 9.x 一起提供，包括浅色/深色主题、可定制的“在编辑器中打开”功能等等。</p>
+<p align="center">
+<img width="100%" src="https://cdn.learnku.com/uploads/images/202202/18/25486/juwOpUFX7p.png!large"/>
+</p>
+
+<p><a name="improved-route-list"></a></p>
+<h3 id="改进的-routelist-cli-输出">改进的 <code>route:list</code> CLI 输出</h3>
+<p>改进的 <code>route:list</code> CLI 输出由 <a href="https://github.com/nunomaduro">Nuno Maduro</a>贡献。</p>
+<p><code>route:list</code> CLI 输出在 Laravel 9.x 版本中得到了显着改进，在探索你的路由定义时提供了一个美妙的新体验。</p>
+<p align="center">
+<img src="https://cdn.learnku.com/uploads/images/202202/18/25486/rbbkbh2QKT.png!large"/>
+</p>
+
+<p><a name="test-coverage-support-on-artisan-test-Command"></a></p>
+<h3 id="使用-artisan-test-命令测试覆盖率">使用 Artisan <code>test</code> 命令测试覆盖率</h3>
+<p>使用 Artisan <code>test</code> 命令时的测试覆盖率由 <a href="https://github.com/nunomaduro">Nuno Maduro</a>贡献。</p>
+<p>Artisan <code>test</code> 命令收到了一个新的 <code>--coverage</code> 选项，您可以使用它来探索您的测试为您的应用程序提供的代码覆盖率：</p>
+<pre><code class="language-shell">php artisan test --coverage
+</code></pre>
+<p>测试覆盖率结果将直接显示在 CLI 输出中。</p>
+<p align="center">
+<img width="100%" src="https://cdn.learnku.com/uploads/images/202202/18/30138/GnM8gJDNhu.png!large"/>
+</p>
+
+<p>此外，如果您想指定测试覆盖率必须满足的最低阈值，您可以使用该 <code>--min</code> 选项。如果未达到给定的最小阈值，则测试套件将失败：</p>
+<pre><code class="language-shell">php artisan test --coverage --min=80.3
+</code></pre>
+<p align="center">
+<img width="100%" src="https://cdn.learnku.com/uploads/images/202202/18/30138/06IIcEzXFN.png!large"/>
+</p>
+
+<p><a name="soketi-echo-server"></a></p>
+<h3 id="soketi-echo-服务器">Soketi Echo 服务器</h3>
+<p><em>Soketi Echo 服务器由 <a href="https://github.com/rennokki">Alex Renoki</a></em> 开发。</p>
+<p>虽然不是 Laravel 9.x 独有的，但 Laravel 最近协助编写了 Soketi 的文档，这是一个为 Node.js 编写的与 <a href="broadcasting.html">Laravel Echo</a> 兼容的 Web Socket 服务器。Soketi 为那些喜欢管理自己的 Web Socket 服务器的应用程序提供了一个很好的、开源的替代 Pusher 和 Ably。</p>
+<p>有关使用 Soketi 的更多信息，请参阅 <a href="broadcasting.html">广播文档</a> 和 <a href="https://docs.soketi.app/">Soketi 文档</a>。</p>
+<p><a name="improved-collections-ide-support"></a></p>
+<h3 id="改进的集合-ide-支持">改进的集合 IDE 支持</h3>
+<p><em><a href="https://github.com/nunomaduro">Nuno Maduro</a></em> 贡献了改进的集合 IDE 支持。</p>
+<p>Laravel 9.x 为集合组件添加了改进的“通用”样式类型定义，改进了 IDE 和静态分析支持。 <a href="https://blog.jetbrains.com/phpstorm/2021/12/phpstorm-2021-3-release/#support_for_future_laravel_collections">PHPStorm</a> 或 <a href="https://phpstan.org">PHPStan</a> 等 IDE 静态分析工具现在可以更好地理解 Laravel 集合。</p>
+<p align="center">
+<img width="100%" src="https://cdn.learnku.com/uploads/images/202202/18/30138/zzM0Yn3RSa.gif!large"/>
+</p>
+
+
+
+<p><a name="new-helpers"></a></p>
+<h3 id="新助手">新助手</h3>
+<p>Laravel 9.x 引入了两个新的、方便的辅助函数，你可以在自己的应用程序中使用它们。</p>
+<p><a name="new-helpers-str"></a></p>
+<h4 id="str"><code>str</code></h4>
+<p>该 <code>str</code> 函数返回 <code>Illuminate\Support\Stringable</code> 给定字符串的新实例。这个函数等价于 <code>Str::of</code> 方法：</p>
+<pre><code><span class="variable token">$string</span> = str(<span class="string token">'Taylor'</span>)-&gt;append(<span class="string token">' Otwell'</span>);
+
+<span class="comment token">// 'Taylor Otwell'</span>
+</code></pre>
+<p>如果没有为 <code>str</code> 函数提供参数，则函数返回 <code>Illuminate\Support\Str</code> 的实例：</p>
+<pre><code><span class="variable token">$snake</span> = str()-&gt;snake(<span class="string token">'LaravelFramework'</span>);
+
+<span class="comment token">// 'laravel_framework'</span>
+</code></pre>
+<p><a name="new-helpers-to-route"></a></p>
+<h4 id="to_route"><code>to_route</code></h4>
+<p>该 <code>to_route</code> 函数为给定的命名路由生成重定向 HTTP 响应，提供了一种从路由和控制器重定向到命名路由的表达方式：</p>
+<pre><code><span class="keyword token">return</span> to_route(<span class="string token">'users.show'</span>, [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>]);
+</code></pre>
+<p>如有必要，您可以将应分配给重定向的 HTTP 状态代码和任何其他响应标头作为第三和第四个参数传递给 to_route 方法：</p>
+<pre><code><span class="keyword token">return</span> to_route(<span class="string token">'users.show'</span>, [<span class="string token">'user'</span> =&gt; <span class="number token">1</span>], <span class="number token">302</span>, [<span class="string token">'X-Framework'</span> =&gt; <span class="string token">'Laravel'</span>]);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="数据库-迁移">数据库: 迁移</h1>
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D">介绍</a></li>
+<li><a href="#%E7%94%9F%E6%88%90%E8%BF%81%E7%A7%BB">生成迁移</a><ul>
+<li><a href="#%E6%95%B4%E5%90%88%E8%BF%81%E7%A7%BB">整合迁移</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%81%E7%A7%BB%E7%BB%93%E6%9E%84">迁移结构</a></li>
+<li><a href="#%E6%89%A7%E8%A1%8C%E8%BF%81%E7%A7%BB">执行迁移</a><ul>
+<li><a href="#%E5%9B%9E%E6%BB%9A%E8%BF%81%E7%A7%BB">回滚迁移</a></li>
+</ul>
+</li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E8%A1%A8">数据表</a><ul>
+<li><a href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E8%A1%A8">创建数据表</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0%E6%95%B0%E6%8D%AE%E8%A1%A8">更新数据表</a></li>
+<li><a href="#%E9%87%8D%E5%91%BD%E5%90%8D-%E5%88%A0%E9%99%A4%E8%A1%A8">重命名 / 删除表</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AD%97%E6%AE%B5">字段</a><ul>
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%AD%97%E6%AE%B5">创建字段</a></li>
+<li><a href="#%E5%8F%AF%E7%94%A8%E7%9A%84%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B">可用的字段类型</a></li>
+<li><a href="#%E5%AD%97%E6%AE%B5%E4%BF%AE%E9%A5%B0%E7%AC%A6">字段修饰符</a></li>
+<li><a href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E6%AE%B5">修改字段</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4%E5%AD%97%E6%AE%B5">删除字段</a></li>
+</ul>
+</li>
+<li><a href="#%E7%B4%A2%E5%BC%95">索引</a><ul>
+<li><a href="#%E5%88%9B%E5%BB%BA%E7%B4%A2%E5%BC%95">创建索引</a></li>
+<li><a href="#%E9%87%8D%E5%91%BD%E5%90%8D%E7%B4%A2%E5%BC%95">重命名索引</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4%E7%B4%A2%E5%BC%95">删除索引</a></li>
+<li><a href="#%E5%A4%96%E9%94%AE%E7%BA%A6%E6%9D%9F">外键约束</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%8B%E4%BB%B6">事件</a></li>
+</ul>
+<p><a name="介绍"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>迁移就像是数据库的版本控制，让你的团队能够轻松地去定义和共享程序的数据库结构。迁移通常配合 Laravel 的结构生成器，可以轻松生成应用程序的数据库结构。如果团队中有成员在他的本地数据库环境中手动的添加了某个字段，那么你将会面对如何解决数据库迁移的问题。</p>
+<p> Laravel 9 <code>Schema</code> <a href="facades.html">facade</a> 提供了数据库相关的支持，可以在所有Laravel支持的数据库管理系统中创建和操作表。</p>
+<p><a name="生成迁移"></a></p>
+<h2 id="生成迁移">生成迁移</h2>
+<p>你可以使用 <code>make:migration</code> <a href="artisan.html">Artisan command</a> 生成数据库迁移。新的迁移将放在您的 <code>database/migrations</code> 目录每个迁移文件名都包含一个时间戳，允许Laravel确定迁移的顺序：</p>
+<pre><code class="language-shell">php artisan make:migration create_flights_table
+</code></pre>
+<p>Laravel会根据迁移文件的名称确定表的名称已经是否在前一种创建新的数据表。</p>
+<p>如果要为生成的迁移指定自定义路径, 您可以在执行 <code>make:migration</code> 命令时使用 <code>--path</code> 选项。给定的路径应该相对于应用程序的基本路径。</p>
+<blockquote>
+<p>技巧：可以使用 <a href="artisan.html#stub-customization">stub publishing</a> 自定义发布。</p>
+</blockquote>
+<p><a name="整合迁移"></a></p>
+<h3 id="整合迁移">整合迁移</h3>
+<p>在构建应用程序时，可能会随着时间的推移积累越来越多的迁移。这可能会导致您的 <code>database/migrations</code> 目录因为数百次迁移而变得臃肿。你如果愿意的话，可以将迁移「压缩」到单个 SQL 文件中。如果你想这样做，请先执行<code>schema:dump</code> 命令：</p>
+<pre><code class="language-shell">php artisan schema:dump
+
+<span class="comment token"># 转储当前数据库架构并删除所有现有迁移...</span>
+php artisan schema:dump --prune
+</code></pre>
+<p>执行此命令时， Laravel 将向应用程序的 <code>database/schema</code> 目录写入一个 「schema」 文件。现在，当您尝试迁移数据库而没有执行其他迁移时， Laravel 将首先执行模式文件的 SQL 语句。在执行数据库结构文件的语句之后，Laravel 将执行不属于数据库结构的剩余的所有迁移。</p>
+<p>您应该将数据库模式文件提交给源代码管理，以便团队中的其他新开发人员可以快速创建应用程序的初始数据库结构。</p>
+<blockquote>
+<p>注意：压缩迁移仅适用于 MySQL 、 PostgreSQL 和 SQLite 数据库，并使用数据库命令行的客户端。另外，数据库结构不能还原到内存中的 SQLite 数据库。</p>
+</blockquote>
+<p><a name="迁移结构"></a></p>
+<h2 id="迁移结构">迁移结构</h2>
+<p>迁移类包含两个方法：<code>up</code> 和 <code>down</code> 。<code>up</code> 方法用于向数据库中添加新表、列或索引，而 down 方法用于撤销 <code>up </code> 方法执行的操作。.</p>
+<p>在这两种方法中，可以使用 Laravel 模式构建器来富有表现力地创建和修改表。要了解 <code>Schema</code> 构建器上可用的所有方法，<a href="#creating-tables">查看其文档</a>。例如，以下迁移会创建一个 <code>flights</code> 表：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">use</span> Illuminate\Database\Migrations\Migration;
+<span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+<span class="keyword token">return</span> <span class="keyword token">new</span> <span class="keyword token">class</span> <span class="keyword token">extends</span> Migration
+{
+    <span class="comment token">/**
+     * Run the migrations.
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> up()
+    {
+        Schema::create(<span class="string token">'flights'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+            <span class="variable token">$table</span>-&gt;id();
+            <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>);
+            <span class="variable token">$table</span>-&gt;string(<span class="string token">'airline'</span>);
+            <span class="variable token">$table</span>-&gt;timestamps();
+        });
+    }
+
+    <span class="comment token">/**
+     * Reverse the migrations.
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> down()
+    {
+        Schema::drop(<span class="string token">'flights'</span>);
+    }
+};
+</code></pre>
+<p><a name="设置迁移连接"></a></p>
+<h4 id="设置迁移连接">设置迁移连接</h4>
+<p>如果您的迁移将与应用程序默认数据库连接以外的数据库连接进行交互，您应该设置迁移的 <code>$connection</code> 属性：</p>
+<pre><code><span class="comment token">/**
+ * 迁移应使用的数据库连接。
+ *
+ *<span class="phpdoc token"> @var</span> string
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$connection</span> = <span class="string token">'pgsql'</span>;
+
+<span class="comment token">/**
+ * 执行迁移。
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> up()
+{
+    <span class="comment token">//</span>
+}
+</code></pre>
+<p><a name="执行迁移"></a></p>
+<h2 id="执行迁移">执行迁移</h2>
+<p>执行 Artisan 命令 migrate，来运行所有未执行过的迁移：</p>
+<pre><code class="language-shell">php artisan migrate
+</code></pre>
+<p>如果你想查看目前已经执行了哪些迁移，可以使用 <code>migrate:status</code> Artisan 命令：</p>
+<pre><code class="language-shell">php artisan migrate:status
+</code></pre>
+<p><a name="在生产环境中执行强制迁移"></a></p>
+<h4 id="在生产环境中执行强制迁移">在生产环境中执行强制迁移</h4>
+<p>有些迁移操作是破坏性的，这意味着它们可能会导致数据丢失。为了防止您对生产数据库运行这些命令，在执行这些命令之前，系统将提示您进行确认。如果要在运行强制命令的时候去掉提示，需要加上 <code>--force</code> 标志：</p>
+<pre><code class="language-shell">php artisan migrate --force
+</code></pre>
+<p><a name="回滚迁移"></a></p>
+<h3 id="回滚迁移">回滚迁移</h3>
+<p>如果要回滚最后一次迁移操作，可以使用 Artisan 命令 <code>rollback</code>。该命令会回滚最后「一批」的迁移，这可能包含多个迁移文件：</p>
+<pre><code class="language-shell">php artisan migrate:rollback
+</code></pre>
+<p>通过向 rollback 命令加上 step 参数，可以回滚指定数量的迁移。例如，以下命令将回滚最后五个迁移：</p>
+<pre><code class="language-shell">php artisan migrate:rollback --step=5
+</code></pre>
+<p>命令 <code>migrate:reset</code> 会回滚应用已运行过的所有迁移：</p>
+<pre><code class="language-shell">php artisan migrate:reset
+</code></pre>
+<p><a name="使用单个命令同时进行回滚和迁移操作"></a></p>
+<h4 id="使用单个命令同时进行回滚和迁移操作">使用单个命令同时进行回滚和迁移操作</h4>
+<p>命令 <code>migrate:refresh</code> 首先会回滚已运行过的所有迁移，随后会执行 migrate。这一命令可以高效地重建你的整个数据库：</p>
+<pre><code class="language-shell">php artisan migrate:refresh
+
+<span class="comment token"># 重置数据库，并运行所有的 seeds...</span>
+php artisan migrate:refresh --seed
+</code></pre>
+<p>通过在命令 refresh 中使用 step 参数，你可以回滚并重新执行指定数量的迁移操作。例如，下列命令会回滚并重新执行最后五个迁移操作：</p>
+<pre><code class="language-shell">php artisan migrate:refresh --step=5
+</code></pre>
+<p><a name="删除所有表然后执行迁移"></a></p>
+<h4 id="删除所有表然后执行迁移">删除所有表然后执行迁移</h4>
+<p>命令 <code>migrate:fresh</code> 会删去数据库中的所有表，随后执行命令 <code>migrate</code>：</p>
+<pre><code class="language-shell">php artisan migrate:fresh
+
+php artisan migrate:fresh --seed
+</code></pre>
+<blockquote>
+<p>注意：该命令 <code>migrate:fresh</code> 在删去所有数据表的过程中，会无视它们的前缀。如果数据库涉及到其它应用，使用该命令须十分小心。</p>
+</blockquote>
+<p><a name="数据表"></a></p>
+<h2 id="数据表">数据表</h2>
+<p><a name="创建数据表"></a></p>
+<h3 id="创建数据表">创建数据表</h3>
+<p>接下来我们将使用 Schema 的 <code>create</code> 方法创建一个新的数据表。<code>create</code> 接受两个参数：第一个参数是表名，而第二个参数是一个闭包，该闭包接受一个用来定义新数据表的 <code>Blueprint</code> 对象：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::create(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;id();
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>);
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'email'</span>);
+    <span class="variable token">$table</span>-&gt;timestamps();
+});
+</code></pre>
+<p>创建表时，可以使用数据库结构构建器的 <a href="#creating-columns">列方法</a> 来定义表的列。</p>
+<p><a name="检查表-列是否存在"></a></p>
+<h4 id="检查表--列是否存在">检查表 / 列是否存在</h4>
+<p>您可以使用 <code>hasTable</code> 和 <code>hasColumn</code> 方法检查表或列是否存在：</p>
+<pre><code><span class="keyword token">if</span> (Schema::hasTable(<span class="string token">'users'</span>)) {
+    <span class="comment token">// "users" 表存在...</span>
+}
+
+<span class="keyword token">if</span> (Schema::hasColumn(<span class="string token">'users'</span>, <span class="string token">'email'</span>)) {
+    <span class="comment token">// "users" 表存在，并且有 "email" 列...</span>
+}
+</code></pre>
+<p><a name="数据库连接和表选项"></a></p>
+<h4 id="数据库连接和表选项">数据库连接和表选项</h4>
+<p>如果要对不是应用程序默认的数据库连接执行数据库结构的操作，请使用 <code>connection</code> 方法：</p>
+<pre><code>Schema::connection(<span class="string token">'sqlite'</span>)-&gt;create(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;id();
+});
+</code></pre>
+<p>此外，还可以使用其他一些属性和方法来定义表创建的其他地方。使用 MySQL 时，可以使用 engine 属性指定表的存储引擎：</p>
+<pre><code>Schema::create(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;engine = <span class="string token">'InnoDB'</span>;
+
+    <span class="comment token">// ...</span>
+});
+</code></pre>
+<p><code>charset</code> 和 <code>collation</code> 属性可用于在使用 MySQL 时为创建的表指定字符集和排序规则：</p>
+<pre><code>Schema::create(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;charset = <span class="string token">'utf8mb4'</span>;
+    <span class="variable token">$table</span>-&gt;collation = <span class="string token">'utf8mb4_unicode_ci'</span>;
+
+    <span class="comment token">// ...</span>
+});
+</code></pre>
+<p><code>temporary</code> 方法可用于将表标识为「临时」状态。临时表仅对当前连接的数据库会话可见，当连接关闭时会自动删除：</p>
+<pre><code>Schema::create(<span class="string token">'calculations'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;temporary();
+
+    <span class="comment token">// ...</span>
+});
+</code></pre>
+<p>如果你想给数据库表添加「注释」，你可以在表实例上调用<code>comment</code>方法。目前只有 MySQL 和 Postgres 支持表注释：</p>
+<pre><code>Schema::create(<span class="string token">'calculations'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;comment(<span class="string token">'Business calculations'</span>);
+
+    <span class="comment token">// ...</span>
+});
+</code></pre>
+<p><a name="更新数据表"></a></p>
+<h3 id="更新数据表">更新数据表</h3>
+<p><code>Schema</code> 门面的 <code>table</code> 方法可用于更新现有表。 与 <code>create</code> 方法一样，<code>table</code> 方法接受两个参数：表的名称和接收可用于向表添加列或索引的 <code>Blueprint</code> 实例的闭包：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;integer(<span class="string token">'votes'</span>);
+});
+</code></pre>
+<p><a name="重命名-删除表"></a></p>
+<h3 id="重命名--删除表">重命名 / 删除表</h3>
+<p>要重命名已存在的数据表，使用 <code>rename</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::rename(<span class="variable token">$from</span>, <span class="variable token">$to</span>);
+</code></pre>
+<p>要删除已存在的表，您可以使用 <code>drop</code> 或 <code>dropIfExists</code> 方法：</p>
+<pre><code>Schema::drop(&#39;users&#39;);
+
+Schema::dropIfExists(&#39;users&#39;);
+</code></pre>
+<p><a name="使用外键重命名表"></a></p>
+<h4 id="使用外键重命名表">使用外键重命名表</h4>
+<p>在重命名表之前，应该确认表的所有外键约束在迁移文件中有一个显式的名称，而不是让 Laravel 去指定。否则，外键约束名称将引用旧表名。</p>
+<p><a name="字段"></a></p>
+<h2 id="字段">字段</h2>
+<p><a name="创建字段"></a></p>
+<h3 id="创建字段">创建字段</h3>
+<p>门面 <code>Schema</code> 的 <code>table</code> 方法可用于更新表。与 <code>create</code> 方法一样， <code>table</code> 方法接受两个参数：表名和一个闭包，该闭包接收一个 <code>illumb\Database\Schema\Blueprint</code> 实例，可以使用该实例向表中添加列:</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;integer(<span class="string token">'votes'</span>);
+});
+</code></pre>
+<p><a name="可用的字段类型"></a></p>
+<h3 id="可用的字段类型">可用的字段类型</h3>
+<p><code>Illuminate\Database\Schema\Blueprint</code> 提供了多种方法，用来创建表中对应类型的列。下面列出了所有可用的方法:</p>
+<p><a href="#column-method-bigIncrements">bigIncrements</a>
+<a href="#column-method-bigInteger">bigInteger</a>
+<a href="#column-method-binary">binary</a>
+<a href="#column-method-boolean">boolean</a>
+<a href="#column-method-char">char</a>
+<a href="#column-method-dateTimeTz">dateTimeTz</a>
+<a href="#column-method-dateTime">dateTime</a>
+<a href="#column-method-date">date</a>
+<a href="#column-method-decimal">decimal</a>
+<a href="#column-method-double">double</a>
+<a href="#column-method-enum">enum</a>
+<a href="#column-method-float">float</a>
+<a href="#column-method-foreignId">foreignId</a>
+<a href="#column-method-foreignIdFor">foreignIdFor</a>
+<a href="#column-method-foreignUuid">foreignUuid</a>
+<a href="#column-method-geometryCollection">geometryCollection</a>
+<a href="#column-method-geometry">geometry</a>
+<a href="#column-method-id">id</a>
+<a href="#column-method-increments">increments</a>
+<a href="#column-method-integer">integer</a>
+<a href="https://learnku.commigrations/12248.html#column-method-ipAddress">ipAddress</a>
+<a href="#column-method-json">json</a>
+<a href="#column-method-jsonb">jsonb</a>
+<a href="#column-method-lineString">lineString</a>
+<a href="#column-method-longText">longText</a>
+<a href="#column-method-macAddress">macAddress</a>
+<a href="#column-method-mediumIncrements">mediumIncrements</a>
+<a href="#column-method-mediumInteger">mediumInteger</a>
+<a href="8#column-method-mediumText">mediumText</a>
+<a href="#column-method-morphs">morphs</a>
+<a href="#column-method-multiLineString">multiLineString</a>
+<a href="#column-method-multiPoint">multiPoint</a>
+<a href="#column-method-multiPolygon">multiPolygon</a>
+<a href="#column-method-nullableMorphs">nullableMorphs</a>
+<a href="#column-method-nullableTimestamps">nullableTimestamps</a>
+<a href="#column-method-nullableUuidMorphs">nullableUuidMorphs</a>
+<a href="#column-method-point">point</a>
+<a href="#column-method-polygon">polygon</a>
+<a href="#column-method-rememberToken">rememberToken</a>
+<a href="#column-method-set">set</a>
+<a href="#column-method-smallIncrements">smallIncrements</a>
+<a href="#column-method-smallInteger">smallInteger</a>
+<a href="#column-method-softDeletesTz">softDeletesTz</a>
+<a href="#column-method-softDeletes">softDeletes</a>
+<a href="#column-method-string">string</a>
+<a href="#column-method-text">text</a>
+<a href="#column-method-timeTz">timeTz</a>
+<a href="https://learnku.commigrations/12248.html#column-method-time">time</a>
+<a href="#column-method-timestampTz">timestampTz</a>
+<a href="#column-method-timestamp">timestamp</a>
+<a href="#column-method-timestampsTz">timestampsTz</a>
+<a href="#column-method-timestamps">timestamps</a>
+<a href="#column-method-tinyIncrements">tinyIncrements</a>
+<a href="#column-method-tinyInteger">tinyInteger</a>
+<a href="#column-method-tinyText">tinyText</a>
+<a href="#column-method-unsignedBigInteger">unsignedBigInteger</a>
+<a href="#column-method-unsignedDecimal">unsignedDecimal</a>
+<a href="#column-method-unsignedInteger">unsignedInteger</a>
+<a href="#column-method-unsignedMediumInteger">unsignedMediumInteger</a>
+<a href="#column-method-unsignedSmallInteger">unsignedSmallInteger</a>
+<a href="#column-method-unsignedTinyInteger">unsignedTinyInteger</a>
+<a href="#column-method-uuidMorphs">uuidMorphs</a>
+<a href="#column-method-uuid">uuid</a>
+<a href="#column-method-year">year</a></p>
+<p><a name="column-method-bigIncrements"></a></p>
+<h4 id="bigincrements"><code>bigIncrements()</code></h4>
+<p><code>bigIncrements</code> 方法用于在数据表中创建一个自增的 <code>UNSIGNED BIGINT</code> 类型（主键）的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;bigIncrements(<span class="string token">'id'</span>);
+</code></pre>
+<p><a name="column-method-bigInteger"></a></p>
+<h4 id="biginteger"><code>bigInteger()</code></h4>
+<p><code>bigInteger</code> 方法用于在数据表中创建一个 <code>BIGINT</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;bigInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-binary"></a></p>
+<h4 id="binary"><code>binary()</code></h4>
+<p><code>binary</code> 方法用于在数据表中创建一个 <code>BLOB</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;binary(<span class="string token">'photo'</span>);
+</code></pre>
+<p><a name="column-method-boolean"></a></p>
+<h4 id="boolean"><code>boolean()</code></h4>
+<p><code>boolean</code> 方法用于在数据表中创建一个 <code>BOOLEAN</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;boolean(<span class="string token">'confirmed'</span>);
+</code></pre>
+<p><a name="column-method-char"></a></p>
+<h4 id="char"><code>char()</code></h4>
+<p><code>char</code> 方法用于在数据表中创建一个 <code>CHAR</code> 类型的列，长度由参数指定：</p>
+<pre><code><span class="variable token">$table</span>-&gt;char(<span class="string token">'name'</span>, <span class="number token">100</span>);
+</code></pre>
+<p><a name="column-method-dateTimeTz"></a></p>
+<h4 id="datetimetz"><code>dateTimeTz()</code></h4>
+<p><code>dateTimeTz</code> 方法用于在数据表中创建一个 <code>DATETIME</code> 类型（附有 timezone ）的列，可选参数为精度的总位数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;dateTimeTz(<span class="string token">'created_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-dateTime"></a></p>
+<h4 id="datetime"><code>dateTime()</code></h4>
+<p><code>dateTime</code> 方法用于在数据表中创建一个 <code>DATETIME</code> 类型的列，可选参数为精度的总位数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;dateTime(<span class="string token">'created_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-date"></a></p>
+<h4 id="date"><code>date()</code></h4>
+<p><code>date</code> 方法用于在数据表中创建一个 <code>DATE</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;date(<span class="string token">'created_at'</span>);
+</code></pre>
+<p><a name="column-method-decimal"></a></p>
+<h4 id="decimal"><code>decimal()</code></h4>
+<p><code>decimal</code> 方法用于在数据表中创建一个 <code>DECIMAL</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;decimal(<span class="string token">'amount'</span>, <span class="variable token">$precision</span> = <span class="number token">8</span>, <span class="variable token">$scale</span> = <span class="number token">2</span>);
+</code></pre>
+<p><a name="column-method-double"></a></p>
+<h4 id="double"><code>double()</code></h4>
+<p><code>double</code> 方法用于在数据表中创建一个 <code>DOUBLE</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;double(<span class="string token">'amount'</span>, <span class="number token">8</span>, <span class="number token">2</span>);
+</code></pre>
+<p><a name="column-method-enum"></a></p>
+<h4 id="enum"><code>enum()</code></h4>
+<p><code>enum</code> 方法用于在数据表中创建一个 <code>ENUM</code> 类型的列，合法的值列表由参数指定：</p>
+<pre><code><span class="variable token">$table</span>-&gt;enum(<span class="string token">'difficulty'</span>, [<span class="string token">'easy'</span>, <span class="string token">'hard'</span>]);
+</code></pre>
+<p><a name="column-method-float"></a></p>
+<h4 id="float"><code>float()</code></h4>
+<p> <code>float</code> 方法用于在数据表中创建一个 <code>FLOAT</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;float(<span class="string token">'amount'</span>, <span class="number token">8</span>, <span class="number token">2</span>);
+</code></pre>
+<p><a name="column-method-foreignId"></a></p>
+<h4 id="foreignid"><code>foreignId()</code></h4>
+<p><code>foreignId</code> 方法是 <code>unsignedBigInteger</code> 的别名:</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>);
+</code></pre>
+<p><a name="column-method-foreignIdFor"></a></p>
+<h4 id="foreignidfor"><code>foreignIdFor()</code></h4>
+<p><code>foreignIdFor</code> 方法为给定模型类添加了 <code>{column}_id UNSIGNED BIGINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignIdFor(User::<span class="keyword token">class</span>);
+</code></pre>
+<p><a name="column-method-foreignUuid"></a></p>
+<h4 id="foreignuuid"><code>foreignUuid()</code></h4>
+<p><code>foreignUuid</code> 方法创建一个 <code>UUID</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignUuid(<span class="string token">'user_id'</span>);
+</code></pre>
+<p><a name="column-method-geometryCollection"></a></p>
+<h4 id="geometrycollection"><code>geometryCollection()</code></h4>
+<p><code>geometryCollection</code> 方法相当于 <code>GEOMETRYCOLLECTION</code> :</p>
+<pre><code><span class="variable token">$table</span>-&gt;geometryCollection(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-geometry"></a></p>
+<h4 id="geometry"><code>geometry()</code></h4>
+<p><code>geometry</code> 方法相当于 <code>GEOMETRY</code> :</p>
+<pre><code><span class="variable token">$table</span>-&gt;geometry(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-id"></a></p>
+<h4 id="id"><code>id()</code></h4>
+<p> <code>id</code> 方法是<code>bigIncrements</code> 的别名.默认情况下，该方法将创建一个 <code>id</code> 列; 但是，如果要为列指定不同的名称，则可以传递列名：</p>
+<pre><code><span class="variable token">$table</span>-&gt;id();
+</code></pre>
+<p><a name="column-method-increments"></a></p>
+<h4 id="increments"><code>increments()</code></h4>
+<p><code>increments</code> 方法创建一个自动递增相当于 <code>UNSIGNED INTEGER</code> 的列作为主键：</p>
+<pre><code><span class="variable token">$table</span>-&gt;increments(<span class="string token">'id'</span>);
+</code></pre>
+<p><a name="column-method-integer"></a></p>
+<h4 id="integer"><code>integer()</code></h4>
+<p><code>integer</code> 方法相当于 <code>INTEGER</code> ：</p>
+<pre><code><span class="variable token">$table</span>-&gt;integer(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-ipAddress"></a></p>
+<h4 id="ipaddress"><code>ipAddress()</code></h4>
+<p><code>ipAddress</code> 方法相当于 <code>VARCHAR</code> ：</p>
+<pre><code><span class="variable token">$table</span>-&gt;ipAddress(<span class="string token">'visitor'</span>);
+</code></pre>
+<p><a name="column-method-json"></a></p>
+<h4 id="json"><code>json()</code></h4>
+<p><code>json</code> 方法相当于 <code>JSON</code>：</p>
+<pre><code><span class="variable token">$table</span>-&gt;json(<span class="string token">'options'</span>);
+</code></pre>
+<p><a name="column-method-jsonb"></a></p>
+<h4 id="jsonb"><code>jsonb()</code></h4>
+<p><code>jsonb</code> 方法相当于 <code>JSONB</code>：</p>
+<pre><code><span class="variable token">$table</span>-&gt;jsonb(<span class="string token">'options'</span>);
+</code></pre>
+<p><a name="column-method-lineString"></a></p>
+<h4 id="linestring"><code>lineString()</code></h4>
+<p> <code>lineString</code> 方法相当于 <code>LINESTRING</code>：</p>
+<pre><code><span class="variable token">$table</span>-&gt;lineString(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-longText"></a></p>
+<h4 id="longtext"><code>longText()</code></h4>
+<p> <code>longText</code> 方法相当于 <code>LONGTEXT</code>：</p>
+<pre><code><span class="variable token">$table</span>-&gt;longText(<span class="string token">'description'</span>);
+</code></pre>
+<p><a name="column-method-macAddress"></a></p>
+<h4 id="macaddress"><code>macAddress()</code></h4>
+<p><code>macAddress</code> 方法创建一个用于保存 MAC 地址的列。 一些数据库系统（如 PostgreSQL），为这种类型的数据提供了专用的类型。其他数据库系统相当于使用字符串类型：</p>
+<pre><code><span class="variable token">$table</span>-&gt;macAddress(<span class="string token">'device'</span>);
+</code></pre>
+<p><a name="column-method-mediumIncrements"></a></p>
+<h4 id="mediumincrements"><code>mediumIncrements()</code></h4>
+<p> <code>mediumIncrements</code> 方法用于创建一个 <code>UNSIGNED MEDIUMINT</code> 类型的自动递增的列作为主键：</p>
+<pre><code><span class="variable token">$table</span>-&gt;mediumIncrements(<span class="string token">'id'</span>);
+</code></pre>
+<p><a name="column-method-mediumInteger"></a></p>
+<h4 id="mediuminteger"><code>mediumInteger()</code></h4>
+<p> <code>mediumInteger</code> 方法用于创建一个 <code>MEDIUMINT</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;mediumInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-mediumText"></a></p>
+<h4 id="mediumtext"><code>mediumText()</code></h4>
+<p><code>mediumText</code> 方法用于创建一个 <code>MEDIUMTEXT</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;mediumText(<span class="string token">'description'</span>);
+</code></pre>
+<p><a name="column-method-morphs"></a></p>
+<h4 id="morphs"><code>morphs()</code></h4>
+<p> <code>morphs</code> 方法用于快速创建一个名称为 <code>{column}_id</code> ，类型为 <code>UNSIGNED BIGINT</code> 的列和一个名称为 <code>{column}_type</code> ，类型为 <code>VARCHAR</code> 的列。</p>
+<p>这个方法在定义<a href="eloquent-relationships.html">多态关联</a>所需的列时使用。在下面的例子中， <code>taggable_id</code> 和 <code>taggable_type</code> 这两个列会被创建：</p>
+<pre><code><span class="variable token">$table</span>-&gt;morphs(<span class="string token">'taggable'</span>);
+</code></pre>
+<p><a name="column-method-multiLineString"></a></p>
+<h4 id="multilinestring"><code>multiLineString()</code></h4>
+<p> <code>multiLineString</code> 方法用于创建一个 <code>MULTILINESTRING</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;multiLineString(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-multiPoint"></a></p>
+<h4 id="multipoint"><code>multiPoint()</code></h4>
+<p> <code>multiPoint</code> 方法用于创建一个 <code>MULTIPOINT</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;multiPoint(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-multiPolygon"></a></p>
+<h4 id="multipolygon"><code>multiPolygon()</code></h4>
+<p> <code>multiPolygon</code> 方法用于创建一个 <code>MULTIPOLYGON</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;multiPolygon(<span class="string token">'positions'</span>);
+</code></pre>
+<p><a name="column-method-nullableTimestamps"></a></p>
+<h4 id="nullabletimestamps"><code>nullableTimestamps()</code></h4>
+<p>这个方法和 <a href="#column-method-timestamps">timestamps</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
+<pre><code><span class="variable token">$table</span>-&gt;nullableTimestamps(<span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-nullableMorphs"></a></p>
+<h4 id="nullablemorphs"><code>nullableMorphs()</code></h4>
+<p>这个方法和 <a href="#column-method-morphs">morphs</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
+<pre><code><span class="variable token">$table</span>-&gt;nullableMorphs(<span class="string token">'taggable'</span>);
+</code></pre>
+<p><a name="column-method-nullableUuidMorphs"></a></p>
+<h4 id="nullableuuidmorphs"><code>nullableUuidMorphs()</code></h4>
+<p>这个方法和 <a href="#column-method-uuidMorphs">uuidMorphs</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
+<pre><code><span class="variable token">$table</span>-&gt;nullableUuidMorphs(<span class="string token">'taggable'</span>);
+</code></pre>
+<p><a name="column-method-point"></a></p>
+<h4 id="point"><code>point()</code></h4>
+<p><code>point</code> 方法相当于 POINT：</p>
+<pre><code><span class="variable token">$table</span>-&gt;point(<span class="string token">'position'</span>);
+</code></pre>
+<p><a name="column-method-polygon"></a></p>
+<h4 id="polygon"><code>polygon()</code></h4>
+<p><code>polygon</code> 方法相当于 POLYGON：</p>
+<pre><code><span class="variable token">$table</span>-&gt;polygon(<span class="string token">'position'</span>);
+</code></pre>
+<p><a name="column-method-rememberToken"></a></p>
+<h4 id="remembertoken"><code>rememberToken()</code></h4>
+<p>添加一个允许空值的 VARCHAR (100) 类型的 <code>remember_token</code> 字段，用于存储 <a href="authentication.html#remembering-users">记住用户</a>：</p>
+<pre><code><span class="variable token">$table</span>-&gt;rememberToken();
+</code></pre>
+<p><a name="column-method-set"></a></p>
+<h4 id="set"><code>set()</code></h4>
+<p><code>set</code> 方法使用给定的有效值列表创建一个 <code>SET</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;set(<span class="string token">'flavors'</span>, [<span class="string token">'strawberry'</span>, <span class="string token">'vanilla'</span>]);
+</code></pre>
+<p><a name="column-method-smallIncrements"></a></p>
+<h4 id="smallincrements"><code>smallIncrements()</code></h4>
+<p><code>smallIncrements</code> 方法创建一个自动递增的 <code>UNSIGNED SMALLINT</code> 等效列作为主键：</p>
+<pre><code><span class="variable token">$table</span>-&gt;smallIncrements(<span class="string token">'id'</span>);
+</code></pre>
+<p><a name="column-method-smallInteger"></a></p>
+<h4 id="smallinteger"><code>smallInteger()</code></h4>
+<p><code>smallInteger</code> 方法创建一个 <code>SMALLINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;smallInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-softDeletesTz"></a></p>
+<h4 id="softdeletestz"><code>softDeletesTz()</code></h4>
+<p><code>softDeletesTz</code> 方法添加了一个可为空的 <code>deleted_at</code> <code>TIMESTAMP</code>（带时区）等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的“软删除”功能所需的 <code>deleted_at</code> 时间戳：</p>
+<pre><code><span class="variable token">$table</span>-&gt;softDeletesTz(<span class="variable token">$column</span> = <span class="string token">'deleted_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-softDeletes"></a></p>
+<h4 id="softdeletes"><code>softDeletes()</code></h4>
+<p><code>softDeletes</code> 方法添加了一个可为空的 <code>deleted_at</code> <code>TIMESTAMP</code> 等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的「软删除」功能所需的 <code>deleted_at</code> 时间戳，相当于为软删除添加一个可空的 <code>deleted_at</code> 字段：</p>
+<pre><code><span class="variable token">$table</span>-&gt;softDeletes(<span class="variable token">$column</span> = <span class="string token">'deleted_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-string"></a></p>
+<h4 id="string"><code>string()</code></h4>
+<p><code>string</code> 方法创建一个给定长度的 <code>VARCHAR</code> 等效列，相当于指定长度的 VARCHAR：</p>
+<pre><code><span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">100</span>);
+</code></pre>
+<p><a name="column-method-text"></a></p>
+<h4 id="text"><code>text()</code></h4>
+<p><code>text</code> 方法创建一个 <code>TEXT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;text(<span class="string token">'description'</span>);
+</code></pre>
+<p><a name="column-method-timeTz"></a></p>
+<h4 id="timetz"><code>timeTz()</code></h4>
+<p><code>timeTz</code> 方法创建一个具有可选精度（总位数）的 <code>TIME</code>（带时区）等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;timeTz(<span class="string token">'sunrise'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-time"></a></p>
+<h4 id="time"><code>time()</code></h4>
+<p><code>time</code> 方法创建一个具有可选精度（总位数）的 <code>TIME</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;time(<span class="string token">'sunrise'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-timestampTz"></a></p>
+<h4 id="timestamptz"><code>timestampTz()</code></h4>
+<p><code>timestampTz</code> 方法创建一个具有可选精度（总位数）的 <code>TIMESTAMP</code>（带时区）等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;timestampTz(<span class="string token">'added_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-timestamp"></a></p>
+<h4 id="timestamp"><code>timestamp()</code></h4>
+<p><code>timestamp</code> 方法创建一个具有可选精度（总位数）的 <code>TIMESTAMP</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;timestamp(<span class="string token">'added_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
+</code></pre>
+<p><a name="column-method-timestampsTz"></a></p>
+<h4 id="timestampstz"><code>timestampsTz()</code></h4>
+<p><code>timestampsTz</code> 方法创建 <code>created_at</code> 和 <code>updated_at</code> <code>TIMESTAMP</code>（带时区）等效列，具有可选精度（总位数）：
+    $table-&gt;timestampsTz($precision = 0);</p>
+<p><a name="column-method-timestamps"></a></p>
+<h4 id="timestamps"><code>timestamps()</code></h4>
+<p><code>timestamps</code> 方法创建具有可选精度（总位数）的 <code>created_at</code> 和 <code>updated_at</code> <code>TIMESTAMP</code> 等效列：
+    $table-&gt;timestamps($precision = 0);</p>
+<p><a name="column-method-tinyIncrements"></a></p>
+<h4 id="tinyincrements"><code>tinyIncrements()</code></h4>
+<p><code>tinyIncrements</code> 方法创建一个自动递增的 <code>UNSIGNED TINYINT</code> 等效列作为主键：
+    $table-&gt;tinyIncrements(&#39;id&#39;);</p>
+<p><a name="column-method-tinyInteger"></a></p>
+<h4 id="tinyinteger"><code>tinyInteger()</code></h4>
+<p><code>tinyInteger</code> 方法用于创建一个 <code>TINYINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;tinyInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-tinyText"></a></p>
+<h4 id="tinytext"><code>tinyText()</code></h4>
+<p><code>tinyText</code> 方法用于创建一个 <code>TINYTEXT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;tinyText(<span class="string token">'notes'</span>);
+</code></pre>
+<p><a name="column-method-unsignedBigInteger"></a></p>
+<h4 id="unsignedbiginteger"><code>unsignedBigInteger()</code></h4>
+<p><code>unsignedBigInteger</code> 方法用于创建一个 <code>UNSIGNED BIGINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedBigInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-unsignedDecimal"></a></p>
+<h4 id="unsigneddecimal"><code>unsignedDecimal()</code></h4>
+<p><code>unsignedDecimal</code> 方法用于创建一个 <code>UNSIGNED DECIMAL</code> 等效列，具有可选的精度（总位数）和小数位数（小数位数）：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedDecimal(<span class="string token">'amount'</span>, <span class="variable token">$precision</span> = <span class="number token">8</span>, <span class="variable token">$scale</span> = <span class="number token">2</span>);
+</code></pre>
+<p><a name="column-method-unsignedInteger"></a></p>
+<h4 id="unsignedinteger"><code>unsignedInteger()</code></h4>
+<p><code>unsignedInteger</code> 方法用于创建一个 <code>UNSIGNED INTEGER</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-unsignedMediumInteger"></a></p>
+<h4 id="unsignedmediuminteger"><code>unsignedMediumInteger()</code></h4>
+<p><code>unsignedMediumInteger</code> 方法用于创建一个 <code>UNSIGNED MEDIUMINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedMediumInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-unsignedSmallInteger"></a></p>
+<h4 id="unsignedsmallinteger"><code>unsignedSmallInteger()</code></h4>
+<p><code>unsignedSmallInteger</code> 方法用于创建一个 <code>UNSIGNED SMALLINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedSmallInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-unsignedTinyInteger"></a></p>
+<h4 id="unsignedtinyinteger"><code>unsignedTinyInteger()</code></h4>
+<p><code>unsignedTinyInteger</code> 方法用于创建一个 <code>UNSIGNED TINYINT</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unsignedTinyInteger(<span class="string token">'votes'</span>);
+</code></pre>
+<p><a name="column-method-uuidMorphs"></a></p>
+<h4 id="uuidmorphs"><code>uuidMorphs()</code></h4>
+<p><code>uuidMorphs</code> 方法用于快速创建一个名称为 <code>{column}_id</code> ，类型为 <code>CHAR(36)</code> 的列和一个名称为 <code>{column}_type</code> ，类型为  <code>VARCHAR</code> 的列。</p>
+<p>这个方法用于定义使用 UUID 标识符的<a href="eloquent-relationships.html">多态关联</a>所需的列时使用。在下面的例子中，<code>taggable_id</code> 和 <code>taggable_type</code> 这两个列将会被创建:</p>
+<pre><code><span class="variable token">$table</span>-&gt;uuidMorphs(<span class="string token">'taggable'</span>);
+</code></pre>
+<p><a name="column-method-uuid"></a></p>
+<h4 id="uuid"><code>uuid()</code></h4>
+<p><code>uuid</code> 方法用于创建一个 <code>UUID</code> 类型的列:</p>
+<pre><code><span class="variable token">$table</span>-&gt;uuid(<span class="string token">'id'</span>);
+</code></pre>
+<p><a name="column-method-year"></a></p>
+<h4 id="year"><code>year()</code></h4>
+<p><code>year</code> 方法用于创建一个 <code>YEAR</code> 类型的列:</p>
+<pre><code><span class="variable token">$table</span>-&gt;year(<span class="string token">'birth_year'</span>);
+</code></pre>
+<p><a name="字段修饰符"></a></p>
+<h3 id="字段修饰符">字段修饰符</h3>
+<p>除了上面列出的列类型外，在向数据库表添加列时还有几个可以使用的「修饰符」。例如，如果要把列设置为要使列为「可空」，你可以使用 <code>nullable</code> 方法:</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'email'</span>)-&gt;nullable();
+});
+</code></pre>
+<p>下表时所有可用的列修饰符。此列表不包括<a href="#creating-indexes">索引修饰符</a>:</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-&gt;after(&#39;column&#39;)</code></td>
+<td>将该列放在其它字段「之后」(MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;autoIncrement()</code></td>
+<td>设置 INTEGER 类型的列为自动递增 (主键)</td>
+</tr>
+<tr>
+<td><code>-&gt;charset(&#39;utf8mb4&#39;)</code></td>
+<td>为该列指定字符集 (MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;collation(&#39;utf8mb4_unicode_ci&#39;)</code></td>
+<td>为该列指定排序规则 (MySQL/PostgreSQL/SQL Server)</td>
+</tr>
+<tr>
+<td><code>-&gt;comment(&#39;my comment&#39;)</code></td>
+<td>为该列添加注释 (MySQL/PostgreSQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;default($value)</code></td>
+<td>为该列指定一个「默认值」</td>
+</tr>
+<tr>
+<td><code>-&gt;first()</code></td>
+<td>将该列放在该表「首位」 (MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;from($integer)</code></td>
+<td>设置自动递增字段的起始值 (MySQL / PostgreSQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;invisible()</code></td>
+<td>使列对「SELECT *」查询不可见（MySQL）。</td>
+</tr>
+<tr>
+<td><code>-&gt;nullable($value = true)</code></td>
+<td>允许 NULL 值插入到该列</td>
+</tr>
+<tr>
+<td><code>-&gt;storedAs($expression)</code></td>
+<td>创建一个存储生成的列 (MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;unsigned()</code></td>
+<td>设置 INTEGER 类型的字段为 UNSIGNED (MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;useCurrent()</code></td>
+<td>设置 TIMESTAMP 类型的列使用 CURRENT_TIMESTAMP 作为默认值</td>
+</tr>
+<tr>
+<td><code>-&gt;useCurrentOnUpdate()</code></td>
+<td>将 TIMESTAMP 类型的列设置为在更新时使用 CURRENT_TIMESTAMP 作为新值</td>
+</tr>
+<tr>
+<td><code>-&gt;virtualAs($expression)</code></td>
+<td>创建一个虚拟生成的列 (MySQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;generatedAs($expression)</code></td>
+<td>使用指定的序列选项创建标识列 (PostgreSQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;always()</code></td>
+<td>定义序列值优先于标识列的输入 (PostgreSQL)</td>
+</tr>
+<tr>
+<td><code>-&gt;isGeometry()</code></td>
+<td>将空间列类型设置为 <code>geometry</code> - 默认类型为 <code>geography</code> (PostgreSQL)。</td>
+</tr>
+</tbody></table>
+<p><a name="默认值表达式"></a></p>
+<h4 id="默认值表达式">默认值表达式</h4>
+<p><code>default</code> 修饰符接收一个变量或者一个 <code>\Illuminate\Database\Query\Expression</code> 实例。使用 <code>Expression</code> 实例可以避免使用包含在引号中的值，并且允许你使用特定数据库函数。这在当你需要给 <code>JSON</code> 字段指定默认值的时候特别有用：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+<span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Database\Query\Expression;
+<span class="keyword token">use</span> Illuminate\Database\Migrations\Migration;
+
+<span class="keyword token">return</span> <span class="keyword token">new</span> <span class="keyword token">class</span> <span class="keyword token">extends</span> Migration
+{
+    <span class="comment token">/**
+     * 运行迁移
+     *
+     *<span class="phpdoc token"> @return</span> void
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> up()
+    {
+        Schema::create(<span class="string token">'flights'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+            <span class="variable token">$table</span>-&gt;id();
+            <span class="variable token">$table</span>-&gt;json(<span class="string token">'movies'</span>)-&gt;<span class="keyword token">default</span>(<span class="keyword token">new</span> Expression(<span class="string token">'(JSON_ARRAY())'</span>));
+            <span class="variable token">$table</span>-&gt;timestamps();
+        });
+    }
+};
+</code></pre>
+<blockquote>
+<p>注意：支持哪些默认值的表示方式取决于你的数据库驱动、数据库版本、还有字段类型。请参考合适的文档使用。还有一点要注意的是，使用数据库特定函数，可能会将你绑牢到特定的数据库驱动上。</p>
+</blockquote>
+<p><a name="字段顺序"></a></p>
+<h4 id="字段顺序">字段顺序</h4>
+<p>使用 MySQL 数据库时，可以使用 <code>after</code> 方法在模式中的现有列后添加列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;after(<span class="string token">'password'</span>, <span class="keyword token">function</span> (<span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'address_line1'</span>);
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'address_line2'</span>);
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'city'</span>);
+});
+</code></pre>
+<p><a name="修改字段"></a></p>
+<h3 id="修改字段">修改字段</h3>
+<p><a name="先决条件"></a></p>
+<h4 id="先决条件">先决条件</h4>
+<p>在修饰字段之前，请确保你已经通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包。Doctrine DBAL 库用于确定字段的当前状态，并创建对该字段进行指定调整所需的 SQL 查询：</p>
+<pre><code>composer <span class="keyword token">require</span> doctrine/dbal
+</code></pre>
+<p>如果你打算修改 <code>timestamp</code> 方法来创建列，你还需要将以下配置添加到应用程序的<code>config/database.php</code>配置文件中：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Database\DBAL\TimestampType;
+
+<span class="string token">'dbal'</span> =&gt; [
+    <span class="string token">'types'</span> =&gt; [
+        <span class="string token">'timestamp'</span> =&gt; TimestampType::<span class="keyword token">class</span>,
+    ],
+],
+</code></pre>
+<blockquote>
+<p>注意：如果你的应用程序使用 Microsoft SQL 驱动，请确保你已经安装了<code>doctrine/dbal:^3.0</code>。</p>
+</blockquote>
+<p><a name="更新字段属性"></a></p>
+<h4 id="更新字段属性">更新字段属性</h4>
+<p><code>change</code> 方法可以将现有的字段类型修改为新的类型或修改属性。比如，你可能想增加 <code>string</code> 字段的长度，可以使用 <code>change</code> 方法把 <code>name</code> 字段的长度从 25 增加到 50。所以，我们可以简单的更新字段属性然后调用  <code>change</code> 方法：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">50</span>)-&gt;change();
+});
+</code></pre>
+<p>我们同样可以使用 <code>nullable</code> 将字段修改为允许为空：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">50</span>)-&gt;nullable()-&gt;change();
+});
+</code></pre>
+<blockquote>
+<p>注意：只有以下字段类型能被 「修改」: <code>bigInteger</code>, <code>binary</code>, <code>boolean</code>, <code>char</code>, <code>date</code>, <code>dateTime</code>, <code>dateTimeTz</code>, <code>decimal</code>, <code>integer</code>, <code>json</code>, <code>longText</code>, <code>mediumText</code>, <code>smallInteger</code>, <code>string</code>, <code>text</code>, <code>time</code>, <code>unsignedBigInteger</code>, <code>unsignedInteger</code>, <code>unsignedSmallInteger</code>, 和 <code>uuid</code>.   要修改 <code>timestamp</code> 字段类型 ， <a href="#prerequisites">Doctrine 类型必须被注册 </a>。</p>
+</blockquote>
+<p><a name="重命名字段"></a></p>
+<h4 id="重命名字段">重命名字段</h4>
+<p>可以使用结构生成器上的 <code>renameColumn</code> 方法来重命名字段。在重命名字段前，请确保你已经通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;renameColumn(<span class="string token">'from'</span>, <span class="string token">'to'</span>);
+});
+</code></pre>
+<blockquote>
+<p>注意：当前不支持 <code>enum</code> 类型的字段重命名。</p>
+</blockquote>
+<p><a name="删除字段"></a></p>
+<h3 id="删除字段">删除字段</h3>
+<p>你可以使用结构生成器上的 <code>dropColumn</code> 方法来删除字段。如果你的应用程序使用的是 SQLite 数据库，你必须在调用<code>dropColumn</code>方法之前通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;dropColumn(<span class="string token">'votes'</span>);
+});
+</code></pre>
+<p>你可以传递一个字段数组给 <code>dropColumn</code> 方法来删除多个字段：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;dropColumn([<span class="string token">'votes'</span>, <span class="string token">'avatar'</span>, <span class="string token">'location'</span>]);
+});
+</code></pre>
+<blockquote>
+<p>注意：使用 SQLite 数据库时不支持在单个迁移中 <strong>删除</strong> 或 <strong>修改</strong> 多个字段。</p>
+</blockquote>
+<p><a name="可用的命令别名"></a></p>
+<h4 id="可用的命令别名">可用的命令别名</h4>
+<p>Laravel 提供了几种常用的删除相关列的便捷方法。 如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$table-&gt;dropMorphs(&#39;morphable&#39;);</code></td>
+<td>删除 <code>morphable_id</code> 和 <code>morphable_type</code> 字段</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropRememberToken();</code></td>
+<td>删除 <code>remember_token</code> 字段</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropSoftDeletes();</code></td>
+<td>删除 <code>deleted_at</code> 字段</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropSoftDeletesTz();</code></td>
+<td><code>dropSoftDeletes()</code> 方法的别名</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropTimestamps();</code></td>
+<td>删除 <code>created_at</code> 和 <code>updated_at</code> 字段</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropTimestampsTz();</code></td>
+<td><code>dropTimestamps()</code> 方法别名</td>
+</tr>
+</tbody></table>
+<p><a name="索引"></a></p>
+<h2 id="索引">索引</h2>
+<p><a name="创建索引"></a></p>
+<h3 id="创建索引">创建索引</h3>
+<p>结构生成器支持多种类型的索引。下面的例子中新建了一个值唯一的 <code>email</code> 字段。我们可以将 <code>unique</code> 方法链式地添加到字段定义上来创建索引：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'email'</span>)-&gt;unique();
+});
+</code></pre>
+<p>或者，你也可以在定义完字段之后创建索引。为此，你应该调用结构生成器上的 <code>unique</code> 方法，此方法应该传入唯一索引的列名称：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unique(<span class="string token">'email'</span>);
+</code></pre>
+<p>你甚至可以将数组传递给索引方法来创建一个复合（或合成）索引：</p>
+<pre><code><span class="variable token">$table</span>-&gt;index([<span class="string token">'account_id'</span>, <span class="string token">'created_at'</span>]);
+</code></pre>
+<p>创建索引时，Laravel 会自动生成一个合理的索引名称，但你也可以传递第二个参数来自定义索引名称：</p>
+<pre><code><span class="variable token">$table</span>-&gt;unique(<span class="string token">'email'</span>, <span class="string token">'unique_email'</span>);
+</code></pre>
+<p><a name="可用的索引类型"></a></p>
+<h4 id="可用的索引类型">可用的索引类型</h4>
+<p>Laravel 的结构生成器提供了 Laravel 支持的所有类型的索引方法。每个索引方法都接受一个可选的第二个参数来指定索引的名称。如果省略，名称将根据表和列的名称生成。下面是所有可用的索引方法：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$table-&gt;primary(&#39;id&#39;);</code></td>
+<td>添加主键</td>
+</tr>
+<tr>
+<td><code>$table-&gt;primary([&#39;id&#39;, &#39;parent_id&#39;]);</code></td>
+<td>添加复合主键</td>
+</tr>
+<tr>
+<td><code>$table-&gt;unique(&#39;email&#39;);</code></td>
+<td>添加唯一索引</td>
+</tr>
+<tr>
+<td><code>$table-&gt;index(&#39;state&#39;);</code></td>
+<td>添加普通索引</td>
+</tr>
+<tr>
+<td><code>$table-&gt;fullText(&#39;body&#39;);</code></td>
+<td>添加全文索引 (MySQL/PostgreSQL)</td>
+</tr>
+<tr>
+<td><code>$table-&gt;fullText(&#39;body&#39;)-&gt;language(&#39;english&#39;);</code></td>
+<td>添加指定语言 (PostgreSQL) 的全文索引</td>
+</tr>
+<tr>
+<td><code>$table-&gt;spatialIndex(&#39;location&#39;);</code></td>
+<td>添加空间索引（不支持 SQLite）</td>
+</tr>
+</tbody></table>
+<p><a name="索引长度-mysql-mariadb"></a></p>
+<h4 id="索引长度--mysql--mariadb">索引长度 &amp; MySQL / MariaDB</h4>
+<p>默认情况下, Laravel 使用<code>utf8mb4</code> 编码。如果你是在版本低于 5.7.7 的 MySQL 或者版本低于 10.2.2 的 MariaDB 上创建索引，那你就需要手动配置数据库迁移的默认字符串长度。也就是说，你可以通过在<code>App\Providers\AppServiceProvider</code>类的<code>boot</code>方法中调用<code>Schema::defaultStringLength</code>方法来配置默认字符串长度：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+<span class="comment token">/**
+ * 引导任何应用程序「全局配置」
+ *
+ *<span class="phpdoc token"> @return</span> void
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+{
+    Schema::defaultStringLength(<span class="number token">191</span>);
+}
+</code></pre>
+<p>当然，你也可以选择开启数据库的 <code>innodb_large_prefix</code> 选项。至于如何正确开启，请自行查阅数据库文档。</p>
+<p><a name="重命名索引"></a></p>
+<h3 id="重命名索引">重命名索引</h3>
+<p>若要重命名索引，你需要调用 <code>renameIndex</code> 方法。此方法接受当前索引名称作为其第一个参数，并将所需名称作为其第二个参数：</p>
+<pre><code><span class="variable token">$table</span>-&gt;renameIndex(<span class="string token">'from'</span>, <span class="string token">'to'</span>)
+</code></pre>
+<p><a name="删除索引"></a></p>
+<h3 id="删除索引">删除索引</h3>
+<p>若要删除索引，则必须指定索引的名称。Laravel 默认会自动将数据表名称、索引的字段名及索引类型简单地连接在一起作为名称。举例如下：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$table-&gt;dropPrimary(&#39;users_id_primary&#39;);</code></td>
+<td>从 「users」 表中删除主键</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropUnique(&#39;users_email_unique&#39;);</code></td>
+<td>从 「users」 表中删除 unique 索引</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropIndex(&#39;geo_state_index&#39;);</code></td>
+<td>从 「geo」 表中删除基本索引</td>
+</tr>
+<tr>
+<td><code>$table-&gt;dropSpatialIndex(&#39;geo_location_spatialindex&#39;);</code></td>
+<td>从 「geo」 表中删除空间索引（不支持 SQLite）</td>
+</tr>
+</tbody></table>
+<p>如果将字段数组传给 <code>dropIndex</code> 方法，会删除根据表名、字段和键类型生成的索引名称。</p>
+<pre><code>Schema::table(<span class="string token">'geo'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;dropIndex([<span class="string token">'state'</span>]); <span class="comment token">// 删除 'geo_state_index' 索引</span>
+});
+</code></pre>
+<p><a name="外键约束"></a></p>
+<h3 id="外键约束">外键约束</h3>
+<p>Laravel 还支持创建用于在数据库层中的强制引用完整性的外键约束。例如，让我们在 <code>posts</code> 表上定义一个引用 <code>users</code> 表的 <code>id</code> 字段的 <code>user_id</code> 字段：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Schema;
+
+Schema::table(<span class="string token">'posts'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;unsignedBigInteger(<span class="string token">'user_id'</span>);
+
+    <span class="variable token">$table</span>-&gt;foreign(<span class="string token">'user_id'</span>)-&gt;references(<span class="string token">'id'</span>)-&gt;on(<span class="string token">'users'</span>);
+});
+</code></pre>
+<p>由于这种外键约束的定义方式过于繁复，Laravel 额外提供了更简洁的方法，基于约定来提供更好的开发人员体验。上面的示例还可以这么写：</p>
+<pre><code>Schema::table(<span class="string token">'posts'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>)-&gt;constrained();
+});
+</code></pre>
+<p><code>foreignId</code> 方法是 <code>unsignedBigInteger</code> 的别名，而 <code>constrained</code> 方法将使用约定来确定所引用的表名和列名。如果表名与约定不匹配，可以通过将表名作为参数传递给 <code>constrained</code> 方法来指定表名：</p>
+<pre><code>Schema::table(<span class="string token">'posts'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>)-&gt;constrained(<span class="string token">'users'</span>);
+});
+</code></pre>
+<p>你可以为约束的「on delete」和「on update」属性指定所需的操作：</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>)
+      -&gt;constrained()
+      -&gt;onUpdate(<span class="string token">'cascade'</span>)
+      -&gt;onDelete(<span class="string token">'cascade'</span>);
+</code></pre>
+<p>还为这些操作提供了另一种表达性语法：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$table-&gt;cascadeOnUpdate();</code></td>
+<td>更新应该级联。</td>
+</tr>
+<tr>
+<td><code>$table-&gt;restrictOnUpdate();</code></td>
+<td>应该限制更新。</td>
+</tr>
+<tr>
+<td><code>$table-&gt;cascadeOnDelete();</code></td>
+<td>删除应该级联</td>
+</tr>
+<tr>
+<td><code>$table-&gt;restrictOnDelete();</code></td>
+<td>应该限制删除</td>
+</tr>
+<tr>
+<td><code>$table-&gt;nullOnDelete();</code></td>
+<td>删除应将外键值设置为空</td>
+</tr>
+</tbody></table>
+<p>当使用任意 <a href="#column-modifiers">字段修饰符</a> 的时候，必须在调用 <code>constrained</code> 之前调用：</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>)
+      -&gt;nullable()
+      -&gt;constrained();
+</code></pre>
+<p><a name="删除外键"></a></p>
+<h4 id="删除外键">删除外键</h4>
+<p>要删除一个外键，你需要使用 <code>dropForeign</code> 方法，将要删除的外键约束作为参数传递。外键约束采用的命名方式与索引相同。即，将数据表名称和约束的字段连接起来，再加上 <code>_foreign</code> 后缀：</p>
+<pre><code><span class="variable token">$table</span>-&gt;dropForeign(<span class="string token">'posts_user_id_foreign'</span>);
+</code></pre>
+<p>或者，可以给 <code>dropForeign</code> 方法传递一个数组，该数组包含要删除的外键的列名。数组将根据  Laravel 的 结构生成器使用的约束名称约定自动转换：</p>
+<pre><code><span class="variable token">$table</span>-&gt;dropForeign([<span class="string token">'user_id'</span>]);
+</code></pre>
+<p><a name="更改外键约束"></a></p>
+<h4 id="更改外键约束">更改外键约束</h4>
+<p>你可以在迁移文件中使用以下方法来开启或关闭外键约束：</p>
+<pre><code>Schema::enableForeignKeyConstraints();
+
+Schema::disableForeignKeyConstraints();
+</code></pre>
+<blockquote>
+<p>注意：SQLite 默认禁用外键约束。使用 SQLite 时，请确保在数据库配置中<a href="database.html#configuration">启用外键支持</a> 然后再尝试在迁移中创建它们。另外, SQLite只在创建表时支持外键，并且<a href="https://www.sqlite.org/omitted.html">将在修改表时不会支持</a>。</p>
+</blockquote>
+<p><a name="事件"></a></p>
+<h2 id="事件">事件</h2>
+<p>为方便起见，每个迁移操作都会派发一个 <a href="events.html">事件</a>。以下所有事件都扩展了基础 <code>Illuminate\Database\Events\MigrationEvent</code> 类：</p>
+<table>
+<thead>
+<tr>
+<th>类</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Illuminate\Database\Events\MigrationsStarted</code></td>
+<td>即将执行一批迁移。</td>
+</tr>
+<tr>
+<td><code>Illuminate\Database\Events\MigrationsEnded</code></td>
+<td>一批迁移已完成执行。</td>
+</tr>
+<tr>
+<td><code>Illuminate\Database\Events\MigrationStarted</code></td>
+<td>即将执行单个迁移。</td>
+</tr>
+<tr>
+<td><code>Illuminate\Database\Events\MigrationEnded</code></td>
+<td>单个迁移已完成执行。</td>
+</tr>
+<tr>
+<td><code>Illuminate\Database\Events\SchemaDumped</code></td>
+<td>数据库结构转储已完成。</td>
+</tr>
+<tr>
+<td><code>Illuminate\Database\Events\SchemaLoaded</code></td>
+<td>已加载现有数据库结构转储。</td>
+</tr>
+</tbody></table>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>

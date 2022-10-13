@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="laravel-envoy">Laravel Envoy</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#installation">安装</a></li>
+<li><a href="#writing-tasks">编写任务</a><ul>
+<li><a href="#defining-tasks">定义任务</a></li>
+<li><a href="#multiple-servers">多服务器</a></li>
+<li><a href="#setup">配置</a></li>
+<li><a href="#variables">变量</a></li>
+<li><a href="#stories">脚本故事</a></li>
+<li><a href="#completion-hooks">任务钩子</a></li>
+</ul>
+</li>
+<li><a href="#running-tasks">运行任务</a><ul>
+<li><a href="#confirming-task-execution">任务确认</a></li>
+</ul>
+</li>
+<li><a href="#notifications">消息通知</a><ul>
+<li><a href="#slack">Slack</a></li>
+<li><a href="#discord">Discord</a></li>
+<li><a href="#telegram">Telegram</a></li>
+<li><a href="#microsoft-teams">Microsoft Teams</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p><a href="https://github.com/laravel/envoy">Laravel Envoy</a> 是一套在远程服务器上执行日常任务的工具。使用了 <a href="blade.html">Blade</a> 风格语法, 你可以轻松地配置部署任务、Artisan 命令的执行等。目前，Envoy 仅支持 Mac 和 Linux 操作系统。但是可以使用 <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">WSL2</a> 以实现在 Windows 上使用。</p>
+<p><a name="installation"></a></p>
+<h2 id="安装">安装</h2>
+<p>首先，运行 Composer 将 Envoy 安装到你的项目中：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/envoy --dev
+</code></pre>
+<p>安装 Envoy 之后, Envoy 的可执行文件将出现在你项目的 <code>vendor/bin</code> 目录下：</p>
+<pre><code class="language-shell">php vendor/bin/envoy
+</code></pre>
+<p><a name="writing-tasks"></a></p>
+<h2 id="编写任务">编写任务</h2>
+<p><a name="defining-tasks"></a></p>
+<h3 id="定义任务">定义任务</h3>
+<p>任务是 Envoy 的基础构建元素, 任务定义了你想在远程服务器上当任务被调用时所执行的 Shell 命令。例如, 你可能定义了一个任务, 在你所有的队列服务器上执行 <code>php artisan queue:restart</code> 命令。</p>
+<p>你所有的 Envoy 任务都应该在项目根目录中的 <code>Envoy.blade.php</code> 文件中定义。 以下是一个帮助你入门的例子：</p>
+<pre><code class="language-blade">@servers(['web' =&gt; ['user@192.168.1.1'], 'workers' =&gt; ['user@192.168.1.2']])
+
+@task('restart-queues', ['on' =&gt; 'workers'])
+    cd /home/user/example.com
+    php artisan queue:restart
+@endtask
+</code></pre>
+<p>如你所见，文件顶部定义了一个 <code>@server</code> 数组，允许你在任务声明的 <code>on</code> 选项中引用这些服务器。<code>@server</code> 声明应始终放在一行中。在你的 <code>@task</code> 声明中，你应该放置任务被调用执行时你期望在服务器上运行的 Shell 命令。</p>
+<p><a name="local-tasks"></a></p>
+<h4 id="本地任务">本地任务</h4>
+<p>你可以通过将服务器的 IP 地址指定为 <code>127.0.0.1</code> 来强制脚本在本地运行：</p>
+<pre><code class="language-blade">@servers(['localhost' =&gt; '127.0.0.1'])
+</code></pre>
+<p><a name="importing-envoy-tasks"></a></p>
+<h4 id="导入-envoy-任务">导入 Envoy 任务</h4>
+<p>使用 <code>@import</code> 指令, 你可以从其他的 Envoy 文件导入它们的故事与任务并添加到您的文件中。文件导入后，你可以执行他们所定义的任务，就像这些任务是在你的 Envoy 文件中被定义的一样：</p>
+<pre><code class="language-blade">@import(&#39;vendor/package/Envoy.blade.php&#39;)
+</code></pre>
+<p><a name="multiple-servers"></a></p>
+<h3 id="多服务器">多服务器</h3>
+<p>Envoy 允许你轻松跨多台服务器运行任务。 首先，在 <code>@server</code> 声明中添加额外的服务器。每台服务器都应分配一个唯一的名称。一旦你定义了额外的服务器，你可以在任务的 <code>on</code> 数组中的列出每一台服务器：</p>
+<pre><code class="language-blade">@servers([<span class="string token">'web-1'</span> =&gt; <span class="string token">'192.168.1.1'</span>, <span class="string token">'web-2'</span> =&gt; <span class="string token">'192.168.1.2'</span>])
+
+@task(<span class="string token">'deploy'</span>, [<span class="string token">'on'</span> =&gt; [<span class="string token">'web-1'</span>, <span class="string token">'web-2'</span>]])
+    cd /home/user/example.com
+    git pull origin {{ <span class="variable token">$branch</span> }}
+    php artisan migrate --force
+@endtask
+</code></pre>
+<p><a name="parallel-execution"></a></p>
+<h4 id="并行执行">并行执行</h4>
+<p>默认情况下，任务将在每台服务器上串行执行。 换句话说，任务将在第一台服务器上完成运行后，再继续在第二台服务器上执行。如果你想并行运行多个服务器上的任务，请在任务声明中添加 <code>parallel</code> 选项：</p>
+<pre><code class="language-blade">@servers([<span class="string token">'web-1'</span> =&gt; <span class="string token">'192.168.1.1'</span>, <span class="string token">'web-2'</span> =&gt; <span class="string token">'192.168.1.2'</span>])
+
+@task(<span class="string token">'deploy'</span>, [<span class="string token">'on'</span> =&gt; [<span class="string token">'web-1'</span>, <span class="string token">'web-2'</span>], <span class="string token">'parallel'</span> =&gt; <span class="keyword token">true</span>])
+    cd /home/user/example.com
+    git pull origin {{ <span class="variable token">$branch</span> }}
+    php artisan migrate --force
+@endtask
+</code></pre>
+<p><a name="setup"></a></p>
+<h3 id="配置">配置</h3>
+<p>有时，你可能需要在执行 Envoy 任务之前执行一些 PHP 代码。你可以使用 <code>@setup</code> 指令声明变量，并在执行任何其他任务之前执行其他常规 PHP 工作：</p>
+<pre><code class="language-php">@setup
+    <span class="variable token">$now</span> = <span class="keyword token">new</span> DateTime;
+@endsetup
+</code></pre>
+<p>如果你需要在任务执行前引用其他PHP文件，你可以在 <code>Envoy.blade.php</code> 文件的顶部使用 <code>@include</code> 指令：</p>
+<pre><code class="language-blade">@<span class="keyword token">include</span>(<span class="string token">'vendor/autoload.php'</span>)
+
+@task(<span class="string token">'restart-queues'</span>)
+    <span class="comment token"># ...</span>
+@endtask
+</code></pre>
+<p><a name="variables"></a></p>
+<h3 id="变量">变量</h3>
+<p>如果需要，你可以在调用 Envoy 任务时通过在命令行中指定参数，将参数传递给 Envoy 任务：</p>
+<pre><code class="language-shell">php vendor/bin/envoy run deploy --branch=master
+</code></pre>
+<p>你可以通过 Blade 的「echo」 语法访问传入任务中的参数。你也可以在任务中使用 <code>if</code> 语句和循环。 例如，在执行 <code>git pull</code> 命令之前，我们先验证 <code>$branch</code> 变量是否存在：</p>
+<pre><code class="language-blade">@servers([<span class="string token">'web'</span> =&gt; [<span class="string token">'user@192.168.1.1'</span>]])
+
+@task(<span class="string token">'deploy'</span>, [<span class="string token">'on'</span> =&gt; <span class="string token">'web'</span>])
+    cd /home/user/example.com
+
+    @<span class="keyword token">if</span> (<span class="variable token">$branch</span>)
+        git pull origin {{ <span class="variable token">$branch</span> }}
+    @<span class="keyword token">endif</span>
+
+    php artisan migrate --force
+@endtask
+</code></pre>
+<p><a name="stories"></a></p>
+<h3 id="脚本故事">脚本故事</h3>
+<p>你可以将多个同类型任务组合到在一起，我们称之为脚本故事。 例如， 运行 <code>deploy</code> 这个故事脚本时会运行定义在其中的 <code>update-code</code> 和 <code>install-dependencies</code> 两个任务：</p>
+<pre><code class="language-blade">@servers(['web' =&gt; ['user@192.168.1.1']])
+
+@story('deploy')
+    update-code
+    install-dependencies
+@endstory
+
+@task('update-code')
+    cd /home/user/example.com
+    git pull origin master
+@endtask
+
+@task('install-dependencies')
+    cd /home/user/example.com
+    composer install
+@endtask
+</code></pre>
+<p>一旦编写了脚本故事，你可以像调用任务一样调用脚本故事：</p>
+<pre><code class="language-shell">php vendor/bin/envoy run deploy
+</code></pre>
+<p><a name="completion-hooks"></a></p>
+<h3 id="任务钩子">任务钩子</h3>
+<p>当任务和故事脚本运行时，会执行许多钩子。Envoy 支持的钩子类型有 <code>@before</code>、<code>@after</code>、<code>@error</code>、<code>@success</code> 和 <code>@finished</code>。这些钩子中的所有代码都被解释为 PHP 并在本地执行，而不是在你的任务与之交互的远程服务器上执行。</p>
+<p>你可以根据需要定义任意数量的这些。这些钩子将按照它们在您的 Envoy 脚本中出现的顺序执行。</p>
+<p><a name="hook-before"></a></p>
+<h4 id="before"><code>@before</code></h4>
+<p>在每个任务执行之前，Envoy 脚本中注册的所有 <code>@before</code> 钩子都会执行。 <code>@before</code> 钩子负责接收将要执行的任务的名称：</p>
+<pre><code class="language-blade">@before
+    <span class="keyword token">if</span> (<span class="variable token">$task</span> === <span class="string token">'deploy'</span>) {
+        <span class="comment token">// ...</span>
+    }
+@endbefore
+</code></pre>
+<p><a name="completion-after"></a></p>
+<h4 id="after"><code>@after</code></h4>
+<p>每次任务执行后，Envoy 脚本中注册的所有 <code>@after</code> 钩子都会执行。 <code>@after</code> 钩子负责接收已执行任务的名称：</p>
+<pre><code class="language-blade">@after
+    <span class="keyword token">if</span> (<span class="variable token">$task</span> === <span class="string token">'deploy'</span>) {
+        <span class="comment token">// ...</span>
+    }
+@endafter
+</code></pre>
+<p><a name="completion-error"></a></p>
+<h4 id="error"><code>@error</code></h4>
+<p>在每次任务失败后（以大于 <code>0</code> 的状态码退出执行），Envoy 脚本中注册的所有 <code>@error</code> 钩子都将执行。 <code>@error</code> 钩子负责接收已执行任务的名称：</p>
+<pre><code class="language-blade">@error
+    <span class="keyword token">if</span> (<span class="variable token">$task</span> === <span class="string token">'deploy'</span>) {
+        <span class="comment token">// ...</span>
+    }
+@enderror
+</code></pre>
+<p><a name="completion-success"></a></p>
+<h4 id="success"><code>@success</code></h4>
+<p>如果所有任务都已正确执行，则 Envoy 脚本中注册的所有 <code>@success</code> 钩子都将执行：</p>
+<pre><code class="language-blade">@success
+    <span class="comment token">// ...</span>
+@endsuccess
+</code></pre>
+<p><a name="completion-finished"></a></p>
+<h4 id="finished"><code>@finished</code></h4>
+<p>在所有任务都执行完毕后（不管退出状态如何），所有的 <code>@finished</code> 钩子都会被执行。 <code>@finished</code> 钩子负责接收已完成任务的状态码，它可能是 <code>null</code> 或大于或等于 <code>0</code> 的 <code>integer</code>：</p>
+<pre><code class="language-blade">@finished
+    <span class="keyword token">if</span> (<span class="variable token">$exitCode</span> &gt; <span class="number token">0</span>) {
+        <span class="comment token">// There were errors in one of the tasks...</span>
+    }
+@endfinished
+</code></pre>
+<p><a name="running-tasks"></a></p>
+<h2 id="运行任务">运行任务</h2>
+<p>要运行在 <code>Envoy.blade.php</code> 文件中定义的任务或故事，请执行 Envoy 的 <code>run</code> 命令，传递您要执行的任务或故事的名称。 当任务运行时， Envoy 将运行任务并显示服务器的输出：</p>
+<pre><code class="language-shell">php vendor/bin/envoy run deploy
+</code></pre>
+<p><a name="confirming-task-execution"></a></p>
+<h3 id="确认任务执行">确认任务执行</h3>
+<p>如果你希望在服务器上运行给定任务之前提示你进行确认，则应将 <code>confirm</code> 指令添加到任务声明中。 此选项对于破坏性操作特别有用：</p>
+<pre><code class="language-blade">@task(<span class="string token">'deploy'</span>, [<span class="string token">'on'</span> =&gt; <span class="string token">'web'</span>, <span class="string token">'confirm'</span> =&gt; <span class="keyword token">true</span>])
+    cd /home/user/example.com
+    git pull origin {{ <span class="variable token">$branch</span> }}
+    php artisan migrate
+@endtask
+</code></pre>
+<p><a name="notifications"></a></p>
+<h2 id="消息通知">消息通知</h2>
+<p><a name="slack"></a></p>
+<h3 id="slack">Slack</h3>
+<p>Envoy 还支持在执行每个任务后向 <a href="https://slack.com">Slack</a> 发送通知。 <code>@slack</code> 指令接受 Slack 钩子 URL 和通道名称。 你可以通过在 Slack 控制面板中创建 Incoming WebHooks 集成来检索你的 webhook URL 。 你应该将整个 webhook URL 传递给 <code>@slack</code> 指令：</p>
+<p>你应该将整个 webhook URL 作为第一个参数传递给 <code>@slack</code> 指令。<code>@slack</code> 指令的第二个参数应该是频道名称（<code>#channel</code>）或用户名（<code>@user</code>）：</p>
+<pre><code class="language-blade">@finished
+    @slack(&#39;webhook-url&#39;, &#39;#bots&#39;)
+@endfinished
+</code></pre>
+<p>默认情况下，Envoy 通知将向通知通道发送一条消息，描述已执行的任务。但是，你可以通过将第三个参数传递给 <code>@slack</code> 指令，用你自己的自定义消息覆盖此消息：</p>
+<pre><code class="language-blade">@finished
+    @slack(&#39;webhook-url&#39;, &#39;#bots&#39;, &#39;Hello, Slack.&#39;)
+@endfinished
+</code></pre>
+<p><a name="discord"></a></p>
+<h3 id="discord">Discord</h3>
+<p>Envoy 还支持在每个任务执行后向 <a href="https://discord.com">Discord</a> 发送通知。 <code>@discord</code> 指令接受 Discord hook URL 和消息。你可以通过在服务器设置中创建「Webhook」并选择 Webhook 应该发布到哪个频道来检索你的 Webhook URL。你应该将整个 Webhook URL 传递到 <code>@discord</code> 指令中：</p>
+<pre><code class="language-blade">@finished
+    @discord(&#39;discord-webhook-url&#39;)
+@endfinished
+</code></pre>
+<p><a name="telegram"></a></p>
+<h3 id="telegram">Telegram</h3>
+<p>Envoy 还支持在执行每个任务后向 <a href="https://telegram.org">Telegram</a> 发送通知。<code>@telegram</code> 指令接受Telegram Bot ID 和 Chat ID。你可以使用 <a href="https://t.me/botfather">BotFather</a> 创建一个新的机器人（Bot）来检索 Bot ID。你可以使用 <a href="https://t.me/username_to_id_bot">@username_to_id_bot</a> 检索有效的 Chat ID。你应该将整个 Bot ID 和 Chat ID 传递到 <code>@telegram</code> 指令中：</p>
+<pre><code class="language-blade">@finished
+    @telegram(&#39;bot-id&#39;,&#39;chat-id&#39;)
+@endfinished
+</code></pre>
+<p><a name="microsoft-teams"></a></p>
+<h3 id="microsoft-teams">Microsoft Teams</h3>
+<p>Envoy 还支持在每个任务执行后向 <a href="https://www.microsoft.com/en-us/microsoft-teams">Microsoft Teams</a> 发送通知。 <code>@microsoftTeams</code> 指令接受 Teams Webhook（必需）、消息、主题颜色（成功、信息、警告、错误）和一系列选项。您可以通过创建新的 [incoming webhook] (<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook">https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook</a>) 来检索你的 Teams Webbook。 Teams API 具有许多其他属性来自定义你的消息框，例如标题、摘要和局部片段。你可以在 <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#example-of-connector-message">Microsoft Teams 文档</a>。你应该将整个 Webhook URL 传递到 <code>@microsoftTeams</code> 指令中：</p>
+<pre><code class="language-blade">@finished
+    @microsoftTeams(&#39;webhook-url&#39;)
+@endfinished
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
