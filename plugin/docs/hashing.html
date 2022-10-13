@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 9.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="哈希加密">哈希加密</h1>
+<ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#configuration">配置</a></li>
+<li><a href="#basic-usage">基本用法</a><ul>
+<li><a href="#hashing-passwords">使用哈希算法加密密码</a></li>
+<li><a href="#verifying-that-a-password-matches-a-hash">验证密码是否与哈希匹配</a></li>
+<li><a href="#determining-if-a-password-needs-to-be-rehashed">检查密码是否需要重新散列/哈希</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="简介">简介</h2>
+<p>Laravel <code>Hash</code> <a href="facades.html">facade</a> 为存储用户密码提供了安全的 Bcrypt 和 Argon2 哈希加密方式。如果你正在使用 <a href="starter-kits.html">Laravel 应用初始脚手架</a> ，默认情况下，将使用 Bcrypt 进行注册和身份验证。</p>
+<p>Bcrypt 是加密密码的一个很好的选择，因为它的「加密系数」是可调的，这意味着生成散列所需的时间可以随着硬件功率的增加而增加。当加密密码时速度慢是相对比较好的。算法对密码进行哈希运算的时间越长，恶意用户生成所有可能用于对应用程序进行暴力攻击的字符串哈希值的「彩虹表」的时间就越长。</p>
+<p><a name="configuration"></a></p>
+<h2 id="配置">配置</h2>
+<p>你可以在 <code>config/hashing.php</code> 配置文件中配置默认哈希驱动程序。目前支持三种驱动程序： <a href="https://en.wikipedia.org/wiki/Bcrypt">Bcrypt</a> 和 <a href="https://en.wikipedia.org/wiki/Argon2">Argon2</a> (Argon2i and Argon2id variants)。</p>
+<blockquote>
+<p>注意：Argon2i 驱动程序需要 PHP 7.2.0 或更高版本，而 Argon2id 驱动程序则需要 PHP 7.3.0 或更高版本。</p>
+</blockquote>
+<p><a name="basic-usage"></a></p>
+<h2 id="基本用法">基本用法</h2>
+<p><a name="hashing-passwords"></a></p>
+<h3 id="哈希密码">哈希密码</h3>
+<p>你可以通过调用 <code>Hash</code> facade 的 <code>make</code> 方法来加密你的密码：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> App\Http\Controllers\Controller;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Hash;
+
+<span class="keyword token">class</span> PasswordController <span class="keyword token">extends</span> Controller
+{
+    <span class="comment token">/**
+     * 更新用户密码
+     *
+     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>)
+    {
+        <span class="comment token">// 验证新密码长度</span>
+
+        <span class="variable token">$request</span>-&gt;user()-&gt;fill([
+            <span class="string token">'password'</span> =&gt; Hash::make(<span class="variable token">$request</span>-&gt;newPassword)
+        ])-&gt;save();
+    }
+}
+</code></pre>
+<p><a name="adjusting-the-bcrypt-work-factor"></a></p>
+<h4 id="调整-bcrypt-加密系数">调整 Bcrypt 加密系数</h4>
+<p>如果使用 Bcrypt 算法，你可以在 <code>make</code> 方法中使用 <code>rounds</code> 选项来配置该算法的加密系数。然而，对大多数应用程序来说，默认值就足够了：</p>
+<pre><code><span class="variable token">$hashed</span> = Hash::make(<span class="string token">'password'</span>, [
+    <span class="string token">'rounds'</span> =&gt; <span class="number token">12</span>,
+]);
+</code></pre>
+<p><a name="adjusting-the-argon2-work-factor"></a></p>
+<h4 id="调整-argon2-加密系数">调整 Argon2 加密系数</h4>
+<p>如果使用 Argon2 算法，你可以在 <code>make</code> 方法中使用 <code>memory</code>，<code>time</code> 和 <code>threads</code> 选项来配置该算法的加密系数。然后，对大多数应用程序来说，默认值就足够了：</p>
+<pre><code><span class="variable token">$hashed</span> = Hash::make(<span class="string token">'password'</span>, [
+    <span class="string token">'memory'</span> =&gt; <span class="number token">1024</span>,
+    <span class="string token">'time'</span> =&gt; <span class="number token">2</span>,
+    <span class="string token">'threads'</span> =&gt; <span class="number token">2</span>,
+]);
+</code></pre>
+<blockquote>
+<p>技巧：有关这些选项的更多信息，请查阅 <a href="https://secure.php.net/manual/zh/function.password-hash.php">关于 Argon Hash 的 PHP 官方文档</a>。</p>
+</blockquote>
+<p><a name="verifying-that-a-password-matches-a-hash"></a></p>
+<h3 id="验证密码是否与哈希匹配">验证密码是否与哈希匹配</h3>
+<p><code>check</code> 方法能为你验证一段给定的未加密字符串与给定的散列/哈希值是否一致：</p>
+<pre><code><span class="keyword token">if</span> (Hash::check(<span class="string token">'plain-text'</span>, <span class="variable token">$hashedPassword</span>)) {
+    <span class="comment token">// 密码匹配...</span>
+}
+</code></pre>
+<p><a name="determining-if-a-password-needs-to-be-rehashed"></a></p>
+<h3 id="检查密码是否需要重新散列哈希">检查密码是否需要重新散列/哈希</h3>
+<p><code>needsRehash</code> 方法可以为你检查当散列/哈希的加密系数改变时，你的密码是否被新的加密系数重新加密过。某些应用程序选择在身份验证时执行这一项检查：</p>
+<pre><code><span class="keyword token">if</span> (Hash::needsRehash(<span class="variable token">$hashed</span>)) {
+    <span class="variable token">$hashed</span> = Hash::make(<span class="string token">'plain-text'</span>);
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
