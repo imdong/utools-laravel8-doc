@@ -1,7 +1,7 @@
 # Artisan 命令行
 
 - [简介](#introduction)
-    - [Tinker 命令 (REPL)](#tinker)
+  - [Tinker 命令 (REPL)](#tinker)
 - [编写命令](#writing-commands)
     - [生成命令](#generating-commands)
     - [命令结构](#command-structure)
@@ -25,7 +25,7 @@
 <a name="introduction"></a>
 ## 简介
 
-Artisan 是 Laravel 附带的命令行接口。 Artisan 以 `artisan` 脚本的形式存在于应用的根目录，并提供了许多有用的命令，这些命令可以在构建应用时为你提供帮助。你可以通过 `list` 命令查看所有可用的 Artisan 命令：
+Artisan 是 Laravel 附带的命令行接口。Artisan 以 `artisan` 脚本的形式存在于应用的根目录，并提供了许多有用的命令，这些命令可以在构建应用时为你提供帮助。你可以通过 `list` 命令查看所有可用的 Artisan 命令：
 
 ```shell
 php artisan list
@@ -51,8 +51,6 @@ php artisan help migrate
 
 Laravel Tinker 是为 Laravel 提供的强大的 REPL（交互式解释器），由 [PsySH](https://github.com/bobthecow/psysh) 提供支持。
 
-
-
 <a name="installation"></a>
 #### 安装
 
@@ -67,7 +65,7 @@ composer require laravel/tinker
 <a name="usage"></a>
 #### 用法
 
-Tinker 让你可以在命令行与你的整个 Laravel 应用进行交互。包括但不限于 Eloquent模型、任务、事件等。通过运行 Artisan 命令 `tinker` 进入 Tinker 环境。
+Tinker 让你可以在命令行与你的整个 Laravel 应用进行交互。包括但不限于 Eloquent 模型、任务、事件等。通过运行 Artisan 命令 `tinker` 进入 Tinker 环境。
 
 ```shell
 php artisan tinker
@@ -79,7 +77,7 @@ php artisan tinker
 php artisan vendor:publish --provider="Laravel\Tinker\TinkerServiceProvider"
 ```
 
-> 注意：`Dispatchable` 类中的 `dispatch` 辅助函数和 `dispatch` 方法已被弃用以将任务添加至队列中。因此，当你使用 Tinker 时，请使用 `Bus::dispatch` 或 `Queue::push` 来分发任务。
+> 注意：`dispatch`辅助函数和`Dispatchable`类上的`dispatch`方法都依赖于垃圾回收来将任务放置到队列中。因此，当你使用 Tinker 时，请使用 `Bus::dispatch` 或 `Queue::push` 来分发任务。
 
 <a name="command-allow-list"></a>
 #### 命令白名单
@@ -99,17 +97,15 @@ Tinker 采用白名单来确定允许哪些 Artisan 命令可以在 shell 中运
         App\Models\User::class,
     ],
 
-
-
 <a name="writing-commands"></a>
 ## 编写命令
 
-除 Artisan 提供的命令外，你也可以编写自己的自定义命令。命令在多数情况下位于 `app/Console/Commands` 目录中。 不过，只要你的命令可以由 Composer 加载，你就可以自由选择自己的存储位置。
+除 Artisan 提供的命令外，你也可以编写自己的自定义命令。命令在多数情况下位于 `app/Console/Commands` 目录中。不过，只要你的命令可以由 Composer 加载，你就可以自由选择自己的存储位置。
 
 <a name="generating-commands"></a>
 ### 生成命令
 
-要创建新命令，可以使用 `make:command` Artisan 命令。该命令将在 `app/Console/Commands` 目录中创建一个新的命令类。如果你的应用程序中不存在此目录，请不要担心，它将在您第一次运行 `make:command` 命令时自动创建：
+要创建新命令，可以使用 `make:command` Artisan 命令。该命令将在 `app/Console/Commands` 目录中创建一个新的命令类。如果你的应用程序中不存在此目录，请不要担心，它将在你第一次运行 `make:command` 命令时自动创建：
 
 ```shell
 php artisan make:command SendEmails
@@ -118,7 +114,7 @@ php artisan make:command SendEmails
 <a name="command-structure"></a>
 ### 命令结构
 
-生成命令后，应为该类的 `signature` 和 `description` 属性定义适当的值。当在 `list` 屏幕上显示命令时，将使用这些属性。 `signature` 属性还允许您定义 [命令的输入期望值](#defining-input-expectations)。 `handle` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。
+生成命令后，应为该类的 `signature` 和 `description` 属性定义适当的值。当在 `list` 屏幕上显示命令时，将使用这些属性。 `signature` 属性还允许你定义 [命令的输入期望值](#defining-input-expectations)。 `handle` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。
 
 让我们看一个示例命令。请注意，我们能够通过命令的 `handle` 方法请求我们需要的任何依赖项。Laravel [服务容器](/docs/laravel/9.x/container) 将自动注入此方法签名中带有类型提示的所有依赖项：
 
@@ -170,12 +166,10 @@ php artisan make:command SendEmails
 
 > 技巧：为了更好地复用代码，请尽量让你的命令类保持轻量并且能够延迟到应用服务中完成。在上面的示例中，我们注入了一个服务类来进行发送电子邮件的「繁重工作」。
 
-
-
 <a name="closure-commands"></a>
 ### 闭包命令
 
-基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 `app/Console/Kernel.php` 文件的  `commands` 方法中 ，Laravel 加载 `routes/console.php` 文件：
+基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 `app/Console/Kernel.php` 文件的  `commands` 方法中，Laravel 加载 `routes/console.php` 文件：
 
     /**
      * 注册闭包命令
@@ -216,12 +210,10 @@ php artisan make:command SendEmails
         // ...
     })->purpose('Send a marketing email to a user');
 
-
-
 <a name="defining-input-expectations"></a>
 ## 定义输入期望
 
-在编写控制台命令时，通常是通过参数和选项来收集用户输入的。 Laravel 让你可以非常方便地在 `signature` 属性中定义你期望用户输入的内容。`signature` 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。
+在编写控制台命令时，通常是通过参数和选项来收集用户输入的。Laravel 让你可以非常方便地在 `signature` 属性中定义你期望用户输入的内容。`signature` 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。
 
 <a name="arguments"></a>
 ### 参数
@@ -235,7 +227,7 @@ php artisan make:command SendEmails
      */
     protected $signature = 'mail:send {user}';
 
-您亦可创建可选参数或为参数定义默认值：
+你亦可创建可选参数或为参数定义默认值：
 
     // 可选参数...
     'mail:send {user?}'
@@ -260,8 +252,6 @@ php artisan make:command SendEmails
 ```shell
 php artisan mail:send 1 --queue
 ```
-
-
 
 <a name="options-with-values"></a>
 #### 带值的选项
@@ -288,7 +278,7 @@ php artisan mail:send 1 --queue=default
 <a name="option-shortcuts"></a>
 #### 选项简写
 
-要在定义选项的时候指定一个简写，您可以在选项名前面使用 `|` 隔符将选项名称与其简写分隔开来：
+要在定义选项的时候指定一个简写，你可以在选项名前面使用 `|` 隔符将选项名称与其简写分隔开来：
 
     'mail:send {user} {--Q|queue}'
 
@@ -301,7 +291,7 @@ php artisan mail:send 1 -Q
 <a name="input-arrays"></a>
 ### 输入数组
 
-如果您想要接收数组数组的参数或者选项，您可以使用 `*` 字符。首先，让我们看一下指定了一个数组参数的例子：
+如果你想要接收数组数组的参数或者选项，你可以使用 `*` 字符。首先，让我们看一下指定了一个数组参数的例子：
 
     'mail:send {user*}'
 
@@ -311,9 +301,7 @@ php artisan mail:send 1 -Q
 php artisan mail:send foo bar
 ```
 
-
-
- `*` 字符可以与可选的参数结合使用，允许您定义零个或多个参数实例：
+ `*` 字符可以与可选的参数结合使用，允许你定义零个或多个参数实例：
 
     'mail:send {user?*}'
 
@@ -333,7 +321,7 @@ php artisan mail:send --id=1 --id=2
 <a name="input-descriptions"></a>
 ### 输入说明
 
-您可以通过使用冒号将参数名称与描述分隔来为输入参数和选项指定说明。如果您需要一些额外的空间来定义命令，可以将它自由的定义在多行中：
+你可以通过使用冒号将参数名称与描述分隔来为输入参数和选项指定说明。如果你需要一些额外的空间来定义命令，可以将它自由的定义在多行中：
 
     /**
      * 控制台命令的名称和签名。
@@ -350,7 +338,7 @@ php artisan mail:send --id=1 --id=2
 <a name="retrieving-input"></a>
 ### 检索输入
 
-当命令在执行时，您可能需要访问命令所接受的参数和选项的值。为此，您可以使用 `argument` 和 `option` 方法。如果选项或参数不存在，将会返回`null`：
+当命令在执行时，你可能需要访问命令所接受的参数和选项的值。为此，你可以使用 `argument` 和 `option` 方法。如果选项或参数不存在，将会返回`null`：
 
     /**
      * 执行控制台命令。
@@ -364,7 +352,7 @@ php artisan mail:send --id=1 --id=2
         //
     }
 
-如果您需要检索所有的参数做为 `array`，请调用 `arguments` 方法：
+如果你需要检索所有的参数做为 `array`，请调用 `arguments` 方法：
 
     $arguments = $this->arguments();
 
@@ -375,8 +363,6 @@ php artisan mail:send --id=1 --id=2
 
     // 检索所有选项做为数组...
     $options = $this->options();
-
-
 
 <a name="prompting-for-input"></a>
 ### 交互式输入
@@ -425,12 +411,10 @@ php artisan mail:send --id=1 --id=2
         // 返回自动完成配置...
     });
 
-
-
 <a name="multiple-choice-questions"></a>
 #### 多选择问题
 
-当询问问题时，如果您需要给用户一个预定义的选择，您可以使用 `choice` 方法。如果没有选项被选择，您可以设置数组索引的默认值去返回，通过这个方法的第三个参数去传入索引：
+当询问问题时，如果你需要给用户一个预定义的选择，你可以使用 `choice` 方法。如果没有选项被选择，你可以设置数组索引的默认值去返回，通过这个方法的第三个参数去传入索引：
 
     $name = $this->choice(
         'What is your name?',
@@ -438,7 +422,7 @@ php artisan mail:send --id=1 --id=2
         $defaultIndex
     );
 
-此外， `choice` 方法接受第四和第五可选参数 ，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：
+此外， `choice` 方法接受第四和第五可选参数，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：
 
     $name = $this->choice(
         'What is your name?',
@@ -451,7 +435,7 @@ php artisan mail:send --id=1 --id=2
 <a name="writing-output"></a>
 ### 文字输出
 
-您可以使用 `line`，`info`，`comment`，`question` 和 `error` 方法，发送输出到控制台。 这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，`info` 将会以绿色文本在控制台展示。
+你可以使用 `line`，`info`，`comment`，`question` 和 `error` 方法，发送输出到控制台。这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，`info` 将会以绿色文本在控制台展示。
 
     /**
      * 执行控制台命令
@@ -469,11 +453,11 @@ php artisan mail:send --id=1 --id=2
 
     $this->error('Something went wrong!');
 
-您可以使用 `line` 方法输出无色文本：
+你可以使用 `line` 方法输出无色文本：
 
     $this->line('Display this on the screen');
 
-您可以使用 `newLine` 方法输出空白行：
+你可以使用 `newLine` 方法输出空白行：
 
     // 输出单行空白...
     $this->newLine();
@@ -481,12 +465,10 @@ php artisan mail:send --id=1 --id=2
     // 输出三行空白...
     $this->newLine(3);
 
-
-
 <a name="tables"></a>
 #### 表格
 
-`table` 方法可以轻松正确地格式化多行/多列数据。您需要做的就是提供表的列名和数据，Laravel 会自动为您计算合适的表格宽度和高度：
+`table` 方法可以轻松正确地格式化多行/多列数据。你需要做的就是提供表的列名和数据，Laravel 会自动为你计算合适的表格宽度和高度：
 
     use App\Models\User;
 
@@ -506,7 +488,7 @@ php artisan mail:send --id=1 --id=2
         $this->performTask($user);
     });
 
-有时，您可能需要更多手动控制进度条的前进方式。首先，定义流程将迭代的步骤总数。然后，在处理完每个项目后推进进度条：
+有时，你可能需要更多手动控制进度条的前进方式。首先，定义流程将迭代的步骤总数。然后，在处理完每个项目后推进进度条：
 
     $users = App\Models\User::all();
 
@@ -527,7 +509,7 @@ php artisan mail:send --id=1 --id=2
 <a name="registering-commands"></a>
 ## 注册命令
 
-您的所有控制台命令都在您的应用程序的 `App\Console\Kernel` 类中注册，这是您的应用程序的「控制台内核」。在此类的 `commands` 方法中，您将看到对内核的 `load` 方法的调用。 `load` 方法将扫描 `app/Console/Commands` 目录并自动将其中包含的每个命令注册到 Artisan。 您甚至可以自由地调用 `load` 方法来扫描其他目录以查找 Artisan 命令：
+你的所有控制台命令都在你的应用程序的 `App\Console\Kernel` 类中注册，这是你的应用程序的「控制台内核」。在此类的 `commands` 方法中，你将看到对内核的 `load` 方法的调用。 `load` 方法将扫描 `app/Console/Commands` 目录并自动将其中包含的每个命令注册到 Artisan。你甚至可以自由地调用 `load` 方法来扫描其他目录以查找 Artisan 命令：
 
     /**
      * 注册应用程序的命令。
@@ -542,9 +524,7 @@ php artisan mail:send --id=1 --id=2
         // ...
     }
 
-
-
-如有必要，您可以通过将命令的类名添加到 `App\Console\Kernel` 类中的 `$commands` 属性来手动注册命令。如果您的内核上尚未定义此属性，则应手动定义它。 当 Artisan 启动时，此属性中列出的所有命令将由 [服务容器](/docs/laravel/9.x/container) 解析并注册到 Artisan：
+如有必要，你可以通过将命令的类名添加到 `App\Console\Kernel` 类中的 `$commands` 属性来手动注册命令。如果你的内核上尚未定义此属性，则应手动定义它。当 Artisan 启动时，此属性中列出的所有命令将由 [服务容器](/docs/laravel/9.x/container) 解析并注册到 Artisan：
 
     protected $commands = [
         Commands\SendEmails::class
@@ -553,7 +533,7 @@ php artisan mail:send --id=1 --id=2
 <a name="programmatically-executing-commands"></a>
 ## 以编程方式执行命令
 
-有时您可能希望在 CLI 之外执行 Artisan 命令。例如，您可能希望从路由或控制器执行 Artisan 命令。您可以使用 `Artisan` 外观上的 `call` 方法来完成此操作。 `call` 方法接受命令的签名名称或类名作为其第一个参数，以及一个命令参数数组作为第二个参数。将返回退出代码：
+有时你可能希望在 CLI 之外执行 Artisan 命令。例如，你可能希望从路由或控制器执行 Artisan 命令。你可以使用 `Artisan` 外观上的 `call` 方法来完成此操作。 `call` 方法接受命令的签名名称或类名作为其第一个参数，以及一个命令参数数组作为第二个参数。将返回退出代码：
 
     use Illuminate\Support\Facades\Artisan;
 
@@ -565,14 +545,14 @@ php artisan mail:send --id=1 --id=2
         //
     });
 
-或者，您可以将整个 Artisan 命令作为字符串传递给 `call` 方法：
+或者，你可以将整个 Artisan 命令作为字符串传递给 `call` 方法：
 
     Artisan::call('mail:send 1 --queue=default');
 
 <a name="passing-array-values"></a>
 #### 传递数组值
 
-如果您的命令定义了一个接受数组的选项，您可以将一组值传递给该选项：
+如果你的命令定义了一个接受数组的选项，你可以将一组值传递给该选项：
 
     use Illuminate\Support\Facades\Artisan;
 
@@ -585,18 +565,16 @@ php artisan mail:send --id=1 --id=2
 <a name="passing-boolean-values"></a>
 #### 传递布尔值
 
-如果您需要指定不接受字符串值的选项的值，例如 `migrate:refresh` 命令上的 `--force` 标志，则应传递 `true` 或 `false` 作为 选项：
+如果你需要指定不接受字符串值的选项的值，例如 `migrate:refresh` 命令上的 `--force` 标志，则应传递 `true` 或 `false` 作为 选项：
 
     $exitCode = Artisan::call('migrate:refresh', [
         '--force' => true,
     ]);
 
-
-
 <a name="queueing-artisan-commands"></a>
 #### 队列 Artisan 命令
 
-使用 `Artisan` 门面的 `queue` 方法，您甚至可以对 Artisan 命令进行排队，以便您的 [队列工作者](/docs/laravel/9.x/queues) 在后台处理它们。 在使用此方法之前，请确保您已配置队列并正在运行队列侦听器：
+使用 `Artisan` 门面的 `queue` 方法，你甚至可以对 Artisan 命令进行排队，以便你的 [队列工作者](/docs/laravel/9.x/queues) 在后台处理它们。在使用此方法之前，请确保你已配置队列并正在运行队列侦听器：
 
     use Illuminate\Support\Facades\Artisan;
 
@@ -608,7 +586,7 @@ php artisan mail:send --id=1 --id=2
         //
     });
 
-使用 `onConnection` 和 `onQueue` 方法，您可以指定 Artisan 命令应分派到的连接或队列：
+使用 `onConnection` 和 `onQueue` 方法，你可以指定 Artisan 命令应分派到的连接或队列：
 
     Artisan::queue('mail:send', [
         'user' => 1, '--queue' => 'default'
@@ -617,7 +595,7 @@ php artisan mail:send --id=1 --id=2
 <a name="calling-commands-from-other-commands"></a>
 ### 从其他命令调用命令
 
-有时您可能希望从现有的 Artisan 命令调用其他命令。您可以使用 `call` 方法来执行此操作。 这个 `call` 方法接受命令名称和命令参数/选项数组：
+有时你可能希望从现有的 Artisan 命令调用其他命令。你可以使用 `call` 方法来执行此操作。这个 `call` 方法接受命令名称和命令参数/选项数组：
 
     /**
      * 执行控制台命令。
@@ -633,7 +611,7 @@ php artisan mail:send --id=1 --id=2
         //
     }
 
-如果您想调用另一个控制台命令并禁止其所有输出，您可以使用 `callSilently` 方法。 `callSilently` 方法与 `call` 方法具有相同的签名：
+如果你想调用另一个控制台命令并禁止其所有输出，你可以使用 `callSilently` 方法。 `callSilently` 方法与 `call` 方法具有相同的签名：
 
     $this->callSilently('mail:send', [
         'user' => 1, '--queue' => 'default'
@@ -642,9 +620,9 @@ php artisan mail:send --id=1 --id=2
 <a name="signal-handling"></a>
 ## 信号处理
 
-为 Artisan 控制台提供动力的 Symfony 控制台组件允许您指示您的命令处理哪些进程信号（如果有）。 例如，您可以指示您的命令处理「SIGINT」和「SIGTERM」信号。
+为 Artisan 控制台提供动力的 Symfony 控制台组件允许你指示你的命令处理哪些进程信号（如果有）。例如，你可以指示你的命令处理「SIGINT」和「SIGTERM」信号。
 
-首先，你应该在你的 Artisan 命令类上实现 `Symfony\Component\Console\Command\SignalableCommandInterface` 接口。 这个接口需要你定义两个方法：`getSubscribedSignals`和`handleSignal`：
+首先，你应该在你的 Artisan 命令类上实现 `Symfony\Component\Console\Command\SignalableCommandInterface` 接口。这个接口需要你定义两个方法：`getSubscribedSignals`和`handleSignal`：
 
 ```php
 <?php
@@ -682,13 +660,12 @@ class StartServer extends Command implements SignalableCommandInterface
 }
 ```
 
-
-
 正如你所料，`getSubscribedSignals` 方法应该返回命令可以处理的信号数组，而 `handleSignal` 方法接收信号并可以做出相应地响应。
 
+<a name="stub-customization"></a>
 ## Stub 定制
 
-Artisan 控制台的 make 命令用于创建各种类，例如控制器、作业、迁移和测试。这些类是使用「stub」文件生成的，这些文件中会根据你的输入填充值。但是，你可能需要对 Artisan 生成的文件进行少量更改。为此，你可以使用以下 stub:publish 命令将最常见的 Stub 命令发布到你的应用程序中，以便可以自定义它们：
+Artisan 控制台的 `make` 命令用于创建各种类，例如控制器、作业、迁移和测试。这些类是使用「stub」文件生成的，这些文件中会根据你的输入填充值。但是，你可能需要对 Artisan 生成的文件进行少量更改。为此，你可以使用以下 `stub:publish` 命令将最常见的 Stub 命令发布到你的应用程序中，以便可以自定义它们：
 
 ```shell
 php artisan stub:publish
@@ -698,5 +675,4 @@ php artisan stub:publish
 
 ## 事件
 
-Artisan 在运行命令时会调度三个事件： `Illuminate\Console\Events\ArtisanStarting`，`Illuminate\Console\Events\CommandStarting` 和  `Illuminate\Console\Events\CommandFinished`。 当 Artisan 开始运行时，会立即调度 `ArtisanStarting` 事件。接下来，在命令运行之前立即调度  `CommandStarting` 事件。最后，一旦命令执行完毕，就会调度  `CommandFinished` 事件。
-
+Artisan 在运行命令时会调度三个事件： `Illuminate\Console\Events\ArtisanStarting`，`Illuminate\Console\Events\CommandStarting` 和  `Illuminate\Console\Events\CommandFinished`。当 Artisan 开始运行时，会立即调度 `ArtisanStarting` 事件。接下来，在命令运行之前立即调度  `CommandStarting` 事件。最后，一旦命令执行完毕，就会调度  `CommandFinished` 事件。
