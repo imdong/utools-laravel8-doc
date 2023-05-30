@@ -129,7 +129,7 @@ Laravel 主要提供了两种授权操作的方法: [拦截器](#gates) 和 [策
 您还可以通过 `any` 或 `none` 方法来一次性授权多个行为:
 
     if (Gate::any(['update-post', 'delete-post'], $post)) {
-        // 用户可以提交update和delete...
+        // 用户可以提交update或delete...
     }
 
     if (Gate::none(['update-post', 'delete-post'], $post)) {
@@ -308,7 +308,7 @@ php artisan make:policy PostPolicy --model=Post
 <a name="policy-auto-discovery"></a>
 #### 策略自动发现
 
-只要模型和策略遵循标准的 Laravel 命名约定，Laravel 就可以自动发现策略，而不是手动注册模型策略。具体来说，策略必须位于包含模型的目录或其上方的「Policies」目录中。 因此，例如，模型可以放置在 `app/Models` 目录中，而策略可以放置在 `app/Policies` 目录中。在这种情况下，Laravel 将检查 `app/Models/Policies` 然后 `app/Policies` 中的策略。此外，策略名称必须与模型名称匹配并具有「策略」后缀。 因此，`User` 模型将对应于`UserPolicy` 策略类。
+只要模型和策略遵循标准的 Laravel 命名约定，Laravel 就可以自动发现策略，而不是手动注册模型策略。具体来说，策略必须位于包含模型的目录或其上方的「Policies」目录中。 因此，例如，模型可以放置在 `app/Models` 目录中，而策略可以放置在 `app/Policies` 目录中。在这种情况下，Laravel 将检查 `app/Models/Policies` 然后 `app/Policies` 中的策略。此外，策略名称必须与模型名称匹配并具有 `Policy` 后缀。 因此，`User` 模型将对应于`UserPolicy` 策略类。
 
 如果要自定义策略的发现逻辑，可以使用 `Gate::guessPolicyNamesUsing` 方法注册自定义策略发现回调。通常，应该从应用程序的 `AuthServiceProvider` 的 `boot` 方法调用此方法：
 
