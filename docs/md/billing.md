@@ -1,4 +1,3 @@
-
 # Laravel Cashier (Stripe)
 
 - [简介](#introduction)
@@ -292,30 +291,36 @@ CASHIER_LOGGER=stack
 <a name="balances"></a>
 ### 余额
 
-Stripe 允许你借记贷记消费者的“余额”。余额将体现在发票上面为借记或贷记。可以使用 `balance` 方法检测用户的可用余额。`balance` 方法会返回消费者货币余额格式化后的字符串：
+Stripe 允许你贷记或借记客户的「余额」。稍后，此余额将在新发票上贷记或借记。要检查客户的总余额，你可以使用`balance`可用于计费模型的方法。该`balance`方法将返回以客户货币表示的余额的格式化字符串表示：
 
     $balance = $user->balance();
 
-要计入用户的余额，可以为 `applyBalance` 方法提供一个负值。如果愿意的话可以提供描述信息：
+要记入客户的余额，可以为该`creditBalance`方法提供一个值。如果你愿意，还可以提供描述：
 
-    $user->applyBalance(-500, 'Premium customer top-up.');
+```
+$user->creditBalance(500, 'Premium customer top-up.');
+```
 
-提供一个正数值给 `applyBalance` 方法将增加客户的余额：
+为该方法提供一个值debitBalance将从客户的余额中扣除：
 
-    $user->applyBalance(300, 'Bad usage penalty.');
+```
+$user->debitBalance(300, 'Bad usage penalty.');
+```
 
- `applyBalance` 方法会创建一条客户余额流水记录。可以通过调用 `balanceTransactions` 方法获取余额交易记录，这有助于提供借记或贷记记录给客户查看：
+`applyBalance` 方法会创建一条客户余额流水记录。可以通过调用 `balanceTransactions` 方法获取余额交易记录，这有助于提供借记或贷记记录给客户查看：
 
-    // Retrieve all transactions...
-    $transactions = $user->balanceTransactions();
-
-    foreach ($transactions as $transaction) {
-        // Transaction amount...
-        $amount = $transaction->amount(); // $2.31
-
-        // Retrieve the related invoice when available...
-        $invoice = $transaction->invoice();
-    }
+```
+// 检索所有交易...
+$transactions = $user->balanceTransactions();
+ 
+foreach ($transactions as $transaction) {
+    // Transaction amount...
+    $amount = $transaction->amount(); // $2.31
+ 
+    // Retrieve the related invoice when available...
+    $invoice = $transaction->invoice();
+}
+```
 
 
 
