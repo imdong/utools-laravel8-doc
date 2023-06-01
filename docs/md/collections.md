@@ -1,20 +1,20 @@
 # 集合
 
 - [介绍](#introduction)
-     - [创建集合](#creating-collections)
-     - [扩展集合](#extending-collections)
+    - [创建集合](#creating-collections)
+    - [扩展集合](#extending-collections)
 - [可用方法](#available-methods)
 - [高阶消息](#higher-order-messages)
 - [惰性集合](#lazy-collections)
-     - [介绍](#lazy-collection-introduction)
-     - [创建惰性集合](#creating-lazy-collections)
-     - [枚举契约](#the-enumerable-contract)
-     - [惰性集合方法](#lazy-collection-methods)
+    - [介绍](#lazy-collection-introduction)
+    - [创建惰性集合](#creating-lazy-collections)
+    - [枚举契约](#the-enumerable-contract)
+    - [惰性集合方法](#lazy-collection-methods)
 
 <a name="introduction"></a>
 ## 介绍
 
-`Illuminate\Support\Collection` 类为处理数据数组提供了一个流畅、方便的包装器。 例如，查看以下代码。 我们将使用 `collect` 助手从数组中创建一个新的集合实例，对每个元素运行 `strtoupper` 函数，然后删除所有空元素：
+`Illuminate\Support\Collection` 类为处理数据数组提供了一个流畅、方便的包装器。例如，查看以下代码。我们将使用 `collect` 助手从数组中创建一个新的集合实例，对每个元素运行 `strtoupper` 函数，然后删除所有空元素：
 
     $collection = collect(['taylor', 'abigail', null])->map(function ($name) {
         return strtoupper($name);
@@ -22,12 +22,12 @@
         return empty($name);
     });
 
-如您所见，`Collection` 类允许您链接其方法以执行流畅的映射和减少底层数组。 一般来说，集合是不可变的，这意味着每个 `Collection` 方法都会返回一个全新的 `Collection` 实例。
+如你所见，`Collection` 类允许你链接其方法以执行流畅的映射和减少底层数组。一般来说，集合是不可变的，这意味着每个 `Collection` 方法都会返回一个全新的 `Collection` 实例。
 
 <a name="creating-collections"></a>
 ### 创建集合
 
-如上所述，`collect` 帮助器为给定数组返回一个新的 `Illuminate\Support\Collection` 实例。 因此，创建一个集合非常简单：
+如上所述，`collect` 帮助器为给定数组返回一个新的 `Illuminate\Support\Collection` 实例。因此，创建一个集合非常简单：
 
     $collection = collect([1, 2, 3]);
 
@@ -36,7 +36,7 @@
 <a name="extending-collections"></a>
 ### 扩展集合
 
-集合是“可宏化的”，它允许您在运行时向 `Collection` 类添加其他方法。 `Illuminate\Support\Collection` 类的 `macro` 方法接受一个闭包，该闭包将在调用宏时执行。 宏闭包可以通过 `$this` 访问集合的其他方法，就像它是集合类的真实方法一样。 例如，以下代码在 `Collection` 类中添加了 `toUpper` 方法：
+集合是「可宏化的」，它允许你在运行时向 `Collection` 类添加其他方法。 `Illuminate\Support\Collection` 类的 `macro` 方法接受一个闭包，该闭包将在调用宏时执行。宏闭包可以通过 `$this` 访问集合的其他方法，就像它是集合类的真实方法一样。例如，以下代码在 `Collection` 类中添加了 `toUpper` 方法：
 
     use Illuminate\Support\Collection;
     use Illuminate\Support\Str;
@@ -53,9 +53,7 @@
 
     // ['FIRST', 'SECOND']
 
-
-
-通常，您应该在[service provider](/docs/laravel/9.x/providers)的 `boot` 方法中声明集合宏。
+通常，你应该在[service provider](/docs/laravel/9.x/providers)的 `boot` 方法中声明集合宏。
 
 <a name="macro-arguments"></a>
 #### 宏参数
@@ -231,8 +229,6 @@
 
 </div>
 
-
-
 <a name="method-listing"></a>
 ## 方法列表
 
@@ -256,12 +252,12 @@
     // [1, 2, 3]
 
 <a name="method-average"></a>
-#### `average()` 
+#### `average()`
 
 [`avg`](#method-avg) 方法的别名。
 
 <a name="method-avg"></a>
-#### `avg()` 
+#### `avg()`
 
 `avg` 方法返回给定键的 [平均值](https://en.wikipedia.org/wiki/Average)：
 
@@ -291,7 +287,7 @@
 
     // [[1, 2, 3, 4], [5, 6, 7]]
 
-当使用诸如 [Bootstrap](https://getbootstrap.com/docs/4.1/layout/grid/) 之类的网格系统时，此方法在 [views](/docs/laravel/9.x/views) 中特别有用 . 例如，假设您有一组 [Eloquent](/docs/laravel/9.x/eloquent) 模型要在网格中显示：
+当使用诸如 [Bootstrap](https://getbootstrap.com/docs/4.1/layout/grid/) 之类的网格系统时，此方法在 [views](/docs/laravel/9.x/views) 中特别有用 . 例如，假设你有一组 [Eloquent](/docs/laravel/9.x/eloquent) 模型要在网格中显示：
 
 ```blade
 @foreach ($products->chunk(3) as $chunk)
@@ -304,9 +300,9 @@
 ```
 
 <a name="method-chunkwhile"></a>
-#### `chunkWhile()` 
+#### `chunkWhile()`
 
-`chunkWhile` 方法根据给定回调的评估将集合分成多个更小的集合。 传递给闭包的 `$chunk` 变量可用于检查前一个元素：
+`chunkWhile` 方法根据给定回调的评估将集合分成多个更小的集合。传递给闭包的 `$chunk` 变量可用于检查前一个元素：
 
     $collection = collect(str_split('AABBCCCD'));
 
@@ -320,8 +316,6 @@
 
 <a name="method-collapse"></a>
 #### `collapse()` {.collection-method}
-
-
 
 `collapse` 方法将数组集合折叠成一个单一的平面集合：
 
@@ -368,7 +362,7 @@
 
     // [1, 2, 3]
 
-> 技巧：当你有一个 `Enumerable` 的实例并且需要一个非惰性集合实例时，`collect` 方法特别有用。 由于 `collect()` 是 `Enumerable` 合约的一部分，您可以安全地使用它来获取 `Collection` 实例。
+> 技巧：当你有一个 `Enumerable` 的实例并且需要一个非惰性集合实例时，`collect` 方法特别有用。由于 `collect()` 是 `Enumerable` 合约的一部分，你可以安全地使用它来获取 `Collection` 实例。
 
 <a name="method-combine"></a>
 #### `combine()` {.collection-method}
@@ -396,12 +390,12 @@
 
     // ['John Doe', 'Jane Doe', 'Johnny Doe']
 
-`concat` 方法在数字上重新索引连接到原始集合上的项目的键。 要维护关联集合中的键，请参阅 [merge](#method-merge) 方法。
+`concat` 方法在数字上重新索引连接到原始集合上的项目的键。要维护关联集合中的键，请参阅 [merge](#method-merge) 方法。
 
 <a name="method-contains"></a>
 #### `contains()` {.collection-method}
 
-`contains` 方法确定集合是否包含给定项目。 您可以将闭包传递给 `contains` 方法，以确定集合中是否存在与给定真值测试匹配的元素：
+`contains` 方法确定集合是否包含给定项目。你可以将闭包传递给 `contains` 方法，以确定集合中是否存在与给定真值测试匹配的元素：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -411,9 +405,7 @@
 
     // false
 
-
-
-或者，您可以将字符串传递给 `contains` 方法，以确定集合是否包含给定的项目值：
+或者，你可以将字符串传递给 `contains` 方法，以确定集合是否包含给定的项目值：
 
     $collection = collect(['name' => 'Desk', 'price' => 100]);
 
@@ -425,7 +417,7 @@
 
     // false
 
-您还可以将键/值对传递给 `contains` 方法，该方法将确定给定对是否存在于集合中：
+你还可以将键/值对传递给 `contains` 方法，该方法将确定给定对是否存在于集合中：
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -436,14 +428,14 @@
 
     // false
 
-`contains` 方法在检查项目值时使用“松散”比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。 使用 [`containsStrict`](#method-containsstrict) 方法使用“严格”比较进行过滤。
+`contains` 方法在检查项目值时使用「松散」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 [`containsStrict`](#method-containsstrict) 方法使用「严格」比较进行过滤。
 
 对于 `contains` 的逆操作，请参见 [doesntContain](#method-doesntcontain) 方法。
 
 <a name="method-containsstrict"></a>
 #### `containsStrict()` {.collection-method}
 
-此方法与 [`contains`](#method-contains) 方法具有相同的签名； 但是，所有值都使用“严格”比较进行比较。
+此方法与 [`contains`](#method-contains) 方法具有相同的签名；但是，所有值都使用「严格」比较进行比较。
 
 > 技巧：使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-contains) 时会修改此方法的行为。
 
@@ -461,7 +453,7 @@
 <a name="method-countBy"></a>
 #### `countBy()` {.collection-method}
 
-`countBy` 方法计算集合中值的出现次数。 默认情况下，该方法计算每个元素的出现次数，允许您计算集合中元素的某些“类型”：
+`countBy` 方法计算集合中值的出现次数。默认情况下，该方法计算每个元素的出现次数，允许你计算集合中元素的某些「类型」：
 
     $collection = collect([1, 2, 2, 2, 3]);
 
@@ -471,7 +463,7 @@
 
     // [1 => 1, 2 => 3, 3 => 1]
 
-您将闭包传递给 `countBy` 方法以按自定义值计算所有项目：
+你将闭包传递给 `countBy` 方法以按自定义值计算所有项目：
 
     $collection = collect(['alice@gmail.com', 'bob@yahoo.com', 'carlos@gmail.com']);
 
@@ -482,8 +474,6 @@
     $counted->all();
 
     // ['gmail.com' => 2, 'yahoo.com' => 1]
-
-
 
 <a name="method-crossjoin"></a>
 #### `crossJoin()` {.collection-method}
@@ -542,12 +532,12 @@
         }
     */
 
-如果您不想停止执行脚本，请改用 [`dump`](#method-dump) 方法。
+如果你不想停止执行脚本，请改用 [`dump`](#method-dump) 方法。
 
 <a name="method-diff"></a>
 #### `diff()` {.collection-method}
 
-`diff` 方法根据集合的值将集合与另一个集合或普通 PHP `array` 进行比较。 此方法将返回给定集合中不存在的原始集合中的值：
+`diff` 方法根据集合的值将集合与另一个集合或普通 PHP `array` 进行比较。此方法将返回给定集合中不存在的原始集合中的值：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -562,7 +552,7 @@
 <a name="method-diffassoc"></a>
 #### `diffAssoc()` {.collection-method}
 
-`diffAssoc` 方法根据其键和值将集合与另一个集合或普通 PHP `array` 进行比较。 此方法将返回给定集合中不存在的原始集合中的键/值对：
+`diffAssoc` 方法根据其键和值将集合与另一个集合或普通 PHP `array` 进行比较。此方法将返回给定集合中不存在的原始集合中的键/值对：
 
     $collection = collect([
         'color' => 'orange',
@@ -582,11 +572,9 @@
     // ['color' => 'orange', 'remain' => 6]
 
 <a name="method-diffkeys"></a>
-
-
 #### `diffKeys()` {.collection-method}
 
-`diffKeys` 方法将集合与另一个集合或基于其键的普通 PHP `array` 进行比较。 此方法将返回给定集合中不存在的原始集合中的键/值对：
+`diffKeys` 方法将集合与另一个集合或基于其键的普通 PHP `array` 进行比较。此方法将返回给定集合中不存在的原始集合中的键/值对：
 
     $collection = collect([
         'one' => 10,
@@ -610,7 +598,7 @@
 <a name="method-doesntcontain"></a>
 #### `doesntContain()` {.collection-method}
 
-`doesntContain` 方法确定集合是否不包含给定项目。 您可以将闭包传递给 `doesntContain` 方法，以确定集合中是否不存在与给定真值测试匹配的元素：
+`doesntContain` 方法确定集合是否不包含给定项目。你可以将闭包传递给 `doesntContain` 方法，以确定集合中是否不存在与给定真值测试匹配的元素：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -620,7 +608,7 @@
 
     // false
 
-或者，您可以将字符串传递给 `doesntContain` 方法，以确定集合是否不包含给定的项目值：
+或者，你可以将字符串传递给 `doesntContain` 方法，以确定集合是否不包含给定的项目值：
 
     $collection = collect(['name' => 'Desk', 'price' => 100]);
 
@@ -632,7 +620,7 @@
 
     // false
 
-您还可以将键/值对传递给 `doesntContain` 方法，该方法将确定给定对是否不存在于集合中：
+你还可以将键/值对传递给 `doesntContain` 方法，该方法将确定给定对是否不存在于集合中：
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -643,7 +631,7 @@
 
     // true
 
-`doesntContain` 方法在检查项目值时使用“松散”比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。
+`doesntContain` 方法在检查项目值时使用「松散」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。
 
 <a name="method-dump"></a>
 #### `dump()` {.collection-method}
@@ -665,8 +653,6 @@
 
 如果要在转储集合后停止执行脚本，请改用 [`dd`](#method-dd) 方法。
 
-
-
 <a name="method-duplicates"></a>
 #### `duplicates()` {.collection-method}
 
@@ -678,7 +664,7 @@
 
     // [2 => 'a', 4 => 'b']
 
-如果集合包含数组或对象，您可以传递要检查重复值的属性的键：
+如果集合包含数组或对象，你可以传递要检查重复值的属性的键：
 
     $employees = collect([
         ['email' => 'abigail@example.com', 'position' => 'Developer'],
@@ -693,7 +679,7 @@
 <a name="method-duplicatesstrict"></a>
 #### `duplicatesStrict()` {.collection-method}
 
-此方法与 [`duplicates`](#method-duplicates) 方法具有相同的签名； 但是，所有值都使用“严格”比较进行比较。
+此方法与 [`duplicates`](#method-duplicates) 方法具有相同的签名；但是，所有值都使用「严格」比较进行比较。
 
 <a name="method-each"></a>
 #### `each()` {.collection-method}
@@ -723,7 +709,7 @@
         //
     });
 
-您可以通过从回调中返回 `false` 来停止遍历项目：
+你可以通过从回调中返回 `false` 来停止遍历项目：
 
     $collection->eachSpread(function ($name, $age) {
         return false;
@@ -749,8 +735,6 @@
     });
 
     // true
-
-
 
 <a name="method-except"></a>
 #### `except()` {.collection-method}
@@ -805,7 +789,7 @@
 
     // 3
 
-你也可以调用不带参数的 `first` 方法来获取集合中的第一个元素。 如果集合为空，则返回 `null`：
+你也可以调用不带参数的 `first` 方法来获取集合中的第一个元素。如果集合为空，则返回 `null`：
 
     collect([1, 2, 3, 4])->first();
 
@@ -827,15 +811,13 @@
 
     // ['name' => 'Linda', 'age' => 14]
 
-您还可以使用比较运算符调用 `firstWhere` 方法：
+你还可以使用比较运算符调用 `firstWhere` 方法：
 
     $collection->firstWhere('age', '>=', 18);
 
     // ['name' => 'Diego', 'age' => 23]
 
-
-
-与 [where](#method-where) 方法一样，您可以将一个参数传递给 `firstWhere` 方法。 在这种情况下，`firstWhere` 方法将返回给定项目键值为“真”的第一个项目：
+与 [where](#method-where) 方法一样，你可以将一个参数传递给 `firstWhere` 方法。在这种情况下，`firstWhere` 方法将返回给定项目键值为「真」的第一个项目：
 
     $collection->firstWhere('age');
 
@@ -844,7 +826,7 @@
 <a name="method-flatmap"></a>
 #### `flatMap()` {.collection-method}
 
-`flatMap` 方法遍历集合并将每个值传递给给定的闭包。 闭包可以自由修改项目并将其返回，从而形成一个新的修改项目集合。 然后，数组被展平一层：
+`flatMap` 方法遍历集合并将每个值传递给给定的闭包。闭包可以自由修改项目并将其返回，从而形成一个新的修改项目集合。然后，数组被展平一层：
 
     $collection = collect([
         ['name' => 'Sally'],
@@ -878,7 +860,7 @@
 
     // ['taylor', 'php', 'javascript'];
 
-如有必要，您可以向 `flatten` 方法传递一个“深度”参数：
+如有必要，你可以向 `flatten` 方法传递一个「深度」参数：
 
     $collection = collect([
         'Apple' => [
@@ -906,7 +888,7 @@
         ]
     */
 
-在此示例中，调用 `flatten` 而不提供深度也会使嵌套数组变平，从而导致 `['iPhone 6S', 'Apple', 'Galaxy S7', 'Samsung']`。 提供深度允许您指定嵌套数组将被展平的级别数。
+在此示例中，调用 `flatten` 而不提供深度也会使嵌套数组变平，从而导致 `['iPhone 6S', 'Apple', 'Galaxy S7', 'Samsung']`。提供深度允许你指定嵌套数组将被展平的级别数。
 
 <a name="method-flip"></a>
 #### `flip()` {.collection-method}
@@ -921,10 +903,8 @@
 
     // ['taylor' => 'name', 'laravel' => 'framework']
 
-
-
 <a name="method-forget"></a>
-#### `forget()` 
+#### `forget()`
 
 该 `forget` 方法将通过指定的键来移除集合中对应的元素：
 
@@ -1005,9 +985,7 @@
         ]
     */
 
-
-
-您可以传递回调，而不是传递字符串 `key`。 回调应返回您希望通过以下方式键入组的值：
+你可以传递回调，而不是传递字符串 `key`。回调应返回你希望通过以下方式键入组的值：
 
     $grouped = $collection->groupBy(function ($item, $key) {
         return substr($item['account_id'], -3);
@@ -1027,7 +1005,7 @@
         ]
     */
 
-多个分组标准可以作为数组传递。 每个数组元素将应用于多维数组中的相应级别：
+多个分组标准可以作为数组传递。每个数组元素将应用于多维数组中的相应级别：
 
     $data = new Collection([
         10 => ['user' => 1, 'skill' => 1, 'roles' => ['Role_1', 'Role_3']],
@@ -1087,7 +1065,7 @@
 <a name="method-implode"></a>
 #### `implode()` {.collection-method}
 
-`implode` 方法连接集合中的项目。 它的参数取决于集合中项目的类型。 如果集合包含数组或对象，您应该传递您希望加入的属性的键，以及您希望放置在值之间的“胶水”字符串：
+`implode` 方法连接集合中的项目。它的参数取决于集合中项目的类型。如果集合包含数组或对象，你应该传递你希望加入的属性的键，以及你希望放置在值之间的「胶水」字符串：
 
     $collection = collect([
         ['account_id' => 1, 'product' => 'Desk'],
@@ -1098,9 +1076,7 @@
 
     // Desk, Chair
 
-
-
-如果集合包含简单的字符串或数值，则应将“胶水”作为唯一参数传递给该方法：
+如果集合包含简单的字符串或数值，则应将「胶水」作为唯一参数传递给该方法：
 
     collect([1, 2, 3, 4, 5])->implode('-');
 
@@ -1109,7 +1085,7 @@
 <a name="method-intersect"></a>
 #### `intersect()` {.collection-method}
 
-`intersect` 方法从原始集合中删除任何不存在于给定 `array` 或集合中的值。 生成的集合将保留原始集合的键：
+`intersect` 方法从原始集合中删除任何不存在于给定 `array` 或集合中的值。生成的集合将保留原始集合的键：
 
     $collection = collect(['Desk', 'Sofa', 'Chair']);
 
@@ -1141,7 +1117,7 @@
 <a name="method-isempty"></a>
 #### `isEmpty()` {.collection-method}
 
-如果集合为空，`isEmpty` 方法返回 `true`； 否则，返回 `false`：
+如果集合为空，`isEmpty` 方法返回 `true`；否则，返回 `false`：
 
     collect([])->isEmpty();
 
@@ -1150,7 +1126,7 @@
 <a name="method-isnotempty"></a>
 #### `isNotEmpty()` {.collection-method}
 
-如果集合不为空，`isNotEmpty` 方法返回 `true`； 否则，返回 `false`：
+如果集合不为空，`isNotEmpty` 方法返回 `true`；否则，返回 `false`：
 
     collect([])->isNotEmpty();
 
@@ -1159,7 +1135,7 @@
 <a name="method-join"></a>
 #### `join()` {.collection-method}
 
-`join` 方法将集合的值与字符串连接起来。 使用此方法的第二个参数，您还可以指定最终元素应如何附加到字符串：
+`join` 方法将集合的值与字符串连接起来。使用此方法的第二个参数，你还可以指定最终元素应如何附加到字符串：
 
     collect(['a', 'b', 'c'])->join(', '); // 'a, b, c'
     collect(['a', 'b', 'c'])->join(', ', ', and '); // 'a, b, and c'
@@ -1167,12 +1143,10 @@
     collect(['a'])->join(', ', ' and '); // 'a'
     collect([])->join(', ', ' and '); // ''
 
-
-
 <a name="method-keyby"></a>
 #### `keyBy()` {.collection-method}
 
-`keyBy` 方法通过给定键对集合进行键控。 如果多个项目具有相同的键，则只有最后一个会出现在新集合中：
+`keyBy` 方法通过给定键对集合进行键控。如果多个项目具有相同的键，则只有最后一个会出现在新集合中：
 
     $collection = collect([
         ['product_id' => 'prod-100', 'name' => 'Desk'],
@@ -1190,7 +1164,7 @@
         ]
     */
 
-您也可以将回调传递给该方法。 回调应通过以下方式返回值以作为集合的键：
+你也可以将回调传递给该方法。回调应通过以下方式返回值以作为集合的键：
 
     $keyed = $collection->keyBy(function ($item) {
         return strtoupper($item['product_id']);
@@ -1232,7 +1206,7 @@
 
     // 2
 
-你也可以调用不带参数的`last`方法来获取集合中的最后一个元素。 如果集合为空，则返回 `null`：
+你也可以调用不带参数的`last`方法来获取集合中的最后一个元素。如果集合为空，则返回 `null`：
 
     collect([1, 2, 3, 4])->last();
 
@@ -1241,9 +1215,7 @@
 <a name="method-macro"></a>
 #### `macro()` {.collection-method}
 
-静态`macro()`方法允许您在运行时向“集合”类添加方法。 有关详细信息，请参阅有关 [扩展集合](#extending-collections) 的文档。
-
-
+静态`macro()`方法允许你在运行时向「集合」类添加方法。有关详细信息，请参阅有关 [扩展集合](#extending-collections) 的文档。
 
 <a name="method-make"></a>
 #### `make()`
@@ -1253,7 +1225,7 @@
 <a name="method-map"></a>
 #### `map()`
 
-该 `map` 方法遍历集合并将每一个值传入给定的回调函数。该回调函数可以任意修改集合项并返回，从而生成被修改过集合项的新集合：
+`map`方法遍历集合并将每一个值传入给定的回调函数。该回调函数可以任意修改集合项并返回，从而生成被修改过集合项的新集合:
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -1348,12 +1320,10 @@
 
     // ['John Doe', 'Jane Doe']
 
-
-
 <a name="method-mapwithkeys"></a>
 #### `mapWithKeys()` {.collection-method}
 
-`mapWithKeys` 方法遍历集合并将每个值传递给给定的回调。 回调应返回包含单个键/值对的关联数组：
+`mapWithKeys` 方法遍历集合并将每个值传递给给定的回调。回调应返回包含单个键/值对的关联数组：
 
     $collection = collect([
         [
@@ -1418,7 +1388,7 @@
 <a name="method-merge"></a>
 #### `merge()` {.collection-method}
 
-`merge` 方法将给定的数组或集合与原始集合合并。 如果给定项目中的字符串键与原始集合中的字符串键匹配，则给定项目的值将覆盖原始集合中的值：
+`merge` 方法将给定的数组或集合与原始集合合并。如果给定项目中的字符串键与原始集合中的字符串键匹配，则给定项目的值将覆盖原始集合中的值：
 
     $collection = collect(['product_id' => 1, 'price' => 100]);
 
@@ -1441,7 +1411,7 @@
 <a name="method-mergerecursive"></a>
 #### `mergeRecursive()` {.collection-method}
 
-`mergeRecursive` 方法将给定的数组或集合递归地与原始集合合并。 如果给定项目中的字符串键与原始集合中的字符串键匹配，则这些键的值将合并到一个数组中，这是递归完成的：
+`mergeRecursive` 方法将给定的数组或集合递归地与原始集合合并。如果给定项目中的字符串键与原始集合中的字符串键匹配，则这些键的值将合并到一个数组中，这是递归完成的：
 
     $collection = collect(['product_id' => 1, 'price' => 100]);
 
@@ -1454,8 +1424,6 @@
     $merged->all();
 
     // ['product_id' => [1, 2], 'price' => [100, 200], 'discount' => false]
-
-
 
 <a name="method-min"></a>
 #### `min()` {.collection-method}
@@ -1503,7 +1471,7 @@
 
     // ['a', 'e']
 
-您可以选择将起始偏移量作为第二个参数传递：
+你可以选择将起始偏移量作为第二个参数传递：
 
     $collection->nth(4, 1);
 
@@ -1527,16 +1495,16 @@
 
     // ['product_id' => 1, 'name' => 'Desk']
 
-For the inverse of `only`, see the [except](#method-except) method.
+关于 `only` 的反义词，见[except](#method-except) 方法。
 
 > 技巧：使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-only) 时会修改此方法的行为。
 
 <a name="method-pad"></a>
 #### `pad()` {.collection-method}
 
-`pad` 方法将用给定的值填充数组，直到数组达到指定的大小。 此方法的行为类似于 [array_pad](https://secure.php.net/manual/en/function.array-pad.php) PHP 函数。
+`pad` 方法将用给定的值填充数组，直到数组达到指定的大小。此方法的行为类似于 [array_pad](https://secure.php.net/manual/en/function.array-pad.php) PHP 函数。
 
-要向左填充，您应该指定一个负尺寸。 如果给定大小的绝对值小于或等于数组的长度，则不会发生填充：
+要向左填充，你应该指定一个负尺寸。如果给定大小的绝对值小于或等于数组的长度，则不会发生填充：
 
     $collection = collect(['A', 'B', 'C']);
 
@@ -1551,8 +1519,6 @@ For the inverse of `only`, see the [except](#method-except) method.
     $filtered->all();
 
     // [0, 0, 'A', 'B', 'C']
-
-
 
 <a name="method-partition"></a>
 #### `partition()`
@@ -1677,8 +1643,6 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // ['Rosa', 'Judith']
 
-
-
 如果存在重复键，则将最后一个匹配元素插入到 plucked 集合中：
 
     $collection = collect([
@@ -1709,7 +1673,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2, 3, 4]
 
-您可以将整数传递给 `pop` 方法以从集合末尾删除并返回多个项目：
+你可以将整数传递给 `pop` 方法以从集合末尾删除并返回多个项目：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -1734,7 +1698,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [0, 1, 2, 3, 4, 5]
 
-您还可以传递第二个参数来指定前置项的键：
+你还可以传递第二个参数来指定前置项的键：
 
     $collection = collect(['one' => 1, 'two' => 2]);
 
@@ -1796,9 +1760,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 4 - (retrieved randomly)
 
-
-
-您可以将一个整数传递给“random”，以指定要随机检索的项目数。 当明确传递您希望接收的项目数时，始终返回项目集合：
+你可以将一个整数传递给 `random`，以指定要随机检索的项目数。当明确传递你希望接收的项目数时，始终返回项目集合：
 
     $random = $collection->random(3);
 
@@ -1832,7 +1794,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 6
 
-`$carry` 在第一次迭代时的值为 `null`； 但是，您可以通过将第二个参数传递给 `reduce` 来指定其初始值：
+`$carry` 在第一次迭代时的值为 `null`；但是，你可以通过将第二个参数传递给 `reduce` 来指定其初始值：
 
     $collection->reduce(function ($carry, $item) {
         return $carry + $item;
@@ -1860,12 +1822,10 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 4264
 
-
-
 <a name="method-reduce-spread"></a>
 #### `reduceSpread()` {.collection-method}
 
-`reduceSpread` 方法将集合缩减为一个值数组，将每次迭代的结果传递给后续迭代。 此方法类似于 `reduce` 方法； 但是，它可以接受多个初始值：
+`reduceSpread` 方法将集合缩减为一个值数组，将每次迭代的结果传递给后续迭代。此方法类似于 `reduce` 方法；但是，它可以接受多个初始值：
 
     [$creditsRemaining, $batch] = Image::where('status', 'unprocessed')
         ->get()
@@ -1882,7 +1842,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-reject"></a>
 #### `reject()` {.collection-method}
 
-`reject` 方法使用给定的闭包过滤集合。 如果应从结果集合中删除项目，则闭包应返回 `true`：
+`reject` 方法使用给定的闭包过滤集合。如果应从结果集合中删除项目，则闭包应返回 `true`：
 
     $collection = collect([1, 2, 3, 4]);
 
@@ -1899,7 +1859,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-replace"></a>
 #### `replace()` {.collection-method}
 
-`replace` 方法的行为类似于 `merge`； 但是，除了覆盖具有字符串键的匹配项之外，`replace` 方法还将覆盖集合中具有匹配数字键的项：
+`replace` 方法的行为类似于 `merge`；但是，除了覆盖具有字符串键的匹配项之外，`replace` 方法还将覆盖集合中具有匹配数字键的项：
 
     $collection = collect(['Taylor', 'Abigail', 'James']);
 
@@ -1954,12 +1914,10 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-
-
 <a name="method-search"></a>
 #### `search()` {.collection-method}
 
-`search` 方法在集合中搜索给定值，如果找到则返回其键。 如果未找到该项目，则返回 `false`：
+`search` 方法在集合中搜索给定值，如果找到则返回其键。如果未找到该项目，则返回 `false`：
 
     $collection = collect([2, 4, 6, 8]);
 
@@ -1967,13 +1925,13 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 1
 
-搜索是使用“松散”比较完成的，这意味着具有整数值的字符串将被视为等于具有相同值的整数。 要使用“严格”比较，请将 `true` 作为第二个参数传递给方法：
+搜索是使用「松散」比较完成的，这意味着具有整数值的字符串将被视为等于具有相同值的整数。要使用「严格」比较，请将 `true` 作为第二个参数传递给方法：
 
     collect([2, 4, 6, 8])->search('4', $strict = true);
 
     // false
 
-或者，您可以提供自己的闭包来搜索通过给定真值测试的第一个项目：
+或者，你可以提供自己的闭包来搜索通过给定真值测试的第一个项目：
 
     collect([2, 4, 6, 8])->search(function ($item, $key) {
         return $item > 5;
@@ -1996,7 +1954,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [2, 3, 4, 5]
 
-您可以将整数传递给 `shift` 方法以从集合的开头删除并返回多个项目：
+你可以将整数传递给 `shift` 方法以从集合的开头删除并返回多个项目：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -2024,7 +1982,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-sliding"></a>
 #### `sliding()` {.collection-method}
 
-`sliding` 方法返回一个新的块集合，表示集合中项目的“滑动窗口”视图：
+`sliding` 方法返回一个新的块集合，表示集合中项目的「滑动窗口」视图：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -2040,7 +1998,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         $current->total = $previous->total + $current->amount;
     });
 
-您可以选择传递第二个“步长”值，该值确定每个块的第一项之间的距离：
+你可以选择传递第二个「步长」值，该值确定每个块的第一项之间的距离：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -2049,8 +2007,6 @@ For the inverse of `only`, see the [except](#method-except) method.
     $chunks->toArray();
 
     // [[1, 2, 3], [3, 4, 5]]
-
-
 
 <a name="method-skip"></a>
 #### `skip()` {.collection-method}
@@ -2080,7 +2036,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [3, 4]
 
-您还可以将一个简单的值传递给 `skipUntil` 方法以跳过所有项目，直到找到给定值：
+你还可以将一个简单的值传递给 `skipUntil` 方法以跳过所有项目，直到找到给定值：
 
     $collection = collect([1, 2, 3, 4]);
 
@@ -2122,7 +2078,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [5, 6, 7, 8, 9, 10]
 
-如果您想限制返回切片的大小，请将所需大小作为第二个参数传递给该方法：
+如果你想限制返回切片的大小，请将所需大小作为第二个参数传递给该方法：
 
     $slice = $collection->slice(4, 2);
 
@@ -2130,9 +2086,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [5, 6]
 
-默认情况下，返回的切片将保留键。 如果您不希望保留原始键，可以使用 [`values`](#method-values) 方法重新索引它们。
-
-
+默认情况下，返回的切片将保留键。如果你不希望保留原始键，可以使用 [`values`](#method-values) 方法重新索引它们。
 
 <a name="method-sole"></a>
 #### `sole()` {.collection-method}
@@ -2145,7 +2099,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 2
 
-您还可以将键/值对传递给 `sole` 方法，该方法将返回集合中与给定对匹配的第一个元素，但前提是它恰好有一个元素匹配：
+你还可以将键/值对传递给 `sole` 方法，该方法将返回集合中与给定对匹配的第一个元素，但前提是它恰好有一个元素匹配：
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -2156,7 +2110,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // ['product' => 'Chair', 'price' => 100]
 
-或者，如果只有一个元素，您也可以调用不带参数的 `sole` 方法来获取集合中的第一个元素：
+或者，如果只有一个元素，你也可以调用不带参数的 `sole` 方法来获取集合中的第一个元素：
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -2166,7 +2120,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // ['product' => 'Desk', 'price' => 200]
 
-如果集合中没有应该由 `sole` 方法返回的元素，则会抛出 `\Illuminate\Collections\ItemNotFoundException` 异常。 如果应该返回多个元素，则会抛出 `\Illuminate\Collections\MultipleItemsFoundException`。
+如果集合中没有应该由 `sole` 方法返回的元素，则会抛出 `\Illuminate\Collections\ItemNotFoundException` 异常。如果应该返回多个元素，则会抛出 `\Illuminate\Collections\MultipleItemsFoundException`。
 
 <a name="method-some"></a>
 #### `some()` {.collection-method}
@@ -2176,7 +2130,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-sort"></a>
 #### `sort()` {.collection-method}
 
-`sort` 方法对集合进行排序。 排序后的集合保留了原始数组键，因此在下面的示例中，我们将使用 [`values`](#method-values) 方法将键重置为连续编号的索引：
+`sort` 方法对集合进行排序。排序后的集合保留了原始数组键，因此在下面的示例中，我们将使用 [`values`](#method-values) 方法将键重置为连续编号的索引：
 
     $collection = collect([5, 3, 1, 2, 4]);
 
@@ -2186,16 +2140,14 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2, 3, 4, 5]
 
-如果您的排序需求更高级，您可以使用自己的算法将回调传递给“排序”。 参考PHP文档[`uasort`](https://secure.php.net/manual/en/function.uasort.php#refsect1-function.uasort-parameters)，就是集合的`sort`方法 调用内部使用。
+如果你的排序需求更高级，你可以使用自己的算法将回调传递给「排序」。参考 PHP 文档[`uasort`](https://secure.php.net/manual/en/function.uasort.php#refsect1-function.uasort-parameters)，就是集合的`sort`方法 调用内部使用。
 
-> 技巧：如果您需要对嵌套数组或对象的集合进行排序，请参阅 [`sortBy`](#method-sortby) 和 [`sortByDesc`](#method-sortbydesc) 方法。
-
-
+> 技巧：如果你需要对嵌套数组或对象的集合进行排序，请参阅 [`sortBy`](#method-sortby) 和 [`sortByDesc`](#method-sortbydesc) 方法。
 
 <a name="method-sortby"></a>
 #### `sortBy()` {.collection-method}
 
-`sortBy` 方法按给定键对集合进行排序。 排序后的集合保留了原始数组键，因此在下面的示例中，我们将使用 [`values`](#method-values) 方法将键重置为连续编号的索引：
+`sortBy` 方法按给定键对集合进行排序。排序后的集合保留了原始数组键，因此在下面的示例中，我们将使用 [`values`](#method-values) 方法将键重置为连续编号的索引：
 
     $collection = collect([
         ['name' => 'Desk', 'price' => 200],
@@ -2235,7 +2187,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-或者，您可以传递自己的闭包来确定如何对集合的值进行排序：
+或者，你可以传递自己的闭包来确定如何对集合的值进行排序：
 
     $collection = collect([
         ['name' => 'Desk', 'colors' => ['Black', 'Mahogany']],
@@ -2257,7 +2209,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-如果您想按多个属性对集合进行排序，可以将排序操作数组传递给 `sortBy` 方法。 每个排序操作都应该是一个数组，由您希望排序的属性和所需排序的方向组成：
+如果你想按多个属性对集合进行排序，可以将排序操作数组传递给 `sortBy` 方法。每个排序操作都应该是一个数组，由你希望排序的属性和所需排序的方向组成：
 
     $collection = collect([
         ['name' => 'Taylor Otwell', 'age' => 34],
@@ -2282,9 +2234,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-
-
-当按多个属性对集合进行排序时，您还可以提供定义每个排序操作的闭包：
+当按多个属性对集合进行排序时，你还可以提供定义每个排序操作的闭包：
 
     $collection = collect([
         ['name' => 'Taylor Otwell', 'age' => 34],
@@ -2327,7 +2277,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [5, 4, 3, 2, 1]
 
-与 `sort` 不同，您不能将闭包传递给 `sortDesc`。 相反，您应该使用 [`sort`](#method-sort) 方法并反转比较。
+与 `sort` 不同，你不能将闭包传递给 `sortDesc`。相反，你应该使用 [`sort`](#method-sort) 方法并反转比较。
 
 <a name="method-sortkeys"></a>
 #### `sortKeys()` {.collection-method}
@@ -2380,9 +2330,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-
-
-回调必须是返回小于、等于或大于零的整数的比较函数。 有关更多信息，请参阅 [`uksort`](https://www.php.net/manual/en/function.uksort.php#refsect1-function.uksort-parameters) 上的 PHP 文档，这是 PHP 函数 `sortKeysUsing` 方法在内部使用。
+回调必须是返回小于、等于或大于零的整数的比较函数。有关更多信息，请参阅 [`uksort`](https://www.php.net/manual/en/function.uksort.php#refsect1-function.uksort-parameters) 上的 PHP 文档，这是 PHP 函数 `sortKeysUsing` 方法在内部使用。
 
 <a name="method-splice"></a>
 #### `splice()` {.collection-method}
@@ -2401,7 +2349,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2]
 
-您可以传递第二个参数来限制结果集合的大小：
+你可以传递第二个参数来限制结果集合的大小：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -2415,7 +2363,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2, 4, 5]
 
-此外，您可以传递包含新项目的第三个参数来替换从集合中删除的项目：
+此外，你可以传递包含新项目的第三个参数来替换从集合中删除的项目：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
@@ -2475,9 +2423,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // 1272
 
-
-
-此外，您可以传递自己的闭包来确定要对集合的哪些值求和：
+此外，你可以传递自己的闭包来确定要对集合的哪些值求和：
 
     $collection = collect([
         ['name' => 'Chair', 'colors' => ['Black']],
@@ -2504,7 +2450,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [0, 1, 2]
 
-您还可以传递一个负整数以从集合末尾获取指定数量的项目：
+你还可以传递一个负整数以从集合末尾获取指定数量的项目：
 
     $collection = collect([0, 1, 2, 3, 4, 5]);
 
@@ -2529,7 +2475,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2]
 
-您还可以将一个简单的值传递给 `takeUntil` 方法以获取项目，直到找到给定值：
+你还可以将一个简单的值传递给 `takeUntil` 方法以获取项目，直到找到给定值：
 
     $collection = collect([1, 2, 3, 4]);
 
@@ -2561,7 +2507,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-tap"></a>
 #### `tap()` {.collection-method}
 
-`tap` 方法将集合传递给给定的回调，允许您在特定点“点击”到集合中并在不影响集合本身的情况下对项目执行某些操作。 然后集合由 `tap` 方法返回：
+`tap` 方法将集合传递给给定的回调，允许你在特定点「点击」到集合中并在不影响集合本身的情况下对项目执行某些操作。然后集合由 `tap` 方法返回：
 
     collect([2, 4, 3, 1, 5])
         ->sort()
@@ -2571,8 +2517,6 @@ For the inverse of `only`, see the [except](#method-except) method.
         ->shift();
 
     // 1
-
-
 
 <a name="method-times"></a>
 #### `times()`
@@ -2635,7 +2579,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="method-undot"></a>
 #### `undot()`
 
-该 `undot` 方法将给定数组添加到集合中。如果给定的数组含有与原集合一样的键，则首选原始集合的值：
+`undot()` 方法将使用「点」表示法的一维集合扩展为多维集合：
 
     $person = collect([
         'name.first_name' => 'Marie',
@@ -2666,8 +2610,6 @@ For the inverse of `only`, see the [except](#method-except) method.
             ],
         ]
     */
-
-
 
 <a name="method-union"></a>
 #### `union()`
@@ -2716,7 +2658,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-最后，您还可以将自己的闭包传递给该 `unique` 方法，以指定哪个值应确定项目的唯一性：
+最后，你还可以将自己的闭包传递给该 `unique` 方法，以指定哪个值应确定项目的唯一性：
 
     $unique = $collection->unique(function ($item) {
         return $item['brand'].$item['type'];
@@ -2737,17 +2679,15 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 > 技巧：这个方法的行为在使用 [Eloquent 集合](/docs/laravel/9.x/eloquent-collections#method-unique) 时被修改。
 
-
-
 <a name="method-uniquestrict"></a>
 #### `uniqueStrict()`
 
-这个方法与 [`unique`](#method-unique) 方法一样，然而，所有的值是用 「严格」模式来比较的。
+这个方法与 [`unique`](#method-unique) 方法一样，然而，所有的值是用「严格」模式来比较的。
 
 <a name="method-unless"></a>
 #### `unless()`
 
-该 `unless` 法当传入的第一个参数不为 `true` 的时候，将执行给定的回调函数：
+该 `unless` 方法当传入的第一个参数不为 `true` 的时候，将执行给定的回调函数：
 
     $collection = collect([1, 2, 3]);
 
@@ -2790,7 +2730,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 [`whenEmpty`](#method-whenempty) 的别名方法。
 
 <a name="method-unwrap"></a>
-#### `unwrap()
+#### `unwrap()`
 
 静态 `unwrap` 方法返回集合内部的可用元素：
 
@@ -2846,9 +2786,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     // [1, 2, 3, 4]
 
-
-
-可以将第二个回调传递给该 `when` 方法。`when` 当给方法的第一个参数计算结果为时，将执行第二个回调 `false`:
+可以将第二个回调传递给该 `when` 方法。当给 `when` 方法的第一个参数计算结果为 `false` 时，将执行第二个回调：
 
     $collection = collect([1, 2, 3]);
 
@@ -2948,8 +2886,6 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 与 `whenNotEmpty` 相反的方法，请查看 [`whenEmpty`](#method-whenempty) 方法。
 
-
-
 <a name="method-where"></a>
 #### `where()`
 
@@ -3047,14 +2983,12 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-
-
-`whereIn` 方法在检查项目值时使用 "loose" 比较，这意味着具有整数值的字符串将被视为等于相同值的整数。 使用 [`whereInStrict`](#method-whereinstrict) 方法使用“strict”比较进行过滤。
+`whereIn` 方法在检查项目值时使用 "loose" 比较，这意味着具有整数值的字符串将被视为等于相同值的整数。使用 [`whereInStrict`](#method-whereinstrict) 方法使用「strict」比较进行过滤。
 
 <a name="method-whereinstrict"></a>
 #### `whereInStrict()` {.collection-method}
 
-此方法与 [`whereIn`](#method-wherein) 方法具有相同的签名； 但是，所有值都使用“strict”比较进行比较。
+此方法与 [`whereIn`](#method-wherein) 方法具有相同的签名；但是，所有值都使用「strict」比较进行比较。
 
 <a name="method-whereinstanceof"></a>
 #### `whereInstanceOf()` {.collection-method}
@@ -3123,9 +3057,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-`whereNotIn` 方法在检查项目值时使用“loose”比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。 使用 [`whereNotInStrict`](#method-wherenotinstrict) 方法使用“strict”比较进行过滤。
-
-
+`whereNotIn` 方法在检查项目值时使用「loose」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 [`whereNotInStrict`](#method-wherenotinstrict) 方法使用「strict」比较进行过滤。
 
 <a name="method-wherenotinstrict"></a>
 #### `whereNotInStrict()`
@@ -3175,7 +3107,6 @@ For the inverse of `only`, see the [except](#method-except) method.
         ]
     */
 
-
 <a name="method-wrap"></a>
 #### `wrap()`
 
@@ -3219,9 +3150,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 集合也提供对「高阶消息传递」的支持，即集合常见操作的快捷方式。支持高阶消息传递的集合方法有： [`average`](#method-average)，[`avg`](#method-avg)，[`contains`](#method-contains)， [`each`](#method-each)，[`every`](#method-every)，[`filter`](#method-filter)， [`first`](#method-first)，[`flatMap`](#method-flatmap)，[`groupBy`](#method-groupby)，[`keyBy`](#method-keyby)，[`map`](#method-map)，[`max`](#method-max)， [`min`](#method-min)，[`partition`](#method-partition)，[`reject`](#method-reject)， [`skipUntil`](#method-skipuntil)，[`skipWhile`](#method-skipwhile)，[`some`](#method-some)，[`sortBy`](#method-sortby)，[`sortByDesc`](#method-sortbydesc)， [`sum`](#method-sum)，[`takeUntil`](#method-takeuntil)，[`takeWhile`](#method-takewhile) 和 [`unique`](#method-unique)。
 
-
-
-每个高阶消息都可以作为集合实例上的动态属性进行访问。 例如，让我们使用 `each` 高阶消息来调用集合中每个对象的方法：
+每个高阶消息都可以作为集合实例上的动态属性进行访问。例如，让我们使用 `each` 高阶消息来调用集合中每个对象的方法：
 
     use App\Models\User;
 
@@ -3229,7 +3158,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 
     $users->each->markAsVip();
 
-同样，我们可以使用 `sum` 高阶消息来收集用户集合的“votes”总数：
+同样，我们可以使用 `sum` 高阶消息来收集用户集合的「votes」总数：
 
     $users = User::where('group', 'Development')->get();
 
@@ -3243,9 +3172,9 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 > 注意：在进一步了解 Laravel 的惰性集合之前，花点时间熟悉一下 [PHP 生成器](https://www.php.net/manual/en/language.generators.overview.php).
 
-为了补充已经强大的 `Collection` 类，`LazyCollection` 类利用 PHP 的 [generators](https://www.php.net/manual/en/language.generators.overview.php) 允许您使用非常 大型数据集，同时保持较低的内存使用率。
+为了补充已经强大的 `Collection` 类，`LazyCollection` 类利用 PHP 的 [generators](https://www.php.net/manual/en/language.generators.overview.php) 允许你使用非常 大型数据集，同时保持较低的内存使用率。
 
-例如，假设您的应用程序需要处理数 GB 的日志文件，同时利用 Laravel 的集合方法来解析日志。 可以使用惰性集合在给定时间仅将文件的一小部分保留在内存中，而不是一次将整个文件读入内存：
+例如，假设你的应用程序需要处理数 GB 的日志文件，同时利用 Laravel 的集合方法来解析日志。可以使用惰性集合在给定时间仅将文件的一小部分保留在内存中，而不是一次将整个文件读入内存：
 
     use App\Models\LogEntry;
     use Illuminate\Support\LazyCollection;
@@ -3262,9 +3191,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         // Process the log entry...
     });
 
-
-
-或者，假设您需要遍历 10,000 个 Eloquent 模型。 使用传统 Laravel 集合时，所有 10,000 个 Eloquent 模型必须同时加载到内存中：
+或者，假设你需要遍历 10,000 个 Eloquent 模型。使用传统 Laravel 集合时，所有 10,000 个 Eloquent 模型必须同时加载到内存中：
 
     use App\Models\User;
 
@@ -3272,7 +3199,7 @@ For the inverse of `only`, see the [except](#method-except) method.
         return $user->id > 500;
     });
 
-但是，查询构建器的 `cursor` 方法返回一个 `LazyCollection` 实例。 这允许您仍然只对数据库运行一个查询，而且一次只在内存中加载一个 Eloquent 模型。 在这个例子中，`filter` 回调在我们实际单独遍历每个用户之前不会执行，从而可以大幅减少内存使用量：
+但是，查询构建器的 `cursor` 方法返回一个 `LazyCollection` 实例。这允许你仍然只对数据库运行一个查询，而且一次只在内存中加载一个 Eloquent 模型。在这个例子中，`filter` 回调在我们实际单独遍历每个用户之前不会执行，从而可以大幅减少内存使用量：
 
     use App\Models\User;
 
@@ -3287,7 +3214,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="creating-lazy-collections"></a>
 ### 创建惰性集合
 
-要创建惰性集合实例，您应该将 PHP 生成器函数传递给集合的 `make` 方法：
+要创建惰性集合实例，你应该将 PHP 生成器函数传递给集合的 `make` 方法：
 
     use Illuminate\Support\LazyCollection;
 
@@ -3302,7 +3229,7 @@ For the inverse of `only`, see the [except](#method-except) method.
 <a name="the-enumerable-contract"></a>
 ### 枚举契约
 
-`Collection` 类上几乎所有可用的方法也可以在 `LazyCollection` 类上使用。 这两个类都实现了 `Illuminate\Support\Enumerable` 契约，它定义了以下方法：
+`Collection` 类上几乎所有可用的方法也可以在 `LazyCollection` 类上使用。这两个类都实现了 `Illuminate\Support\Enumerable` 契约，它定义了以下方法：
 
 <div id="collection-method-list" markdown="1">
 
@@ -3419,8 +3346,6 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 > 注意：改变集合的方法（例如 `shift`、`pop`、`prepend` 等）在 `LazyCollection` 类中**不**可用。
 
-
-
 <a name="lazy-collection-methods"></a>
 ### 惰性集合方法
 
@@ -3448,7 +3373,7 @@ For the inverse of `only`, see the [except](#method-except) method.
     // 59
 ```
 
-为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 [计划任务 ](/docs/laravel/9.x/scheduling)，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：
+为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 [计划任务](/docs/laravel/9.x/scheduling)，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：
 
 ```php
     use App\Models\Invoice;
@@ -3463,7 +3388,6 @@ For the inverse of `only`, see the [except](#method-except) method.
 
 <a name="method-tapEach"></a>
 #### `tapEach()` {.collection-method}
-
 
 当 `each` 方法为集合中每一个元素调用给定回调时， `tapEach` 方法仅调用给定回调，因为这些元素正在逐个从列表中拉出：
 
@@ -3495,6 +3419,6 @@ For the inverse of `only`, see the [except](#method-except) method.
     $users->take(5)->all();
 
     // 前 5 个用户数据从缓存中获取
-    // 剩余的（15个）用户数据从数据库中查询
+    // 剩余的（15 个）用户数据从数据库中查询
     $users->take(20)->all();
 ```
