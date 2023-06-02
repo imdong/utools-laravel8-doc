@@ -1,4 +1,3 @@
-
 # 控制台测试
 
 - [介绍](#introduction)
@@ -25,11 +24,11 @@
         $this->artisan('inspire')->assertExitCode(0);
     }
 
-您可以使用 `assertNotExitCode` 方法断言命令没有以给定的退出代码退出：
+你可以使用 `assertNotExitCode` 方法断言命令没有以给定的退出代码退出：
 
     $this->artisan('inspire')->assertNotExitCode(1);
 
-当然，所有终端命令通常在成功时以 `0` 状态码退出，在不成功时以非零退出码退出。因此，为方便起见，您可以使用 `assertSuccessful` 和 `assertFailed` 断言来断言给定命令是否以成功的退出代码退出：
+当然，所有终端命令通常在成功时以 `0` 状态码退出，在不成功时以非零退出码退出。因此，为方便起见，你可以使用 `assertSuccessful` 和 `assertFailed` 断言来断言给定命令是否以成功的退出代码退出：
 
     $this->artisan('inspire')->assertSuccessful();
 
@@ -38,7 +37,7 @@
 <a name="input-output-expectations"></a>
 ## 期望输入/输出
 
-Laravel 允许您使用 `expectsQuestion` 方法轻松 「mock」控制台命令的用户输入。此外，您可以使用 `assertExitCode` 和 `expectsOutput` 方法指定您希望通过控制台命令输出的退出代码和文本。例如，考虑以下控制台命令：
+Laravel 允许你使用 `expectsQuestion` 方法轻松 「mock」控制台命令的用户输入。此外，你可以使用 `assertExitCode` 和 `expectsOutput` 方法指定你希望通过控制台命令输出的退出代码和文本。例如，考虑以下控制台命令：
 
     Artisan::command('question', function () {
         $name = $this->ask('What is your name?');
@@ -52,9 +51,7 @@ Laravel 允许您使用 `expectsQuestion` 方法轻松 「mock」控制台命令
         $this->line('Your name is '.$name.' and you prefer '.$language.'.');
     });
 
-
-
-您可以使用以下测试来测试此命令，该测试利用了 `expectsQuestion`、`expectsOutput`、`doesntExpectOutput` 和 `assertExitCode` 方法：
+你可以使用以下测试来测试此命令，该测试利用了 `expectsQuestion`、`expectsOutput`、`doesntExpectOutput` 和 `assertExitCode` 方法：
 
     /**
      * 测试控制台命令。
@@ -74,7 +71,7 @@ Laravel 允许您使用 `expectsQuestion` 方法轻松 「mock」控制台命令
 <a name="confirmation-expectations"></a>
 #### 确认期望
 
-当编写一个期望以「是」或「否」答案形式确认的命令时，您可以使用 `expectsConfirmation` 方法：
+当编写一个期望以「是」或「否」答案形式确认的命令时，你可以使用 `expectsConfirmation` 方法：
 
     $this->artisan('module:import')
         ->expectsConfirmation('Do you really wish to run this command?', 'no')
@@ -83,7 +80,7 @@ Laravel 允许您使用 `expectsQuestion` 方法轻松 「mock」控制台命令
 <a name="table-expectations"></a>
 #### 表格期望
 
-如果您的命令使用 Artisan 的 `table` 方法显示信息表，则为整个表格编写输出预期会很麻烦。相反，您可以使用 `expectsTable` 方法。此方法接受表格的标题作为它的第一个参数和表格的数据作为它的第二个参数：
+如果你的命令使用 Artisan 的 `table` 方法显示信息表，则为整个表格编写输出预期会很麻烦。相反，你可以使用 `expectsTable` 方法。此方法接受表格的标题作为它的第一个参数和表格的数据作为它的第二个参数：
 
     $this->artisan('users:all')
         ->expectsTable([
@@ -93,4 +90,3 @@ Laravel 允许您使用 `expectsQuestion` 方法轻松 「mock」控制台命令
             [1, 'taylor@example.com'],
             [2, 'abigail@example.com'],
         ]);
-
