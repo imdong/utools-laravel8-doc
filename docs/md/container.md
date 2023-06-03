@@ -130,7 +130,7 @@ Laravel 服务容器是一个用于管理类依赖以及实现依赖注入的强
 
 注意，我们接受容器本身作为解析器的参数。然后，我们可以使用容器来解析正在构建的对象的子依赖。
 
-如前所述，您通常会与服务提供商内部的容器进行交互；但是，如果您希望与服务提供商外部的容器进行交互，则可以通过 `App` [facade](/docs/laravel/9.x/facades) 进行:
+如前所述，您通常会在服务提供者内部与容器进行交互；但是，如果您希望在服务提供者外部与容器进行交互，则可以通过 `App` [facade](/docs/laravel/9.x/facades) 进行:
 
     use App\Services\Transistor;
     use Illuminate\Support\Facades\App;
