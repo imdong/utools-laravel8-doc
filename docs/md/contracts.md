@@ -9,23 +9,23 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 的 Contract 是一组接口，它们定义由框架提供的核心服务。例如，`illuste\Contracts\Queue\Queue` Contract 定义了队列所需的方法，而 `illuste\Contracts\Mail\Mailer` Contract 定义了发送邮件所需的方法。
+Laravel 的「契约（Contract）」是一组接口，它们定义由框架提供的核心服务。例如，`illuste\Contracts\Queue\Queue` Contract 定义了队列所需的方法，而 `illuste\Contracts\Mail\Mailer` Contract 定义了发送邮件所需的方法。
 
-每个契约都有由框架提供的相应实现。例如，Laravel 提供了一个支持各种驱动的队列实现，还有一个由 [SwiftMailer](https://swiftmailer.symfony.com/) 提供支持的邮件程序实现等等。
+每个契约都有由框架提供的相应实现。例如，Laravel 提供了一个支持各种驱动的队列实现，还有一个由 [SwiftMailer](https://symfony.com/doc/6.0/mailer.html) 提供支持的邮件程序实现等等。
 
 所有的 Laravel Contract 都存在于它们各自的 [GitHub 仓库](https://github.com/illuminate/contracts)。这为所有可用的契约提供了一个快速的参考点，以及一个可以被包开发人员使用的独立的包。
 
 <a name="contracts-vs-facades"></a>
 ### Contract 对比 Facade
 
-Laravel 的 [Facade](/docs/laravel/8.x/facades) 和辅助函数提供了一种利用 Laravel 服务的简单方法，无需类型提示并可以从服务容器中解析 Contract。在大多数情况下，每个 Facade 都有一个等效的 Contract。
+Laravel 的 [Facade](/docs/laravel/9.x/facades) 和辅助函数提供了一种利用 Laravel 服务的简单方法，无需类型提示并可以从服务容器中解析 Contract。在大多数情况下，每个 Facade 都有一个等效的 Contract。
 
 和 Facade（不需要在构造函数中引入）不同，Contract 允许你为类定义显式依赖关系。一些开发者更喜欢以这种方式显式定义其依赖项，所以更喜欢使用 Contract，而其他开发者则享受 Facade 带来的便利。**通常，大多数应用都可以在开发过程中使用 Facade。**
 
 <a name="when-to-use-contracts"></a>
 ## 何时使用 Contract
 
-使用 Contract 或 Facades 取决于个人喜好和开发团队的喜好。Contract 和 Facade 均可用于创建功能强大且经过良好测试的 Laravel 应用。Contract 和 Facade 并不是一道单选题，你可以在同一个应用内同时使用 Contract 和 Facade。只要聚焦在类的职责应该单一上，您会发现 Contract 和 Facade 的实际差异其实很小。
+使用 Contract 或 Facades 取决于个人喜好和开发团队的喜好。Contract 和 Facade 均可用于创建功能强大且经过良好测试的 Laravel 应用。Contract 和 Facade 并不是一道单选题，你可以在同一个应用内同时使用 Contract 和 Facade。只要聚焦在类的职责应该单一上，你会发现 Contract 和 Facade 的实际差异其实很小。
 
 通常情况下，大部分使用 Facade 的应用都不会在开发中遇到问题。但如果你在建立一个可以由多个 PHP 框架使用的扩展包，你可能会希望使用 `illuminate/contracts` 扩展包来定义该包和 Laravel 集成，而不需要引入完整的 Laravel 实现。
 
@@ -34,11 +34,11 @@ Laravel 的 [Facade](/docs/laravel/8.x/facades) 和辅助函数提供了一种�
 
 那么，如何实现契约呢？它其实很简单。
 
-Laravel 中的许多类都是通过 [服务容器](https://learnku.com/docs/Laravel/8.x/container) 解析的，包括控制器、事件侦听器、中间件、队列任务，甚至路由闭包。因此，要实现契约，你只需要在被解析的类的构造函数中「类型提示」接口。
+Laravel 中的许多类都是通过 [服务容器](https://learnku.com/docs/Laravel/9.x/container) 解析的，包括控制器、事件侦听器、中间件、队列任务，甚至路由闭包。因此，要实现契约，你只需要在被解析的类的构造函数中「类型提示」接口。
 
 例如，看看下面的这个事件监听器：
 
-	<?php
+ <?php
 
     namespace App\Listeners;
 
@@ -78,7 +78,7 @@ Laravel 中的许多类都是通过 [服务容器](https://learnku.com/docs/Lara
         }
     }
 
-当解析事件监听器时，服务容器将读取构造函数上的类型提示，并注入适当的值。 要了解更多有关在服务容器中注册内容的信息，请查看 [其文档](/docs/laravel/8.x/container)。
+当解析事件监听器时，服务容器将读取构造函数上的类型提示，并注入适当的值。 要了解更多有关在服务容器中注册内容的信息，请查看 [其文档](/docs/laravel/9.x/container)。
 
 <a name="contract-reference"></a>
 ## Contract 参考
@@ -166,4 +166,3 @@ Contract  |  对应的 Facade
 [Illuminate\Contracts\View\Engine](https://github.com/illuminate/contracts/blob/laravel/9.x/View/Engine.php) | &nbsp;
 [Illuminate\Contracts\View\Factory](https://github.com/illuminate/contracts/blob/laravel/9.x/View/Factory.php) | `View`
 [Illuminate\Contracts\View\View](https://github.com/illuminate/contracts/blob/laravel/9.x/View/View.php) | `View::make()`
-
