@@ -1,4 +1,3 @@
-
 # Laravel Dusk
 
 - [简介](#introduction)
@@ -163,7 +162,7 @@ php artisan dusk:make LoginTest
         use DatabaseMigrations;
     }
 
-> 注意：执行 Dusk 测试时，可能不使用 SQLite 内存数据库。由于浏览器在其自己的进程中执行，因此它将无法访问其他进程的内存数据库。
+> 注意：执行 Dusk 测试时，可能不会使用 SQLite 内存数据库。由于浏览器在其自己的进程中执行，因此它将无法访问其他进程的内存数据库。
 
 
 <a name="running-tests"></a>
