@@ -95,8 +95,9 @@ public function address(): Attribute
         ),
     );
 }
-```
 
+```
+#### 访问器缓存
 从访问器返回值对象时，对值对象所做的任何更改都将在模型保存之前自动同步回模型。 这是可能的，因为 Eloquent 保留了访问器返回的实例，因此每次调用访问器时都可以返回相同的实例：
 
     use App\Models\User;
@@ -108,8 +109,15 @@ public function address(): Attribute
 
     $user->save();
 
-
-
+有时您可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，您可以在定义访问器时调用 `shouldCache` 方法：
+```php
+protected function hash(): Attribute
+{
+    return Attribute::make(
+        get: fn ($value) => bcrypt(gzuncompress($value)),
+      )->shouldCache();
+}
+```
 如果要禁用属性的缓存，可以在定义属性时调用 `withoutObjectCaching` 方法：
 
 ```php
@@ -333,7 +341,7 @@ public function address(): Attribute
 
     $user->save();
 
-当使用 `update` 方法更新 JSON 属性的单个字段时，可以使用 `->` 操作符让语法更加简洁：:
+当使用 `update` 方法更新 JSON 属性的单个字段时，可以使用 `->` 操作符让语法更加简洁：
 
     $user = User::find(1);
 
