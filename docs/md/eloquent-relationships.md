@@ -937,7 +937,7 @@ public function currentPricing()
 `Comment` 模型的 `commentable` 关联将返回 `Post` 或 `Video` 实例，其结果取决于评论所属的模型。
 
 <a name="one-of-many-polymorphic-relations"></a>
-### 一对多（多态）
+### 一对多检索（多态）
 
 有时一个模型可能有许多相关模型，要检索关系的「最新」或「最旧」相关模型。 例如，一个 `User` 模型可能与许多 `Image` 模型相关，如果你想定义一种方便的方式来与用户上传的最新图像进行交互。 可以使用 `morphOne` 关系类型结合 `ofMany` 方法来完成此操作：
 
@@ -1035,7 +1035,7 @@ public function bestImage()
     }
 
 <a name="many-to-many-polymorphic-defining-the-inverse-of-the-relationship"></a>
-#### 自定义多态类型
+#### 定义多对多（多态）反向关系
 
 接下来, 在这个 `Tag` 模型中, 你应该为每个可能的父模型定义一个方法. 所以, 在这个例子中, 我们将会定义一个  `posts` 方法 和 一个 `videos` 方法. 这两个方法都应该返回 `morphedByMany`  结果
 
@@ -1764,7 +1764,7 @@ select * from authors where id in (1, 2, 3, 4, 5, ...)
 <a name="preventing-lazy-loading"></a>
 ### 防止延迟加载
 
-如前所述，预加载关系可以为应用程序提供显着的性能优势。 但你也可以指示 Laravel 始终防止延迟加载关系。 你可以调用基本 Eloquent 模型类提供的 `preventLazyLoading` 方法。 通常，你应该在应用程序的 `AppServiceProvider` 类的 `boot` 方法中调用此方法。
+如前所述，预加载关系可以为应用程序提供显著的性能优势。 但你也可以指示 Laravel 始终防止延迟加载关系。 你可以调用基本 Eloquent 模型类提供的 `preventLazyLoading` 方法。 通常，你应该在应用程序的 `AppServiceProvider` 类的 `boot` 方法中调用此方法。
 
 
 
