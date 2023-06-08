@@ -266,52 +266,6 @@ php artisan make:resource UserCollection
          */
         public $collects = Member::class;
     }
-
-<a name="writing-resources"></a>
-## 编写资源
-
-> 技巧：如果你还没有阅读 [概念综述](#concept-overview)，强烈建议你在继续阅读本文档之前先去阅读一下。
-
-从本质上说，资源的作用很简单，它只需要将给定的模型转换为数组。所以，每个资源都包含一个 `toArray` 方法，这个方法将模型的属性转换成一个 API 友好的数组，然后将该数组通过路由或控制器返回给用户：
-
-    <?php
-
-    namespace App\Http\Resources;
-
-    use Illuminate\Http\Resources\Json\JsonResource;
-
-    class UserResource extends JsonResource
-    {
-        /**
-         * Transform the resource into an array.
-		 * 将资源转换为数组
-         *
-         * @param  \Illuminate\Http\Request  $request
-         * @return array
-         */
-        public function toArray($request)
-        {
-            return [
-                'id' => $this->id,
-                'name' => $this->name,
-                'email' => $this->email,
-                'created_at' => $this->created_at,
-                'updated_at' => $this->updated_at,
-            ];
-        }
-    }
-
-
-
-创建资源之后，就可以在路由或者控制器中直接返回该资源了：
-
-    use App\Http\Resources\UserResource;
-    use App\Models\User;
-
-    Route::get('/user/{id}', function ($id) {
-        return new UserResource(User::findOrFail($id));
-    });
-
 <a name="relationships"></a>
 #### 关联关系
 
