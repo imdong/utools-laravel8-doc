@@ -566,7 +566,7 @@ use  App\Models\Flight;
 $flight  =  Flight::where(['flight_no'  =>  '001'])->sole();
 
 // 检索航班号，如果不能存在，会抛 `ModelNotFoundException` 异常...
-$flight  =  Flight::where(['flight_no'  =>  '001'])->sole();
+$flight  =  Flight::where(['flight_no'  =>  '003'])->sole();
 
 // 只有当查询条件存在与表中且是表中唯一的记录，才会返回 Model...
 $flight  =  Flight::where(['flight_no'  =>  '002'])->sole();
@@ -1329,7 +1329,7 @@ Eloquent 模型触发几个事件，允许你挂接到模型生命周期的如�
 
 
 
-当从数据库中检索到现有模型时，将调度 `retrived` 事件。 当一个新模型第一次被保存时，`creating` 和 `created` 事件将被触发。 `updating` / `updated` 事件将在修改现有模型并调用 `save` 方法时触发。`saving` / `saved` 事件将在创建或更新模型时触发 - 即使模型的属性没有更改。以「-ing」结尾的事件名称在模型的任何更改被持久化之前被调度，而以「-ed」结尾的事件在对模型的更改被持久化之后被调度。
+当从数据库中检索到现有模型时，将调度 `retrieved` 事件。 当一个新模型第一次被保存时，`creating` 和 `created` 事件将被触发。 `updating` / `updated` 事件将在修改现有模型并调用 `save` 方法时触发。`saving` / `saved` 事件将在创建或更新模型时触发 - 即使模型的属性没有更改。以「-ing」结尾的事件名称在模型的任何更改被持久化之前被调度，而以「-ed」结尾的事件在对模型的更改被持久化之后被调度。
 
 要开始监听模型事件，请在 Eloquent 模型上定义一个 `$dispatchesEvents` 属性。此属性将 Eloquent 模型生命周期的各个点映射到你定义的 [事件类](/docs/laravel/9.x/events)。 每个模型事件类都应该期望通过其构造函数接收受影响模型的实例：
 
