@@ -1,4 +1,4 @@
-> # 事件系统
+# 事件系统
 
 - [介绍](#introduction)
 - [注册事件和监听器](#registering-events-and-listeners)
