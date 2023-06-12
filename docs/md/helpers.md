@@ -1319,7 +1319,7 @@ Laravel 基于该函数实现[条件类](/docs/laravel/9.x/blade#conditionally-m
 
     // true
 
-你也可以传递数组的值的形式来判断指定字符串是否包含指定数组中的任一值：
+你也可以传递一个数组来判断指定字符串是否以数组中的任一值结尾：
 
     use Illuminate\Support\Str;
 
