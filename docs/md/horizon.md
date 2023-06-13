@@ -21,8 +21,6 @@
 
 [Laravel Horizon](https://github.com/laravel/horizon) 为你的 Laravel [Redis queues](/docs/laravel/9.x/queues).提供了一个美观的仪表盘和代码驱动的配置；它可以方便的监控队列系统的关键指标：任务吞吐量、运行时间、作业失败情况。
 
-所有的 worker 配置存储在一个简单的配置文件中，你可以在整个团队都可以进行协作的地方进行源码控制。
-
 在使用 Horizon 时，所有队列的 worker 配置都存储在一个简单的配置文件中。通过在受版本控制的文件中定义应用程序的 worker 配置，你可以在部署应用程序时轻松扩展或修改应用程序的队列 worker。
 
 <img src="https://laravel.com/img/docs/horizon-example.png">
@@ -76,7 +74,7 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
 
 当你启动 Horizon 时，它将使用指定应用程序运行环境所配置的 worker 进程选项。通常，环境配置由 `APP_ENV` [环境变量](/docs/laravel/9.x/configuration#determining-the-current-environment) 的值确定。例如，默认的 `local` Horizon 环境配置为启动三个工作进程，并自动平衡分配给每个队列的工作进程数量。默认的「生产」环境配置为最多启动 10 个 worker 进程，并自动平衡分配给每个队列的 worker 进程数量。
 
-> 注意：您应该确保您的 `horizon` 配置文件的 `environments` 部分包含您计划在其上运行 Horizon 的每个 [环境](/docs/laravel/9.x/configuration#environment-configuration) 的配置。
+> 注意：你应该确保你的 `horizon` 配置文件的 `environments` 部分包含计划在其上运行 Horizon 的每个 [环境](/docs/laravel/9.x/configuration#environment-configuration) 的配置。
 
 
 <a name="supervisors"></a>
@@ -148,7 +146,7 @@ Horizon 在 `/horizon` 上显示了一个控制面板。默认情况下，你�
 <a name="alternative-authentication-strategies"></a>
 #### 可替代的身份验证策略
 
-需要留意的是，Laravel 会自动将经过 *authenticated*  的用户注入到拦截器（Gate）闭包中。如果你的应用程序通过其他方法（例如 IP 限制）提供 Horizon 安全性保障，那么你访问 Horizon 用户可能不需要实现这个「登录」动作。因此，你需要将上面的 `function ($user)` 更改为 `function ($user = null)` 以强制 Laravel 跳过身份验证。
+需要留意的是，Laravel 会自动将经过认证的用户注入到拦截器（Gate）闭包中。如果你的应用程序通过其他方法（例如 IP 限制）提供 Horizon 安全性保障，那么你访问 Horizon 用户可能不需要实现这个「登录」动作。因此，你需要将上面的 `function ($user)` 更改为 `function ($user = null)` 以强制 Laravel 跳过身份验证。
 
 
 <a name="upgrading-horizon"></a>
@@ -161,6 +159,7 @@ Horizon 在 `/horizon` 上显示了一个控制面板。默认情况下，你�
 ```shell
 php artisan horizon:publish
 ```
+
 为了使资源文件保持最新并避免以后的更新中出现问题，你可以将以下  `horizon:publish`  命令添加到 `composer.json` 文件中的 `post-update-cmd` 脚本中：
 
 ```json
