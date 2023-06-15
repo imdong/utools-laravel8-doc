@@ -224,6 +224,10 @@ Laravel 框架的所有配置文件都存储在 `config` 目录中。每个选�
 Laravel 几乎不需要额外的配置。你可以自由地开始开发！然而，你可能希望查看 `config/app.php` 文件及其文档。它包含几个选项，比如 `timezone` 和 `locale`，你可能希望根据你的应用程序进行更改。
 
 <a name="environment-based-configuration"></a>
+
+#### 目录权限
+
+安装完 Laravel 后，你可能需要给这两个文件配置读写权限：`storage` 目录和 `bootstrap/cache` 目录应该允许 Web 服务器写入，否则 Laravel 程序将无法运行。
 ### 基于环境的配置
 
 由于 Laravel 的许多配置选项值可能会根据你的应用程序是在本地计算机上还是在生产 Web 服务器上运行而有所不同，因此许多重要的配置值是使用 `.env` 存在于应用程序根目录中的文件来定义的。
