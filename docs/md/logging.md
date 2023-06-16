@@ -1,4 +1,4 @@
-# Logging
+# 日志（Logging）
 
 - [介绍](#introduction)
 - [配置](#configuration)
@@ -27,8 +27,6 @@ Laravel 使用了 [Monolog](https://github.com/Seldaek/monolog) 库，它为各�
 ## 配置
 
 所有的应用程序日志系统配置都位于 `config/logging.php` 配置文件中。这个文件允许你配置程序的日志通道，因此务必查看每个可用通道和它们的选项。我们将在下面回顾一些常用的选项。
-
-
 
 Laravel 默认使用 `stack` 通道记录日志消息。 `stack` 通道被用于将多个日志通道集成到一个单独的通道中去。获得更多构建堆栈信息，请查看 [以下文档](#building-log-stacks) 。
 
@@ -63,8 +61,6 @@ Laravel 默认使用 `stack` 通道记录日志消息。 `stack` 通道被用于
 
 > 技巧：查看 [高级通道定制](#monolog-channel-customization) 文档，了解有关 `monolog` 和 `custom` 驱动程序的更多信息。
 
-
-
 <a name="channel-prerequisites"></a>
 ### 通道先决条件
 
@@ -87,14 +83,14 @@ Laravel 默认使用 `stack` 通道记录日志消息。 `stack` 通道被用于
 <a name="configuring-the-slack-channel"></a>
 #### 配置 Slack 通道
 
-`slack` 通道需要 `url` 配置选项。URL 应该与您为 Slack 团队配置 [incoming webhook](https://slack.com/apps/A0F7XDUAZ-incoming-webhooks) 的 URL 匹配。
+`slack` 通道需要 `url` 配置选项。URL 应该与你为 Slack 团队配置 [incoming webhook](https://slack.com/apps/A0F7XDUAZ-incoming-webhooks) 的 URL 匹配。
 
 默认情况下，Slack 将仅接收 `critical` 级别及更高级别的日志；但是，你可以在 `config/logging.php` 配置文件中通过修改 Slack 日志通道的配置数组中的 `level` 配置选项来进行调整。
 
 <a name="logging-deprecation-warnings"></a>
 ### 记录弃用警告
 
-PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已被弃用，并将在未来的版本中删除。如果您想记录这些弃用警告，您可以在应用程序的 `config/logging.php` 配置文件中指定 `deprecations` 的日志通道：
+PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已被弃用，并将在未来的版本中删除。如果你想记录这些弃用警告，你可以在应用程序的 `config/logging.php` 配置文件中指定 `deprecations` 的日志通道：
 
     'deprecations' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
 
@@ -102,7 +98,7 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
         ...
     ]
 
-或者，您可以定义一个名为 `deprecations` 的日志通道。 如果存在具有此名称的日志通道，它将被用于记录弃用警告：
+或者，你可以定义一个名为 `deprecations` 的日志通道。 如果存在具有此名称的日志通道，它将被用于记录弃用警告：
 
     'channels' => [
         'deprecations' => [
@@ -110,8 +106,6 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
             'path' => storage_path('logs/php-deprecation-warnings.log'),
         ],
     ],
-
-
 
 <a name="building-log-stacks"></a>
 ## 构建日志堆栈
@@ -153,12 +147,10 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
 
     Log::emergency('The system is down!');
 
-
-
 <a name="writing-log-messages"></a>
 ## 编写日志消息
 
-您可以使用 `Log` [facade](/docs/laravel/9.x/facades) 将信息写入日志。如前所述，记录器提供 [RFC 5424 规范](https://tools.ietf.org/html/rfc5424) 中定义的八个记录级别： **emergency**、 **alert**、 **critical**、 **error**、 **warning**、 **notice**、 **info** 和 **debug**：
+你可以使用 `Log` [facade](/docs/laravel/9.x/facades) 将信息写入日志。如前所述，记录器提供 [RFC 5424 规范](https://tools.ietf.org/html/rfc5424) 中定义的八个记录级别： **emergency**、 **alert**、 **critical**、 **error**、 **warning**、 **notice**、 **info** 和 **debug**：
 
     use Illuminate\Support\Facades\Log;
 
@@ -171,7 +163,7 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
     Log::info($message);
     Log::debug($message);
 
-您可以调用任何这些方法来记录相应级别的消息。默认情况下，消息将写入您的 `logging` 配置文件配置的默认日志通道：
+你可以调用任何这些方法来记录相应级别的消息。默认情况下，消息将写入你的 `logging` 配置文件配置的默认日志通道：
 
     <?php
 
@@ -208,7 +200,7 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
 
     Log::info('User failed to login.', ['id' => $user->id]);
 
-有时，您可能希望指定一些应包含在所有后续日志条目中的上下文信息。例如，您可能希望记录与应用程序的每个传入请求相关联的请求 ID。为此，您可以调用 `Log` 门面的 `withContext` 方法：
+有时，你可能希望指定一些应包含在所有后续日志条目中的上下文信息。例如，你可能希望记录与应用程序的每个传入请求相关联的请求 ID。为此，你可以调用 `Log` 门面的 `withContext` 方法：
 
     <?php
 
@@ -239,25 +231,23 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
         }
     }
 
-
-
 <a name="writing-to-specific-channels"></a>
 ### 写入特定通道
 
-有时您可能希望将消息记录到应用程序默认通道以外的通道。您可以使用 `Log` 门面的 `channel` 方法来检索并记录到配置文件中定义的任何通道：
+有时你可能希望将消息记录到应用程序默认通道以外的通道。你可以使用 `Log` 门面的 `channel` 方法来检索并记录到配置文件中定义的任何通道：
 
     use Illuminate\Support\Facades\Log;
 
     Log::channel('slack')->info('Something happened!');
 
-如果您想创建一个由多个通道组成的按需日志堆栈，您可以使用 `stack` 方法：
+如果你想创建一个由多个通道组成的按需日志堆栈，你可以使用 `stack` 方法：
 
     Log::stack(['single', 'slack'])->info('Something happened!');
 
 <a name="on-demand-channels"></a>
 #### 按需通道
 
-也可以通过在运行时提供配置来创建按需通道，而该配置不存在于应用程序的「日志记录」配置文件中。 为此，您可以将配置数组传递给 `Log` 门面的 `build` 方法：
+也可以通过在运行时提供配置来创建按需通道，而该配置不存在于应用程序的「日志记录」配置文件中。 为此，你可以将配置数组传递给 `Log` 门面的 `build` 方法：
 
     use Illuminate\Support\Facades\Log;
 
@@ -266,7 +256,7 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
       'path' => storage_path('logs/custom.log'),
     ])->info('Something happened!');
 
-您可能还希望在按需日志记录堆栈中包含一个按需通道。这可以通过将您的按需通道实例包含在传递给 `stack` 方法的数组中来实现：
+你可能还希望在按需日志记录堆栈中包含一个按需通道。这可以通过将你的按需通道实例包含在传递给 `stack` 方法的数组中来实现：
 
     use Illuminate\Support\Facades\Log;
 
@@ -283,11 +273,9 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
 <a name="customizing-monolog-for-channels"></a>
 ### 为通道自定义 Monolog
 
-有时您可能需要完全控制如何为现有通道配置 Monolog。例如，您可能想要为 Laravel 的内置 `single` 通道配置自定义 Monolog `FormatterInterface` 实现。
+有时你可能需要完全控制如何为现有通道配置 Monolog。例如，你可能想要为 Laravel 的内置 `single` 通道配置自定义 Monolog `FormatterInterface` 实现。
 
-
-
-首先，在通道的配置上定义一个 `tap` 数组。 `tap` 数组应该包含一个类列表，这些类应该有机会在创建 Monolog 实例后进行自定义（或「tap」）。没有应该放置这些类的常规位置，因此您可以在应用程序中自由创建一个目录来包含这些类：
+首先，在通道的配置上定义一个 `tap` 数组。 `tap` 数组应该包含一个类列表，这些类应该有机会在创建 Monolog 实例后进行自定义（或「tap」）。没有应该放置这些类的常规位置，因此你可以在应用程序中自由创建一个目录来包含这些类：
 
     'single' => [
         'driver' => 'single',
@@ -322,14 +310,12 @@ PHP、Laravel 和其他库经常通知他们的用户，他们的一些功能已
         }
     }
 
-> 技巧：您的所有「tap」类都由 [服务容器](/docs/laravel/9.x/container) 解析，因此它们所需的任何构造函数依赖项都将自动注入。
+> 技巧：你的所有「tap」类都由 [服务容器](/docs/laravel/9.x/container) 解析，因此它们所需的任何构造函数依赖项都将自动注入。
 
 <a name="creating-monolog-handler-channels"></a>
 ### 创建 Monolog 处理器通道
 
-Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tree/main/src/Monolog/Handler)，并且 Laravel 没有为每个处理程序包含一个内置通道。 在某些情况下，您可能希望创建一个自定义通道，它只是一个特定的 Monolog 处理程序的实例，它没有相应的 Laravel 日志驱动程序。 这些通道可以使用 `monolog` 驱动轻松创建。
-
-
+Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tree/main/src/Monolog/Handler)，并且 Laravel 没有为每个处理程序包含一个内置通道。 在某些情况下，你可能希望创建一个自定义通道，它只是一个特定的 Monolog 处理程序的实例，它没有相应的 Laravel 日志驱动程序。 这些通道可以使用 `monolog` 驱动轻松创建。
 
 使用 `monolog` 驱动程序时，`handler` 配置选项用于指定将实例化哪个处理程序。或者，可以使用 `with` 配置选项指定处理程序所需的任何构造函数参数：
 
@@ -345,7 +331,7 @@ Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tre
 <a name="monolog-formatters"></a>
 #### Monolog 格式化程序
 
-使用 `monolog` 驱动程序时，Monolog `LineFormatter` 将用作默认格式化程序。但是，您可以使用 `formatter` 和 `formatter_with` 配置选项自定义传递给处理程序的格式化程序类型：
+使用 `monolog` 驱动程序时，Monolog `LineFormatter` 将用作默认格式化程序。但是，你可以使用 `formatter` 和 `formatter_with` 配置选项自定义传递给处理程序的格式化程序类型：
 
     'browser' => [
         'driver' => 'monolog',
@@ -356,7 +342,7 @@ Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tre
         ],
     ],
 
-如果您使用的是能够提供自己的格式化程序的 Monolog 处理程序，您可以将 `formatter` 配置选项的值设置为 `default`：
+如果你使用的是能够提供自己的格式化程序的 Monolog 处理程序，你可以将 `formatter` 配置选项的值设置为 `default`：
 
     'newrelic' => [
         'driver' => 'monolog',
@@ -367,7 +353,7 @@ Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tre
 <a name="creating-custom-channels-via-factories"></a>
 ### 通过工厂创建通道
 
-如果您想定义一个完全自定义的通道，您可以在其中完全控制 Monolog 的实例化和配置，您可以在 `config/logging.php` 配置文件中指定`custom` 驱动程序类型。您的配置应该包括一个 `via` 选项，其中包含将被调用以创建 Monolog 实例的工厂类的名称：
+如果你想定义一个完全自定义的通道，你可以在其中完全控制 Monolog 的实例化和配置，你可以在 `config/logging.php` 配置文件中指定`custom` 驱动程序类型。你的配置应该包括一个 `via` 选项，其中包含将被调用以创建 Monolog 实例的工厂类的名称：
 
     'channels' => [
         'example-custom-channel' => [
@@ -376,7 +362,7 @@ Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tre
         ],
     ],
 
-一旦您配置了「custom」驱动程序通道，您就可以定义将创建您的 Monolog 实例的类。这个类只需要一个 __invoke 方法，它应该返回 Monolog 记录器实例。 该方法将接收通道配置数组作为其唯一参数：
+一旦你配置了「custom」驱动程序通道，你就可以定义将创建你的 Monolog 实例的类。这个类只需要一个 __invoke 方法，它应该返回 Monolog 记录器实例。 该方法将接收通道配置数组作为其唯一参数：
 
     <?php
 
@@ -397,4 +383,3 @@ Monolog 有多种 [可用的处理程序](https://github.com/Seldaek/monolog/tre
             return new Logger(...);
         }
     }
-
