@@ -174,7 +174,7 @@ php artisan make:mail OrderShipped
 <a name="using-the-from-method"></a>
 #### 使用 `from` 方法
 
-首先，让我们浏览一下邮件的发件人的配置。或者，换句话说，邮件来自谁。有两种方法配置发件人。第一种，你可以在 mailable 类的 `from` 方法中使用 `build` 方法：
+首先，让我们浏览一下邮件的发件人的配置。或者，换句话说，邮件来自谁。有两种方法配置发件人。第一种，你可以在 mailable 类的 `build` 方法中使用 `from` 方法：
 
     /**
      * 构建消息
