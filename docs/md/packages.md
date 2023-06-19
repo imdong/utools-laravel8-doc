@@ -27,7 +27,7 @@
 <a name="a-note-on-facades"></a>
 ### 关于 Facades
 
-在编写 Laravel 应用程序时，通常使用契约还是外观并不重要，因为两者都提供了基本相同的可测试性级别。 但是，在编写包时，您的包通常无法访问 Laravel 的所有测试助手。 如果您希望能够像将包安装在典型的 Laravel 应用程序中一样编写包测试，您可以使用 [Orchestral Testbench](https://github.com/orchestral/testbench) 包。
+在编写 Laravel 应用程序时，通常使用契约（Contracts）还是门面（Facades）并不重要，因为两者都提供了基本相同的可测试性级别。 但是，在编写包时，您的包通常无法访问 Laravel 的所有测试助手。 如果您希望能够像将包安装在典型的 Laravel 应用程序中一样编写包测试，您可以使用 [Orchestral Testbench](https://github.com/orchestral/testbench) 包。
 
 
 
