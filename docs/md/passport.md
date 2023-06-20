@@ -100,40 +100,7 @@ php artisan passport:install
 
 
 
-接着你需要在 `App\Providers\AuthServiceProvider` 类的 `boot` 方法中调用 `Passport::routes` 方法。这个方法将注册一些必须的路由，用于发布或撤销访问令牌，操作客户端以及个人的访问令牌：
-
-    <?php
-
-    namespace App\Providers;
-
-    use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-    use Illuminate\Support\Facades\Gate;
-    use Laravel\Passport\Passport;
-
-    class AuthServiceProvider extends ServiceProvider
-    {
-        /**
-         * 应用的策略映射。
-         *
-         * @var array
-         */
-        protected $policies = [
-            'App\Models\Model' => 'App\Policies\ModelPolicy',
-        ];
-
-        /**
-         * 注册鉴权/授权服务。
-         *
-         * @return void
-         */
-        public function boot()
-        {
-            $this->registerPolicies();
-
-        }
-    }
-
-最后，在你应用的配置文件 `config/auth.php` 中， 将 api 的授权看守器 guards 的 `driver` 参数的值设置为 `passport`。此调整会让你的应用程序使用 Passport 的 `TokenGuard` 鉴权 API 接口请求：
+然后，在你应用的配置文件 `config/auth.php` 中， 将 api 的授权看守器 guards 的 `driver` 参数的值设置为 `passport`。此调整会让你的应用程序使用 Passport 的 `TokenGuard` 鉴权 API 接口请求：
 
     'guards' => [
         'web' => [
