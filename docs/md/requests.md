@@ -575,7 +575,7 @@ Laravel 框架创建的所有 `cookie` 均已加密并使用身份验证代码
         protected $headers = Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO;
     }
 
-> 技巧：技巧：如果你使用 AWS 弹性负载平衡，你的 `$headers` 值应该是 `Request::HEADER_X_FORWARDED_AWS_ELB`。如果您想查看更多可用于 `$headers` 的属性信息，请查阅 Symfony 的文档 [信任代理](https://symfony.com/doc/current/deployment/proxies.html)。
+> 技巧：如果你使用 AWS 弹性负载平衡，你的 `$headers` 值应该是 `Request::HEADER_X_FORWARDED_AWS_ELB`。如果您想查看更多可用于 `$headers` 的属性信息，请查阅 Symfony 的文档 [信任代理](https://symfony.com/doc/current/deployment/proxies.html)。
 
 
 <a name="trusting-all-proxies"></a>
