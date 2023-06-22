@@ -329,11 +329,11 @@ Laravel 路由组件允许除 `/` 之外的所有字符出现在路由参数值�
 
     Route::middleware(['first', 'second'])->group(function () {
         Route::get('/', function () {
-            // 使用第一个和第二个中间件...
+            // 使用first和second中间件...
         });
 
         Route::get('/user/profile', function () {
-            // 使用第一个和第二个中间件...
+            // 使用first和second中间件...
         });
     });
 
@@ -763,7 +763,7 @@ Laravel 可以使用你配置的值自动响应 CORS `OPTIONS` HTTP 请求。所
 php artisan route:cache
 ```
 
-运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路线，你将需要生成新的路线缓存。因此，你应该只在项目部署期间运行 `route:cache` 命令。
+运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路由，你将需要生成新的路由缓存。因此，你应该只在项目部署期间运行 `route:cache` 命令。
 
 你可以使用 `route:clear` 命令清除路由缓存：
 
