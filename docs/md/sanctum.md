@@ -1,4 +1,3 @@
-
 # Laravel Sanctum
 
 - [介绍](#introduction)
@@ -11,6 +10,7 @@
     - [令牌能力](#token-abilities)
     - [保护路由](#protecting-routes)
     - [撤销令牌](#revoking-tokens)
+	- [令牌有效期](#token-expiration)
 - [SPA 认证](#spa-authentication)
     - [配置](#spa-configuration)
     - [认证](#spa-authenticating)
@@ -236,6 +236,22 @@ return $request->user()->id === $server->user_id &&
 
     // 撤销指定令牌...
     $user->tokens()->where('id', $tokenId)->delete();
+
+<a name="token-expiration"></a>
+### 令牌有效期
+
+默认情况下，`sanctum` 的`token`无过期时限并且仅能通过[撤销令牌](#revoking-tokens)来使它无效。当然如果您想在您的程序里设置`token`的有效期也是可以的。修改`sanctum`的配置文件中的`expiration`选项（默认为null），此选项设置的数字表示多少分钟后过期：
+
+	// 365天后过期
+	'expiration'  =>  525600,
+
+如果您的程序中配置了`token`的过期时间，那您多半会希望能用[任务调度](/docs/laravel/9.x/scheduling)自动删除过期了的`token`数据。有个好消息，`sanctum` 提供了一个`Artisan`命令，可以实现这个想法：
+```sh
+	php artisan sanctum:prune-expired
+```
+比如，您可以设置一个调度任务用于删除你数据库中所有过期超过24小时的`token`记录：
+
+	$schedule->command('sanctum:prune-expired --hours=24')->daily();
 
 <a name="spa-authentication"></a>
 ## SPA 认证
