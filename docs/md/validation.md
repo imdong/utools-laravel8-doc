@@ -1009,7 +1009,7 @@ confirmed可以验证密码和确认密码是否相同，验证字段必须具�
 
 #### date_format:_format_
 
-验证字段必须匹配给定的 _format_（日期格式）。当验证某个字段的时候，你应该只使用 `date`  或者 `date_format`  **其中一个** ，而不是同时使用。此验证规则支持 PHP 所有的 [DateTime](https://www.php.net/manual/en/class.datetime.php) 类。
+验证字段必须匹配给定的 _format_ （日期格式）。当验证某个字段的时候，你应该只使用 `date`  或者 `date_format`  **其中一个** ，而不是同时使用。此验证规则支持 PHP 所有的 [DateTime](https://www.php.net/manual/en/class.datetime.php) 类。
 
 <a name="rule-declined"></a>
 #### declined
@@ -1043,7 +1043,7 @@ confirmed可以验证密码和确认密码是否相同，验证字段必须具�
 
     'avatar' => 'dimensions:min_width=100,min_height=200'
 
-可用的规则为: _min\_width_， _max\_width_， _min\_height_， _max\_height_， _width_， _height_， _ratio_。
+可用的规则为: _min\_width_ ，_max\_width_ ，_min\_height_ ，_max\_height_ ，_width_ ，_height_ ，_ratio_ 。
 
  _ratio_ 约束应该表示为宽度除以高度。 这可以通过像 `3/2` 这样的语句或像 `1.5`这样的 `float` 来指定：
 
@@ -1429,7 +1429,7 @@ Distinct 默认使用松散的变量比较。要使用严格比较，您可以�
 <a name="rule-required-if"></a>
 #### required_if:_anotherfield_,_value_,...
 
-如果 _anotherfield_ 字段等于任何 _value_，则验证中的字段必须存在且不为空。
+如果 _anotherfield_ 字段等于任何 _value_ ，则验证中的字段必须存在且不为空。
 
 如果你想为 `required_if` 规则构造一个更复杂的条件，你可以使用 `Rule::requiredIf` 方法。 此方法接受布尔值或闭包。 当传递一个闭包时，闭包应该返回 `true` 或 `false` 以指示是否需要验证字段：
 
@@ -1449,7 +1449,7 @@ Distinct 默认使用松散的变量比较。要使用严格比较，您可以�
 <a name="rule-required-unless"></a>
 #### required_unless:_anotherfield_,_value_,...
 
-除非_anotherfield_ 字段等于任何_value_，否则验证中的字段必须存在且不为空。 这也意味着 _anotherfield_ 必须存在于请求数据中，除非 _value_ 为 `null`。 如果 _value_ 为 `null` (`required_unless:name,null`)，则需要验证的字段，除非比较字段为 `null` 或请求数据中缺少比较字段。
+除非_anotherfield_ 字段等于任何 _value_ ，否则验证中的字段必须存在且不为空。 这也意味着 _anotherfield_ 必须存在于请求数据中，除非 _value_ 为 `null`。 如果 _value_ 为 `null` (`required_unless:name,null`)，则需要验证的字段，除非比较字段为 `null` 或请求数据中缺少比较字段。
 
 
 
@@ -1486,7 +1486,7 @@ Distinct 默认使用松散的变量比较。要使用严格比较，您可以�
 <a name="rule-size"></a>
 #### size:_value_
 
-验证字段的大小必须与给定的_value_匹配。对于字符串数据，_value_ 对应于字符数。 对于数字数据，_value_ 对应于给定的整数值（属性还必须具有 `numeric` 或 `integer` 规则）。 对于数组，_size_ 对应于数组的 `count`。 对于文件，_size_ 对应于以千字节为单位的文件大小。 让我们看一些例子：
+验证字段的大小必须与给定的 _value_ 匹配。对于字符串数据，_value_ 对应于字符数。 对于数字数据，_value_ 对应于给定的整数值（属性还必须具有 `numeric` 或 `integer` 规则）。 对于数组，_size_ 对应于数组的 `count`。 对于文件，_size_ 对应于以千字节为单位的文件大小。 让我们看一些例子：
 
     // 验证一个字符串是否正好是 12 个字符长...
     'title' => 'size:12';
@@ -1632,7 +1632,7 @@ Distinct 默认使用松散的变量比较。要使用严格比较，您可以�
 <a name="complex-conditional-validation"></a>
 #### 复杂的条件验证
 
-有时您可能希望基于更复杂的条件逻辑添加验证规则。例如，您可能希望仅当另一个字段的值大于 100 时才需要给定字段。或者，您可能需要两个字段才能仅在另一个字段存在时才具有给定值。 添加这些验证规则并不一定很痛苦。首先，使用您的_静态规则_创建一个永远不会改变的 `Validator` 实例：
+有时您可能希望基于更复杂的条件逻辑添加验证规则。例如，您可能希望仅当另一个字段的值大于 100 时才需要给定字段。或者，您可能需要两个字段才能仅在另一个字段存在时才具有给定值。 添加这些验证规则并不一定很痛苦。首先，使用您的 _静态规则_ 创建一个永远不会改变的 `Validator` 实例：
 
     use Illuminate\Support\Facades\Validator;
 
@@ -2023,5 +2023,5 @@ php artisan make:rule Uppercase
 php artisan make:rule Uppercase --implicit
 ```
 
-> 注意：「隐式」规则仅_implicit_该属性是必需的。 它是否实际上使缺失或空属性无效取决于您。
+> 注意：「隐式」规则仅 _implicit_ 该属性是必需的。 它是否实际上使缺失或空属性无效取决于您。
 
