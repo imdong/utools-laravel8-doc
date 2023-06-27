@@ -3,7 +3,7 @@
 文档资料来源 [Laravel 中文文档](https://learnku.com/docs/laravel/9.x)、[Laravrl 速查表](https://learnku.com/docs/laravel-cheatsheet/9.x)  
 ，不定期同步自 [learnku](https://learnku.com/docs) 社区，感谢社区热心用户与平台。
 
-最后同步日期: `2022-10-13 14:22`
+最后同步日期: `2023-10-22 16:51`
 
 ## 关于
 
@@ -25,7 +25,7 @@
 - [Weiwen](https://learnku.com/users/69545) 翻译了 11 块翻译
 - [clark](https://learnku.com/users/35313) 翻译了 11 块翻译
 - [tomcath](https://learnku.com/users/72853) 翻译了 11 块翻译
-- [大牛比较懒](https://learnku.com/users/81767) 翻译了 10 块翻译
+- [dkp](https://learnku.com/users/81767) 翻译了 10 块翻译
 - [stamina](https://learnku.com/users/33612) 翻译了 10 块翻译
 - [hmingv](https://learnku.com/users/52850) 翻译了 9 块翻译
 - [笑逐颜凯](https://learnku.com/users/17716) 翻译了 7 块翻译
@@ -40,7 +40,7 @@
 - [FlyingMaster](https://learnku.com/users/92601) 翻译了 5 块翻译
 - [codeSeele](https://learnku.com/users/63273) 翻译了 5 块翻译
 - [win27149](https://learnku.com/users/89419) 翻译了 4 块翻译
-- [Monster丶](https://learnku.com/users/36022) 翻译了 4 块翻译
+- [曹孟德](https://learnku.com/users/36022) 翻译了 4 块翻译
 - [ojbkkk](https://learnku.com/users/93014) 翻译了 4 块翻译
 - [jiajia123](https://learnku.com/users/87885) 翻译了 4 块翻译
 - [zhuan_zhuan](https://learnku.com/users/92405) 翻译了 4 块翻译
@@ -69,12 +69,12 @@
 - [晴空](https://learnku.com/users/21295) 翻译了 1 块翻译
 - [Mr-houzi](https://learnku.com/users/42837) 翻译了 1 块翻译
 - [minororange](https://learnku.com/users/24372) 翻译了 1 块翻译
-- [zy812282694](https://learnku.com/users/53460) 翻译了 1 块翻译
+- [ikun_jntm](https://learnku.com/users/53460) 翻译了 1 块翻译
 - [LXC999](https://learnku.com/users/94068) 翻译了 1 块翻译
 - [w158264166](https://learnku.com/users/21609) 翻译了 1 块翻译
 - [Arduino](https://learnku.com/users/6306) 翻译了 1 块翻译
 - [wyq2214368](https://learnku.com/users/29004) 翻译了 1 块翻译
-- [Jouzeyu](https://learnku.com/users/32858) 翻译了 1 块翻译
+- [lochpure](https://learnku.com/users/32858) 翻译了 1 块翻译
 - [罐装仙人掌CuratorC](https://learnku.com/users/32395) 翻译了 1 块翻译
 - [justmd5](https://learnku.com/users/4924) 翻译了 1 块翻译
 - [萧晔离](https://learnku.com/users/1006) 翻译了 1 块翻译
@@ -105,6 +105,7 @@
 - `1.0.2 (2020-12-20)`: 添加 Laravel 速查表
 - `1.0.3 (2021-03-19)`: 同步文档
 - `0.0.0 (2022-10-13)`: 同步文档
+- `0.0.0 (2023-10-22)`: 同步文档
 
 ## 版权声明
 
