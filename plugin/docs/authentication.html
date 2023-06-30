@@ -66,11 +66,11 @@
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
 <p>许多 web 应用程序为其用户提供了一种通过应用程序进行身份验证和「登录」的方法。在 web 应用程序中实现此功能可能是一项复杂且具有潜在风险的工作。因此，Laravel 努力为你提供了一套快速、安全、轻松地实现身份验证的工具。</p>
-<p>在其核心，Laravel 的用户认证是由「看守器」和「提供器」。看守器定义如何对每个请求的用户进行身份验证。例如，Laravel 附带了一个 <code>session</code> 守护程序，它使用 session 存储和 cookie 来维护状态。</p>
-<p>提供器定义如何从持久存储中检索用户。Laravel 支持使用 <a href="eloquent.html">Eloquent</a> 和数据库查询生成器检索用户。不仅如此，你甚至可以根据应用程序的需要自由定制其他提供程序。</p>
+<p>Laravel 的身份验证功能，主要由「看守器」和「提供器」实现。看守器（Guards）定义如何对每个请求的用户进行身份验证。例如，Laravel 附带了一个 <code>session</code> 看守器，它使用 session 存储和 cookie 来维护状态。</p>
+<p>提供器（Providers）定义如何从持久存储中检索用户。Laravel 支持使用 <a href="eloquent.html">Eloquent</a> 和数据库查询生成器检索用户。不仅如此，你甚至可以根据应用程序的需要自由定制其他提供程序。</p>
 <p>应用程序的身份验证配置文件位于 <code>config/auth.php</code>。这个文件包含几个记载了的选项，用于调整 Laravel 的身份验证服务的行为。</p>
 <blockquote>
-<p>技巧：守卫和提供器不应与「角色」和「权限」混淆。要了解有关通过权限授权用户操作的更多信息，请参阅 <a href="authorization.html">用户授权</a> 文档。</p>
+<p>技巧：看守器和提供器不应与「角色」和「权限」混淆。要了解有关通过权限授权用户操作的更多信息，请参阅 <a href="authorization.html">用户授权</a> 文档。</p>
 </blockquote>
 <p><a name="starter-kits"></a></p>
 <h3 id="入门套件">入门套件</h3>
