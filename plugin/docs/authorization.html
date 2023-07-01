@@ -140,7 +140,7 @@
 </code></pre>
 <p>您还可以通过 <code>any</code> 或 <code>none</code> 方法来一次性授权多个行为:</p>
 <pre><code><span class="keyword token">if</span> (Gate::any([<span class="string token">'update-post'</span>, <span class="string token">'delete-post'</span>], <span class="variable token">$post</span>)) {
-    <span class="comment token">// 用户可以提交update和delete...</span>
+    <span class="comment token">// 用户可以提交update或delete...</span>
 }
 
 <span class="keyword token">if</span> (Gate::none([<span class="string token">'update-post'</span>, <span class="string token">'delete-post'</span>], <span class="variable token">$post</span>)) {
@@ -282,7 +282,7 @@ Gate::denyIf(fn (<span class="variable token">$user</span>) =&gt; <span class="v
 </code></pre>
 <p><a name="policy-auto-discovery"></a></p>
 <h4 id="策略自动发现">策略自动发现</h4>
-<p>只要模型和策略遵循标准的 Laravel 命名约定，Laravel 就可以自动发现策略，而不是手动注册模型策略。具体来说，策略必须位于包含模型的目录或其上方的「Policies」目录中。 因此，例如，模型可以放置在 <code>app/Models</code> 目录中，而策略可以放置在 <code>app/Policies</code> 目录中。在这种情况下，Laravel 将检查 <code>app/Models/Policies</code> 然后 <code>app/Policies</code> 中的策略。此外，策略名称必须与模型名称匹配并具有「策略」后缀。 因此，<code>User</code> 模型将对应于<code>UserPolicy</code> 策略类。</p>
+<p>只要模型和策略遵循标准的 Laravel 命名约定，Laravel 就可以自动发现策略，而不是手动注册模型策略。具体来说，策略必须位于包含模型的目录或其上方的「Policies」目录中。 因此，例如，模型可以放置在 <code>app/Models</code> 目录中，而策略可以放置在 <code>app/Policies</code> 目录中。在这种情况下，Laravel 将检查 <code>app/Models/Policies</code> 然后 <code>app/Policies</code> 中的策略。此外，策略名称必须与模型名称匹配并具有 <code>Policy</code> 后缀。 因此，<code>User</code> 模型将对应于<code>UserPolicy</code> 策略类。</p>
 <p>如果要自定义策略的发现逻辑，可以使用 <code>Gate::guessPolicyNamesUsing</code> 方法注册自定义策略发现回调。通常，应该从应用程序的 <code>AuthServiceProvider</code> 的 <code>boot</code> 方法调用此方法：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Gate;
 
