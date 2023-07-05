@@ -134,7 +134,7 @@ Route::get(<span class="string token">'/'</span>, <span class="keyword token">fu
 });
 </code></pre>
 <p>注意，我们接受容器本身作为解析器的参数。然后，我们可以使用容器来解析正在构建的对象的子依赖。</p>
-<p>如前所述，您通常会与服务提供商内部的容器进行交互；但是，如果您希望与服务提供商外部的容器进行交互，则可以通过 <code>App</code> <a href="facades.html">facade</a> 进行:</p>
+<p>如前所述，您通常会在服务提供者内部与容器进行交互；但是，如果您希望在服务提供者外部与容器进行交互，则可以通过 <code>App</code> <a href="facades.html">facade</a> 进行:</p>
 <pre><code><span class="keyword token">use</span> App\Services\Transistor;
 <span class="keyword token">use</span> Illuminate\Support\Facades\App;
 
