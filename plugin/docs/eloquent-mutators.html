@@ -106,6 +106,7 @@
     );
 }
 </code></pre>
+<h4 id="访问器缓存">访问器缓存</h4>
 <p>从访问器返回值对象时，对值对象所做的任何更改都将在模型保存之前自动同步回模型。 这是可能的，因为 Eloquent 保留了访问器返回的实例，因此每次调用访问器时都可以返回相同的实例：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
@@ -115,6 +116,14 @@
 <span class="variable token">$user</span>-&gt;address-&gt;lineTwo = <span class="string token">'Updated Address Line 2 Value'</span>;
 
 <span class="variable token">$user</span>-&gt;save();
+</code></pre>
+<p>有时您可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，您可以在定义访问器时调用 <code>shouldCache</code> 方法：</p>
+<pre><code class="language-php"><span class="keyword token">protected</span> <span class="keyword token">function</span> hash(): Attribute
+{
+    <span class="keyword token">return</span> Attribute::make(
+        get: fn (<span class="variable token">$value</span>) =&gt; bcrypt(gzuncompress(<span class="variable token">$value</span>)),
+      )-&gt;shouldCache();
+}
 </code></pre>
 <p>如果要禁用属性的缓存，可以在定义属性时调用 <code>withoutObjectCaching</code> 方法：</p>
 <pre><code class="language-php"><span class="comment token">/**
@@ -313,7 +322,7 @@
 
 <span class="variable token">$user</span>-&gt;save();
 </code></pre>
-<p>当使用 <code>update</code> 方法更新 JSON 属性的单个字段时，可以使用 <code>-&gt;</code> 操作符让语法更加简洁：:</p>
+<p>当使用 <code>update</code> 方法更新 JSON 属性的单个字段时，可以使用 <code>-&gt;</code> 操作符让语法更加简洁：</p>
 <pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
 
 <span class="variable token">$user</span>-&gt;update([<span class="string token">'options-&gt;key'</span> =&gt; <span class="string token">'value'</span>]);
