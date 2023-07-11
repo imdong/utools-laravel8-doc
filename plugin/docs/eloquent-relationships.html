@@ -824,7 +824,7 @@ comments
 </code></pre>
 <p><code>Comment</code> 模型的 <code>commentable</code> 关联将返回 <code>Post</code> 或 <code>Video</code> 实例，其结果取决于评论所属的模型。</p>
 <p><a name="one-of-many-polymorphic-relations"></a></p>
-<h3 id="一对多（多态）-1">一对多（多态）</h3>
+<h3 id="一对多检索（多态）">一对多检索（多态）</h3>
 <p>有时一个模型可能有许多相关模型，要检索关系的「最新」或「最旧」相关模型。 例如，一个 <code>User</code> 模型可能与许多 <code>Image</code> 模型相关，如果你想定义一种方便的方式来与用户上传的最新图像进行交互。 可以使用 <code>morphOne</code> 关系类型结合 <code>ofMany</code> 方法来完成此操作：</p>
 <pre><code class="language-php"><span class="comment token">/**
  * 获取用户最近的图像。
@@ -903,7 +903,7 @@ taggables
 }
 </code></pre>
 <p><a name="many-to-many-polymorphic-defining-the-inverse-of-the-relationship"></a></p>
-<h4 id="自定义多态类型">自定义多态类型</h4>
+<h4 id="定义多对多（多态）反向关系">定义多对多（多态）反向关系</h4>
 <p>接下来, 在这个 <code>Tag</code> 模型中, 你应该为每个可能的父模型定义一个方法. 所以, 在这个例子中, 我们将会定义一个  <code>posts</code> 方法 和 一个 <code>videos</code> 方法. 这两个方法都应该返回 <code>morphedByMany</code>  结果</p>
 <p><code>morphedByMany</code> 方法接受相关模型的名称以及&quot;关系名称&quot;。根据我们分配给中间表名的名称及其包含的键，我们将该关系称为“taggable”：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
@@ -956,7 +956,7 @@ taggables
 }
 </code></pre>
 <p><a name="custom-polymorphic-types"></a></p>
-<h3 id="自定义多态类型-1">自定义多态类型</h3>
+<h3 id="自定义多态类型">自定义多态类型</h3>
 <p>默认情况下， Laravel 使用完全限定类名存储关联模型类型。在上面的一对多示例中， 因为 <code>Comment</code> 可能从属于一个 <code>Post</code> 或一个 <code>Video</code>，默认的 <code>commentable_type</code> 就将分别是 <code>App\Post 或 App\Video</code>。不过，你可能希望数据库与应用的内部结构解耦。在这种情况下，可以定义一个「morph 映射」来通知 Eloquent 使用自定义名称代替对应的类名：</p>
 <p>例如，我们可以不使用模型名称作为「类型」，而是使用简单的字符串，例如 <code>post</code> 和 <code>video</code>。 通过这样做，即使模型被重命名，我们数据库中的多态「类型」列值也将保持有效：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Relations\Relation;
@@ -1501,7 +1501,7 @@ select * from authors where id in (1, 2, 3, 4, 5, ...)
 </code></pre>
 <p><a name="preventing-lazy-loading"></a></p>
 <h3 id="防止延迟加载">防止延迟加载</h3>
-<p>如前所述，预加载关系可以为应用程序提供显着的性能优势。 但你也可以指示 Laravel 始终防止延迟加载关系。 你可以调用基本 Eloquent 模型类提供的 <code>preventLazyLoading</code> 方法。 通常，你应该在应用程序的 <code>AppServiceProvider</code> 类的 <code>boot</code> 方法中调用此方法。</p>
+<p>如前所述，预加载关系可以为应用程序提供显著的性能优势。 但你也可以指示 Laravel 始终防止延迟加载关系。 你可以调用基本 Eloquent 模型类提供的 <code>preventLazyLoading</code> 方法。 通常，你应该在应用程序的 <code>AppServiceProvider</code> 类的 <code>boot</code> 方法中调用此方法。</p>
 <p><code>preventLazyLoading</code> 方法接受一个可选的布尔类型的参数，表示是否阻止延迟加载。例如，你可能希望只在非生产环境中禁用延迟加载，这样即使在生产环境代码中意外出现了延迟加载关系，你的生产环境也能继续正常运行。</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 
