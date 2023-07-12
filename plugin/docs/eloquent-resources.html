@@ -250,47 +250,6 @@ Route::get(<span class="string token">'/users'</span>, <span class="keyword toke
     <span class="keyword token">public</span> <span class="variable token">$collects</span> = Member::<span class="keyword token">class</span>;
 }
 </code></pre>
-<p><a name="writing-resources"></a></p>
-<h2 id="编写资源-1">编写资源</h2>
-<blockquote>
-<p>技巧：如果你还没有阅读 <a href="#concept-overview">概念综述</a>，强烈建议你在继续阅读本文档之前先去阅读一下。</p>
-</blockquote>
-<p>从本质上说，资源的作用很简单，它只需要将给定的模型转换为数组。所以，每个资源都包含一个 <code>toArray</code> 方法，这个方法将模型的属性转换成一个 API 友好的数组，然后将该数组通过路由或控制器返回给用户：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> App\Http\Resources;
-
-<span class="keyword token">use</span> Illuminate\Http\Resources\Json\JsonResource;
-
-<span class="keyword token">class</span> UserResource <span class="keyword token">extends</span> JsonResource
-{
-    <span class="comment token">/**
-     * Transform the resource into an array.
-     * 将资源转换为数组
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @return</span> array
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> toArray(<span class="variable token">$request</span>)
-    {
-        <span class="keyword token">return</span> [
-            <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
-            <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
-            <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;email,
-            <span class="string token">'created_at'</span> =&gt; <span class="variable token">$this</span>-&gt;created_at,
-            <span class="string token">'updated_at'</span> =&gt; <span class="variable token">$this</span>-&gt;updated_at,
-        ];
-    }
-}
-</code></pre>
-<p>创建资源之后，就可以在路由或者控制器中直接返回该资源了：</p>
-<pre><code><span class="keyword token">use</span> App\Http\Resources\UserResource;
-<span class="keyword token">use</span> App\Models\User;
-
-Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="keyword token">return</span> <span class="keyword token">new</span> UserResource(User::findOrFail(<span class="variable token">$id</span>));
-});
-</code></pre>
 <p><a name="relationships"></a></p>
 <h4 id="关联关系">关联关系</h4>
 <p>如果想在响应中返回关联的资源，你可以在资源类的 <code>toArray</code> 方法中将关联关系添加上。下面的例子会展示如何将文章资源类 <code>PostResource</code> 添加到用户资源类 <code>UserResource</code> 中：</p>
