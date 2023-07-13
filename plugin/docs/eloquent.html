@@ -510,7 +510,7 @@ Route::get(<span class="string token">'/api/flights/{id}'</span>, <span class="k
 <span class="variable token">$flight</span>  =  Flight::where([<span class="string token">'flight_no'</span>  =&gt;  <span class="string token">'001'</span>])-&gt;sole();
 
 <span class="comment token">// 检索航班号，如果不能存在，会抛 `ModelNotFoundException` 异常...</span>
-<span class="variable token">$flight</span>  =  Flight::where([<span class="string token">'flight_no'</span>  =&gt;  <span class="string token">'001'</span>])-&gt;sole();
+<span class="variable token">$flight</span>  =  Flight::where([<span class="string token">'flight_no'</span>  =&gt;  <span class="string token">'003'</span>])-&gt;sole();
 
 <span class="comment token">// 只有当查询条件存在与表中且是表中唯一的记录，才会返回 Model...</span>
 <span class="variable token">$flight</span>  =  Flight::where([<span class="string token">'flight_no'</span>  =&gt;  <span class="string token">'002'</span>])-&gt;sole();
@@ -1146,7 +1146,7 @@ User::withoutGlobalScopes([
 <p>技巧：想要将 Eloquent 事件直接广播到客户端应用程序？ 查看 Laravel 的 <a href="broadcasting.html#model-broadcasting">模型事件广播</a>。</p>
 </blockquote>
 <p>Eloquent 模型触发几个事件，允许你挂接到模型生命周期的如下节点： <code>retrieved</code>、<code>creating</code>、<code>created</code>、<code>updating</code>、<code>updated</code>、<code>saving</code>、<code>saved</code>、<code>deleting</code>、<code>deleted</code>、<code>restoring</code>、<code>restored</code>、<code>replicating</code>。事件允许你每当特定模型保存或更新数据库时执行代码。每个事件通过其构造器接受模型实例。</p>
-<p>当从数据库中检索到现有模型时，将调度 <code>retrived</code> 事件。 当一个新模型第一次被保存时，<code>creating</code> 和 <code>created</code> 事件将被触发。 <code>updating</code> / <code>updated</code> 事件将在修改现有模型并调用 <code>save</code> 方法时触发。<code>saving</code> / <code>saved</code> 事件将在创建或更新模型时触发 - 即使模型的属性没有更改。以「-ing」结尾的事件名称在模型的任何更改被持久化之前被调度，而以「-ed」结尾的事件在对模型的更改被持久化之后被调度。</p>
+<p>当从数据库中检索到现有模型时，将调度 <code>retrieved</code> 事件。 当一个新模型第一次被保存时，<code>creating</code> 和 <code>created</code> 事件将被触发。 <code>updating</code> / <code>updated</code> 事件将在修改现有模型并调用 <code>save</code> 方法时触发。<code>saving</code> / <code>saved</code> 事件将在创建或更新模型时触发 - 即使模型的属性没有更改。以「-ing」结尾的事件名称在模型的任何更改被持久化之前被调度，而以「-ed」结尾的事件在对模型的更改被持久化之后被调度。</p>
 <p>要开始监听模型事件，请在 Eloquent 模型上定义一个 <code>$dispatchesEvents</code> 属性。此属性将 Eloquent 模型生命周期的各个点映射到你定义的 <a href="events.html">事件类</a>。 每个模型事件类都应该期望通过其构造函数接收受影响模型的实例：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
