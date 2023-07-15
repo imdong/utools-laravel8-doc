@@ -20,7 +20,7 @@
     <div class="markdown-body"><h1 id="laravel-fortify">Laravel Fortify</h1>
 <ul>
 <li><a href="#introduction">介绍</a><ul>
-<li><a href="#what-is-fortify">Fortify 是什么?</a></li>
+<li><a href="#what-is-fortify">Fortify 是什么？</a></li>
 <li><a href="#when-should-i-use-fortify">何时使用 Fortify?</a></li>
 </ul>
 </li>
@@ -63,24 +63,24 @@
 <p><a href="https://github.com/laravel/fortify">Laravel Fortify</a> 是一个与前端无关的身份认证后端实现。Fortify 注册了所有实现 Laravel 身份验证功能所需的路由和控制器，包括登录，注册，重置密码，邮件认证等。安装 Fortify 之后，你可以运行 Artisan 命令 <code>route:list</code> 来查看 Fortify 已注册的路由。</p>
 <p>由于 Fortify 不提供其自己的用户界面，因此应与你自己的用户界面配对，该用户界面向其注册的路由发出请求。在本文档的其余部分中，我们将进一步讨论如何向这些路由发出请求。</p>
 <blockquote>
-<p>技巧：请记住，Fortify 是一个软件包，旨在使你能够快速开始实施 Laravel 的身份验证功能。你不必非要使用它不可。 你始终可以按照以下说明中提供的文档，自由地与 Laravel 的身份认证服务进行交互，<a href="authentication.html">用户认证</a>， <a href="passwords.html">重置密码</a> 和 <a href="verification.html">邮箱认证</a> documentation. 文档。</p>
+<p>技巧：请记住，Fortify 是一个软件包，旨在使你能够快速开始实施 Laravel 的身份验证功能。你不必非要使用它不可。你始终可以按照以下说明中提供的文档，自由地与 Laravel 的身份认证服务进行交互，<a href="authentication.html">用户认证</a>， <a href="passwords.html">重置密码</a> 和 <a href="verification.html">邮箱认证</a> documentation. 文档。</p>
 </blockquote>
 <p><a name="what-is-fortify"></a></p>
 <h3 id="fortify-是什么？">Fortify 是什么？</h3>
 <p>如上所述，Laravel Fortify 是一个与前端无关的身份认证后端实现，Fortify 注册了所有实现 Laravel 身份验证功能所需的路由和控制器，包括登录，注册，重置密码，邮件认证等。</p>
 <p><strong>你不必使用 Fortify，也可以使用 Laravel 的身份认证功能。</strong> 你始终可以按照 <a href="authentication.html">用户认证</a>，<a href="passwords.html">重置密码</a> 和 <a href="verification.html">邮箱认证</a> 文档中提供的文档来手动与 Laravel 的身份验证服务进行交互。</p>
-<p>如果你是一名新手，在使用 Laravel Fortify 之前不妨尝试使用 <a href="starter-kits.html">Laravel Breeze</a> 应用入门套件。Laravel Breeze 为你的应用提供身份认证支架，其中包括使用 <a href="https://tailwindcss.com">Tailwind CSS</a>。与 Fortify 不同，Breeze 将其路由和控制器直接发布到你的应用程序中。这使你可以学习并熟悉 Laravel 的身份认证功能，然后再允许 Laravel Fortify 为您实现这些功能。</p>
+<p>如果你是一名新手，在使用 Laravel Fortify 之前不妨尝试使用 <a href="starter-kits.html">Laravel Breeze</a> 应用入门套件。Laravel Breeze 为你的应用提供身份认证支架，其中包括使用 <a href="https://tailwindcss.com">Tailwind CSS</a>。与 Fortify 不同，Breeze 将其路由和控制器直接发布到你的应用程序中。这使你可以学习并熟悉 Laravel 的身份认证功能，然后再允许 Laravel Fortify 为你实现这些功能。</p>
 <p>Laravel Fortify 本质上是采用了 Laravel Breeze 的路由和控制器，且提供了不包含用户界面的扩展。这样，你可以快速搭建应用程序身份认证层的后端实现，而不必依赖于任何特定的前端实现。</p>
 <p><a name="when-should-i-use-fortify"></a></p>
 <h3 id="何时使用-fortify？">何时使用 Fortify？</h3>
-<p>你可能想知道何时使用 Laravel Fortify。 首先，如果你正在使用 Laravel 的 <a href="starter-kits.html">应用入门套件</a>，你不需要安装 Laravel Fortify，因为它已经提供了完整的身份认证实现。</p>
+<p>你可能想知道何时使用 Laravel Fortify。首先，如果你正在使用 Laravel 的 <a href="starter-kits.html">应用入门套件</a>，你不需要安装 Laravel Fortify，因为它已经提供了完整的身份认证实现。</p>
 <p>如果你不使用应用入门套件，并且你的应用需要身份认证功能，则有两个选择：手动实现应用的身份认证功能或使用由 Laravel Fortify 提供这些功能的后端实现。</p>
 <p>如果你选择安装 Fortify，你的用户界面将向 Fortify 的身份验证路由发出请求，本文档中对此进行了详细介绍，以便对用户进行身份认证和注册。</p>
 <p>如果你选择手动与 Laravel 的身份认证服务进行交互而不是使用 Fortify，可以按照 <a href="authentication.html">用户认证</a>，<a href="passwords.html">重置密码</a> 和 <a href="verification.html">邮箱认证</a> 文档中提供的说明进行操作。</p>
 <p><a name="laravel-fortify-and-laravel-sanctum"></a></p>
 <h4 id="laravel-fortify--laravel-sanctum">Laravel Fortify &amp; Laravel Sanctum</h4>
 <p>一些开发人员对 <a href="sanctum.html">Laravel Sanctum</a> 和 Laravel Fortify 两者之间的区别感到困惑。由于这两个软件包解决了两个不同但相关的问题，因此 Laravel Fortify 和 Laravel Sanctum 并非互斥或竞争的软件包。</p>
-<p>Laravel Sanctum 只关心管理 API 令牌和使用会话 cookie 或令牌来认证现有用户。 Sanctum 不提供任何处理用户注册，重置密码等相关的路由。</p>
+<p>Laravel Sanctum 只关心管理 API 令牌和使用会话 cookie 或令牌来认证现有用户。Sanctum 不提供任何处理用户注册，重置密码等相关的路由。</p>
 <p>如果你尝试为提供 API 或用作单页应用的后端的应用手动构建身份认证层，那么完全有可能同时使用 Laravel Fortify（用于用户注册，重置密码等）和 Laravel Sanctum（API 令牌管理，会话身份认证）。</p>
 <p><a name="installation"></a></p>
 <h2 id="安装">安装</h2>
@@ -90,7 +90,7 @@
 <p>下一步，使用 <code>vendor:publish</code> 命令来发布 Fortify 的资源：</p>
 <pre><code class="language-shell">php artisan vendor:publish --provider=&quot;Laravel\Fortify\FortifyServiceProvider&quot;
 </code></pre>
-<p>该命令会将 Fortify 的行为类发布到您的 <code>app/Actions</code> 目录，如果该目录不存在，则会创建该目录。此外，还将发布 Fortify 的配置和迁移文件。</p>
+<p>该命令会将 Fortify 的行为类发布到你的 <code>app/Actions</code> 目录，如果该目录不存在，则会创建该目录。此外，还将发布 Fortify 的配置和迁移文件。</p>
 <p>下一步，你应该迁移数据库：</p>
 <pre><code class="language-shell">php artisan migrate
 </code></pre>
@@ -117,7 +117,7 @@
 <p>如果你选择禁用 Fortify 的视图，并且将为你的应用实现重置密码功能，这时你仍然需要定义一个名为 <code>password.reset</code> 的路由，该路由负责显示应用的「重置密码」视图。这是必要的，因为 Laravel 的 <code>Illuminate\Auth\Notifications\ResetPassword</code> 通知将通过名为 <code>password.reset</code> 的路由生成重置密码 URL。</p>
 <p><a name="authentication"></a></p>
 <h2 id="身份认证">身份认证</h2>
-<p>首先，我们需要指导 Fortify 如何返回「登录」视图。记住，Fortify 是一个无头认证扩展。如果你想要一个已经为你完成的 Laravel 身份认证功能的前端实现， 你应该使用 <a href="starter-kits.html">应用入门套件</a>。</p>
+<p>首先，我们需要指导 Fortify 如何返回「登录」视图。记住，Fortify 是一个无头认证扩展。如果你想要一个已经为你完成的 Laravel 身份认证功能的前端实现，你应该使用 <a href="starter-kits.html">应用入门套件</a>。</p>
 <p>所有的身份认证视图逻辑，都可以使用 <code>Laravel\Fortify\Fortify</code> 类提供的方法来自定义。通常，你应该从应用的 <code>App\Providers\FortifyServiceProvider</code> 的 <code>boot</code> 方法中调用此方法。Fortify 将负责定义返回此视图的 <code>/login</code> 路由：</p>
 <pre><code><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
@@ -136,12 +136,12 @@
 }
 </code></pre>
 <p>你的登录模板应包括一个向 <code>/login</code> 发出 POST 请求的表单。 <code>/login</code> 表单需要一个 <code>email</code> / <code>username</code> 和 <code>password</code>。 <code>email</code> / <code>username</code> 字段与 <code>config/fortify.php</code> 配置文件中的 <code>username</code> 值相匹配。另外，可以提供布尔值 <code>remember</code> 字段来指导用户想要使用 Laravel 提供的「记住我」功能。</p>
-<p>如果登录尝试成功，Fortify 会将您重定向到通过应用程序 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。 如果登录请求是 XHR 请求，将返回 200 HTTP 响应。</p>
-<p>如果请求不成功，用户将被重定向回登录页，验证错误将通过共享的 <code>$errors</code> <a href="validation.html#quick-displaying-the-validation-errors">Blade 模板变量</a> 提供给你。 或者，在 XHR 请求的情况下，验证错误将与 422 HTTP 响应一起返回。</p>
+<p>如果登录尝试成功，Fortify 会将你重定向到通过应用程序 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。如果登录请求是 XHR 请求，将返回 200 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回登录页，验证错误将通过共享的 <code>$errors</code> <a href="validation.html#quick-displaying-the-validation-errors">Blade 模板变量</a> 提供给你。或者，在 XHR 请求的情况下，验证错误将与 422 HTTP 响应一起返回。</p>
 <p><a name="customizing-user-authentication"></a></p>
 <h3 id="自定义用户认证">自定义用户认证</h3>
-<p>Fortify 将根据提供的凭据和为您的应用程序配置的身份验证保护自动检索和验证用户。 但是，您有时可能希望对登录凭据的身份验证和用户的检索方式进行完全自定义。 幸运的是，Fortify 允许您使用 <code>Fortify::authenticateUsing</code> 方法轻松完成此操作。</p>
-<p>此方法接受接收传入 HTTP 请求的闭包。 闭包负责验证附加到请求的登录凭据并返回关联的用户实例。 如果凭据无效或找不到用户，则闭包应返回 <code>null</code> 或 <code>false</code> 。 通常，这个方法应该从你的 <code>FortifyServiceProvider</code> 的 <code>boot</code> 方法中调用：</p>
+<p>Fortify 将根据提供的凭据和为你的应用程序配置的身份验证保护自动检索和验证用户。但是，你有时可能希望对登录凭据的身份验证和用户的检索方式进行完全自定义。幸运的是，Fortify 允许你使用 <code>Fortify::authenticateUsing</code> 方法轻松完成此操作。</p>
+<p>此方法接受接收传入 HTTP 请求的闭包。闭包负责验证附加到请求的登录凭据并返回关联的用户实例。如果凭据无效或找不到用户，则闭包应返回 <code>null</code> 或 <code>false</code> 。通常，这个方法应该从你的 <code>FortifyServiceProvider</code> 的 <code>boot</code> 方法中调用：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Models\User;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Hash;
@@ -168,12 +168,12 @@
 </code></pre>
 <p><a name="authentication-guard"></a></p>
 <h4 id="身份验证看守器">身份验证看守器</h4>
-<p>您可以在应用程序的 <code>fortify</code> 文件中自定义 Fortify 使用的身份验证看守器。 但是，您应该确保配置的看守器是 <code>Illuminate\Contracts\Auth\StatefulGuard</code> 的实现。 如果您尝试使用 Laravel Fortify 对 SPA 进行身份验证，您应该将 Laravel 的默认 <code>web</code> 防护与 <a href="https://laravel.com/docs/sanctum">Laravel Sanctum</a> 结合使用。</p>
+<p>你可以在应用程序的 <code>fortify</code> 文件中自定义 Fortify 使用的身份验证看守器。但是，你应该确保配置的看守器是 <code>Illuminate\Contracts\Auth\StatefulGuard</code> 的实现。如果你尝试使用 Laravel Fortify 对 SPA 进行身份验证，你应该将 Laravel 的默认 <code>web</code> 防护与 <a href="https://laravel.com/docs/sanctum">Laravel Sanctum</a> 结合使用。</p>
 <p><a name="customizing-the-authentication-pipeline"></a></p>
 <h3 id="自定义身份验证管道">自定义身份验证管道</h3>
-<p>Laravel Fortify通过可调用类的管道对登录请求进行身份验证。如果您愿意，您可以定义一个自定义的类管道，登录请求应该通过管道传输。每个类都应该有一个 <code>__invoke</code> 方法，该方法接收传入 <code>Illuminate\Http\Request</code> 实例的方法，并且像 <a href="middleware.html">中间件</a> 一样，调用一个 <code>$next</code> 变量，以便将请求传递给管道中的下一个类。</p>
+<p>Laravel Fortify 通过可调用类的管道对登录请求进行身份验证。如果你愿意，你可以定义一个自定义的类管道，登录请求应该通过管道传输。每个类都应该有一个 <code>__invoke</code> 方法，该方法接收传入 <code>Illuminate\Http\Request</code> 实例的方法，并且像 <a href="middleware.html">中间件</a> 一样，调用一个 <code>$next</code> 变量，以便将请求传递给管道中的下一个类。</p>
 <p>要定义自定义管道，可以使用 <code>Fortify::authenticateThrough</code> 方法。此方法接受一个闭包，该闭包应返回类数组，以通过管道传递登录请求。通常，应该从 <code>App\Providers\FortifyServiceProvider</code> 的 <code>boot</code> 方法调用此方法。</p>
-<p>下面的示例包含默认管道定义，您可以在自己进行修改时将其用作开始：</p>
+<p>下面的示例包含默认管道定义，你可以在自己进行修改时将其用作开始：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Actions\AttemptToAuthenticate;
 <span class="keyword token">use</span> Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 <span class="keyword token">use</span> Laravel\Fortify\Actions\PrepareAuthenticatedSession;
@@ -192,7 +192,7 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
 </code></pre>
 <p><a name="customizing-authentication-redirects"></a></p>
 <h3 id="自定义跳转">自定义跳转</h3>
-<p>如果登录尝试成功，Fortify 会将您重定向到您应用程序 <code>Fortify</code> 的配置文件中的 <code>home</code> 配置选项的 URI 值. 如果登录请求是 XHR 请求，将返回 200 HTTP 响应。用户注销应用程序后，该用户将被重定向到 <code>/</code> 地址。</p>
+<p>如果登录尝试成功，Fortify 会将你重定向到你应用程序 <code>Fortify</code> 的配置文件中的 <code>home</code> 配置选项的 URI 值。如果登录请求是 XHR 请求，将返回 200 HTTP 响应。用户注销应用程序后，该用户将被重定向到 <code>/</code> 地址。</p>
 <p>如果需要对这种行为进行高级定制，可以将 <code>LoginResponse</code> 和 <code>LogoutResponse</code> 契约的实现绑定到 Laravel <a href="container.html">服务容器</a> 。通常，这应该在你应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>register</code> 方法中完成：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Contracts\LogoutResponse;
 
@@ -213,8 +213,8 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
 </code></pre>
 <p><a name="two-factor-authentication"></a></p>
 <h2 id="双因素认证">双因素认证</h2>
-<p>当 Fortify 的双因素身份验证功能启用时，用户需要在身份验证过程中输入一个六位数的数字令牌。该令牌使用基于时间的一次性密码（TOTP）生成，该密码可以从任何与 TOTP 兼容的移动认证应用程序（如Google Authenticator）中检索。</p>
-<p>在开始之前，您应该首先确保应用程序的 <code>App\Models\User</code> 模型使用 <code>Laravel\Fortify\TwoFactorAuthenticatable</code> trait：</p>
+<p>当 Fortify 的双因素身份验证功能启用时，用户需要在身份验证过程中输入一个六位数的数字令牌。该令牌使用基于时间的一次性密码（TOTP）生成，该密码可以从任何与 TOTP 兼容的移动认证应用程序（如 Google Authenticator）中检索。</p>
+<p>在开始之前，你应该首先确保应用程序的 <code>App\Models\User</code> 模型使用 <code>Laravel\Fortify\TwoFactorAuthenticatable</code> trait：</p>
 <pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -228,34 +228,34 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="keyword token">use</span> Notifiable, TwoFactorAuthenticatable;
 }
 </code></pre>
-<p>接下来，您应该在应用程序中构建一个页面，用户可以在其中管理他们的双因素身份验证设置。该页面应允许用户启用和禁用双因素身份验证，以及重新生成双因素身份验证恢复的代码。</p>
+<p>接下来，你应该在应用程序中构建一个页面，用户可以在其中管理他们的双因素身份验证设置。该页面应允许用户启用和禁用双因素身份验证，以及重新生成双因素身份验证恢复的代码。</p>
 <blockquote>
-<p>默认情况下， <code>fortify</code> 配置文件的 <code>features</code> 数组管理着 Fortify 的双因素身份验证设置在修改前需要密码确认。因此，在使用之前，你的应用程序应该实现 Fortify 的 <a href="#password-confirmation">密码确认</a> 功能 。</p>
+<p>默认情况下， <code>fortify</code> 配置文件的 <code>features</code> 数组管理着 Fortify 的双因素身份验证设置在修改前需要密码确认。因此，在使用之前，你的应用程序应该实现 Fortify 的 <a href="#password-confirmation">密码确认</a> 功能。</p>
 </blockquote>
 <p><a name="enabling-two-factor-authentication"></a></p>
 <h3 id="启用双因素身份验证">启用双因素身份验证</h3>
-<p>要启用双重身份验证，你的应用程序应向 Fortify 定义的 <code>/user/two-factor-authentication</code> 发出 POST 请求。 如果请求成功，用户将被重定向回之前的 URL，并且 <code>status</code> session 变量将设置为 <code>two-factor-authentication-enabled</code>。 你可以在模板中检测这个 <code>status</code> session 变量以显示适当的成功消息。 如果请求是 XHR 请求，将返回  <code>200</code> HTTP 响应：</p>
+<p>要启用双重身份验证，你的应用程序应向 Fortify 定义的 <code>/user/two-factor-authentication</code> 发出 POST 请求。如果请求成功，用户将被重定向回之前的 URL，并且 <code>status</code> session 变量将设置为 <code>two-factor-authentication-enabled</code>。你可以在模板中检测这个 <code>status</code> session 变量以显示适当的成功消息。如果请求是 XHR 请求，将返回  <code>200</code> HTTP 响应：</p>
 <pre><code class="language-html">@<span class="keyword token">if</span> (session(<span class="string token">'status'</span>) == <span class="string token">'two-factor-authentication-enabled'</span>)
     &lt;div <span class="keyword token">class</span>=<span class="string token">"mb-4 font-medium text-sm text-green-600"</span>&gt;
         Two factor authentication has been enabled.
     &lt;/div&gt;
 @<span class="keyword token">endif</span>
 </code></pre>
-<p>接下来，你应该显示双重身份验证二维码，供用户扫描到他们的身份验证器应用程序中。 如果你使用 Blade 呈现应用程序的前端，则可以使用用户实例上可用的 <code>twoFactorQrCodeSvg</code> 方法检索二维码 SVG：</p>
+<p>接下来，你应该显示双重身份验证二维码，供用户扫描到他们的身份验证器应用程序中。如果你使用 Blade 呈现应用程序的前端，则可以使用用户实例上可用的 <code>twoFactorQrCodeSvg</code> 方法检索二维码 SVG：</p>
 <pre><code class="language-php"><span class="variable token">$request</span>-&gt;user()-&gt;twoFactorQrCodeSvg();
 </code></pre>
-<p>如果你正在构建由 JavaScript 驱动的前端，你可以向 <code>/user/two-factor-qr-code</code> 发出 XHR GET 请求以检索用户的双重身份验证二维码。 将返回一个包含 <code>svg</code> 键的 JSON 对象。</p>
+<p>如果你正在构建由 JavaScript 驱动的前端，你可以向 <code>/user/two-factor-qr-code</code> 发出 XHR GET 请求以检索用户的双重身份验证二维码。将返回一个包含 <code>svg</code> 键的 JSON 对象。</p>
 <p><a name="displaying-the-recovery-codes"></a></p>
 <h4 id="显示恢复代码">显示恢复代码</h4>
 <p>你还应该显示用户的两个因素恢复代码。这些恢复代码允许用户在无法访问其移动设备时进行身份验证。如果你使用 Blade 来渲染应用程序的前端，你可以通过经过身份验证的用户实例访问恢复代码：</p>
 <pre><code class="language-php">(<span class="keyword token">array</span>) <span class="variable token">$request</span>-&gt;user()-&gt;recoveryCodes()
 </code></pre>
 <p>如果你正在构建一个 JavaScript 驱动的前端，你可以向 <code>/user/two-factor-recovery-codes</code> 端点发出 XHR GET 请求。此端点将返回一个包含用户恢复代码的 JSON 数组。</p>
-<p>要重新生成用户的恢复代码，您的应用程序应向 <code>/user/two-factor-recovery-codes</code> 端点发出 POST 请求。</p>
+<p>要重新生成用户的恢复代码，你的应用程序应向 <code>/user/two-factor-recovery-codes</code> 端点发出 POST 请求。</p>
 <p><a name="authenticating-with-two-factor-authentication"></a></p>
 <h3 id="使用双因素身份验证进行身份验证">使用双因素身份验证进行身份验证</h3>
-<p>在身份验证过程中，Fortify 将自动将用户重定向到您的应用程序的双因素身份验证检查页面。 但是，如果您的应用程序正在发出 XHR 登录请求，则在成功进行身份验证尝试后返回的 JSON 响应将包含一个具有 <code>two_factor</code> 布尔属性的 JSON 对象。 您应该检查此值以了解是否应该重定向到应用程序的双因素身份验证检查页面。</p>
-<p>要开始实现两因素身份验证功能，我们需要指示 Fortify 如何返回我们的双因素身份验证检查页面。 Fortify 的所有身份验证视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>在身份验证过程中，Fortify 将自动将用户重定向到你的应用程序的双因素身份验证检查页面。但是，如果你的应用程序正在发出 XHR 登录请求，则在成功进行身份验证尝试后返回的 JSON 响应将包含一个具有 <code>two_factor</code> 布尔属性的 JSON 对象。你应该检查此值以了解是否应该重定向到应用程序的双因素身份验证检查页面。</p>
+<p>要开始实现两因素身份验证功能，我们需要指示 Fortify 如何返回我们的双因素身份验证检查页面。Fortify 的所有身份验证视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -272,16 +272,16 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>Fortify 将负责定义返回此视图的 <code>/two-factor-challenge</code> 路由。 您的 <code>two-factor-challenge</code> 模板应包含一个向 <code>/two-factor-challenge</code> 端点发出 POST 请求的表单。 <code>/two-factor-challenge</code> 操作需要包含有效 TOTP 令牌的 <code>code</code> 字段或包含用户恢复代码之一的 <code>recovery_code</code> 字段。</p>
-<p>如果登录尝试成功，Fortify 会将用户重定向到通过应用程序的 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。 如果登录请求是 XHR 请求，将返回 204 HTTP 响应。</p>
-<p>如果请求不成功，用户将被重定向回两因素挑战屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](验证.html#快速显示验证错误）。 或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
+<p>Fortify 将负责定义返回此视图的 <code>/two-factor-challenge</code> 路由。你的 <code>two-factor-challenge</code> 模板应包含一个向 <code>/two-factor-challenge</code> 端点发出 POST 请求的表单。 <code>/two-factor-challenge</code> 操作需要包含有效 TOTP 令牌的 <code>code</code> 字段或包含用户恢复代码之一的 <code>recovery_code</code> 字段。</p>
+<p>如果登录尝试成功，Fortify 会将用户重定向到通过应用程序的 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。如果登录请求是 XHR 请求，将返回 204 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回两因素挑战屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](验证.html#快速显示验证错误）。或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
 <p><a name="禁用双因素身份验证"></a></p>
 <h3 id="禁用两因素身份验证">禁用两因素身份验证</h3>
-<p>要禁用双因素身份验证，您的应用程序应向 <code>/user/two-factor-authentication</code> 端点发出 DELETE 请求。 请记住，Fortify 的两个因素身份验证端点在被调用之前需要 <a href="#password-confirmation">密码确认</a>。</p>
+<p>要禁用双因素身份验证，你的应用程序应向 <code>/user/two-factor-authentication</code> 端点发出 DELETE 请求。请记住，Fortify 的两个因素身份验证端点在被调用之前需要 <a href="#password-confirmation">密码确认</a>。</p>
 <p><a name="registration"></a></p>
 <h2 id="注册">注册</h2>
-<p>要开始实现我们应用程序的注册功能，我们需要指示 Fortify 如何返回我们的“注册”视图。 请记住，Fortify 是一个无头身份验证库。 如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
-<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>要开始实现我们应用程序的注册功能，我们需要指示 Fortify 如何返回我们的“注册”视图。请记住，Fortify 是一个无头身份验证库。如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
+<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -298,10 +298,10 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>Fortify 将负责定义返回此视图的 <code>/register</code> 路由。 您的 <code>register</code> 模板应包含一个向 Fortify 定义的 <code>/register</code> 端点发出 POST 请求的表单。</p>
-<p><code>/register</code> 端点需要一个字符串 <code>name</code>、字符串电子邮件地址/用户名、<code>password</code> 和 <code>password_confirmation</code> 字段。 电子邮件/用户名字段的名称应与应用程序的“fortify”配置文件中定义的“用户名”配置值匹配。</p>
-<p>如果注册尝试成功，Fortify 会将用户重定向到通过应用程序的 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。 如果登录请求是 XHR 请求，将返回 200 HTTP 响应。</p>
-<p>如果请求不成功，用户将被重定向回注册屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](validation.html#快速显示验证错误）。 或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
+<p>Fortify 将负责定义返回此视图的 <code>/register</code> 路由。你的 <code>register</code> 模板应包含一个向 Fortify 定义的 <code>/register</code> 端点发出 POST 请求的表单。</p>
+<p><code>/register</code> 端点需要一个字符串 <code>name</code>、字符串电子邮件地址/用户名、<code>password</code> 和 <code>password_confirmation</code> 字段。电子邮件/用户名字段的名称应与应用程序的“fortify”配置文件中定义的“用户名”配置值匹配。</p>
+<p>如果注册尝试成功，Fortify 会将用户重定向到通过应用程序的 <code>fortify</code> 配置文件中的 <code>home</code> 配置选项配置的 URI。如果登录请求是 XHR 请求，将返回 200 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回注册屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](validation.html#快速显示验证错误）。或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
 <p><a name="customizing-registration"></a></p>
 <h3 id="定制注册">定制注册</h3>
 <p>可以通过修改安装 Laravel Fortify 时生成的 <code>App\Actions\Fortify\CreateNewUser</code> 操作来自定义用户验证和创建过程。</p>
@@ -309,8 +309,8 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
 <h2 id="重设密码">重设密码</h2>
 <p><a name="requesting-a-password-reset-link"></a></p>
 <h3 id="请求密码重置链接">请求密码重置链接</h3>
-<p>要开始实现我们应用程序的密码重置功能，我们需要指示 Fortify 如何返回我们的“忘记密码”视图。 请记住，Fortify 是一个无头身份验证库。 如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
-<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>要开始实现我们应用程序的密码重置功能，我们需要指示 Fortify 如何返回我们的“忘记密码”视图。请记住，Fortify 是一个无头身份验证库。如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
+<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -327,23 +327,23 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>Fortify 将负责定义返回此视图的 <code>/forgot-password</code> 端点。 你的 <code>forgot-password</code> 模板应该包含一个向 <code>/forgot-password</code> 端点发出 POST 请求的表单。</p>
-<p><code>/forgot-password</code> 端点需要一个字符串 <code>email</code> 字段。 此字段/数据库列的名称应与应用程序的 <code>fortify</code> 配置文件中的 <code>email</code> 配置值匹配。</p>
+<p>Fortify 将负责定义返回此视图的 <code>/forgot-password</code> 端点。你的 <code>forgot-password</code> 模板应该包含一个向 <code>/forgot-password</code> 端点发出 POST 请求的表单。</p>
+<p><code>/forgot-password</code> 端点需要一个字符串 <code>email</code> 字段。此字段/数据库列的名称应与应用程序的 <code>fortify</code> 配置文件中的 <code>email</code> 配置值匹配。</p>
 <p><a name="handling-the-password-reset-link-request-response"></a></p>
 <h4 id="处理密码重置链接请求响应">处理密码重置链接请求响应</h4>
-<p>如果密码重置链接请求成功，Fortify 会将用户重定向回 <code>/forgot-password</code> 端点，并向用户发送一封电子邮件，其中包含可用于重置密码的安全链接。 如果请求是 XHR 请求，将返回 200 HTTP 响应。</p>
-<p>在成功请求后被重定向回 <code>/forgot-password</code> 端点后，<code>status</code> 会话变量可用于显示密码重置链接请求尝试的状态。 此会话变量的值将匹配应用程序的“密码”<a href="localization.html">语言文件</a> 中定义的翻译字符串之一：</p>
+<p>如果密码重置链接请求成功，Fortify 会将用户重定向回 <code>/forgot-password</code> 端点，并向用户发送一封电子邮件，其中包含可用于重置密码的安全链接。如果请求是 XHR 请求，将返回 200 HTTP 响应。</p>
+<p>在成功请求后被重定向回 <code>/forgot-password</code> 端点后，<code>status</code> 会话变量可用于显示密码重置链接请求尝试的状态。此会话变量的值将匹配应用程序的“密码”<a href="localization.html">语言文件</a> 中定义的翻译字符串之一：</p>
 <pre><code class="language-html">@<span class="keyword token">if</span> (session(<span class="string token">'status'</span>))
     &lt;div <span class="keyword token">class</span>=<span class="string token">"mb-4 font-medium text-sm text-green-600"</span>&gt;
         {{ session(<span class="string token">'status'</span>) }}
     &lt;/div&gt;
 @<span class="keyword token">endif</span>
 </code></pre>
-<p>如果请求不成功，用户将被重定向回请求密码重置链接屏幕，验证错误将通过共享的 <code>$errors</code> <a href="/docs/laravel/9.x">Blade 模板变量</a> 提供给您/validation#quick-displaying-the-validation-errors）。 或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回请求密码重置链接屏幕，验证错误将通过共享的 <code>$errors</code> <a href="/docs/laravel/9.x">Blade 模板变量</a> 提供给你/validation#quick-displaying-the-validation-errors）。或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
 <p><a name="resetting-the-password"></a></p>
 <h3 id="重设密码-1">重设密码</h3>
 <p>为了完成应用程序的密码重置功能，我们需要指示 Fortify 如何返回我们的“重置密码”视图。</p>
-<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -360,11 +360,11 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>Fortify 将负责定义显示此视图的路线。 您的 <code>reset-password</code> 模板应该包含一个向 <code>/reset-password</code> 发出 POST 请求的表单。</p>
+<p>Fortify 将负责定义显示此视图的路线。你的 <code>reset-password</code> 模板应该包含一个向 <code>/reset-password</code> 发出 POST 请求的表单。</p>
 <p><code>/reset-password</code> 端点需要一个字符串<code>email</code> 字段、一个<code>password</code> 字段、一个<code>password_confirmation</code> 字段和一个名为<code>token</code> 的隐藏字段，其中包含<code>request()-&gt;route(&#39; 的值令牌&#39;）</code>。 “email”字段/数据库列的名称应与应用程序的“fortify”配置文件中定义的“email”配置值匹配。</p>
 <p><a name="handling-the-password-reset-response"></a></p>
 <h4 id="处理密码重置响应">处理密码重置响应</h4>
-<p>如果密码重置请求成功，Fortify 将重定向回 <code>/login</code> 路由，以便用户可以使用新密码登录。 此外，还将设置一个 <code>status</code> 会话变量，以便您可以在登录屏幕上显示重置的成功状态：</p>
+<p>如果密码重置请求成功，Fortify 将重定向回 <code>/login</code> 路由，以便用户可以使用新密码登录。此外，还将设置一个 <code>status</code> 会话变量，以便你可以在登录屏幕上显示重置的成功状态：</p>
 <pre><code class="language-blade">@<span class="keyword token">if</span> (session(<span class="string token">'status'</span>))
     &lt;div <span class="keyword token">class</span>=<span class="string token">"mb-4 font-medium text-sm text-green-600"</span>&gt;
         {{ session(<span class="string token">'status'</span>) }}
@@ -372,15 +372,15 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
 @<span class="keyword token">endif</span>
 </code></pre>
 <p>如果请求是 XHR 请求，将返回 200 HTTP 响应。</p>
-<p>如果请求不成功，用户将被重定向回重置密码屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](validation .html#快速显示验证错误）。 或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回重置密码屏幕，验证错误将通过共享的 <code>$errors</code> [Blade 模板变量](validation .html#快速显示验证错误）。或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
 <p><a name="customizing-password-resets"></a></p>
 <h3 id="自定义密码重置">自定义密码重置</h3>
 <p>可以通过修改安装 Laravel Fortify 时生成的 <code>App\Actions\ResetUserPassword</code> 操作来自定义密码重置过程。</p>
 <p><a name="email-verification"></a></p>
 <h2 id="电子邮件验证">电子邮件验证</h2>
-<p>注册后，您可能希望用户在继续访问您的应用程序之前验证他们的电子邮件地址。 要开始使用，请确保在 <code>fortify</code> 配置文件的 <code>features</code> 数组中启用了 <code>emailVerification</code> 功能。 接下来，你应该确保你的 App\Models\User 类实现了 Illuminate\Contracts\Auth\MustVerifyEmail 接口。</p>
-<p>完成这两个设置步骤后，新注册的用户将收到一封电子邮件，提示他们验证其电子邮件地址的所有权。 但是，我们需要通知 Fortify 如何显示电子邮件验证屏幕，通知用户他们需要点击电子邮件中的验证链接。</p>
-<p>Fortify 的所有视图的渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>注册后，你可能希望用户在继续访问你的应用程序之前验证他们的电子邮件地址。要开始使用，请确保在 <code>fortify</code> 配置文件的 <code>features</code> 数组中启用了 <code>emailVerification</code> 功能。接下来，你应该确保你的 App\Models\User 类实现了 Illuminate\Contracts\Auth\MustVerifyEmail 接口。</p>
+<p>完成这两个设置步骤后，新注册的用户将收到一封电子邮件，提示他们验证其电子邮件地址的所有权。但是，我们需要通知 Fortify 如何显示电子邮件验证屏幕，通知用户他们需要点击电子邮件中的验证链接。</p>
+<p>Fortify 的所有视图的渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -398,29 +398,29 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
 }
 </code></pre>
 <p>当用户被 Laravel 内置的 <code>verified</code> 中间件重定向到 <code>/email/verify</code> 端点时，Fortify 将负责定义显示此视图的路由。</p>
-<p>您的“验证电子邮件”模板应包含一条信息性消息，指示用户单击发送到其电子邮件地址的电子邮件验证链接。</p>
+<p>你的“验证电子邮件”模板应包含一条信息性消息，指示用户单击发送到其电子邮件地址的电子邮件验证链接。</p>
 <p><a name="resending-email-verification-links"></a></p>
 <h4 id="重新发送电子邮件验证链接">重新发送电子邮件验证链接</h4>
-<p>如果您愿意，您可以在应用程序的 <code>verify-email</code> 模板中添加一个按钮，该按钮会触发对 <code>/email/verification-notification</code> 端点的 POST 请求。 当此端点收到请求时，将通过电子邮件将新的验证电子邮件链接发送给用户，如果先前的验证链接被意外删除或丢失，则允许用户获取新的验证链接。</p>
-<p>如果重新发送验证链接电子邮件的请求成功，Fortify 将使用 <code>status</code> 会话变量将用户重定向回 <code>/email/verify</code> 端点，允许您向用户显示信息性消息，通知他们操作已完成成功的。 如果请求是 XHR 请求，将返回 202 HTTP 响应：</p>
+<p>如果你愿意，你可以在应用程序的 <code>verify-email</code> 模板中添加一个按钮，该按钮会触发对 <code>/email/verification-notification</code> 端点的 POST 请求。当此端点收到请求时，将通过电子邮件将新的验证电子邮件链接发送给用户，如果先前的验证链接被意外删除或丢失，则允许用户获取新的验证链接。</p>
+<p>如果重新发送验证链接电子邮件的请求成功，Fortify 将使用 <code>status</code> 会话变量将用户重定向回 <code>/email/verify</code> 端点，允许你向用户显示信息性消息，通知他们操作已完成成功的。如果请求是 XHR 请求，将返回 202 HTTP 响应：</p>
 <pre><code class="language-blade">@<span class="keyword token">if</span> (session(<span class="string token">'status'</span>) == <span class="string token">'verification-link-sent'</span>)
     &lt;div <span class="keyword token">class</span>=<span class="string token">"mb-4 font-medium text-sm text-green-600"</span>&gt;
-        新的电子邮件验证链接已通过电子邮件发送给您！
+        新的电子邮件验证链接已通过电子邮件发送给你！
     &lt;/div&gt;
 @<span class="keyword token">endif</span>
 </code></pre>
 <p><a name="protecting-routes"></a></p>
 <h3 id="保护路线">保护路线</h3>
-<p>要指定一个路由或一组路由要求用户验证他们的电子邮件地址，您应该将 Laravel 的内置 <code>verified</code> 中间件附加到该路由。 该中间件在您的应用程序的 <code>App\Http\Kernel</code> 类中注册：</p>
+<p>要指定一个路由或一组路由要求用户验证他们的电子邮件地址，你应该将 Laravel 的内置 <code>verified</code> 中间件附加到该路由。该中间件在你的应用程序的 <code>App\Http\Kernel</code> 类中注册：</p>
 <pre><code class="language-php">Route::get(<span class="string token">'/dashboard'</span>, <span class="keyword token">function</span> () {
     <span class="comment token">// ...</span>
 })-&gt;middleware([<span class="string token">'verified'</span>]);
 </code></pre>
 <p><a name="password-confirmation"></a></p>
 <h2 id="确认密码">确认密码</h2>
-<p>在构建应用程序时，您可能偶尔会有一些操作需要用户在执行操作之前确认其密码。 通常，这些路由受到 Laravel 内置的 <code>password.confirm</code> 中间件的保护。</p>
-<p>要开始实现密码确认功能，我们需要指示 Fortify 如何返回应用程序的“密码确认”视图。 请记住，Fortify 是一个无头身份验证库。 如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
-<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。 通常，您应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
+<p>在构建应用程序时，你可能偶尔会有一些操作需要用户在执行操作之前确认其密码。通常，这些路由受到 Laravel 内置的 <code>password.confirm</code> 中间件的保护。</p>
+<p>要开始实现密码确认功能，我们需要指示 Fortify 如何返回应用程序的“密码确认”视图。请记住，Fortify 是一个无头身份验证库。如果你想要一个已经为你完成的 Laravel 身份验证功能的前端实现，你应该使用 <a href="starter-kits.html">application starter kit</a>。</p>
+<p>Fortify 的所有视图渲染逻辑都可以使用通过 <code>Laravel\Fortify\Fortify</code> 类提供的适当方法进行自定义。通常，你应该从应用程序的 <code>App\Providers\FortifyServiceProvider</code> 类的 <code>boot</code> 方法调用此方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Fortify\Fortify;
 
 <span class="comment token">/**
@@ -437,9 +437,9 @@ Fortify::authenticateThrough(<span class="keyword token">function</span> (Reques
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>Fortify 将负责定义返回此视图的 <code>/user/confirm-password</code> 端点。 您的 <code>confirm-password</code> 模板应包含一个表单，该表单向 <code>/user/confirm-password</code> 端点发出 POST 请求。 <code>/user/confirm-password</code> 端点需要一个包含用户当前密码的 <code>password</code> 字段。</p>
-<p>如果密码与用户的当前密码匹配，Fortify 会将用户重定向到他们尝试访问的路由。 如果请求是 XHR 请求，将返回 201 HTTP 响应。</p>
-<p>如果请求不成功，用户将被重定向回确认密码屏幕，验证错误将通过共享的 <code>$errors</code> Blade 模板变量提供给您。 或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
+<p>Fortify 将负责定义返回此视图的 <code>/user/confirm-password</code> 端点。你的 <code>confirm-password</code> 模板应包含一个表单，该表单向 <code>/user/confirm-password</code> 端点发出 POST 请求。 <code>/user/confirm-password</code> 端点需要一个包含用户当前密码的 <code>password</code> 字段。</p>
+<p>如果密码与用户的当前密码匹配，Fortify 会将用户重定向到他们尝试访问的路由。如果请求是 XHR 请求，将返回 201 HTTP 响应。</p>
+<p>如果请求不成功，用户将被重定向回确认密码屏幕，验证错误将通过共享的 <code>$errors</code> Blade 模板变量提供给你。或者，在 XHR 请求的情况下，验证错误将返回 422 HTTP 响应。</p>
 </div>
     <blockquote style="font-size: 0.9em;">
         本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
