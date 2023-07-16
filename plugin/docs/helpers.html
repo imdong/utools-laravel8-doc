@@ -1149,7 +1149,7 @@ data_set(<span class="variable token">$data</span>, <span class="string token">'
 
 <span class="comment token">// true</span>
 </code></pre>
-<p>你也可以传递数组的值的形式来判断指定字符串是否包含指定数组中的任一值：</p>
+<p>你也可以传递一个数组来判断指定字符串是否以数组中的任一值结尾：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
 
 <span class="variable token">$result</span> = Str::endsWith(<span class="string token">'This is my name'</span>, [<span class="string token">'name'</span>, <span class="string token">'foo'</span>]);
