@@ -43,7 +43,6 @@
 <p>提示：在深入了解 Laravel Horizon 之前，您应该熟悉 Laravel 的基础 <a href="queues.html">队列服务</a>。 Horizon 为 Laravel 的队列增加了额外的功能，如果你还不熟悉 Laravel 提供的基本队列功能，这些功能可能会让人感到困惑。</p>
 </blockquote>
 <p><a href="https://github.com/laravel/horizon">Laravel Horizon</a> 为你的 Laravel <a href="queues.html">Redis queues</a>.提供了一个美观的仪表盘和代码驱动的配置；它可以方便的监控队列系统的关键指标：任务吞吐量、运行时间、作业失败情况。</p>
-<p>所有的 worker 配置存储在一个简单的配置文件中，你可以在整个团队都可以进行协作的地方进行源码控制。</p>
 <p>在使用 Horizon 时，所有队列的 worker 配置都存储在一个简单的配置文件中。通过在受版本控制的文件中定义应用程序的 worker 配置，你可以在部署应用程序时轻松扩展或修改应用程序的队列 worker。</p>
 <img src="https://laravel.com/img/docs/horizon-example.png">
 
@@ -85,7 +84,7 @@
 </code></pre>
 <p>当你启动 Horizon 时，它将使用指定应用程序运行环境所配置的 worker 进程选项。通常，环境配置由 <code>APP_ENV</code> <a href="configuration.html#determining-the-current-environment">环境变量</a> 的值确定。例如，默认的 <code>local</code> Horizon 环境配置为启动三个工作进程，并自动平衡分配给每个队列的工作进程数量。默认的「生产」环境配置为最多启动 10 个 worker 进程，并自动平衡分配给每个队列的 worker 进程数量。</p>
 <blockquote>
-<p>注意：您应该确保您的 <code>horizon</code> 配置文件的 <code>environments</code> 部分包含您计划在其上运行 Horizon 的每个 <a href="configuration.html#environment-configuration">环境</a> 的配置。</p>
+<p>注意：你应该确保你的 <code>horizon</code> 配置文件的 <code>environments</code> 部分包含计划在其上运行 Horizon 的每个 <a href="configuration.html#environment-configuration">环境</a> 的配置。</p>
 </blockquote>
 <p><a name="supervisors"></a></p>
 <h4 id="supervisors">Supervisors</h4>
@@ -140,7 +139,7 @@
 </code></pre>
 <p><a name="alternative-authentication-strategies"></a></p>
 <h4 id="可替代的身份验证策略">可替代的身份验证策略</h4>
-<p>需要留意的是，Laravel 会自动将经过 <em>authenticated</em>  的用户注入到拦截器（Gate）闭包中。如果你的应用程序通过其他方法（例如 IP 限制）提供 Horizon 安全性保障，那么你访问 Horizon 用户可能不需要实现这个「登录」动作。因此，你需要将上面的 <code>function ($user)</code> 更改为 <code>function ($user = null)</code> 以强制 Laravel 跳过身份验证。</p>
+<p>需要留意的是，Laravel 会自动将经过认证的用户注入到拦截器（Gate）闭包中。如果你的应用程序通过其他方法（例如 IP 限制）提供 Horizon 安全性保障，那么你访问 Horizon 用户可能不需要实现这个「登录」动作。因此，你需要将上面的 <code>function ($user)</code> 更改为 <code>function ($user = null)</code> 以强制 Laravel 跳过身份验证。</p>
 <p><a name="upgrading-horizon"></a></p>
 <h2 id="升级-horizon">升级 Horizon</h2>
 <p>当你升级到 Horizon 的一个新的主要版本时，你需要仔细阅读 <a href="https://github.com/laravel/horizon/blob/master/UPGRADE.md">升级指南</a>。</p>
