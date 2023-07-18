@@ -45,7 +45,7 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>Laravel提供了一个非常流畅的API，用于向应用程序发出HTTP请求并检查响应。例如，看看下面定义的特性测试:</p>
+<p>Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP 请求并检查响应。例如，看看下面定义的特性测试：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -69,11 +69,11 @@
     }
 }
 </code></pre>
-<p><code>get</code>方法向应用程序发出<code>Get</code>请求，而<code>assertStatus</code>方法则断言返回的响应应该具有给定的HTTP状态代码。除了这个简单的断言之外，Laravel还包含各种用于检查响应头、内容、JSON结构等的断言。</p>
+<p><code>get</code>方法向应用程序发出<code>Get</code>请求，而<code>assertStatus</code>方法则断言返回的响应应该具有给定的 HTTP 状态代码。除了这个简单的断言之外，Laravel 还包含各种用于检查响应头、内容、JSON 结构等的断言。</p>
 <p><a name="making-requests"></a></p>
 <h2 id="创建请求">创建请求</h2>
-<p>要向应用程序发出请求，可以在测试中调用<code>get</code>、<code>post</code>、<code>put</code>、<code>patch</code>或<code>delete</code>方法。这些方法实际上不会向应用程序发出“真正的” HTTP请求。相反，整个网络请求是在内部模拟的.</p>
-<p>测试请求方法不返回<code>Illuminate\Http\Response</code>实例，而是返回<code>Illuminate\Testing\TestResponse</code>实例，该实例提供<a href="##available-assertions">各种有用的断言</a>,允许您检查应用程序的响应:</p>
+<p>要向应用程序发出请求，可以在测试中调用<code>get</code>、<code>post</code>、<code>put</code>、<code>patch</code>或<code>delete</code>方法。这些方法实际上不会向应用程序发出“真正的”HTTP 请求。相反，整个网络请求是在内部模拟的。</p>
+<p>测试请求方法不返回<code>Illuminate\Http\Response</code>实例，而是返回<code>Illuminate\Testing\TestResponse</code>实例，该实例提供<a href="##available-assertions">各种有用的断言</a>,允许你检查应用程序的响应：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -97,13 +97,13 @@
     }
 }
 </code></pre>
-<p>通常，您的每个测试应该只向您的应用发出一个请求。如果在单个测试方法中执行多个请求，则可能会出现意外行为。</p>
+<p>通常，你的每个测试应该只向你的应用发出一个请求。如果在单个测试方法中执行多个请求，则可能会出现意外行为。</p>
 <blockquote>
 <p>技巧：为了方便起见，运行测试时会自动禁用 CSRF 中间件。</p>
 </blockquote>
 <p><a name="customizing-request-headers"></a></p>
 <h3 id="自定义请求头">自定义请求头</h3>
-<p>您可以使用此 <code>withHeaders</code> 方法自定义请求的标头，然后再将其发送到应用程序。这使您可以将任何想要的自定义标头添加到请求中：</p>
+<p>你可以使用此 <code>withHeaders</code> 方法自定义请求的标头，然后再将其发送到应用程序。这使你可以将任何想要的自定义标头添加到请求中：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -129,7 +129,7 @@
 </code></pre>
 <p><a name="cookies"></a></p>
 <h3 id="cookies">Cookies</h3>
-<p>在发送请求前你可以使用 <code>withCookie</code> 或 <code>withCookies</code> 方法设置 cookie 。<code>withCookie</code> 接受 cookie 的名称和值这两个参数，而 <code>withCookies</code> 方法接受一个名称 / 值对数组：</p>
+<p>在发送请求前你可以使用 <code>withCookie</code> 或 <code>withCookies</code> 方法设置 cookie。<code>withCookie</code> 接受 cookie 的名称和值这两个参数，而 <code>withCookies</code> 方法接受一个名称 / 值对数组：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -166,7 +166,7 @@
     }
 }
 </code></pre>
-<p>Laravel 的 session 通常用于维护当前已验证用户的状态。因此，<code>actingAs</code> 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如， 我们可以使用 <a href="database-testing.html#writing-factories">工厂模式</a> 生成并验证用户:</p>
+<p>Laravel 的 session 通常用于维护当前已验证用户的状态。因此，<code>actingAs</code> 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如，我们可以使用 <a href="database-testing.html#writing-factories">工厂模式</a> 生成并验证用户：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -191,7 +191,7 @@
 </code></pre>
 <p><a name="debugging-responses"></a></p>
 <h3 id="调试响应">调试响应</h3>
-<p>在向您的应用程序发出测试请求之后，可以使用 <code>dump</code>、<code>dumpHeaders</code> 和 <code>dumpSession</code> 方法来检查和调试响应内容：</p>
+<p>在向你的应用程序发出测试请求之后，可以使用 <code>dump</code>、<code>dumpHeaders</code> 和 <code>dumpSession</code> 方法来检查和调试响应内容：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -227,7 +227,7 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 基本功能测试示例子
+     * 基本功能测试例子
      *
      *<span class="phpdoc token"> @return</span> void
      */</span>
@@ -253,7 +253,7 @@
 </code></pre>
 <p><a name="testing-json-apis"></a></p>
 <h2 id="测试-json-apis">测试 JSON APIs</h2>
-<p>Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如，<code>json</code>、<code>getJson</code>、<code>postJson</code>、<code>putJson</code>、<code>patchJson</code>、<code>deleteJson</code> 以及 <code>optionsJson</code> 可以被用于发送各种 HTTP 动作。你也可以轻松地将数据和请求头传递到这些方法中。首先，让我们实现一个测试示例， 发送 <code>POST</code> 请求到 <code>/api/user</code>，并断言返回的期望数据：</p>
+<p>Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如，<code>json</code>、<code>getJson</code>、<code>postJson</code>、<code>putJson</code>、<code>patchJson</code>、<code>deleteJson</code> 以及 <code>optionsJson</code> 可以被用于发送各种 HTTP 动作。你也可以轻松地将数据和请求头传递到这些方法中。首先，让我们实现一个测试示例，发送 <code>POST</code> 请求到 <code>/api/user</code>，并断言返回的期望数据：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -287,7 +287,7 @@
 </blockquote>
 <p><a name="verifying-exact-match"></a></p>
 <h4 id="验证-json-完全匹配">验证 JSON 完全匹配</h4>
-<p>如前所述，<code>assertJson</code> 方法可用于断言 JSON 响应中存在 JSON 片段。如果您想验证给定数组是否与应用程序返回的 JSON <strong>完全匹配</strong>，则应使用 <code>assertExactJson</code> 方法：</p>
+<p>如前所述，<code>assertJson</code> 方法可用于断言 JSON 响应中存在 JSON 片段。如果你想验证给定数组是否与应用程序返回的 JSON <strong>完全匹配</strong>，则应使用 <code>assertExactJson</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -539,7 +539,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="rendering-blade-and-components"></a></p>
 <h3 id="渲染模板--组件">渲染模板 &amp; 组件</h3>
-<p>必要的话，你可以使用 <code>blade</code> 方法来计算和呈现原始的 <a href="blade.html">Blade</a> 字符串。与 <code>view</code> 方法一样，<code>blade</code> 方法返回的是 <code>Illuminate\Testing\TestView</code> 的实例:</p>
+<p>必要的话，你可以使用 <code>blade</code> 方法来计算和呈现原始的 <a href="blade.html">Blade</a> 字符串。与 <code>view</code> 方法一样，<code>blade</code> 方法返回的是 <code>Illuminate\Testing\TestView</code> 的实例：</p>
 <pre><code><span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;blade(
     <span class="string token">'&lt;x-component :name="$name" /&gt;'</span>,
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]
@@ -547,7 +547,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 
 <span class="variable token">$view</span>-&gt;assertSee(<span class="string token">'Taylor'</span>);
 </code></pre>
-<p>您可以使用 <code>component</code> 方法来评估和渲染 <a href="blade.html#components">Blade组件</a>。类似于 <code>view</code> 方法，<code>component</code> 方法返回一个 <code>Illuminate\Testing\TestView</code> 的实例：</p>
+<p>你可以使用 <code>component</code> 方法来评估和渲染 <a href="blade.html#components">Blade 组件</a>。类似于 <code>view</code> 方法，<code>component</code> 方法返回一个 <code>Illuminate\Testing\TestView</code> 的实例：</p>
 <pre><code><span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;component(Profile::<span class="keyword token">class</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]);
 
 <span class="variable token">$view</span>-&gt;assertSee(<span class="string token">'Taylor'</span>);
@@ -556,7 +556,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <h2 id="可用断言">可用断言</h2>
 <p><a name="response-assertions"></a></p>
 <h3 id="响应断言">响应断言</h3>
-<p>Laravel的 <code>Illuminate \ Testing \ TestResponse</code> 类提供了各种自定义断言方法，您可以在测试应用程序时使用它们。可以在由 <code>json</code>、<code>get</code>、<code>post</code>、<code>put</code> 和 <code>delete</code> 方法返回的响应上访问这些断言：</p>
+<p>Laravel 的 <code>Illuminate \ Testing \ TestResponse</code> 类提供了各种自定义断言方法，你可以在测试应用程序时使用它们。可以在由 <code>json</code>、<code>get</code>、<code>post</code>、<code>put</code> 和 <code>delete</code> 方法返回的响应上访问这些断言：</p>
 <style>
     .collection-method-list > p {
         column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;
@@ -759,7 +759,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
     }
 }
 </code></pre>
-<p>你可以断言 JSON 结构符合您的期望，如下所示：</p>
+<p>你可以断言 JSON 结构符合你的期望，如下所示：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonStructure([
     <span class="string token">'user'</span> =&gt; [
         <span class="string token">'name'</span>,
@@ -828,7 +828,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="assert-plain-cookie"></a></p>
 <h4 id="assertplaincookie">assertPlainCookie</h4>
-<p>断言响应包含给定的 cookie （未加密）:</p>
+<p>断言响应包含给定的 cookie（未加密）:</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertPlainCookie(<span class="variable token">$cookieName</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
 <p><a name="assert-redirect"></a></p>
@@ -871,17 +871,17 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言 Session 包含给定的数据段：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHas(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
-<p>如果需要，可以提供一个闭包作为 <code>assertSessionHas</code> 方法的第二个参数。 如果闭包返回 <code>true</code>，则断言将通过：</p>
+<p>如果需要，可以提供一个闭包作为 <code>assertSessionHas</code> 方法的第二个参数。如果闭包返回 <code>true</code>，则断言将通过：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHas(<span class="variable token">$key</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span>-&gt;name === <span class="string token">'Taylor Otwell'</span>;
 });
 </code></pre>
 <p><a name="assert-session-has-input"></a></p>
 <h4 id="assertsessionhasinput">assertSessionHasInput</h4>
-<p>session 在 <a href="responses.html#redirecting-with-flashed-session-data">闪存输入数组</a> 中断言具有给定值： </p>
+<p>session 在 <a href="responses.html#redirecting-with-flashed-session-data">闪存输入数组</a> 中断言具有给定值：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasInput(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
-<p>如果需要，可以提供一个闭包作为 <code>assertSessionHasInput</code> 方法的第二个参数。 如果闭包返回 <code>true</code>，则断言将通过：</p>
+<p>如果需要，可以提供一个闭包作为 <code>assertSessionHasInput</code> 方法的第二个参数。如果闭包返回 <code>true</code>，则断言将通过：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasInput(<span class="variable token">$key</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
     <span class="keyword token">return</span> Crypt::decryptString(<span class="variable token">$value</span>) === <span class="string token">'secret'</span>;
 });
@@ -891,7 +891,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言 Session 中具有给定的键 / 值对列表：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasAll(<span class="keyword token">array</span> <span class="variable token">$data</span>);
 </code></pre>
-<p>例如，如果您的应用程序会话包含 <code>name</code> 和 <code>status</code> 键，则可以断言它们存在并且具有指定的值，如下所示：</p>
+<p>例如，如果你的应用程序会话包含 <code>name</code> 和 <code>status</code> 键，则可以断言它们存在并且具有指定的值，如下所示：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasAll([
     <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor Otwell'</span>,
     <span class="string token">'status'</span> =&gt; <span class="string token">'active'</span>,
@@ -907,14 +907,14 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>例如，要断言 <code>name</code> 和 <code>email</code> 字段具有已闪存到 session 的验证错误消息，可以调用 <code>assertSessionHasErrors</code> 方法，如下所示：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasErrors([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
 </code></pre>
-<p>或者，您可以断言给定字段具有特定的验证错误消息：</p>
+<p>或者，你可以断言给定字段具有特定的验证错误消息：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasErrors([
     <span class="string token">'name'</span> =&gt; <span class="string token">'The given name was invalid.'</span>
 ]);
 </code></pre>
 <p><a name="assert-session-has-errors-in"></a></p>
 <h4 id="assertsessionhaserrorsin">assertSessionHasErrorsIn</h4>
-<p>断言会话在特定的 <a href="validation.html#named-error-bags">错误包</a> 中包含给定 <code>$keys</code> 的错误。如果 <code>$keys</code> 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）： </p>
+<p>断言会话在特定的 <a href="validation.html#named-error-bags">错误包</a> 中包含给定 <code>$keys</code> 的错误。如果 <code>$keys</code> 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasErrorsIn(<span class="variable token">$errorBag</span>, <span class="variable token">$keys</span> = [], <span class="variable token">$format</span> = <span class="keyword token">null</span>);
 </code></pre>
 <p><a name="assert-session-has-no-errors"></a></p>
@@ -954,7 +954,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="assert-valid"></a></p>
 <h4 id="assertvalid">assertValid</h4>
-<p>断言响应对给定键没有验证错误。 此方法可用于断言验证错误作为 JSON 结构返回或验证错误已闪现到会话的响应：</p>
+<p>断言响应对给定键没有验证错误。此方法可用于断言验证错误作为 JSON 结构返回或验证错误已闪现到会话的响应：</p>
 <pre><code><span class="comment token">// 断言不存在验证错误...</span>
 <span class="variable token">$response</span>-&gt;assertValid();
 
@@ -963,10 +963,10 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="assert-invalid"></a></p>
 <h4 id="assertinvalid">assertInvalid</h4>
-<p>断言响应对给定键有验证错误。 此方法可用于断言验证错误作为 JSON 结构返回或验证错误已闪存到会话的响应：</p>
+<p>断言响应对给定键有验证错误。此方法可用于断言验证错误作为 JSON 结构返回或验证错误已闪存到会话的响应：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertInvalid([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
 </code></pre>
-<p>您还可以断言给定键具有特定的验证错误消息。 这样做时，您可以提供整条消息或仅提供一部分消息：</p>
+<p>你还可以断言给定键具有特定的验证错误消息。这样做时，你可以提供整条消息或仅提供一部分消息：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertInvalid([
     <span class="string token">'name'</span> =&gt; <span class="string token">'The name field is required.'</span>,
     <span class="string token">'email'</span> =&gt; <span class="string token">'valid email address'</span>,
@@ -977,12 +977,12 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言为响应视图提供了一个键值对数据：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertViewHas(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
-<p>将闭包作为第二个参数传递给 <code>assertViewHas</code> 方法将允许您检查并针对特定的视图数据做出断言：</p>
+<p>将闭包作为第二个参数传递给 <code>assertViewHas</code> 方法将允许你检查并针对特定的视图数据做出断言：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertViewHas(<span class="string token">'user'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;name === <span class="string token">'Taylor'</span>;
 });
 </code></pre>
-<p>此外，视图数据可以作为数组变量访问响应，让您可以方便地检查它：</p>
+<p>此外，视图数据可以作为数组变量访问响应，让你可以方便地检查它：</p>
 <pre><code><span class="variable token">$this</span>-&gt;assertEquals(<span class="string token">'Taylor'</span>, <span class="variable token">$response</span>[<span class="string token">'name'</span>]);
 </code></pre>
 <p><a name="assert-view-has-all"></a></p>
@@ -996,7 +996,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
     <span class="string token">'email'</span>,
 ]);
 </code></pre>
-<p>或者，您可以断言该视图数据存在并且具有特定值：</p>
+<p>或者，你可以断言该视图数据存在并且具有特定值：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertViewHasAll([
     <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor Otwell'</span>,
     <span class="string token">'email'</span> =&gt; <span class="string token">'taylor@example.com,'</span>,
@@ -1013,8 +1013,8 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertViewMissing(<span class="variable token">$key</span>);
 </code></pre>
 <p><a name="authentication-assertions"></a></p>
-<h3 id="authentication-assertions">Authentication Assertions</h3>
-<p>Laravel 还提供了各种与身份验证相关的断言，您可以在应用程序的功能测试中使用它们。 请注意，这些方法是在测试类本身上调用的，而不是由诸如 <code>get</code> 和 <code>post</code> 等方法返回的 <code>Illuminate\Testing\TestResponse</code> 实例。</p>
+<h3 id="身份验证断言">身份验证断言</h3>
+<p>Laravel 还提供了各种与身份验证相关的断言，你可以在应用程序的功能测试中使用它们。请注意，这些方法是在测试类本身上调用的，而不是由诸如 <code>get</code> 和 <code>post</code> 等方法返回的 <code>Illuminate\Testing\TestResponse</code> 实例。</p>
 <p><a name="assert-authenticated"></a></p>
 <h4 id="assertauthenticated">assertAuthenticated</h4>
 <p>断言用户已通过身份验证：</p>
