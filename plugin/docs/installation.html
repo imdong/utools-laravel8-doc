@@ -172,6 +172,8 @@ php artisan serve
 <p>Laravel 框架的所有配置文件都存储在 <code>config</code> 目录中。每个选项都有文档记录，所以请随意浏览这些文件并熟悉可用的选项。</p>
 <p>Laravel 几乎不需要额外的配置。你可以自由地开始开发！然而，你可能希望查看 <code>config/app.php</code> 文件及其文档。它包含几个选项，比如 <code>timezone</code> 和 <code>locale</code>，你可能希望根据你的应用程序进行更改。</p>
 <p><a name="environment-based-configuration"></a></p>
+<h4 id="目录权限">目录权限</h4>
+<p>安装完 Laravel 后，你可能需要给这两个文件配置读写权限：<code>storage</code> 目录和 <code>bootstrap/cache</code> 目录应该允许 Web 服务器写入，否则 Laravel 程序将无法运行。</p>
 <h3 id="基于环境的配置">基于环境的配置</h3>
 <p>由于 Laravel 的许多配置选项值可能会根据你的应用程序是在本地计算机上还是在生产 Web 服务器上运行而有所不同，因此许多重要的配置值是使用 <code>.env</code> 存在于应用程序根目录中的文件来定义的。</p>
 <p>你的 <code>.env</code> 文件不应提交到应用程序的源代码管理，因为每个使用你的应用程序的开发人员/服务器可能需要不同的环境配置。此外，如果入侵者获得对你的源代码控制存储库的访问权限，这将是一个安全风险，因为任何敏感凭据都会被暴露。</p>
