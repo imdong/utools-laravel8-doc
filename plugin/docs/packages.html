@@ -45,7 +45,7 @@
 <p>另一方面，其他软件包专门用于 Laravel。 这些包可能包含专门用于增强 Laravel 应用程序的路由、控制器、视图和配置。 本指南主要涵盖了那些特定于 Laravel 的包的开发。</p>
 <p><a name="a-note-on-facades"></a></p>
 <h3 id="关于-facades">关于 Facades</h3>
-<p>在编写 Laravel 应用程序时，通常使用契约还是外观并不重要，因为两者都提供了基本相同的可测试性级别。 但是，在编写包时，您的包通常无法访问 Laravel 的所有测试助手。 如果您希望能够像将包安装在典型的 Laravel 应用程序中一样编写包测试，您可以使用 <a href="https://github.com/orchestral/testbench">Orchestral Testbench</a> 包。</p>
+<p>在编写 Laravel 应用程序时，通常使用契约（Contracts）还是门面（Facades）并不重要，因为两者都提供了基本相同的可测试性级别。 但是，在编写包时，您的包通常无法访问 Laravel 的所有测试助手。 如果您希望能够像将包安装在典型的 Laravel 应用程序中一样编写包测试，您可以使用 <a href="https://github.com/orchestral/testbench">Orchestral Testbench</a> 包。</p>
 <p><a name="package-discovery"></a></p>
 <h2 id="包发现">包发现</h2>
 <p>在 Laravel 应用程序的 <code>config/app.php</code> 配置文件中，<code>providers</code> 选项定义了 Laravel 应该加载的服务提供者列表。 当有人安装您的软件包时，您通常希望您的服务提供商包含在此列表中。 您可以在包的 <code>composer.json</code> 文件的 <code>extra</code> 部分中定义提供者，而不是要求用户手动将您的服务提供者添加到列表中。 除了服务提供商之外，您还可以列出您想注册的任何 <a href="facades.html">facades</a>：</p>
