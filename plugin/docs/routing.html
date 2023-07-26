@@ -301,11 +301,11 @@ Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword 
 <p>要将 <a href="middleware.html">middleware</a> 分配给组内的所有路由，你可以在定义组之前使用 <code>middleware</code> 方法。 中间件按照它们在数组中列出的顺序执行：</p>
 <pre><code>Route::middleware([<span class="string token">'first'</span>, <span class="string token">'second'</span>])-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// 使用第一个和第二个中间件...</span>
+        <span class="comment token">// 使用first和second中间件...</span>
     });
 
     Route::get(<span class="string token">'/user/profile'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// 使用第一个和第二个中间件...</span>
+        <span class="comment token">// 使用first和second中间件...</span>
     });
 });
 </code></pre>
@@ -663,7 +663,7 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 <p>在将应用程序部署到生产环境时，你应该利用 Laravel 的路由缓存。使用路由缓存将大大减少注册所有应用程序路由所需的时间。要生成路由缓存，请执行 <code>route:cache</code> Artisan 命令：</p>
 <pre><code class="language-shell">php artisan route:cache
 </code></pre>
-<p>运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路线，你将需要生成新的路线缓存。因此，你应该只在项目部署期间运行 <code>route:cache</code> 命令。</p>
+<p>运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路由，你将需要生成新的路由缓存。因此，你应该只在项目部署期间运行 <code>route:cache</code> 命令。</p>
 <p>你可以使用 <code>route:clear</code> 命令清除路由缓存：</p>
 <pre><code class="language-shell">php artisan route:clear
 </code></pre>
