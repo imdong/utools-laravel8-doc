@@ -48,7 +48,7 @@
 <li><a href="#sail-container-cli">容器 CLI</a></li>
 <li><a href="#sail-php-versions">PHP 版本</a></li>
 <li><a href="#sail-node-versions">Node 版本</a></li>
-<li><a href="#sharing-your-site">共享您的网站</a></li>
+<li><a href="#sharing-your-site">共享你的网站</a></li>
 <li><a href="#debugging-with-xdebug">使用 Xdebug 进行调试</a><ul>
 <li><a href="#xdebug-cli-usage">通过命令行使用 Xdebug 进行调试</a></li>
 <li><a href="#xdebug-browser-usage">通过浏览器使用 Xdebug 进行调试</a></li>
@@ -63,7 +63,7 @@
 <p>Laravel Sail 支持 macOS、Linux 和 Windows (通过 <a href="https://docs.microsoft.com/en-us/windows/wsl/about">WSL2</a>）。</p>
 <p><a name="installation"></a></p>
 <h2 id="安装--设定">安装 &amp; 设定</h2>
-<p>Laravel Sail 会随着所有全新的 Laravel 应用程序一起自动安装，因此你可以立即的开始使用它. 要了解如何创建一个新的 Laravel 应用程序，请查阅适合您目前操作系统的 <a href="https://learnku.com/docs/laravel/8.x/installation">安装文档</a>。在安装过程中，你将被要求选择你的应用程序将与哪些 Sail 支持的服务进行交互。</p>
+<p>Laravel Sail 会随着所有全新的 Laravel 应用程序一起自动安装，因此你可以立即的开始使用它. 要了解如何创建一个新的 Laravel 应用程序，请查阅适合你目前操作系统的 <a href="https://learnku.cominstallation.html">安装文档</a>。在安装过程中，你将被要求选择你的应用程序将与哪些 Sail 支持的服务进行交互。</p>
 <p><a name="installing-sail-into-existing-applications"></a></p>
 <h3 id="安装-sail-到当前应用中">安装 Sail 到当前应用中</h3>
 <p>假如你有兴趣在你现有的 Laravel 应用程序中使用 Sail，你可以透过 Composer 套件管理简单的安装 Sail。当然，这些步骤的前提是假设你现有的本地开发环境允许你安装 Copmoser 依赖：</p>
@@ -91,13 +91,13 @@
 <blockquote>
 <p>补充：通过 <code>vim ~/.bashrc</code> 或  <code>vim ~/.zshrc</code> 加入别名，可以让别名常驻。</p>
 </blockquote>
-<p>一旦配置了 Bash 别名，你可以通过简单的键入 <code>sail</code> 来执行 Sail 命令. 本文接下来的示例都假定你已经配置了此别名：</p>
+<p>一旦配置了 Bash 别名，你可以通过简单的键入 <code>sail</code> 来执行 Sail 命令。本文接下来的示例都假定你已经配置了此别名：</p>
 <pre><code class="language-shell">sail up
 </code></pre>
 <p><a name="starting-and-stopping-sail"></a></p>
 <h2 id="启动--停止-sail">启动 &amp; 停止 Sail</h2>
-<p>Laravel Sail 的 <code>docker-compose.yml</code> 文件定义了各种 Docker 容器，它们可以协同工作以帮助你构建 Laravel 应用程序。每一个容器都定义在 <code>docker-compose.yml</code> 文件的 <code>services</code> 的配置内。 <code>laravel.test</code> 容器是将服务于您的应用程序的主要应用程序容器。</p>
-<p>在开始 Sail 之前，你应该确认没有其他的网站服务器或数据库正运行在你的本地计算机上. 要开始启用 <code>docker-compose.yml</code> 文件中定义的所有 Docker 容器，请执行 <code>up</code> 命令：</p>
+<p>Laravel Sail 的 <code>docker-compose.yml</code> 文件定义了各种 Docker 容器，它们可以协同工作以帮助你构建 Laravel 应用程序。每一个容器都定义在 <code>docker-compose.yml</code> 文件的 <code>services</code> 的配置内。 <code>laravel.test</code> 容器是将服务于你的应用程序的主要应用程序容器。</p>
+<p>在开始 Sail 之前，你应该确认没有其他的网站服务器或数据库正运行在你的本地计算机上。要开始启用 <code>docker-compose.yml</code> 文件中定义的所有 Docker 容器，请执行 <code>up</code> 命令：</p>
 <pre><code class="language-shell">sail up
 </code></pre>
 <p>要在后台启动所有 Docker 容器，你可以在「分离 (detached)」模式下启动 Sail：</p>
@@ -111,10 +111,10 @@
 <h2 id="执行命令">执行命令</h2>
 <p>使用 Laravel Sail 时，应用程序在 Docker 容器中执行，并且与本地计算机隔离。不过 Sail 提供了一种针对应用程序运行各种命令的便捷方法，例如任意的 PHP 命令，Artisan 命令，Composer 命令和 Node / NPM 命令。</p>
 <p><strong>当你阅读 Laravel 文档时，你可能经常看到在未使用 Sail 的状况下运行 Composer，Artisan 或是 Node / NPM 命令。</strong> 以下示例假设你已经在本地计算机上安装上述工具。如果你打算使用 Sail 建构你的本地开发环境 ，你需要改用 Sail 运行这些命令：</p>
-<pre><code class="language-shell"><span class="comment token"># Running Artisan commands locally...</span>
+<pre><code class="language-shell"><span class="comment token"># 在本地运行 Artisan 命令...</span>
 php artisan queue:work
 
-<span class="comment token"># Running Artisan commands within Laravel Sail...</span>
+<span class="comment token"># 在 Laravel Sail 中运行 Artisan 命令...</span>
 sail artisan queue:work
 </code></pre>
 <p><a name="executing-php-commands"></a></p>
@@ -278,7 +278,7 @@ sail up
 <p>有时候你可能需要公开分享你的网站给同事，或是测试应用与 Webhook 的集成。想共享你的网站时，可以使用 <code>share</code> 命令。当你执行此命令后，将会获取一个随机的网址，例如 <code>laravel-sail.site</code> 用来访问你的应用程序：</p>
 <pre><code class="language-shell">sail share
 </code></pre>
-<p>当通过 <code>share</code> 命令共享您的站点时，您应该在 <code>TrustProxies</code> 中间件中配置应用程序的可信代理。否则，相关的URL 生成的助手函数，例如 <code>url</code> 和 <code>route</code> 将无法在生成 URL 生成过程中选择正确 HTTP 主机地址：</p>
+<p>当通过 <code>share</code> 命令共享你的站点时，你应该在 <code>TrustProxies</code> 中间件中配置应用程序的可信代理。否则，相关的URL 生成的助手函数，例如 <code>url</code> 和 <code>route</code> 将无法在生成 URL 生成过程中选择正确 HTTP 主机地址：</p>
 <pre><code><span class="comment token">/**
  * 应用程序的受信任代理
  *
@@ -294,7 +294,7 @@ sail up
 </blockquote>
 <p><a name="debugging-with-xdebug"></a></p>
 <h2 id="使用-xdebug-进行调试">使用 Xdebug 进行调试</h2>
-<p>Laravel Sail 的 Docker 配置包含对 <a href="https://xdebug.org/">Xdebug</a> 的支持，这是一个流行且强大的 PHP 调试器。为了启用 Xdebug，你需要在应用程序的 <code>.env</code> 文件中添加一些变量以 <a href="https://xdebug.org/docs/step_debug#mode">配置 Xdebug</a>。要启用 Xdebug，您必须在启动 Sail 之前设置适当的应用模式：</p>
+<p>Laravel Sail 的 Docker 配置包含对 <a href="https://xdebug.org/">Xdebug</a> 的支持，这是一个流行且强大的 PHP 调试器。为了启用 Xdebug，你需要在应用程序的 <code>.env</code> 文件中添加一些变量以 <a href="https://xdebug.org/docs/step_debug#mode">配置 Xdebug</a>。要启用 Xdebug，你必须在启动 Sail 之前设置适当的应用模式：</p>
 <pre><code class="language-ini">SAIL_XDEBUG_MODE=develop,debug
 </code></pre>
 <h4 id="linux-主机-ip-配置">Linux 主机 IP 配置</h4>
