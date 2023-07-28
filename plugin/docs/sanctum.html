@@ -33,6 +33,7 @@
 <li><a href="#token-abilities">令牌能力</a></li>
 <li><a href="#protecting-routes">保护路由</a></li>
 <li><a href="#revoking-tokens">撤销令牌</a></li>
+<li><a href="#token-expiration">令牌有效期</a></li>
 </ul>
 </li>
 <li><a href="#spa-authentication">SPA 认证</a><ul>
@@ -204,6 +205,18 @@ Route::middleware(<span class="string token">'auth:sanctum'</span>)-&gt;get(<spa
 
 <span class="comment token">// 撤销指定令牌...</span>
 <span class="variable token">$user</span>-&gt;tokens()-&gt;where(<span class="string token">'id'</span>, <span class="variable token">$tokenId</span>)-&gt;delete();
+</code></pre>
+<p><a name="token-expiration"></a></p>
+<h3 id="令牌有效期">令牌有效期</h3>
+<p>默认情况下，<code>sanctum</code> 的<code>token</code>无过期时限并且仅能通过<a href="#revoking-tokens">撤销令牌</a>来使它无效。当然如果您想在您的程序里设置<code>token</code>的有效期也是可以的。修改<code>sanctum</code>的配置文件中的<code>expiration</code>选项（默认为null），此选项设置的数字表示多少分钟后过期：</p>
+<pre><code><span class="comment token">// 365天后过期</span>
+<span class="string token">'expiration'</span>  =&gt;  <span class="number token">525600</span>,
+</code></pre>
+<p>如果您的程序中配置了<code>token</code>的过期时间，那您多半会希望能用<a href="scheduling.html">任务调度</a>自动删除过期了的<code>token</code>数据。有个好消息，<code>sanctum</code> 提供了一个<code>Artisan</code>命令，可以实现这个想法：</p>
+<pre><code class="language-sh">    php artisan sanctum:prune-expired
+</code></pre>
+<p>比如，您可以设置一个调度任务用于删除你数据库中所有过期超过24小时的<code>token</code>记录：</p>
+<pre><code><span class="variable token">$schedule</span>-&gt;command(<span class="string token">'sanctum:prune-expired --hours=24'</span>)-&gt;daily();
 </code></pre>
 <p><a name="spa-authentication"></a></p>
 <h2 id="spa-认证">SPA 认证</h2>
