@@ -81,9 +81,9 @@
 <h4 id="routes-目录">Routes 目录</h4>
 <p><code>routes</code> 目录包含应用程序的所有路由定义。默认情况下，Laravel 包含几个路由文件： <code>web.php</code>，<code>api.php</code>，<code>console.php</code> 以及 <code>channels.php</code>。</p>
 <p><code>web.php</code> 文件包含 <code>RouteServiceProvider</code> 放置在 <code>web</code> 中间件组中的路由，该中间件组提供会话状态，CSRF 保护和 cookie 加密，如果你的应用程序不提供无状态的 RESTful API，那么你的所有路由都很可能在 <code>web.php</code> 文件。</p>
-<p><code>api.php</code> 文件包含 <code>RouteServiceProvider</code> 放置在 <code>api</code> 中间件组中的路由。 这些路由旨在是无状态的，因此通过这些路由进入应用程序的请求旨在[通过令牌]（sanctum）进行身份验证，并且无法访问会话状态。</p>
+<p><code>api.php</code> 文件包含 <code>RouteServiceProvider</code> 放置在 <code>api</code> 中间件组中的路由。 这些路由旨在是无状态的，因此通过这些路由进入应用程序的请求旨在<a href="sanctum.html">通过令牌</a>进行身份验证，并且无法访问会话状态。</p>
 <p><code>console.php</code> 文件是您可以定义所有基于闭包的控制台命令的地方。 每个闭包都绑定到一个命令实例，允许一种简单的方法与每个命令的 IO 方法进行交互。 即使此文件没有定义 HTTP 路由，它也会定义应用程序中基于控制台的入口点（路由）。</p>
-<p><code>channels.php</code> 文件是您可以注册应用程序支持的所有 <a href="/docs/laravel/9.x/broadcasting.html">事件广播</a> 频道的地方。</p>
+<p><code>channels.php</code> 文件是您可以注册应用程序支持的所有 <a href="broadcasting.html">事件广播</a> 频道的地方。</p>
 <p><a name="the-storage-directory"></a></p>
 <h4 id="storage-目录">Storage 目录</h4>
 <p><code>storage</code> 目录包含你的日志、编译的 Blade 模板、基于文件的会话、文件缓存和框架生成的其他文件。 该目录分为 <code>app</code>、<code>framework</code> 和 <code>logs</code> 目录。 <code>app</code> 目录可用于存储应用程序生成的任何文件。<code>framework</code> 目录用于存储框架生成的文件和缓存。 最后，<code>logs</code> 目录包含应用程序的日志文件。</p>
