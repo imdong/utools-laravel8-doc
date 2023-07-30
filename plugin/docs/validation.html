@@ -826,7 +826,7 @@ Validator::make(<span class="variable token">$input</span>, [
 <p>验证字段必须等于给定日期。日期将传递到 PHP <code>strtotime</code> 函数中，以便转换为有效的 <code>DateTime</code> 实例。</p>
 <p><a name="rule-date-format"></a></p>
 <h4 id="date_formatformat">date_format:<em>format</em></h4>
-<p>验证字段必须匹配给定的 _format_（日期格式）。当验证某个字段的时候，你应该只使用 <code>date</code>  或者 <code>date_format</code>  <strong>其中一个</strong> ，而不是同时使用。此验证规则支持 PHP 所有的 <a href="https://www.php.net/manual/en/class.datetime.php">DateTime</a> 类。</p>
+<p>验证字段必须匹配给定的 <em>format</em> （日期格式）。当验证某个字段的时候，你应该只使用 <code>date</code>  或者 <code>date_format</code>  <strong>其中一个</strong> ，而不是同时使用。此验证规则支持 PHP 所有的 <a href="https://www.php.net/manual/en/class.datetime.php">DateTime</a> 类。</p>
 <p><a name="rule-declined"></a></p>
 <h4 id="declined">declined</h4>
 <p>正在验证的字段必须是 <code>&quot;no&quot;</code>，<code>&quot;off&quot;</code>，<code>0</code>或者 <code>false</code>。</p>
@@ -847,7 +847,7 @@ Validator::make(<span class="variable token">$input</span>, [
 <p>验证的文件必须是图片并且图片比例必须符合规则:</p>
 <pre><code>'avatar' =&gt; 'dimensions:min_width=100,min_height=200'
 </code></pre>
-<p>可用的规则为: _min_width_， _max_width_， _min_height_， _max_height_， _width_， _height_， _ratio_。</p>
+<p>可用的规则为: <em>min_width</em> ，<em>max_width</em> ，<em>min_height</em> ，<em>max_height</em> ，<em>width</em> ，<em>height</em> ，<em>ratio</em> 。</p>
 <p> <em>ratio</em> 约束应该表示为宽度除以高度。 这可以通过像 <code>3/2</code> 这样的语句或像 <code>1.5</code>这样的 <code>float</code> 来指定：</p>
 <pre><code>'avatar' =&gt; 'dimensions:ratio=3/2'
 </code></pre>
@@ -1123,7 +1123,7 @@ Validator::make(<span class="variable token">$data</span>, [
 
 <p><a name="rule-required-if"></a></p>
 <h4 id="required_ifanotherfieldvalue">required_if:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>如果 <em>anotherfield</em> 字段等于任何 _value_，则验证中的字段必须存在且不为空。</p>
+<p>如果 <em>anotherfield</em> 字段等于任何 <em>value</em> ，则验证中的字段必须存在且不为空。</p>
 <p>如果你想为 <code>required_if</code> 规则构造一个更复杂的条件，你可以使用 <code>Rule::requiredIf</code> 方法。 此方法接受布尔值或闭包。 当传递一个闭包时，闭包应该返回 <code>true</code> 或 <code>false</code> 以指示是否需要验证字段：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
@@ -1140,7 +1140,7 @@ Validator::make(<span class="variable token">$request</span>-&gt;all(), [
 </code></pre>
 <p><a name="rule-required-unless"></a></p>
 <h4 id="required_unlessanotherfieldvalue">required_unless:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>除非<em>anotherfield</em> 字段等于任何<em>value_，否则验证中的字段必须存在且不为空。 这也意味着 _anotherfield</em> 必须存在于请求数据中，除非 <em>value</em> 为 <code>null</code>。 如果 <em>value</em> 为 <code>null</code> (<code>required_unless:name,null</code>)，则需要验证的字段，除非比较字段为 <code>null</code> 或请求数据中缺少比较字段。</p>
+<p>除非<em>anotherfield</em> 字段等于任何 <em>value</em> ，否则验证中的字段必须存在且不为空。 这也意味着 <em>anotherfield</em> 必须存在于请求数据中，除非 <em>value</em> 为 <code>null</code>。 如果 <em>value</em> 为 <code>null</code> (<code>required_unless:name,null</code>)，则需要验证的字段，除非比较字段为 <code>null</code> 或请求数据中缺少比较字段。</p>
 <p><a name="rule-required-with"></a></p>
 <h4 id="required_withfoobar">required_with:<em>foo</em>,<em>bar</em>,...</h4>
 <p>仅当任何指定的字段存在且不为空时，验证下的字段才必须存在且不为空。</p>
@@ -1161,7 +1161,7 @@ Validator::make(<span class="variable token">$request</span>-&gt;all(), [
 <p>给定的 <em>field</em> 必须与正在验证的字段匹配。</p>
 <p><a name="rule-size"></a></p>
 <h4 id="sizevalue">size:<em>value</em></h4>
-<p>验证字段的大小必须与给定的<em>value_匹配。对于字符串数据，_value</em> 对应于字符数。 对于数字数据，<em>value</em> 对应于给定的整数值（属性还必须具有 <code>numeric</code> 或 <code>integer</code> 规则）。 对于数组，<em>size</em> 对应于数组的 <code>count</code>。 对于文件，<em>size</em> 对应于以千字节为单位的文件大小。 让我们看一些例子：</p>
+<p>验证字段的大小必须与给定的 <em>value</em> 匹配。对于字符串数据，<em>value</em> 对应于字符数。 对于数字数据，<em>value</em> 对应于给定的整数值（属性还必须具有 <code>numeric</code> 或 <code>integer</code> 规则）。 对于数组，<em>size</em> 对应于数组的 <code>count</code>。 对于文件，<em>size</em> 对应于以千字节为单位的文件大小。 让我们看一些例子：</p>
 <pre><code><span class="comment token">// 验证一个字符串是否正好是 12 个字符长...</span>
 <span class="string token">'title'</span> =&gt; <span class="string token">'size:12'</span>;
 
@@ -1267,7 +1267,7 @@ Validator::make(<span class="variable token">$data</span>, [
 </blockquote>
 <p><a name="complex-conditional-validation"></a></p>
 <h4 id="复杂的条件验证">复杂的条件验证</h4>
-<p>有时您可能希望基于更复杂的条件逻辑添加验证规则。例如，您可能希望仅当另一个字段的值大于 100 时才需要给定字段。或者，您可能需要两个字段才能仅在另一个字段存在时才具有给定值。 添加这些验证规则并不一定很痛苦。首先，使用您的_静态规则_创建一个永远不会改变的 <code>Validator</code> 实例：</p>
+<p>有时您可能希望基于更复杂的条件逻辑添加验证规则。例如，您可能希望仅当另一个字段的值大于 100 时才需要给定字段。或者，您可能需要两个字段才能仅在另一个字段存在时才具有给定值。 添加这些验证规则并不一定很痛苦。首先，使用您的 <em>静态规则</em> 创建一个永远不会改变的 <code>Validator</code> 实例：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
@@ -1601,7 +1601,7 @@ Validator::make(<span class="variable token">$input</span>, <span class="variabl
 <pre><code class="language-shell">php artisan make:rule Uppercase --implicit
 </code></pre>
 <blockquote>
-<p>注意：「隐式」规则仅_implicit_该属性是必需的。 它是否实际上使缺失或空属性无效取决于您。</p>
+<p>注意：「隐式」规则仅 <em>implicit</em> 该属性是必需的。 它是否实际上使缺失或空属性无效取决于您。</p>
 </blockquote>
 </div>
     <blockquote style="font-size: 0.9em;">
