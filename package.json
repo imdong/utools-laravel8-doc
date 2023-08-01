@@ -1,6 +1,6 @@
 {
-    "name": "utools-laravel9-doc",
-    "version": "1.0.0",
+    "name": "utools-laravel-doc",
+    "version": "1.10.80",
     "description": "适用于 uTools 插件的 Laravel 中文文档，定期同步自 learnku 社区，感谢社区热心用户与平台。",
     "author": "ImDong",
     "homepage": "https://www.qs5.org",
