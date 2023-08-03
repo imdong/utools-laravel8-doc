@@ -1,88 +1,93 @@
 # Artisan 命令行
 
-- [简介](#introduction)
-  - [Tinker 命令 (REPL)](#tinker)
+- [介绍](#introduction)
+    - [Tinker 命令 (REPL)](#tinker)
 - [编写命令](#writing-commands)
     - [生成命令](#generating-commands)
     - [命令结构](#command-structure)
     - [闭包命令](#closure-commands)
-- [定义输入期望](#defining-input-expectations)
+    - [单例命令](#isolatable-commands)
+- [定义输入期望值](#defining-input-expectations)
     - [参数](#arguments)
     - [选项](#options)
     - [输入数组](#input-arrays)
     - [输入说明](#input-descriptions)
 - [I/O 命令](#command-io)
     - [检索输入](#retrieving-input)
-    - [交互式输入](#prompting-for-input)
+    - [输入提示](#prompting-for-input)
     - [编写输出](#writing-output)
 - [注册命令](#registering-commands)
 - [在程序中执行命令](#programmatically-executing-commands)
     - [从其他命令调用命令](#calling-commands-from-other-commands)
 - [信号处理](#signal-handling)
-- [Stub 定制](#stub-customization)
-- [响应](#events)
+- [Stub 自定义](#stub-customization)
+- [事件](#events)
 
 <a name="introduction"></a>
-## 简介
+## 介绍
 
-Artisan 是 Laravel 附带的命令行接口。Artisan 以 `artisan` 脚本的形式存在于应用的根目录，并提供了许多有用的命令，这些命令可以在构建应用时为你提供帮助。你可以通过 `list` 命令查看所有可用的 Artisan 命令：
+Artisan 是 Laravel 中自带的命令行接口。Artisan 以 `artisan ` 脚本的方式存在于应用的根目录中，提供了许多有用的命令，帮助开发者创建应用。使用 `list` 命令可以查看所有可用的Artisan 命令：
 
 ```shell
 php artisan list
 ```
 
-每个命令都包含了「help」界面，它会显示和概述命令的可用参数及选项。只需要在命令前加上 `help` 即可查看命令帮助界面：
+每个命令都与 "help" 帮助界面，它能显示和描述该命令可用的参数和选项。要查看帮助界面，请在命令前加上 `help` 即可：
 
-```shel
+```shell
 php artisan help migrate
 ```
 
 <a name="laravel-sail"></a>
 #### Laravel Sail
 
-如果你将 [Laravel Sail](/docs/laravel/9.x/sail) 用作本地开发环境，记得使用 `sail` 命令行来调用 Artisan 命令。Sail 将在应用的 Docker 容器中执行 Artisan 命令：
+如果你使用 [Laravel Sail](/docs/laravel/10.x/sail) 作为本地开发环境，记得使用 `sail` 命令行来调用 Artisan 命令。Sail 会在应用的 Docker容器中执行 Artisan 命令：
 
 ```shell
-./sail artisan list
+./vendor/bin/sail artisan list
 ```
 
 <a name="tinker"></a>
-### Tinker 命令 (REPL)
+### Tinker (REPL)
 
-Laravel Tinker 是为 Laravel 提供的强大的 REPL（交互式解释器），由 [PsySH](https://github.com/bobthecow/psysh) 提供支持。
+Laravel Tinker 是为 Laravel 提供的强大的 REPL（交互式解释器），由 PsySH(https://github.com/bobthecow/psysh) 驱动支持。
+
+
 
 <a name="installation"></a>
 #### 安装
 
-所有 Laravel 应用都默认包含了 Tinker。如果你之前已经将 Tinker 从应用中删除，可以使用 Composer 进行手动安装：
+所有的 Laravel 应用默认都自带 Tinker。不过，如果你此前删除了它，你可以使用 Composer 安装：
 
 ```shell
 composer require laravel/tinker
 ```
 
-> 技巧：正在寻找一个能与 Laravel 交互的图形用户界面吗？试试 [Tinkerwell](https://tinkerwell.app)!
+> **注意**  
+> 需要能与 Laravel 交互的图形用户界面吗？试试 [Tinkerwell](https://tinkerwell.app)!
 
 <a name="usage"></a>
-#### 用法
+#### 使用
 
-Tinker 让你可以在命令行与你的整个 Laravel 应用进行交互。包括但不限于 Eloquent 模型、任务、事件等。通过运行 Artisan 命令 `tinker` 进入 Tinker 环境。
+Tinker 允许你在命令行中和整个 Laravel 应用交互，包括 Eloquent 模型、队列、事件等等。要进入 Tinker 环境，只需运行 `tinker` Artisan 命令：
 
 ```shell
 php artisan tinker
 ```
 
-你可以通过 `vendor:publish` 命令发布 Tinker 配置文件：
+你可以使用 `vendor:publish` 命令发布 Tinker 的配置文件：
 
 ```shell
 php artisan vendor:publish --provider="Laravel\Tinker\TinkerServiceProvider"
 ```
 
-> 注意：`dispatch`辅助函数和`Dispatchable`类上的`dispatch`方法都依赖于垃圾回收来将任务放置到队列中。因此，当你使用 Tinker 时，请使用 `Bus::dispatch` 或 `Queue::push` 来分发任务。
+> **警告**  
+> `dispatch` 辅助函数及 `Dispatchable` 类中 `dispatch` 方法依赖于垃圾回收将任务放置到队列中。因此，使用 tinker 时，请使用 `Bus::dispath` 或 `Queue::push` 来分发任务。
 
 <a name="command-allow-list"></a>
 #### 命令白名单
 
-Tinker 采用白名单来确定允许哪些 Artisan 命令可以在 shell 中运行。默认情况下，你可以运行 `clear-compiled`、`down`、`env`、`inspire`、`migrate`、`optimize` 和 `up` 命令。如果你想将命令添加到白名单，请将该命令添加到 `tinker.php` 配置文件的 `commands` 数组中：
+Tinker 使用白名单来确定哪些 Artisan 命令可以在其 Shell 中运行。默认情况下，你可以运行 `clear-compiled`、`down`、`env`、`inspire`、`migrate`、`optimize` 和 `up` 命令。如果你想允许更多命令，你可以将它们添加到 `tinker.php` 配置文件的 `commands` 数组中：
 
     'commands' => [
         // App\Console\Commands\ExampleCommand::class,
@@ -91,21 +96,23 @@ Tinker 采用白名单来确定允许哪些 Artisan 命令可以在 shell 中运
 <a name="classes-that-should-not-be-aliased"></a>
 #### 别名黑名单
 
-大多数情况下，Tinker 会在你引入类时自动为其添加别名。然而，你可能不希望为某些类添加别名。你可以在 `tinker.php` 配置文件中的 `dont_alias` 数组里列举这些类来完成此操作：
+一般而言，Tinker 会在你引入类时自动为其添加别名。不过，你可能不希望为某些类添加别名。你可以在 `tinker.php` 配置文件的 `dont_alias` 数组中列举这些类来完成此操作：
 
     'dont_alias' => [
         App\Models\User::class,
     ],
 
+
+
 <a name="writing-commands"></a>
 ## 编写命令
 
-除 Artisan 提供的命令外，你也可以编写自己的自定义命令。命令在多数情况下位于 `app/Console/Commands` 目录中。不过，只要你的命令可以由 Composer 加载，你就可以自由选择自己的存储位置。
+除了 Artisan 提供的命令之外，你可以创建自定义命令。一般而言，命令保存在 `app/Console/Commands` 目录；不过，你可以自由选择命令的存储位置，只要它能够被 Composer 加载即可。
 
 <a name="generating-commands"></a>
 ### 生成命令
 
-要创建新命令，可以使用 `make:command` Artisan 命令。该命令将在 `app/Console/Commands` 目录中创建一个新的命令类。如果你的应用程序中不存在此目录，请不要担心，它将在你第一次运行 `make:command` 命令时自动创建：
+要创建新命令，可以使用 `make:command` Artisan 命令。该命令会在 `app/Console/Commands` 目录下创建一个新的命令类。如果该目录不存在，也无需担心 - 它会在第一次运行 `make:command` Artisan 命令的时候自动创建：
 
 ```shell
 php artisan make:command SendEmails
@@ -114,9 +121,9 @@ php artisan make:command SendEmails
 <a name="command-structure"></a>
 ### 命令结构
 
-生成命令后，应为该类的 `signature` 和 `description` 属性定义适当的值。当在 `list` 屏幕上显示命令时，将使用这些属性。 `signature` 属性还允许你定义 [命令的输入期望值](#defining-input-expectations)。 `handle` 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。
+生成命令后，应该为该类的 `signature` 和 `description` 属性设置设当的值。当在 list 屏幕上显示命令时，将使用这些属性。`signature` 属性也会让你定义[命令输入预期值](#defining-input-expectations)。`handle` 方法会在命令执行时被调用。你可以在该方法中编写命令逻辑。
 
-让我们看一个示例命令。请注意，我们能够通过命令的 `handle` 方法请求我们需要的任何依赖项。Laravel [服务容器](/docs/laravel/9.x/container) 将自动注入此方法签名中带有类型提示的所有依赖项：
+让我们看一个示例命令。请注意，我们能够通过命令的 `handle` 方法引入我们需要的任何依赖项。Laravel [服务容器](https://learnku.com/docs/laravel/9.x/container) 将自动注入此方法签名中带有类型提示的所有依赖项：
 
     <?php
 
@@ -129,75 +136,63 @@ php artisan make:command SendEmails
     class SendEmails extends Command
     {
         /**
-         * 命令名称及签名.
+         * 控制台命令的名称和签名
          *
          * @var string
          */
         protected $signature = 'mail:send {user}';
 
         /**
-         * 命令描述.
+         * 命令描述
          *
          * @var string
          */
         protected $description = 'Send a marketing email to a user';
 
         /**
-         * 创建命令.
-         *
-         * @return void
+         * 执行命令
          */
-        public function __construct()
-        {
-            parent::__construct();
-        }
-
-        /**
-         * 执行命令.
-         *
-         * @param  \App\Support\DripEmailer  $drip
-         * @return mixed
-         */
-        public function handle(DripEmailer $drip)
+        public function handle(DripEmailer $drip): void
         {
             $drip->send(User::find($this->argument('user')));
         }
     }
 
-> 技巧：为了更好地复用代码，请尽量让你的命令类保持轻量并且能够延迟到应用服务中完成。在上面的示例中，我们注入了一个服务类来进行发送电子邮件的「繁重工作」。
+> **注意**
+> 为了更好地复用代码，请尽量让你的命令类保持轻量并且能够延迟到应用服务中完成。上例中，我们注入了一个服务类来进行发送电子邮件的「繁重工作」。
+
+
 
 <a name="closure-commands"></a>
 ### 闭包命令
 
-基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 `app/Console/Kernel.php` 文件的  `commands` 方法中，Laravel 加载 `routes/console.php` 文件：
+基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 `app/Console/Kernel.php` 文件的  `commands` 方法中 ，Laravel 加载 `routes/console.php` 文件：
 
     /**
      * 注册闭包命令
-     *
-     * @return void
      */
-    protected function commands()
+    protected function commands(): void
     {
         require base_path('routes/console.php');
     }
 
 尽管该文件没有定义 HTTP 路由，但它定义了进入应用程序的基于控制台的入口 (routes) 。在这个文件中，你可以使用 `Artisan::command` 方法定义所有的闭包路由。 `command` 方法接受两个参数： [命令名称](#defining-input-expectations) 和可调用的闭包，闭包接收命令的参数和选项：
 
-    Artisan::command('mail:send {user}', function ($user) {
+    Artisan::command('mail:send {user}', function (string $user) {
         $this->info("Sending email to: {$user}!");
     });
 
 该闭包绑定到基础命令实例，因此你可以完全访问通常可以在完整命令类上访问的所有辅助方法。
 
 <a name="type-hinting-dependencies"></a>
-#### 类型约束依赖
+#### Type-Hinting Dependencies
 
-除了接受命令参数及选项外，命令闭包也可以使用类型约束从 [服务容器](/docs/laravel/9.x/container) 中解析其他的依赖关系：
+除了接受命令参数及选项外，命令闭包也可以使用类型约束从 [服务容器](/docs/laravel/10.x/container) 中解析其他的依赖关系：
 
     use App\Models\User;
     use App\Support\DripEmailer;
 
-    Artisan::command('mail:send {user}', function (DripEmailer $drip, $user) {
+    Artisan::command('mail:send {user}', function (DripEmailer $drip, string $user) {
         $drip->send(User::find($user));
     });
 
@@ -206,14 +201,68 @@ php artisan make:command SendEmails
 
 在定义基于闭包的命令时，可以使用 `purpose` 方法向命令添加描述。当你运行 `php artisan list` 或 `php artisan help` 命令时，将显示以下描述：
 
-    Artisan::command('mail:send {user}', function ($user) {
+    Artisan::command('mail:send {user}', function (string $user) {
         // ...
     })->purpose('Send a marketing email to a user');
+
+
+
+<a name="isolatable-commands"></a>
+### 单例命令
+
+> **警告**
+> 要使用该特性，应用必须使用 `memcached`、`redis`、`dynamodb`、`database`、`file` 或 `array` 作为默认的缓存驱动。另外，所有的服务器必须与同一个中央缓存服务器通信。
+
+有时您可能希望确保一次只能运行一个命令实例。为此，你可以在命令类上实现 `Illuminate\Contracts\Console\Isolatable` 接口：
+
+    <?php
+
+    namespace App\Console\Commands;
+
+    use Illuminate\Console\Command;
+    use Illuminate\Contracts\Console\Isolatable;
+
+    class SendEmails extends Command implements Isolatable
+    {
+        // ...
+    }
+
+当命令被标记为 `Isolatable` 时，Laravel 会自动为该命令添加 `--isolated` 选项。当命令中使用这一选项时，Laravel 会确保不会有该命令的其他实例同时运行。Laravel 通过在应用的默认缓存驱动中使用原子锁来实现这一功能。如果这一命令有其他实例在运行，则该命令不会执行；不过，该命令仍然会使用成功退出状态码退出：
+
+```shell
+php artisan mail:send 1 --isolated
+```
+
+如果你想自己指定命令无法执行时返回的退出状态码，你可用通过 `isolated` 选项提供：
+
+```shell
+php artisan mail:send 1 --isolated=12
+```
+
+<a name="lock-expiration-time"></a>
+#### 原子锁到期时间
+
+默认情况下，单例锁会在命令完成后过期。或者如果命令被打断且无法完成的话，锁会在一小时后过期。不过你也可以通过定义命令的 `isolationLockExpiresAt` 方法来调整过期时间：
+
+```php
+use DateTimeInterface;
+use DateInterval;
+
+/**
+ * 定义单例锁的到期时间
+ */
+public function isolationLockExpiresAt(): DateTimeInterface|DateInterval
+{
+    return now()->addMinutes(5);
+}
+```
+
+
 
 <a name="defining-input-expectations"></a>
 ## 定义输入期望
 
-在编写控制台命令时，通常是通过参数和选项来收集用户输入的。Laravel 让你可以非常方便地在 `signature` 属性中定义你期望用户输入的内容。`signature` 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。
+在编写控制台命令时，通常是通过参数和选项来收集用户输入的。 Laravel 让你可以非常方便地在 `signature` 属性中定义你期望用户输入的内容。`signature` 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。
 
 <a name="arguments"></a>
 ### 参数
@@ -238,7 +287,7 @@ php artisan make:command SendEmails
 <a name="options"></a>
 ### 选项
 
-选项类似于参数，是用户输入的另一种形式。在命令行中指定选项的时候，它们以两个短横线 (--) 作为前缀。这有两种类型的选项：接收值和不接受值。不接收值的选项就像是一个布尔「开关」。我们来看一下这种类型的选项的示例：
+选项类似于参数，是用户输入的另一种形式。在命令行中指定选项的时候，它们以两个短横线 (`--`) 作为前缀。这有两种类型的选项：接收值和不接受值。不接收值的选项就像是一个布尔「开关」。我们来看一下这种类型的选项的示例：
 
     /**
      * 命令的名称及其标识
@@ -252,6 +301,8 @@ php artisan make:command SendEmails
 ```shell
 php artisan mail:send 1 --queue
 ```
+
+
 
 <a name="options-with-values"></a>
 #### 带值的选项
@@ -282,10 +333,10 @@ php artisan mail:send 1 --queue=default
 
     'mail:send {user} {--Q|queue}'
 
-在终端上调用命令时，选项简写的前缀只用一个连字符：
+在终端上调用命令时，选项简写的前缀只用一个连字符，在为选项指定值时不应该包括`=`字符。
 
 ```shell
-php artisan mail:send 1 -Q
+php artisan mail:send 1 -Qdefault
 ```
 
 <a name="input-arrays"></a>
@@ -298,10 +349,12 @@ php artisan mail:send 1 -Q
 当调用这个方法的时候，`user` 参数的输入参数将按顺序传递给命令。例如，以下命令将会设置 `user` 的值为 `foo` 和 `bar` ：
 
 ```shell
-php artisan mail:send foo bar
+php artisan mail:send 1 2
 ```
 
- `*` 字符可以与可选的参数结合使用，允许你定义零个或多个参数实例：
+
+
+ `*` 字符可以与可选的参数结合使用，允许您定义零个或多个参数实例：
 
     'mail:send {user?*}'
 
@@ -310,7 +363,7 @@ php artisan mail:send foo bar
 
 当定义需要多个输入值的选项时，传递给命令的每个选项值都应以选项名称作为前缀：
 
-    'mail:send {user} {--id=*}'
+    'mail:send {--id=*}'
 
 这样的命令可以通过传递多个 `--id` 参数来调用：
 
@@ -342,14 +395,10 @@ php artisan mail:send --id=1 --id=2
 
     /**
      * 执行控制台命令。
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): void
     {
         $userId = $this->argument('user');
-
-        //
     }
 
 如果你需要检索所有的参数做为 `array`，请调用 `arguments` 方法：
@@ -364,6 +413,8 @@ php artisan mail:send --id=1 --id=2
     // 检索所有选项做为数组...
     $options = $this->options();
 
+
+
 <a name="prompting-for-input"></a>
 ### 交互式输入
 
@@ -371,12 +422,12 @@ php artisan mail:send --id=1 --id=2
 
     /**
      * 执行命令指令
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         $name = $this->ask('What is your name?');
+
+        // ...
     }
 
 `secret` 方法与 `ask` 相似，区别在于用户的输入将不可见。这个方法在需要输入一些诸如密码之类的敏感信息时是非常有用的：
@@ -389,13 +440,13 @@ php artisan mail:send --id=1 --id=2
 如果你需要请求用户进行一个简单的确认，可以使用 `confirm` 方法来实现。默认情况下，这个方法会返回 `false`。当然，如果用户输入 `y` 或 `yes`，这个方法将会返回 `true`。
 
     if ($this->confirm('Do you wish to continue?')) {
-        //
+        // ...
     }
 
 如有必要，你可以通过将 `true` 作为第二个参数传递给 `confirm` 方法，这样就可以在默认情况下返回 `true`：
 
     if ($this->confirm('Do you wish to continue?', true)) {
-        //
+        // ...
     }
 
 <a name="auto-completion"></a>
@@ -407,9 +458,11 @@ php artisan mail:send --id=1 --id=2
 
 或者，你可以将一个闭包作为第二个参数传递给 `anticipate` 方法。每当用户键入字符时，闭包函数都会被调用。闭包函数应该接受一个包含用户输入的字符串形式的参数，并返回一个可供自动补全的选项的数组：
 
-    $name = $this->anticipate('What is your address?', function ($input) {
+    $name = $this->anticipate('What is your address?', function (string $input) {
         // 返回自动完成配置...
     });
+
+
 
 <a name="multiple-choice-questions"></a>
 #### 多选择问题
@@ -422,7 +475,7 @@ php artisan mail:send --id=1 --id=2
         $defaultIndex
     );
 
-此外， `choice` 方法接受第四和第五可选参数，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：
+此外， `choice` 方法接受第四和第五可选参数 ，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：
 
     $name = $this->choice(
         'What is your name?',
@@ -435,14 +488,12 @@ php artisan mail:send --id=1 --id=2
 <a name="writing-output"></a>
 ### 文字输出
 
-你可以使用 `line`，`info`，`comment`，`question` 和 `error` 方法，发送输出到控制台。这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，`info` 将会以绿色文本在控制台展示。
+你可以使用 `line`，`info`，`comment`，`question` 和 `error` 方法，发送输出到控制台。 这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，`info` 将会以绿色文本在控制台展示。
 
     /**
-     * 执行控制台命令
-     *
-     * @return mixed
+     * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         // ...
 
@@ -465,6 +516,8 @@ php artisan mail:send --id=1 --id=2
     // 输出三行空白...
     $this->newLine(3);
 
+
+
 <a name="tables"></a>
 #### 表格
 
@@ -484,7 +537,7 @@ php artisan mail:send --id=1 --id=2
 
     use App\Models\User;
 
-    $users = $this->withProgressBar(User::all(), function ($user) {
+    $users = $this->withProgressBar(User::all(), function (User $user) {
         $this->performTask($user);
     });
 
@@ -504,19 +557,17 @@ php artisan mail:send --id=1 --id=2
 
     $bar->finish();
 
-> 技巧：有关更多高级选项，请查看 [Symfony 进度条组件文档](https://symfony.com/doc/current/components/console/helpers/progressbar.html).
+> **技巧：**有关更多高级选项，请查看 [Symfony 进度条组件文档](https://symfony.com/doc/current/components/console/helpers/progressbar.html).
 
 <a name="registering-commands"></a>
 ## 注册命令
 
-你的所有控制台命令都在你的应用程序的 `App\Console\Kernel` 类中注册，这是你的应用程序的「控制台内核」。在此类的 `commands` 方法中，你将看到对内核的 `load` 方法的调用。 `load` 方法将扫描 `app/Console/Commands` 目录并自动将其中包含的每个命令注册到 Artisan。你甚至可以自由地调用 `load` 方法来扫描其他目录以查找 Artisan 命令：
+你的所有控制台命令都在您的应用程序的 `App\Console\Kernel` 类中注册，这是你的应用程序的「控制台内核」。在此类的 `commands` 方法中，你将看到对内核的 `load` 方法的调用。 `load` 方法将扫描 `app/Console/Commands` 目录并自动将其中包含的每个命令注册到 Artisan。 你甚至可以自由地调用 `load` 方法来扫描其他目录以查找 Artisan 命令：
 
     /**
-     * 注册应用程序的命令。
-     *
-     * @return void
+     * Register the commands for the application.
      */
-    protected function commands()
+    protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
         $this->load(__DIR__.'/../Domain/Orders/Commands');
@@ -524,7 +575,9 @@ php artisan mail:send --id=1 --id=2
         // ...
     }
 
-如有必要，你可以通过将命令的类名添加到 `App\Console\Kernel` 类中的 `$commands` 属性来手动注册命令。如果你的内核上尚未定义此属性，则应手动定义它。当 Artisan 启动时，此属性中列出的所有命令将由 [服务容器](/docs/laravel/9.x/container) 解析并注册到 Artisan：
+
+
+如有必要，你可以通过将命令的类名添加到 `App\Console\Kernel` 类中的 `$commands` 属性来手动注册命令。如果你的内核上尚未定义此属性，则应手动定义它。当 Artisan 启动时，此属性中列出的所有命令将由 [服务容器](/docs/laravel/10.x/container) 解析并注册到 Artisan：
 
     protected $commands = [
         Commands\SendEmails::class
@@ -537,12 +590,12 @@ php artisan mail:send --id=1 --id=2
 
     use Illuminate\Support\Facades\Artisan;
 
-    Route::post('/user/{user}/mail', function ($user) {
+    Route::post('/user/{user}/mail', function (string $user) {
         $exitCode = Artisan::call('mail:send', [
             'user' => $user, '--queue' => 'default'
         ]);
 
-        //
+        // ...
     });
 
 或者，你可以将整个 Artisan 命令作为字符串传递给 `call` 方法：
@@ -571,19 +624,21 @@ php artisan mail:send --id=1 --id=2
         '--force' => true,
     ]);
 
+
+
 <a name="queueing-artisan-commands"></a>
 #### 队列 Artisan 命令
 
-使用 `Artisan` 门面的 `queue` 方法，你甚至可以对 Artisan 命令进行排队，以便你的 [队列工作者](/docs/laravel/9.x/queues) 在后台处理它们。在使用此方法之前，请确保你已配置队列并正在运行队列侦听器：
+使用 `Artisan` 门面的 `queue` 方法，你甚至可以对 Artisan 命令进行排队，以便你的 [队列工作者](/docs/laravel/10.x/queues) 在后台处理它们。在使用此方法之前，请确保你已配置队列并正在运行队列侦听器：
 
     use Illuminate\Support\Facades\Artisan;
 
-    Route::post('/user/{user}/mail', function ($user) {
+    Route::post('/user/{user}/mail', function (string $user) {
         Artisan::queue('mail:send', [
             'user' => $user, '--queue' => 'default'
         ]);
 
-        //
+        // ...
     });
 
 使用 `onConnection` 和 `onQueue` 方法，你可以指定 Artisan 命令应分派到的连接或队列：
@@ -598,17 +653,15 @@ php artisan mail:send --id=1 --id=2
 有时你可能希望从现有的 Artisan 命令调用其他命令。你可以使用 `call` 方法来执行此操作。这个 `call` 方法接受命令名称和命令参数/选项数组：
 
     /**
-     * 执行控制台命令。
-     *
-     * @return mixed
+     * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->call('mail:send', [
             'user' => 1, '--queue' => 'default'
         ]);
 
-        //
+        // ...
     }
 
 如果你想调用另一个控制台命令并禁止其所有输出，你可以使用 `callSilently` 方法。 `callSilently` 方法与 `call` 方法具有相同的签名：
@@ -620,47 +673,29 @@ php artisan mail:send --id=1 --id=2
 <a name="signal-handling"></a>
 ## 信号处理
 
-为 Artisan 控制台提供动力的 Symfony 控制台组件允许你指示你的命令处理哪些进程信号（如果有）。例如，你可以指示你的命令处理「SIGINT」和「SIGTERM」信号。
-
-首先，你应该在你的 Artisan 命令类上实现 `Symfony\Component\Console\Command\SignalableCommandInterface` 接口。这个接口需要你定义两个方法：`getSubscribedSignals`和`handleSignal`：
-
-```php
-<?php
-
-use Symfony\Component\Console\Command\SignalableCommandInterface;
-
-class StartServer extends Command implements SignalableCommandInterface
-{
-    // ...
+正如你可能知道的，操作系统允许向运行中的进程发送信号。例如，「SIGTERM」信号是操作系统要求程序终止的方式。如果你想在 Artisan 控制台命令中监听信号，并在信号发生时执行代码，你可以使用 `trap` 方法。
 
     /**
-     * 获取命令处理的信号列表。
-     *
-     * @return array
+     * 执行控制台命令。
      */
-    public function getSubscribedSignals(): array
+    public function handle(): void
     {
-        return [SIGINT, SIGTERM];
-    }
+        $this->trap(SIGTERM, fn () => $this->shouldKeepRunning = false);
 
-    /**
-     * 处理传入信号。
-     *
-     * @param  int  $signal
-     * @return void
-     */
-    public function handleSignal(int $signal): void
-    {
-        if ($signal === SIGINT) {
-            $this->stopServer();
-
-            return;
+        while ($this->shouldKeepRunning) {
+            // ...
         }
     }
-}
-```
 
-正如你所料，`getSubscribedSignals` 方法应该返回命令可以处理的信号数组，而 `handleSignal` 方法接收信号并可以做出相应地响应。
+
+
+为了一次监听多个信号，你可以向 `trap` 方法提供一个信号数组。
+
+    $this->trap([SIGTERM, SIGQUIT], function (int $signal) {
+        $this->shouldKeepRunning = false;
+
+        dump($signal); // SIGTERM / SIGQUIT
+    });
 
 <a name="stub-customization"></a>
 ## Stub 定制
@@ -673,6 +708,8 @@ php artisan stub:publish
 
 已发布的 stub 将存放于你的应用根目录下的 `stubs` 目录中。对这些 stub 进行任何改动都将在你使用 Artisan `make` 命令生成相应的类的时候反映出来。
 
+<a name="events"></a>
 ## 事件
 
 Artisan 在运行命令时会调度三个事件： `Illuminate\Console\Events\ArtisanStarting`，`Illuminate\Console\Events\CommandStarting` 和  `Illuminate\Console\Events\CommandFinished`。当 Artisan 开始运行时，会立即调度 `ArtisanStarting` 事件。接下来，在命令运行之前立即调度  `CommandStarting` 事件。最后，一旦命令执行完毕，就会调度  `CommandFinished` 事件。
+
