@@ -1,24 +1,24 @@
 # 集合
 
 - [介绍](#introduction)
-    - [创建集合](#creating-collections)
-    - [扩展集合](#extending-collections)
+     - [创建集合](#creating-collections)
+     - [扩展集合](#extending-collections)
 - [可用方法](#available-methods)
 - [高阶消息](#higher-order-messages)
 - [惰性集合](#lazy-collections)
-    - [介绍](#lazy-collection-introduction)
-    - [创建惰性集合](#creating-lazy-collections)
-    - [枚举契约](#the-enumerable-contract)
-    - [惰性集合方法](#lazy-collection-methods)
+     - [介绍](#lazy-collection-introduction)
+     - [创建惰性集合](#creating-lazy-collections)
+     - [枚举契约](#the-enumerable-contract)
+     - [惰性集合方法](#lazy-collection-methods)
 
 <a name="introduction"></a>
 ## 介绍
 
-`Illuminate\Support\Collection` 类为处理数据数组提供了一个流畅、方便的包装器。例如，查看以下代码。我们将使用 `collect` 助手从数组中创建一个新的集合实例，对每个元素运行 `strtoupper` 函数，然后删除所有空元素：
+`Illuminate\Support\Collection` 类为处理数据数组提供了一个流畅、方便的包装器。 例如，查看以下代码。 我们将使用 `collect` 助手从数组中创建一个新的集合实例，对每个元素运行 `strtoupper` 函数，然后删除所有空元素：
 
-    $collection = collect(['taylor', 'abigail', null])->map(function ($name) {
+    $collection = collect(['taylor', 'abigail', null])->map(function (string $name) {
         return strtoupper($name);
-    })->reject(function ($name) {
+    })->reject(function (string $name) {
         return empty($name);
     });
 
@@ -31,7 +31,7 @@
 
     $collection = collect([1, 2, 3]);
 
-> 技巧：[Eloquent](/docs/laravel/9.x/eloquent) 查询的结果总是作为 `Collection` 实例返回。
+> **技巧：**[Eloquent](/docs/laravel/10.x/eloquent) 查询的结果总是作为 `Collection` 实例返回。
 
 <a name="extending-collections"></a>
 ### 扩展集合
@@ -42,7 +42,7 @@
     use Illuminate\Support\Str;
 
     Collection::macro('toUpper', function () {
-        return $this->map(function ($value) {
+        return $this->map(function (string $value) {
             return Str::upper($value);
         });
     });
@@ -53,7 +53,9 @@
 
     // ['FIRST', 'SECOND']
 
-通常，你应该在[service provider](/docs/laravel/9.x/providers)的 `boot` 方法中声明集合宏。
+
+
+通常，你应该在[服务提供者](/docs/laravel/10.x/providers)的 `boot` 方法中声明集合宏。
 
 <a name="macro-arguments"></a>
 #### 宏参数
@@ -63,8 +65,8 @@
     use Illuminate\Support\Collection;
     use Illuminate\Support\Facades\Lang;
 
-    Collection::macro('toLocale', function ($locale) {
-        return $this->map(function ($value) use ($locale) {
+    Collection::macro('toLocale', function (string $locale) {
+        return $this->map(function (string $value) use ($locale) {
             return Lang::get($value, [], $locale);
         });
     });
@@ -79,17 +81,19 @@
 对于剩余的大部分集合文档，我们将讨论 `Collection` 类中可用的每个方法。请记住，所有这些方法都可以链式调用，以便流畅地操作底层数组。此外，几乎每个方法都会返回一个新的 `Collection` 实例，允许你在必要时保留集合的原始副本：
 
 <style>
-    #collection-method-list > p {
-        column-count: 3; -moz-column-count: 3; -webkit-column-count: 3;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
     }
 
-    #collection-method-list a {
+    .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
-<div id="collection-method-list" markdown="1">
+<div class="collection-method-list" markdown="1">
 
 [all](#method-all)
 [average](#method-average)
@@ -101,6 +105,7 @@
 [combine](#method-combine)
 [concat](#method-concat)
 [contains](#method-contains)
+[containsOneItem](#method-containsoneitem)
 [containsStrict](#method-containsstrict)
 [count](#method-count)
 [countBy](#method-countBy)
@@ -119,6 +124,7 @@
 [except](#method-except)
 [filter](#method-filter)
 [first](#method-first)
+[firstOrFail](#method-first-or-fail)
 [firstWhere](#method-first-where)
 [flatMap](#method-flatmap)
 [flatten](#method-flatten)
@@ -128,8 +134,10 @@
 [get](#method-get)
 [groupBy](#method-groupby)
 [has](#method-has)
+[hasAny](#method-hasany)
 [implode](#method-implode)
 [intersect](#method-intersect)
+[intersectAssoc](#method-intersectAssoc)
 [intersectByKeys](#method-intersectbykeys)
 [isEmpty](#method-isempty)
 [isNotEmpty](#method-isnotempty)
@@ -137,6 +145,7 @@
 [keyBy](#method-keyby)
 [keys](#method-keys)
 [last](#method-last)
+[lazy](#method-lazy)
 [macro](#method-macro)
 [make](#method-make)
 [map](#method-map)
@@ -166,7 +175,6 @@
 [random](#method-random)
 [range](#method-range)
 [reduce](#method-reduce)
-[reduceMany](#method-reduce-many)
 [reduceSpread](#method-reduce-spread)
 [reject](#method-reject)
 [replace](#method-replace)
@@ -175,11 +183,11 @@
 [search](#method-search)
 [shift](#method-shift)
 [shuffle](#method-shuffle)
-[sliding](#method-sliding)
 [skip](#method-skip)
 [skipUntil](#method-skipuntil)
 [skipWhile](#method-skipwhile)
 [slice](#method-slice)
+[sliding](#method-sliding)
 [sole](#method-sole)
 [some](#method-some)
 [sort](#method-sort)
@@ -209,6 +217,7 @@
 [unlessEmpty](#method-unlessempty)
 [unlessNotEmpty](#method-unlessnotempty)
 [unwrap](#method-unwrap)
+[value](#method-value)
 [values](#method-values)
 [when](#method-when)
 [whenEmpty](#method-whenempty)
@@ -229,6 +238,8 @@
 
 </div>
 
+
+
 <a name="method-listing"></a>
 ## 方法列表
 
@@ -243,7 +254,7 @@
 </style>
 
 <a name="method-all"></a>
-#### `all()`
+#### `all()` {.collection-method .first-collection-method}
 
 `all` 方法返回由集合表示的底层数组：
 
@@ -252,12 +263,12 @@
     // [1, 2, 3]
 
 <a name="method-average"></a>
-#### `average()`
+#### `average()` {.collection-method}
 
 [`avg`](#method-avg) 方法的别名。
 
 <a name="method-avg"></a>
-#### `avg()`
+#### `avg()` {.collection-method}
 
 `avg` 方法返回给定键的 [平均值](https://en.wikipedia.org/wiki/Average)：
 
@@ -275,7 +286,7 @@
     // 2
 
 <a name="method-chunk"></a>
-#### `chunk()`
+#### `chunk()` {.collection-method}
 
 `chunk` 方法将集合分成多个给定大小的较小集合：
 
@@ -287,7 +298,7 @@
 
     // [[1, 2, 3, 4], [5, 6, 7]]
 
-当使用诸如 [Bootstrap](https://getbootstrap.com/docs/4.1/layout/grid/) 之类的网格系统时，此方法在 [views](/docs/laravel/9.x/views) 中特别有用 . 例如，假设你有一组 [Eloquent](/docs/laravel/9.x/eloquent) 模型要在网格中显示：
+当使用诸如 [Bootstrap](https://getbootstrap.com/docs/4.1/layout/grid/) 之类的网格系统时，此方法在 [views](/docs/laravel/10.x/views) 中特别有用。例如，假设你有一组 [Eloquent](/docs/laravel/10.x/eloquent) 模型要在网格中显示：
 
 ```blade
 @foreach ($products->chunk(3) as $chunk)
@@ -300,13 +311,13 @@
 ```
 
 <a name="method-chunkwhile"></a>
-#### `chunkWhile()`
+#### `chunkWhile()` {.collection-method}
 
 `chunkWhile` 方法根据给定回调的评估将集合分成多个更小的集合。传递给闭包的 `$chunk` 变量可用于检查前一个元素：
 
     $collection = collect(str_split('AABBCCCD'));
 
-    $chunks = $collection->chunkWhile(function ($value, $key, $chunk) {
+    $chunks = $collection->chunkWhile(function (string $value, int $key, Collection $chunk) {
         return $value === $chunk->last();
     });
 
@@ -315,6 +326,8 @@
     // [['A', 'A'], ['B', 'B'], ['C', 'C', 'C'], ['D']]
 
 <a name="method-collapse"></a>
+
+
 #### `collapse()` {.collection-method}
 
 `collapse` 方法将数组集合折叠成一个单一的平面集合：
@@ -362,7 +375,7 @@
 
     // [1, 2, 3]
 
-> 技巧：当你有一个 `Enumerable` 的实例并且需要一个非惰性集合实例时，`collect` 方法特别有用。由于 `collect()` 是 `Enumerable` 合约的一部分，你可以安全地使用它来获取 `Collection` 实例。
+> **技巧：**当你有一个 `Enumerable` 的实例并且需要一个非惰性集合实例时，`collect` 方法特别有用。由于 `collect()` 是 `Enumerable` 合约的一部分，你可以安全地使用它来获取 `Collection` 实例。
 
 <a name="method-combine"></a>
 #### `combine()` {.collection-method}
@@ -399,11 +412,13 @@
 
     $collection = collect([1, 2, 3, 4, 5]);
 
-    $collection->contains(function ($value, $key) {
+    $collection->contains(function (int $value, int $key) {
         return $value > 5;
     });
 
     // false
+
+
 
 或者，你可以将字符串传递给 `contains` 方法，以确定集合是否包含给定的项目值：
 
@@ -428,16 +443,33 @@
 
     // false
 
-`contains` 方法在检查项目值时使用「松散」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 [`containsStrict`](#method-containsstrict) 方法使用「严格」比较进行过滤。
+`contains` 方法在检查项目值时使用“松散”比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 [`containsStrict`](#method-containsstrict) 方法使用“严格”比较进行过滤。
 
 对于 `contains` 的逆操作，请参见 [doesntContain](#method-doesntcontain) 方法。
+
+<a name="method-containsoneitem"></a>
+#### `containsOneItem()` {.collection-method}
+
+`containsOneItem` 方法决定了集合是否包含一个项目。
+
+    collect([])->containsOneItem();
+
+    // false
+
+    collect(['1'])->containsOneItem();
+
+    // true
+
+    collect(['1', '2'])->containsOneItem();
+
+    // false
 
 <a name="method-containsstrict"></a>
 #### `containsStrict()` {.collection-method}
 
 此方法与 [`contains`](#method-contains) 方法具有相同的签名；但是，所有值都使用「严格」比较进行比较。
 
-> 技巧：使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-contains) 时会修改此方法的行为。
+> **技巧：**使用 [Eloquent Collections](/docs/laravel/10.x/eloquent-collections#method-contains) 时会修改此方法的行为。
 
 <a name="method-count"></a>
 #### `count()` {.collection-method}
@@ -453,7 +485,7 @@
 <a name="method-countBy"></a>
 #### `countBy()` {.collection-method}
 
-`countBy` 方法计算集合中值的出现次数。默认情况下，该方法计算每个元素的出现次数，允许你计算集合中元素的某些「类型」：
+`countBy` 方法计算集合中值的出现次数。默认情况下，该方法计算每个元素的出现次数，允许你计算集合中元素的某些“类型”：
 
     $collection = collect([1, 2, 2, 2, 3]);
 
@@ -463,11 +495,13 @@
 
     // [1 => 1, 2 => 3, 3 => 1]
 
+
+
 你将闭包传递给 `countBy` 方法以按自定义值计算所有项目：
 
     $collection = collect(['alice@gmail.com', 'bob@yahoo.com', 'carlos@gmail.com']);
 
-    $counted = $collection->countBy(function ($email) {
+    $counted = $collection->countBy(function (string $email) {
         return substr(strrchr($email, "@"), 1);
     });
 
@@ -547,7 +581,7 @@
 
     // [1, 3, 5]
 
-> 技巧：此方法的行为在使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-diff) 时被修改。
+> **技巧：**此方法的行为在使用 [Eloquent Collections](/docs/laravel/10.x/eloquent-collections#method-diff) 时被修改。
 
 <a name="method-diffassoc"></a>
 #### `diffAssoc()` {.collection-method}
@@ -570,6 +604,8 @@
     $diff->all();
 
     // ['color' => 'orange', 'remain' => 6]
+
+
 
 <a name="method-diffkeys"></a>
 #### `diffKeys()` {.collection-method}
@@ -602,7 +638,7 @@
 
     $collection = collect([1, 2, 3, 4, 5]);
 
-    $collection->doesntContain(function ($value, $key) {
+    $collection->doesntContain(function (int $value, int $key) {
         return $value < 5;
     });
 
@@ -653,6 +689,8 @@
 
 如果要在转储集合后停止执行脚本，请改用 [`dd`](#method-dd) 方法。
 
+
+
 <a name="method-duplicates"></a>
 #### `duplicates()` {.collection-method}
 
@@ -686,13 +724,15 @@
 
 `each` 方法遍历集合中的项目并将每个项目传递给闭包：
 
-    $collection->each(function ($item, $key) {
-        //
+    $collection = collect([1, 2, 3, 4]);
+
+    $collection->each(function (int $item, int $key) {
+        // ...
     });
 
 如果你想停止遍历这些项目，你可以从你的闭包中返回 `false`：
 
-    $collection->each(function ($item, $key) {
+    $collection->each(function (int $item, int $key) {
         if (/* condition */) {
             return false;
         }
@@ -705,13 +745,13 @@
 
     $collection = collect([['John Doe', 35], ['Jane Doe', 33]]);
 
-    $collection->eachSpread(function ($name, $age) {
-        //
+    $collection->eachSpread(function (string $name, int $age) {
+        // ...
     });
 
 你可以通过从回调中返回 `false` 来停止遍历项目：
 
-    $collection->eachSpread(function ($name, $age) {
+    $collection->eachSpread(function (string $name, int $age) {
         return false;
     });
 
@@ -720,17 +760,19 @@
 
 `every` 方法可用于验证集合的所有元素是否通过给定的真值测试：
 
-    collect([1, 2, 3, 4])->every(function ($value, $key) {
+    collect([1, 2, 3, 4])->every(function (int $value, int $key) {
         return $value > 2;
     });
 
     // false
 
+
+
 如果集合为空，`every` 方法将返回 true：
 
     $collection = collect([]);
 
-    $collection->every(function ($value, $key) {
+    $collection->every(function (int $value, int $key) {
         return $value > 2;
     });
 
@@ -751,7 +793,7 @@
 
 对于 `except` 的反义词，请参见 [only](#method-only) 方法。
 
-> 技巧：此方法的行为在使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-except) 时被修改。
+> 技巧：此方法的行为在使用 [Eloquent Collections](/docs/laravel/10.x/eloquent-collections#method-except) 时被修改。
 
 <a name="method-filter"></a>
 #### `filter()` {.collection-method}
@@ -760,7 +802,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $filtered = $collection->filter(function ($value, $key) {
+    $filtered = $collection->filter(function (int $value, int $key) {
         return $value > 2;
     });
 
@@ -783,7 +825,7 @@
 
 `first` 方法返回集合中通过给定真值测试的第一个元素：
 
-    collect([1, 2, 3, 4])->first(function ($value, $key) {
+    collect([1, 2, 3, 4])->first(function (int $value, int $key) {
         return $value > 2;
     });
 
@@ -794,6 +836,25 @@
     collect([1, 2, 3, 4])->first();
 
     // 1
+
+<a name="method-first-or-fail"></a>
+#### `firstOrFail()` {.collection-method}
+
+`firstOrFail` 方法与 `first` 方法相同；但是，如果没有找到结果，将抛出 `Illuminate/Support/ItemNotFoundException` 异常。
+
+    collect([1, 2, 3, 4])->firstOrFail(function (int $value, int $key) {
+        return $value > 5;
+    });
+
+    // Throws ItemNotFoundException...
+
+
+
+你也可以调用 `firstOrFail` 方法，没有参数，以获得集合中的第一个元素。如果集合是空的，将抛出一个 `Illuminate\Support\ItemNotFoundException` 异常。
+
+    collect([])->firstOrFail();
+
+    // Throws ItemNotFoundException...
 
 <a name="method-first-where"></a>
 #### `firstWhere()` {.collection-method}
@@ -834,7 +895,7 @@
         ['age' => 28]
     ]);
 
-    $flattened = $collection->flatMap(function ($values) {
+    $flattened = $collection->flatMap(function (array $values) {
         return array_map('strtoupper', $values);
     });
 
@@ -888,6 +949,8 @@
         ]
     */
 
+
+
 在此示例中，调用 `flatten` 而不提供深度也会使嵌套数组变平，从而导致 `['iPhone 6S', 'Apple', 'Galaxy S7', 'Samsung']`。提供深度允许你指定嵌套数组将被展平的级别数。
 
 <a name="method-flip"></a>
@@ -904,7 +967,7 @@
     // ['taylor' => 'name', 'laravel' => 'framework']
 
 <a name="method-forget"></a>
-#### `forget()`
+#### `forget()` {.collection-method}
 
 该 `forget` 方法将通过指定的键来移除集合中对应的元素：
 
@@ -916,10 +979,10 @@
 
     // ['framework' => 'laravel']
 
-> 注意：与大多数集合的方法不同的是， `forget` 不会返回修改后的新集合；它会直接修改原集合。
+> **注意：**与大多数集合的方法不同的是， `forget` 不会返回修改后的新集合；它会直接修改原集合。
 
 <a name="method-forpage"></a>
-#### `forPage()`
+#### `forPage()` {.collection-method}
 
 该 `forPage` 方法返回一个含有指定页码数集合项的新集合。这个方法接受页码数作为其第一个参数，每页显示的项数作为其第二个参数：
 
@@ -932,7 +995,7 @@
     // [4, 5, 6]
 
 <a name="method-get"></a>
-#### `get()`
+#### `get()` {.collection-method}
 
 该 `get` 方法返回指定键的集合项，如果该键在集合中不存在，则返回 null：
 
@@ -958,8 +1021,10 @@
 
     // taylor@example.com
 
+
+
 <a name="method-groupby"></a>
-#### `groupBy()`
+#### `groupBy()` {.collection-method}
 
 该 `groupBy` 方法根据指定键对集合项进行分组：
 
@@ -987,7 +1052,7 @@
 
 你可以传递回调，而不是传递字符串 `key`。回调应返回你希望通过以下方式键入组的值：
 
-    $grouped = $collection->groupBy(function ($item, $key) {
+    $grouped = $collection->groupBy(function (array $item, int $key) {
         return substr($item['account_id'], -3);
     });
 
@@ -1014,9 +1079,9 @@
         40 => ['user' => 4, 'skill' => 2, 'roles' => ['Role_2']],
     ]);
 
-    $result = $data->groupBy(['skill', function ($item) {
+    $result = $data->groupBy(['skill', function (array $item) {
         return $item['roles'];
-    }], $preserveKeys = true);
+    }], preserveKeys: true);
 
     /*
     [
@@ -1062,6 +1127,23 @@
 
     // false
 
+
+
+<a name="method-hasany"></a>
+#### `hasAny()` {.collection-method}
+
+`hasAny` 方法确定在集合中是否存在任何给定的键。
+
+    $collection = collect(['account_id' => 1, 'product' => 'Desk', 'amount' => 5]);
+
+    $collection->hasAny(['product', 'price']);
+
+    // true
+
+    $collection->hasAny(['name', 'price']);
+
+    // false
+
 <a name="method-implode"></a>
 #### `implode()` {.collection-method}
 
@@ -1082,6 +1164,14 @@
 
     // '1-2-3-4-5'
 
+如果你想对被内部处理的值进行格式化，你可以给 `implode` 方法传递一个闭包。
+
+    $collection->implode(function (array $item, int $key) {
+        return strtoupper($item['product']);
+    }, ', ');
+
+    // DESK, CHAIR
+
 <a name="method-intersect"></a>
 #### `intersect()` {.collection-method}
 
@@ -1095,12 +1185,35 @@
 
     // [0 => 'Desk', 2 => 'Chair']
 
-> 技巧：使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-intersect) 时会修改此方法的行为。
+> 技巧：使用 [Eloquent Collections](/docs/laravel/10.x/eloquent-collections#method-intersect) 时会修改此方法的行为。
+
+<a name="method-intersectAssoc"></a>
+#### `intersectAssoc()` {.collection-method}
+
+`intersectAssoc` 方法将原始集合与另一个集合或`array`进行比较，返回所有给定集合中存在的键/值对:
+
+    $collection = collect([
+        'color' => 'red',
+        'size' => 'M',
+        'material' => 'cotton'
+    ]);
+
+    $intersect = $collection->intersectAssoc([
+        'color' => 'blue',
+        'size' => 'M',
+        'material' => 'polyester'
+    ]);
+
+    $intersect->all();
+
+    // ['size' => 'M']
+
+
 
 <a name="method-intersectbykeys"></a>
 #### `intersectByKeys()` {.collection-method}
 
-`intersectByKeys` 方法从原始集合中删除给定 `array` 或集合中不存在的任何键及其对应值：
+`intersectByKeys` 方法删除了原始集合中不存在于给定的 `array` 或集合中的任何键和其相应的值。
 
     $collection = collect([
         'serial' => 'UX301', 'type' => 'screen', 'year' => 2009,
@@ -1164,9 +1277,11 @@
         ]
     */
 
+
+
 你也可以将回调传递给该方法。回调应通过以下方式返回值以作为集合的键：
 
-    $keyed = $collection->keyBy(function ($item) {
+    $keyed = $collection->keyBy(function (array $item, int $key) {
         return strtoupper($item['product_id']);
     });
 
@@ -1200,7 +1315,7 @@
 
 `last` 方法返回集合中通过给定真值测试的最后一个元素：
 
-    collect([1, 2, 3, 4])->last(function ($value, $key) {
+    collect([1, 2, 3, 4])->last(function (int $value, int $key) {
         return $value < 3;
     });
 
@@ -1212,24 +1327,52 @@
 
     // 4
 
+<a name="method-lazy"></a>
+#### `lazy()` {.collection-method}
+
+
+`lazy` 方法从底层的项目数组中返回一个新的 [`LazyCollection`](#lazy-collections) 实例。
+
+    $lazyCollection = collect([1, 2, 3, 4])->lazy();
+
+    get_class($lazyCollection);
+
+    // Illuminate\Support\LazyCollection
+
+    $lazyCollection->all();
+
+    // [1, 2, 3, 4]
+
+当你需要对一个包含许多项目的巨大 `Collection` 进行转换时，这一点特别有用。
+
+    $count = $hugeCollection
+        ->lazy()
+        ->where('country', 'FR')
+        ->where('balance', '>', '100')
+        ->count();
+
+通过将集合转换为 `LazyCollection`，我们避免了分配大量的额外内存。虽然原始集合仍然在内存中保留 _它的_ 值，但后续的过滤器不会。因此，在过滤集合的结果时，几乎没有额外的内存被分配。
+
+
+
 <a name="method-macro"></a>
 #### `macro()` {.collection-method}
 
 静态`macro()`方法允许你在运行时向「集合」类添加方法。有关详细信息，请参阅有关 [扩展集合](#extending-collections) 的文档。
 
 <a name="method-make"></a>
-#### `make()`
+#### `make()` {.collection-method}
 
 静态 `make` 方法可以创建一个新的集合实例。请参照 [创建集合](#creating-collections) 部分。
 
 <a name="method-map"></a>
-#### `map()`
+#### `map()` {.collection-method}
 
-`map`方法遍历集合并将每一个值传入给定的回调函数。该回调函数可以任意修改集合项并返回，从而生成被修改过集合项的新集合:
+静态 `make` 方法可以创建一个新的集合实例。请参照 [创建集合](#creating-collections) 部分。
 
     $collection = collect([1, 2, 3, 4, 5]);
 
-    $multiplied = $collection->map(function ($item, $key) {
+    $multiplied = $collection->map(function (int $item, int $key) {
         return $item * 2;
     });
 
@@ -1237,10 +1380,10 @@
 
     // [2, 4, 6, 8, 10]
 
-> 注意：与其他大多数集合方法一样， `map` 会返回一个新的集合实例；它不会修改原集合。如果你想修改原集合，请使用 [`transform`](#method-transform) 方法。
+> **注意：**与其他大多数集合方法一样， `map` 会返回一个新的集合实例；它不会修改原集合。如果你想修改原集合，请使用 [`transform`](#method-transform) 方法。
 
 <a name="method-mapinto"></a>
-#### `mapInto()`
+#### `mapInto()` {.collection-method}
 
 该 `mapInto()` 方法可以迭代集合，通过将值传递给构造函数来创建给定类的新实例：
 
@@ -1248,14 +1391,10 @@
     {
         /**
          * Create a new currency instance.
-         *
-         * @param  string  $code
-         * @return void
          */
-        function __construct(string $code)
-        {
-            $this->code = $code;
-        }
+        function __construct(
+            public string $code
+        ) {}
     }
 
     $collection = collect(['USD', 'EUR', 'GBP']);
@@ -1267,7 +1406,7 @@
     // [Currency('USD'), Currency('EUR'), Currency('GBP')]
 
 <a name="method-mapspread"></a>
-#### `mapSpread()`
+#### `mapSpread()` {.collection-method}
 
 该 `mapSpread` 方法可以迭代集合，将每个嵌套项值给指定的回调函数。该回调函数可以自由修改该集合项并返回，从而生成被修改过集合项的新集合：
 
@@ -1275,7 +1414,7 @@
 
     $chunks = $collection->chunk(2);
 
-    $sequence = $chunks->mapSpread(function ($even, $odd) {
+    $sequence = $chunks->mapSpread(function (int $even, int $odd) {
         return $even + $odd;
     });
 
@@ -1283,8 +1422,10 @@
 
     // [1, 5, 9, 13, 17]
 
+
+
 <a name="method-maptogroups"></a>
-#### `mapToGroups()`
+#### `mapToGroups()` {.collection-method}
 
 该 `mapToGroups` 方法通过给定的回调函数对集合项进行分组。该回调函数应该返回一个包含单个键 / 值对的关联数组，从而生成一个分组值的新集合：
 
@@ -1303,7 +1444,7 @@
         ]
     ]);
 
-    $grouped = $collection->mapToGroups(function ($item, $key) {
+    $grouped = $collection->mapToGroups(function (array $item, int $key) {
         return [$item['department'] => $item['name']];
     });
 
@@ -1338,7 +1479,7 @@
         ]
     ]);
 
-    $keyed = $collection->mapWithKeys(function ($item, $key) {
+    $keyed = $collection->mapWithKeys(function (array $item, int $key) {
         return [$item['email'] => $item['name']];
     });
 
@@ -1397,6 +1538,8 @@
     $merged->all();
 
     // ['product_id' => 1, 'price' => 200, 'discount' => false]
+
+
 
 如果给定项目的键是数字，则值将附加到集合的末尾：
 
@@ -1495,9 +1638,11 @@
 
     // ['product_id' => 1, 'name' => 'Desk']
 
+
+
 关于 `only` 的反义词，见[except](#method-except) 方法。
 
-> 技巧：使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-only) 时会修改此方法的行为。
+> **技巧：**使用 [Eloquent Collections](/docs/laravel/9.x/eloquent-collections#method-only) 时会修改此方法的行为。
 
 <a name="method-pad"></a>
 #### `pad()` {.collection-method}
@@ -1521,13 +1666,13 @@
     // [0, 0, 'A', 'B', 'C']
 
 <a name="method-partition"></a>
-#### `partition()`
+#### `partition()` {.collection-method}
 
 该 `partition` 方法可以与 PHP 数组解构相结合，以将通过给定真值测试的元素与未通过的元素分开：
 
     $collection = collect([1, 2, 3, 4, 5, 6]);
 
-    [$underThree, $equalOrAboveThree] = $collection->partition(function ($i) {
+    [$underThree, $equalOrAboveThree] = $collection->partition(function (int $i) {
         return $i < 3;
     });
 
@@ -1540,40 +1685,31 @@
     // [3, 4, 5, 6]
 
 <a name="method-pipe"></a>
-#### `pipe()`
+#### `pipe()` {.collection-method}
 
 该 `pipe` 可以把集合放到回调参数中并返回回调的结果：
 
     $collection = collect([1, 2, 3]);
 
-    $piped = $collection->pipe(function ($collection) {
+    $piped = $collection->pipe(function (Collection $collection) {
         return $collection->sum();
     });
 
     // 6
 
 <a name="method-pipeinto"></a>
-#### `pipeInto()`
+#### `pipeInto()` {.collection-method}
 
 该 `pipeInto` 方法创建一个给定类的新实例，并将集合传递给构造函数：
 
     class ResourceCollection
     {
         /**
-         * The Collection instance.
-         */
-        public $collection;
-
-        /**
          * Create a new ResourceCollection instance.
-         *
-         * @param  Collection  $collection
-         * @return void
          */
-        public function __construct(Collection $collection)
-        {
-            $this->collection = $collection;
-        }
+        public function __construct(
+          public Collection $collection,
+        ) {}
     }
 
     $collection = collect([1, 2, 3]);
@@ -1585,17 +1721,21 @@
     // [1, 2, 3]
 
 <a name="method-pipethrough"></a>
-#### `pipeThrough()`
+
+
+#### `pipeThrough()` {.collection-method}
 
 该 `pipeThrough` 方法将集合传递给给定的闭包数组并返回执行的闭包的结果：
+
+    use Illuminate\Support\Collection;
 
     $collection = collect([1, 2, 3]);
 
     $result = $collection->pipeThrough([
-        function ($collection) {
+        function (Collection $collection) {
             return $collection->merge([4, 5]);
         },
-        function ($collection) {
+        function (Collection $collection) {
             return $collection->sum();
         },
     ]);
@@ -1603,7 +1743,7 @@
     // 15
 
 <a name="method-pluck"></a>
-#### `pluck()`
+#### `pluck()` {.collection-method}
 
 该 `pluck` 可以获取集合中指定键对应的所有值：
 
@@ -1630,9 +1770,15 @@
 
     $collection = collect([
         [
+            'name' => 'Laracon',
             'speakers' => [
                 'first_day' => ['Rosa', 'Judith'],
-                'second_day' => ['Angela', 'Kathleen'],
+            ],
+        ],
+        [
+            'name' => 'VueConf',
+            'speakers' => [
+                'first_day' => ['Abigail', 'Joey'],
             ],
         ],
     ]);
@@ -1641,7 +1787,7 @@
 
     $plucked->all();
 
-    // ['Rosa', 'Judith']
+    // [['Rosa', 'Judith'], ['Abigail', 'Joey']]
 
 如果存在重复键，则将最后一个匹配元素插入到 plucked 集合中：
 
@@ -1687,6 +1833,8 @@
 
 <a name="method-prepend"></a>
 #### `prepend()` {.collection-method}
+
+
 
 `prepend` 方法将一个项目添加到集合的开头：
 
@@ -1770,6 +1918,18 @@
 
 如果集合实例的项目少于请求的项目，则 `random` 方法将抛出 `InvalidArgumentException`。
 
+`random` 方法也接受一个闭包，它将接收当前集合实例。
+
+    use Illuminate\Support\Collection;
+
+    $random = $collection->random(fn (Collection $items) => min(10, count($items)));
+
+    $random->all();
+
+    // [1, 2, 3, 4, 5] - (retrieved randomly)
+
+
+
 <a name="method-range"></a>
 #### `range()` {.collection-method}
 
@@ -1788,7 +1948,7 @@
 
     $collection = collect([1, 2, 3]);
 
-    $total = $collection->reduce(function ($carry, $item) {
+    $total = $collection->reduce(function (int $carry, int $item) {
         return $carry + $item;
     });
 
@@ -1796,7 +1956,7 @@
 
 `$carry` 在第一次迭代时的值为 `null`；但是，你可以通过将第二个参数传递给 `reduce` 来指定其初始值：
 
-    $collection->reduce(function ($carry, $item) {
+    $collection->reduce(function (int $carry, int $item) {
         return $carry + $item;
     }, 4);
 
@@ -1816,7 +1976,7 @@
         'eur' => 1.22,
     ];
 
-    $collection->reduce(function ($carry, $value, $key) use ($ratio) {
+    $collection->reduce(function (int $carry, int $value, int $key) use ($ratio) {
         return $carry + ($value * $ratio[$key]);
     });
 
@@ -1829,7 +1989,7 @@
 
     [$creditsRemaining, $batch] = Image::where('status', 'unprocessed')
         ->get()
-        ->reduceSpread(function ($creditsRemaining, $batch, $image) {
+        ->reduceSpread(function (int $creditsRemaining, Collection $batch, Image $image) {
             if ($creditsRemaining >= $image->creditsRequired()) {
                 $batch->push($image);
 
@@ -1846,7 +2006,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $filtered = $collection->reject(function ($value, $key) {
+    $filtered = $collection->reject(function (int $value, int $key) {
         return $value > 2;
     });
 
@@ -1854,12 +2014,14 @@
 
     // [1, 2]
 
+
+
 对于 `reject` 方法的逆操作，请参见 [`filter`](#method-filter) 方法。
 
 <a name="method-replace"></a>
 #### `replace()` {.collection-method}
 
-`replace` 方法的行为类似于 `merge`；但是，除了覆盖具有字符串键的匹配项之外，`replace` 方法还将覆盖集合中具有匹配数字键的项：
+
 
     $collection = collect(['Taylor', 'Abigail', 'James']);
 
@@ -1933,11 +2095,13 @@
 
 或者，你可以提供自己的闭包来搜索通过给定真值测试的第一个项目：
 
-    collect([2, 4, 6, 8])->search(function ($item, $key) {
+    collect([2, 4, 6, 8])->search(function (int $item, int $key) {
         return $item > 5;
     });
 
     // 2
+
+
 
 <a name="method-shift"></a>
 #### `shift()` {.collection-method}
@@ -1979,39 +2143,10 @@
 
     // [3, 2, 5, 1, 4] - (generated randomly)
 
-<a name="method-sliding"></a>
-#### `sliding()` {.collection-method}
-
-`sliding` 方法返回一个新的块集合，表示集合中项目的「滑动窗口」视图：
-
-    $collection = collect([1, 2, 3, 4, 5]);
-
-    $chunks = $collection->sliding(2);
-
-    $chunks->toArray();
-
-    // [[1, 2], [2, 3], [3, 4], [4, 5]]
-
-这与 [`eachSpread`](#method-eachspread) 方法结合使用特别有用：
-
-    $transactions->sliding(2)->eachSpread(function ($previous, $current) {
-        $current->total = $previous->total + $current->amount;
-    });
-
-你可以选择传递第二个「步长」值，该值确定每个块的第一项之间的距离：
-
-    $collection = collect([1, 2, 3, 4, 5]);
-
-    $chunks = $collection->sliding(3, step: 2);
-
-    $chunks->toArray();
-
-    // [[1, 2, 3], [3, 4, 5]]
-
 <a name="method-skip"></a>
 #### `skip()` {.collection-method}
 
-`skip` 方法返回一个新集合，从集合的开头删除给定数量的元素：
+`skip` 方法返回一个新的集合，并从集合的开始删除指定数量的元素。
 
     $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
@@ -2028,7 +2163,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $subset = $collection->skipUntil(function ($item) {
+    $subset = $collection->skipUntil(function (int $item) {
         return $item >= 3;
     });
 
@@ -2046,7 +2181,7 @@
 
     // [3, 4]
 
-> 注意：如果未找到给定值或回调从不返回 `true`，则 `skipUntil` 方法将返回一个空集合。
+> **注意：**如果没有找到给定的值或者回调从未返回 `true`，`skipUntil` 方法将返回一个空集合。
 
 <a name="method-skipwhile"></a>
 #### `skipWhile()` {.collection-method}
@@ -2055,7 +2190,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $subset = $collection->skipWhile(function ($item) {
+    $subset = $collection->skipWhile(function (int $item) {
         return $item <= 3;
     });
 
@@ -2063,12 +2198,14 @@
 
     // [4]
 
-> 注意：如果回调从不返回 `false`，则 `skipWhile` 方法将返回一个空集合。
+> **注意：**如果回调从未返回 `false`，`skipWhile` 方法将返回一个空集合。
+
+
 
 <a name="method-slice"></a>
 #### `slice()` {.collection-method}
 
-`slice` 方法返回从给定索引开始的集合切片：
+`slice` 方法返回从给定索引开始的集合的一个片断。
 
     $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
@@ -2078,7 +2215,7 @@
 
     // [5, 6, 7, 8, 9, 10]
 
-如果你想限制返回切片的大小，请将所需大小作为第二个参数传递给该方法：
+如果你想限制返回切片的大小，请将所需的大小作为第二个参数传给该方法。
 
     $slice = $collection->slice(4, 2);
 
@@ -2086,20 +2223,49 @@
 
     // [5, 6]
 
-默认情况下，返回的切片将保留键。如果你不希望保留原始键，可以使用 [`values`](#method-values) 方法重新索引它们。
+返回的切片将默认保留键值。如果你不希望保留原始键，你可以使用 [`values`](#method-values) 方法来重新索引它们。
+
+<a name="method-sliding"></a>
+#### `sliding()` {.collection-method}
+
+`sliding` 方法返回一个新的块集合，表示集合中项目的「滑动窗口」视图：
+
+    $collection = collect([1, 2, 3, 4, 5]);
+
+    $chunks = $collection->sliding(2);
+
+    $chunks->toArray();
+
+    // [[1, 2], [2, 3], [3, 4], [4, 5]]
+
+这与 [`eachSpread`](#method-eachspread) 方法结合使用特别有用：
+
+    $transactions->sliding(2)->eachSpread(function (Collection $previous, Collection $current) {
+        $current->total = $previous->total + $current->amount;
+    });
+
+你可以选择传递第二个「步长」值，该值确定每个块的第一项之间的距离：
+
+    $collection = collect([1, 2, 3, 4, 5]);
+
+    $chunks = $collection->sliding(3, step: 2);
+
+    $chunks->toArray();
+
+    // [[1, 2, 3], [3, 4, 5]]
 
 <a name="method-sole"></a>
 #### `sole()` {.collection-method}
 
-`sole` 方法返回集合中通过给定真值测试的第一个元素，但前提是真值测试与一个元素完全匹配：
+`sole` 方法返回集合中第一个通过给定真值测试的元素，但只有在真值测试正好匹配一个元素的情况下。
 
-    collect([1, 2, 3, 4])->sole(function ($value, $key) {
+    collect([1, 2, 3, 4])->sole(function (int $value, int $key) {
         return $value === 2;
     });
 
     // 2
 
-你还可以将键/值对传递给 `sole` 方法，该方法将返回集合中与给定对匹配的第一个元素，但前提是它恰好有一个元素匹配：
+你也可以向 `sole` 方法传递一个键/值对，它将返回集合中第一个与给定对相匹配的元素，但只有当它正好有一个元素相匹配时。
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -2110,7 +2276,9 @@
 
     // ['product' => 'Chair', 'price' => 100]
 
-或者，如果只有一个元素，你也可以调用不带参数的 `sole` 方法来获取集合中的第一个元素：
+
+
+另外，如果只有一个元素，你也可以调用没有参数的 `sole` 方法来获得集合中的第一个元素。
 
     $collection = collect([
         ['product' => 'Desk', 'price' => 200],
@@ -2142,7 +2310,7 @@
 
 如果你的排序需求更高级，你可以使用自己的算法将回调传递给「排序」。参考 PHP 文档[`uasort`](https://secure.php.net/manual/en/function.uasort.php#refsect1-function.uasort-parameters)，就是集合的`sort`方法 调用内部使用。
 
-> 技巧：如果你需要对嵌套数组或对象的集合进行排序，请参阅 [`sortBy`](#method-sortby) 和 [`sortByDesc`](#method-sortbydesc) 方法。
+> **技巧：**如果你需要对嵌套数组或对象的集合进行排序，请参阅 [`sortBy`](#method-sortby) 和 [`sortByDesc`](#method-sortbydesc) 方法。
 
 <a name="method-sortby"></a>
 #### `sortBy()` {.collection-method}
@@ -2166,6 +2334,8 @@
             ['name' => 'Desk', 'price' => 200],
         ]
     */
+
+
 
 `sortBy` 方法接受 [sort flags](https://www.php.net/manual/en/function.sort.php) 作为其第二个参数：
 
@@ -2195,7 +2365,7 @@
         ['name' => 'Bookcase', 'colors' => ['Red', 'Beige', 'Brown']],
     ]);
 
-    $sorted = $collection->sortBy(function ($product, $key) {
+    $sorted = $collection->sortBy(function (array $product, int $key) {
         return count($product['colors']);
     });
 
@@ -2244,8 +2414,8 @@
     ]);
 
     $sorted = $collection->sortBy([
-        fn ($a, $b) => $a['name'] <=> $b['name'],
-        fn ($a, $b) => $b['age'] <=> $a['age'],
+        fn (array $a, array $b) => $a['name'] <=> $b['name'],
+        fn (array $a, array $b) => $b['age'] <=> $a['age'],
     ]);
 
     $sorted->values()->all();
@@ -2258,6 +2428,8 @@
             ['name' => 'Taylor Otwell', 'age' => 34],
         ]
     */
+
+
 
 <a name="method-sortbydesc"></a>
 #### `sortByDesc()` {.collection-method}
@@ -2349,6 +2521,8 @@
 
     // [1, 2]
 
+
+
 你可以传递第二个参数来限制结果集合的大小：
 
     $collection = collect([1, 2, 3, 4, 5]);
@@ -2431,7 +2605,7 @@
         ['name' => 'Bookcase', 'colors' => ['Red', 'Beige', 'Brown']],
     ]);
 
-    $collection->sum(function ($product) {
+    $collection->sum(function (array $product) {
         return count($product['colors']);
     });
 
@@ -2460,6 +2634,8 @@
 
     // [4, 5]
 
+
+
 <a name="method-takeuntil"></a>
 #### `takeUntil()` {.collection-method}
 
@@ -2467,7 +2643,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $subset = $collection->takeUntil(function ($item) {
+    $subset = $collection->takeUntil(function (int $item) {
         return $item >= 3;
     });
 
@@ -2485,7 +2661,7 @@
 
     // [1, 2]
 
-> 注意：如果未找到给定值或回调从未返回 `true`，则 `takeUntil` 方法将返回集合中的所有项目。
+> **注意：**如果未找到给定值或回调从未返回 `true`，则 `takeUntil` 方法将返回集合中的所有项目。
 
 <a name="method-takewhile"></a>
 #### `takeWhile()` {.collection-method}
@@ -2494,7 +2670,7 @@
 
     $collection = collect([1, 2, 3, 4]);
 
-    $subset = $collection->takeWhile(function ($item) {
+    $subset = $collection->takeWhile(function (int $item) {
         return $item < 3;
     });
 
@@ -2502,7 +2678,7 @@
 
     // [1, 2]
 
-> 注意：如果回调从不返回 `false`，则 `takeWhile` 方法将返回集合中的所有项目。
+> **注意：**如果回调从不返回 `false`，则 `takeWhile` 方法将返回集合中的所有项目。
 
 <a name="method-tap"></a>
 #### `tap()` {.collection-method}
@@ -2511,7 +2687,7 @@
 
     collect([2, 4, 3, 1, 5])
         ->sort()
-        ->tap(function ($collection) {
+        ->tap(function (Collection $collection) {
             Log::debug('Values after sorting', $collection->values()->all());
         })
         ->shift();
@@ -2519,11 +2695,11 @@
     // 1
 
 <a name="method-times"></a>
-#### `times()`
+#### `times()` {.collection-method}
 
 静态 `times` 方法通过调用给定次数的回调函数来创建新集合：
 
-    $collection = Collection::times(10, function ($number) {
+    $collection = Collection::times(10, function (int $number) {
         return $number * 9;
     });
 
@@ -2532,9 +2708,9 @@
     // [9, 18, 27, 36, 45, 54, 63, 72, 81, 90]
 
 <a name="method-toarray"></a>
-#### `toArray()`
+#### `toArray()` {.collection-method}
 
-该 `toArray` 方法将集合转换成 PHP `array`。如果集合的值是 [Eloquent](/docs/laravel/9.x/eloquent) 模型，那也会被转换成数组：
+该 `toArray` 方法将集合转换成 PHP `array`。如果集合的值是 [Eloquent](/docs/laravel/10.x/eloquent) 模型，那也会被转换成数组：
 
     $collection = collect(['name' => 'Desk', 'price' => 200]);
 
@@ -2546,10 +2722,11 @@
         ]
     */
 
-> 注意：`toArray` 也会将 `Arrayable` 的实例、所有集合的嵌套对象转换为数组。如果你想获取原数组，可以使用 [`all`](#method-all) 方法。
+> **注意：**`toArray` 也会将 `Arrayable` 的实例、所有集合的嵌套对象转换为数组。如果你想获取原数组，可以使用 [`all`](#method-all) 方法。
+
 
 <a name="method-tojson"></a>
-#### `toJson()`
+#### `toJson()` {.collection-method}
 
 该 `toJson` 方法将集合转换成 JSON 字符串：
 
@@ -2560,13 +2737,13 @@
     // '{"name":"Desk", "price":200}'
 
 <a name="method-transform"></a>
-#### `transform()`
+#### `transform()` {.collection-method}
 
 该 `transform` 方法会遍历整个集合，并对集合中的每个元素都会调用其回调函数。集合中的元素将被替换为回调函数返回的值：
 
     $collection = collect([1, 2, 3, 4, 5]);
 
-    $collection->transform(function ($item, $key) {
+    $collection->transform(function (int $item, int $key) {
         return $item * 2;
     });
 
@@ -2574,10 +2751,10 @@
 
     // [2, 4, 6, 8, 10]
 
-> 注意：与大多数集合方法不同，`transform` 会修改集合本身。如果你想创建新集合，可以使用 [`map`](#method-map) 方法。
+> **注意：**与大多数集合方法不同，`transform` 会修改集合本身。如果你想创建新集合，可以使用 [`map`](#method-map) 方法。
 
 <a name="method-undot"></a>
-#### `undot()`
+#### `undot()` {.collection-method}
 
 `undot()` 方法将使用「点」表示法的一维集合扩展为多维集合：
 
@@ -2589,7 +2766,7 @@
         'address.suburb' => 'Detroit',
         'address.state' => 'MI',
         'address.postcode' => '48219'
-    ])
+    ]);
 
     $person = $person->undot();
 
@@ -2612,7 +2789,7 @@
     */
 
 <a name="method-union"></a>
-#### `union()`
+#### `union()` {.collection-method}
 
 该 `union` 方法将给定数组添加到集合中。如果给定的数组含有与原集合一样的键，则首选原始集合的值：
 
@@ -2625,7 +2802,7 @@
     // [1 => ['a'], 2 => ['b'], 3 => ['c']]
 
 <a name="method-unique"></a>
-#### `unique()`
+#### `unique()` {.collection-method}
 
 该 `unique` 方法返回集合中所有唯一项。返回的集合保留着原数组的键，所以在这个例子中，我们使用 [`values`](#method-values) 方法把键重置为连续编号的索引：
 
@@ -2636,6 +2813,8 @@
     $unique->values()->all();
 
     // [1, 2, 3, 4]
+
+
 
 当处理嵌套数组或对象时，你可以指定用于确定唯一性的键：
 
@@ -2660,7 +2839,7 @@
 
 最后，你还可以将自己的闭包传递给该 `unique` 方法，以指定哪个值应确定项目的唯一性：
 
-    $unique = $collection->unique(function ($item) {
+    $unique = $collection->unique(function (array $item) {
         return $item['brand'].$item['type'];
     });
 
@@ -2677,25 +2856,25 @@
 
 该 `unique` 方法在检查项目值时使用「宽松」模式比较，意味着具有整数值的字符串将被视为等于相同值的整数。你可以使用  [`uniqueStrict`](#method-uniquestrict)  方法做「严格」模式比较。
 
-> 技巧：这个方法的行为在使用 [Eloquent 集合](/docs/laravel/9.x/eloquent-collections#method-unique) 时被修改。
+> **技巧：**这个方法的行为在使用 [Eloquent 集合](/docs/laravel/10.x/eloquent-collections#method-unique) 时被修改。
 
 <a name="method-uniquestrict"></a>
-#### `uniqueStrict()`
+#### `uniqueStrict()` {.collection-method}
 
 这个方法与 [`unique`](#method-unique) 方法一样，然而，所有的值是用「严格」模式来比较的。
 
 <a name="method-unless"></a>
-#### `unless()`
+#### `unless()` {.collection-method}
 
 该 `unless` 方法当传入的第一个参数不为 `true` 的时候，将执行给定的回调函数：
 
     $collection = collect([1, 2, 3]);
 
-    $collection->unless(true, function ($collection) {
+    $collection->unless(true, function (Collection $collection) {
         return $collection->push(4);
     });
 
-    $collection->unless(false, function ($collection) {
+    $collection->unless(false, function (Collection $collection) {
         return $collection->push(5);
     });
 
@@ -2703,13 +2882,15 @@
 
     // [1, 2, 3, 5]
 
+
+
 可以将第二个回调传递给该 `unless` 方法。 `unless` 当给方法的第一个参数计算结果为时，将执行第二个回调 `true`:
 
     $collection = collect([1, 2, 3]);
 
-    $collection->unless(true, function ($collection) {
+    $collection->unless(true, function (Collection $collection) {
         return $collection->push(4);
-    }, function ($collection) {
+    }, function (Collection $collection) {
         return $collection->push(5);
     });
 
@@ -2720,17 +2901,17 @@
 与 `unless` 相反的，请参见 [`when`](#method-when) 方法。
 
 <a name="method-unlessempty"></a>
-#### `unlessEmpty()`
+#### `unlessEmpty()` {.collection-method}
 
 [`whenNotEmpty`](#method-whennotempty) 的别名方法。
 
 <a name="method-unlessnotempty"></a>
-#### `unlessNotEmpty()`
+#### `unlessNotEmpty()` {.collection-method}
 
 [`whenEmpty`](#method-whenempty) 的别名方法。
 
 <a name="method-unwrap"></a>
-#### `unwrap()`
+#### `unwrap()` {.collection-method}
 
 静态 `unwrap` 方法返回集合内部的可用元素：
 
@@ -2746,8 +2927,22 @@
 
     // 'John Doe'
 
+<a name="method-value"></a>
+#### `value()` {.collection-method}
+
+`value` 方法从集合的第一个元素中检索一个给定的值。
+
+    $collection = collect([
+        ['product' => 'Desk', 'price' => 200],
+        ['product' => 'Speaker', 'price' => 400],
+    ]);
+
+    $value = $collection->value('price');
+
+    // 200
+
 <a name="method-values"></a>
-#### `values()`
+#### `values()` {.collection-method}
 
 该 `values` 方法返回键被重置为连续编号的新集合：
 
@@ -2768,17 +2963,18 @@
     */
 
 <a name="method-when"></a>
-#### `when()`
+#### `when()` {.collection-method}
 
-当 `when` 方法的第一个参数传入为 `true` 时，将执行给定的回调函数：
+当 `when` 方法的第一个参数传入为 `true` 时，将执行给定的回调函数。
+集合实例和给到 `when` 方法的第一个参数将被提供给闭包。
 
     $collection = collect([1, 2, 3]);
 
-    $collection->when(true, function ($collection) {
+    $collection->when(true, function (Collection $collection, int $value) {
         return $collection->push(4);
     });
 
-    $collection->when(false, function ($collection) {
+    $collection->when(false, function (Collection $collection, int $value) {
         return $collection->push(5);
     });
 
@@ -2786,13 +2982,15 @@
 
     // [1, 2, 3, 4]
 
+
+
 可以将第二个回调传递给该 `when` 方法。当给 `when` 方法的第一个参数计算结果为 `false` 时，将执行第二个回调：
 
     $collection = collect([1, 2, 3]);
 
-    $collection->when(false, function ($collection) {
+    $collection->when(false, function (Collection $collection, int $value) {
         return $collection->push(4);
-    }, function ($collection) {
+    }, function (Collection $collection) {
         return $collection->push(5);
     });
 
@@ -2803,13 +3001,13 @@
 与 `when` 相反的方法，请查看 [`unless`](#method-unless) 方法。
 
 <a name="method-whenempty"></a>
-#### `whenEmpty()`
+#### `whenEmpty()` {.collection-method}
 
 该 `whenEmpty` 方法是当集合为空时，将执行给定的回调函数：
 
     $collection = collect(['Michael', 'Tom']);
 
-    $collection->whenEmpty(function ($collection) {
+    $collection->whenEmpty(function (Collection $collection) {
         return $collection->push('Adam');
     });
 
@@ -2820,7 +3018,7 @@
 
     $collection = collect();
 
-    $collection->whenEmpty(function ($collection) {
+    $collection->whenEmpty(function (Collection $collection) {
         return $collection->push('Adam');
     });
 
@@ -2832,9 +3030,9 @@
 
     $collection = collect(['Michael', 'Tom']);
 
-    $collection->whenEmpty(function ($collection) {
+    $collection->whenEmpty(function (Collection $collection) {
         return $collection->push('Adam');
-    }, function ($collection) {
+    }, function (Collection $collection) {
         return $collection->push('Taylor');
     });
 
@@ -2845,13 +3043,13 @@
 与 `whenEmpty` 相反的方法，请查看 [`whenNotEmpty`](#method-whennotempty) 方法。
 
 <a name="method-whennotempty"></a>
-#### `whenNotEmpty()`
+#### `whenNotEmpty()` {.collection-method}
 
 该 `whenNotEmpty` 方法当集合不为空时，将执行给定的回调函数：
 
     $collection = collect(['michael', 'tom']);
 
-    $collection->whenNotEmpty(function ($collection) {
+    $collection->whenNotEmpty(function (Collection $collection) {
         return $collection->push('adam');
     });
 
@@ -2862,7 +3060,7 @@
 
     $collection = collect();
 
-    $collection->whenNotEmpty(function ($collection) {
+    $collection->whenNotEmpty(function (Collection $collection) {
         return $collection->push('adam');
     });
 
@@ -2874,9 +3072,9 @@
 
     $collection = collect();
 
-    $collection->whenNotEmpty(function ($collection) {
+    $collection->whenNotEmpty(function (Collection $collection) {
         return $collection->push('adam');
-    }, function ($collection) {
+    }, function (Collection $collection) {
         return $collection->push('taylor');
     });
 
@@ -2884,10 +3082,12 @@
 
     // ['taylor']
 
+
+
 与 `whenNotEmpty` 相反的方法，请查看 [`whenEmpty`](#method-whenempty) 方法。
 
 <a name="method-where"></a>
-#### `where()`
+#### `where()` {.collection-method}
 
 该 `where` 方法通过给定的键 / 值对查询过滤集合的结果：
 
@@ -2912,6 +3112,7 @@
 该 `where` 方法在检查集合项值时使用「宽松」模式比较，这意味着具有整数值的字符串会被认为等于相同值的整数。你可以使用 [`whereStrict`](#method-wherestrict) 方法进行「严格」模式比较。
 
 而且，你还可以将一个比较运算符作为第二个参数传递。
+支持的运算符是有 '===', '！==', '！=', '==', '=', '<>', '>', '<', '>=', 和 '<='。
 
     $collection = collect([
         ['name' => 'Jim', 'deleted_at' => '2019-01-01 00:00:00'],
@@ -2931,12 +3132,12 @@
     */
 
 <a name="method-wherestrict"></a>
-#### `whereStrict()`
+#### `whereStrict()` {.collection-method}
 
 此方法和 [`where`](#method-where) 方法使用相似；但是它是「严格」模式去匹配值和类型。
 
 <a name="method-wherebetween"></a>
-#### `whereBetween()`
+#### `whereBetween()` {.collection-method}
 
 该 `whereBetween` 方法会筛选给定范围的集合：
 
@@ -2960,8 +3161,10 @@
         ]
     */
 
+
+
 <a name="method-wherein"></a>
-#### `whereIn()`
+#### `whereIn()` {.collection-method}
 
 该 `whereIn` 方法会根据包含给定数组的键 / 值对来过滤集合：
 
@@ -3057,15 +3260,17 @@
         ]
     */
 
+
+
 `whereNotIn` 方法在检查项目值时使用「loose」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 [`whereNotInStrict`](#method-wherenotinstrict) 方法使用「strict」比较进行过滤。
 
 <a name="method-wherenotinstrict"></a>
-#### `whereNotInStrict()`
+#### `whereNotInStrict()` {.collection-method}
 
 这个方法与 [`whereNotIn`](#method-wherenotin) 方法类似；不同的是会使用「严格」模式比较。
 
 <a name="method-wherenotnull"></a>
-#### `whereNotNull()`
+#### `whereNotNull()` {.collection-method}
 
 该 `whereNotNull` 方法筛选给定键不为 `null`的项：
 
@@ -3087,7 +3292,7 @@
     */
 
 <a name="method-wherenull"></a>
-#### `whereNull()`
+#### `whereNull()` {.collection-method}
 
 该 `whereNull` 方法筛选给定键为 `null`的项：
 
@@ -3107,8 +3312,9 @@
         ]
     */
 
+
 <a name="method-wrap"></a>
-#### `wrap()`
+#### `wrap()` {.collection-method}
 
 静态 `wrap` 方法会将给定值封装到集合中：
 
@@ -3133,7 +3339,7 @@
     // ['John Doe']
 
 <a name="method-zip"></a>
-#### `zip()`
+#### `zip()` {.collection-method}
 
 该 `zip` 方法在与集合的值对应的索引处合并给定数组的值：
 
@@ -3146,9 +3352,10 @@
     // [['Chair', 100], ['Desk', 200]]
 
 <a name="higher-order-messages"></a>
-## 高阶消息传递
+## Higher Order Messages
 
-集合也提供对「高阶消息传递」的支持，即集合常见操作的快捷方式。支持高阶消息传递的集合方法有： [`average`](#method-average)，[`avg`](#method-avg)，[`contains`](#method-contains)， [`each`](#method-each)，[`every`](#method-every)，[`filter`](#method-filter)， [`first`](#method-first)，[`flatMap`](#method-flatmap)，[`groupBy`](#method-groupby)，[`keyBy`](#method-keyby)，[`map`](#method-map)，[`max`](#method-max)， [`min`](#method-min)，[`partition`](#method-partition)，[`reject`](#method-reject)， [`skipUntil`](#method-skipuntil)，[`skipWhile`](#method-skipwhile)，[`some`](#method-some)，[`sortBy`](#method-sortby)，[`sortByDesc`](#method-sortbydesc)， [`sum`](#method-sum)，[`takeUntil`](#method-takeuntil)，[`takeWhile`](#method-takewhile) 和 [`unique`](#method-unique)。
+集合也提供对「高阶消息传递」的支持，即集合常见操作的快捷方式。支持高阶消息传递的集合方法有： [`average`](#method-average)、[`avg`](#method-avg)、[`contains`](#method-contains)、[`each`](#method-each)、[`every`](#method-every)、[`filter`](#method-filter)、[`first`](#method-first)、[`flatMap`](#method-flatmap)、[`groupBy`](#method-groupby)、[`keyBy`](#method-keyby)、[`map`](#method-map)、[`max`](#method-max)、[`min`](#method-min)、[`partition`](#method-partition)、[`reject`](#method-reject)、[`skipUntil`](#method-skipuntil)、[`skipWhile`](#method-skipwhile)、[`some`](#method-some)、[`sortBy`](#method-sortby)、[`sortByDesc`](#method-sortbydesc)、[`sum`](#method-sum)、[`takeUntil`](#method-takeuntil)、[`takeWhile`](#method-takeewhile) 和 [`unique`](#method-unique)。
+
 
 每个高阶消息都可以作为集合实例上的动态属性进行访问。例如，让我们使用 `each` 高阶消息来调用集合中每个对象的方法：
 
@@ -3170,7 +3377,7 @@
 <a name="lazy-collection-introduction"></a>
 ### 介绍
 
-> 注意：在进一步了解 Laravel 的惰性集合之前，花点时间熟悉一下 [PHP 生成器](https://www.php.net/manual/en/language.generators.overview.php).
+> **注意：**在进一步了解 Laravel 的惰性集合之前，花点时间熟悉一下 [PHP 生成器](https://www.php.net/manual/en/language.generators.overview.php).
 
 为了补充已经强大的 `Collection` 类，`LazyCollection` 类利用 PHP 的 [generators](https://www.php.net/manual/en/language.generators.overview.php) 允许你使用非常 大型数据集，同时保持较低的内存使用率。
 
@@ -3185,17 +3392,19 @@
         while (($line = fgets($handle)) !== false) {
             yield $line;
         }
-    })->chunk(4)->map(function ($lines) {
+    })->chunk(4)->map(function (array $lines) {
         return LogEntry::fromLines($lines);
     })->each(function (LogEntry $logEntry) {
         // Process the log entry...
     });
 
+
+
 或者，假设你需要遍历 10,000 个 Eloquent 模型。使用传统 Laravel 集合时，所有 10,000 个 Eloquent 模型必须同时加载到内存中：
 
     use App\Models\User;
 
-    $users = User::all()->filter(function ($user) {
+    $users = User::all()->filter(function (User $user) {
         return $user->id > 500;
     });
 
@@ -3203,7 +3412,7 @@
 
     use App\Models\User;
 
-    $users = User::cursor()->filter(function ($user) {
+    $users = User::cursor()->filter(function (User $user) {
         return $user->id > 500;
     });
 
@@ -3231,7 +3440,20 @@
 
 `Collection` 类上几乎所有可用的方法也可以在 `LazyCollection` 类上使用。这两个类都实现了 `Illuminate\Support\Enumerable` 契约，它定义了以下方法：
 
-<div id="collection-method-list" markdown="1">
+<style>
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
+    }
+
+    .collection-method-list a {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="collection-method-list" markdown="1">
 
 [all](#method-all)
 [average](#method-average)
@@ -3260,6 +3482,7 @@
 [except](#method-except)
 [filter](#method-filter)
 [first](#method-first)
+[firstOrFail](#method-first-or-fail)
 [firstWhere](#method-first-where)
 [flatMap](#method-flatmap)
 [flatten](#method-flatten)
@@ -3270,6 +3493,7 @@
 [has](#method-has)
 [implode](#method-implode)
 [intersect](#method-intersect)
+[intersectAssoc](#method-intersectAssoc)
 [intersectByKeys](#method-intersectbykeys)
 [isEmpty](#method-isempty)
 [isNotEmpty](#method-isnotempty)
@@ -3306,6 +3530,7 @@
 [shuffle](#method-shuffle)
 [skip](#method-skip)
 [slice](#method-slice)
+[sole](#method-sole)
 [some](#method-some)
 [sort](#method-sort)
 [sortBy](#method-sortby)
@@ -3344,7 +3569,8 @@
 
 </div>
 
-> 注意：改变集合的方法（例如 `shift`、`pop`、`prepend` 等）在 `LazyCollection` 类中**不**可用。
+> **注意：**改变集合的方法（例如 `shift`、`pop`、`prepend` 等）在 `LazyCollection` 类中**不**可用。
+
 
 <a name="lazy-collection-methods"></a>
 ### 惰性集合方法
@@ -3356,11 +3582,10 @@
 
 `takeUntilTimeout` 方法返回新的惰性集合，它会在给定时间前去枚举集合值，之后集合将停止枚举：
 
-```php
     $lazyCollection = LazyCollection::times(INF)
         ->takeUntilTimeout(now()->addMinute());
 
-    $lazyCollection->each(function ($number) {
+    $lazyCollection->each(function (int $number) {
         dump($number);
 
         sleep(1);
@@ -3371,11 +3596,9 @@
     // ...
     // 58
     // 59
-```
 
-为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 [计划任务](/docs/laravel/9.x/scheduling)，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：
+为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 [计划任务](/docs/laravel/10.x/scheduling)，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：
 
-```php
     use App\Models\Invoice;
     use Illuminate\Support\Carbon;
 
@@ -3383,17 +3606,15 @@
         ->takeUntilTimeout(
             Carbon::createFromTimestamp(LARAVEL_START)->add(14, 'minutes')
         )
-        ->each(fn ($invoice) => $invoice->submit());
-```
+        ->each(fn (Invoice $invoice) => $invoice->submit());
 
 <a name="method-tapEach"></a>
 #### `tapEach()` {.collection-method}
 
 当 `each` 方法为集合中每一个元素调用给定回调时， `tapEach` 方法仅调用给定回调，因为这些元素正在逐个从列表中拉出：
 
-```php
     // 没有任何输出
-    $lazyCollection = LazyCollection::times(INF)->tapEach(function ($value) {
+    $lazyCollection = LazyCollection::times(INF)->tapEach(function (int $value) {
         dump($value);
     });
 
@@ -3403,22 +3624,20 @@
     // 1
     // 2
     // 3
-```
 
 <a name="method-remember"></a>
 #### `remember()` {.collection-method}
 
 `remember` 方法返回一个新的惰性集合，这个集合已经记住（缓存）已枚举的所有值，当再次枚举该集合时不会获取它们：
 
-```php
     // 没执行任何查询
     $users = User::cursor()->remember();
 
     //  执行了查询操作
-    // 并且前 5 个用户数据已经在数据库中查询完成
+    // The first 5 users are hydrated from the database...
     $users->take(5)->all();
 
     // 前 5 个用户数据从缓存中获取
-    // 剩余的（15 个）用户数据从数据库中查询
+    // The rest are hydrated from the database...
     $users->take(20)->all();
-```
+
