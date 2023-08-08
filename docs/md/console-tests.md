@@ -1,3 +1,4 @@
+
 # 控制台测试
 
 - [介绍](#introduction)
@@ -7,7 +8,7 @@
 <a name="introduction"></a>
 ## 介绍
 
-除了简化 HTTP 测试之外，Laravel 还提供了一个简单的 API 来测试应用程序的 [自定义控制台命令](/docs/laravel/9.x/artisan)。
+除了简化 HTTP 测试之外，Laravel 还提供了一个简单的 API 来测试应用程序的 [自定义控制台命令](/docs/laravel/10.x/artisan)。
 
 <a name="success-failure-expectations"></a>
 ## 期望成功/失败
@@ -16,10 +17,8 @@
 
     /**
      * 测试控制台命令。
-     *
-     * @return void
      */
-    public function test_console_command()
+    public function test_console_command(): void
     {
         $this->artisan('inspire')->assertExitCode(0);
     }
@@ -51,20 +50,22 @@ Laravel 允许你使用 `expectsQuestion` 方法轻松 「mock」控制台命令
         $this->line('Your name is '.$name.' and you prefer '.$language.'.');
     });
 
-你可以使用以下测试来测试此命令，该测试利用了 `expectsQuestion`、`expectsOutput`、`doesntExpectOutput` 和 `assertExitCode` 方法：
+
+
+你可以用下面的测试来测试这个命令，该测试利用了 `expectsQuestion`、`expectsOutput`、`doesntExpectOutput`、`expectsOutputToContain`、`doesntExpectOutputToContain` 和 `assertExitCode` 方法。
 
     /**
      * 测试控制台命令。
-     *
-     * @return void
      */
-    public function test_console_command()
+    public function test_console_command(): void
     {
         $this->artisan('question')
              ->expectsQuestion('What is your name?', 'Taylor Otwell')
              ->expectsQuestion('Which language do you prefer?', 'PHP')
              ->expectsOutput('Your name is Taylor Otwell and you prefer PHP.')
              ->doesntExpectOutput('Your name is Taylor Otwell and you prefer Ruby.')
+             ->expectsOutputToContain('Taylor Otwell')
+             ->doesntExpectOutputToContain('you prefer Ruby')
              ->assertExitCode(0);
     }
 
@@ -90,3 +91,4 @@ Laravel 允许你使用 `expectsQuestion` 方法轻松 「mock」控制台命令
             [1, 'taylor@example.com'],
             [2, 'abigail@example.com'],
         ]);
+
