@@ -6,7 +6,7 @@
     - [定义一个修改器](#defining-a-mutator)
 - [属性转换](#attribute-casting)
     - [数组 & JSON 转换](#array-and-json-casting)
-    - [Date 转换](#date-casting)
+    - [日期转换](#date-casting)
     - [枚举转换](#enum-casting)
     - [加密转换](#encrypted-casting)
     - [查询时转换](#query-time-casting)
@@ -15,12 +15,12 @@
     - [数组 / JSON 序列化](#array-json-serialization)
     - [入站转换](#inbound-casting)
     - [类型转换参数](#cast-parameters)
-    - [Castables](#castables)
+    - [可转换](#castables)
 
 <a name="introduction"></a>
 ## 简介
 
-当你在 Eloquent 模型实例中获取或设置某些属性值的时候，访问器和修改器允许你对 Eloquent 属性值进行格式化。例如，你可能需要使用 [Laravel 加密器](https://learnku.com/docs/laravel/8.5/encryption) 来加密保存在数据库中的值，而在使用 Eloquent 模型访问该属性的时候自动进行解密其值。
+当你在 Eloquent 模型实例中获取或设置某些属性值时，访问器和修改器允许你对 Eloquent 属性值进行格式化。例如，你可能需要使用[ Laravel 加密器](/docs/laravel/10.x/encryption) 来加密保存在数据库中的值，而在使用 Eloquent 模型访问该属性的时候自动进行解密其值。
 
 或者，当通过 Eloquent 模型访问存储在数据库的 JSON 字符串时，你可能希望将其转换为数组。
 
@@ -32,31 +32,27 @@
 
 访问器会在访问一个模型的属性时转换 Eloquent 值。要定义访问器，请在模型中创建一个受保护的「驼峰式」方法来表示可访问属性。此方法名称对应到真正的底层模型 `属性/数据库字段` 的表示。
 
-在本例中，我们将为 first_name 属性定义一个访问器。在尝试检索 first_name 属性的值时，Eloquent 会自动调用访问器。所有属性访问器/修改器方法必须声明 `Illuminate\Database\Eloquent\Casts\Attribute` 的返回类型提示：
+在本例中，我们将为 `first_name` 属性定义一个访问器。在尝试检索 `first_name` 属性的值时，Eloquent 会自动调用访问器。所有属性访问器 / 修改器方法必须声明 `Illuminate\Database\Eloquent\Casts\Attribute`的返回类型提示：
 
-```
-<?php
- 
-namespace App\Models;
- 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
- 
-class User extends Model
-{
-    /**
-     * 获取用户的名字。
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function firstName(): Attribute
+    <?php
+
+    namespace App\Models;
+
+    use Illuminate\Database\Eloquent\Casts\Attribute;
+    use Illuminate\Database\Eloquent\Model;
+
+    class User extends Model
     {
-        return Attribute::make(
-            get: fn ($value) => ucfirst($value),
-        );
+        /**
+         * 获取用户的名字。
+         */
+        protected function firstName(): Attribute
+        {
+            return Attribute::make(
+                get: fn (string $value) => ucfirst($value),
+            );
+        }
     }
-}
-```
 
 
 
@@ -70,7 +66,7 @@ class User extends Model
 
     $firstName = $user->first_name;
 
-> 技巧：如果要将这些计算值添加到模型的数组/JSON 表示中，[你需要追加它们](/docs/laravel/9.x/eloquent-serialization#appending-values-to-json).
+> **注意**： 如果要将这些计算值添加到模型的 array / JSON 中表示，[你需要追加它们](/docs/laravel/10.x/eloquent-serializationmd#appending-values-to-json).
 
 <a name="building-value-objects-from-multiple-attributes"></a>
 #### 从多个属性构建值对象
@@ -83,21 +79,21 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * 与用户地址交互。
- *
- * @return  \Illuminate\Database\Eloquent\Casts\Attribute
  */
-public function address(): Attribute
+protected function address(): Attribute
 {
-    return new Attribute(
-        get: fn ($value, $attributes) => new Address(
+    return Attribute::make(
+        get: fn (mixed $value, array $attributes) => new Address(
             $attributes['address_line_one'],
             $attributes['address_line_two'],
         ),
     );
 }
-
 ```
+
+<a name="accessor-caching"></a>
 #### 访问器缓存
+
 从访问器返回值对象时，对值对象所做的任何更改都将在模型保存之前自动同步回模型。 这是可能的，因为 Eloquent 保留了访问器返回的实例，因此每次调用访问器时都可以返回相同的实例：
 
     use App\Models\User;
@@ -109,31 +105,33 @@ public function address(): Attribute
 
     $user->save();
 
-有时您可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，您可以在定义访问器时调用 `shouldCache` 方法：
+
+
+有时你可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，你可以在定义访问器时调用 `shouldCache` 方法：
+
 ```php
 protected function hash(): Attribute
 {
     return Attribute::make(
-        get: fn ($value) => bcrypt(gzuncompress($value)),
-      )->shouldCache();
+        get: fn (string $value) => bcrypt(gzuncompress($value)),
+    )->shouldCache();
 }
 ```
+
 如果要禁用属性的缓存，可以在定义属性时调用 `withoutObjectCaching` 方法：
 
 ```php
 /**
- * 与 user 的 address 交互.
- *
- * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+ * 与 user 的 address 交互。
  */
-public function address(): Attribute
+protected function address(): Attribute
 {
-    return (new Attribute(
-        get: fn ($value, $attributes) => new Address(
+    return Attribute::make(
+        get: fn (mixed $value, array $attributes) => new Address(
             $attributes['address_line_one'],
             $attributes['address_line_two'],
         ),
-    ))->withoutObjectCaching();
+    )->withoutObjectCaching();
 }
 ```
 
@@ -152,21 +150,18 @@ public function address(): Attribute
     class User extends Model
     {
         /**
-         * 与 user 的first name 交互
-         *
-         * @param  string  $value
-         * @return \Illuminate\Database\Eloquent\Casts\Attribute
+         * 与 user 的 first name 交互。
          */
         protected function firstName(): Attribute
         {
-            return new Attribute(
-                get: fn ($value) => ucfirst($value),
-                set: fn ($value) => strtolower($value),
+            return Attribute::make(
+                get: fn (string $value) => ucfirst($value),
+                set: fn (string $value) => strtolower($value),
             );
         }
     }
 
-修改器的闭包会接收将要设置的值，并允许我们使用和返回该值。要使该修改器生效，只需在模型上设置  `first_name` 即可：
+修改器的闭包会接收将要设置的值，并允许我们使用和返回该值。要使该修改器生效，只需在模型上设置 `first_name` 即可：
 
     use App\Models\User;
 
@@ -174,28 +169,26 @@ public function address(): Attribute
 
     $user->first_name = 'Sally';
 
+
+
 在本例中，值 `Sally` 将会触发 `set` 回调。然后，修改器会使用 `strtolower` 函数处理姓名，并将结果值设置在模型的 `$attributes` 数组中。
-
-
 
 <a name="mutating-multiple-attributes"></a>
 #### 修改多个属性
 
-有时你的修改器可能需要修改底层模型的多个属性。 为此，你的 `set` 闭包可以返回一个数组，数组中的每个键都应该与模型的属性/数据库列相对应：
+有时你的修改器可能需要修改底层模型的多个属性。 为此，你的 `set` 闭包可以返回一个数组，数组中的每个键都应该与模型的属性 / 数据库列相对应：
 
 ```php
 use App\Support\Address;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
- * 与user模型的address交互.
- *
- * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+ * 与user模型的address交互。
  */
-public function address(): Attribute
+protected function address(): Attribute
 {
-    return new Attribute(
-        get: fn ($value, $attributes) => new Address(
+    return Attribute::make(
+        get: fn (mixed $value, array $attributes) => new Address(
             $attributes['address_line_one'],
             $attributes['address_line_two'],
         ),
@@ -224,7 +217,7 @@ public function address(): Attribute
 - `datetime`
 - `immutable_date`
 - `immutable_datetime`
-- `decimal:`<code>&lt;digits&gt;</code>
+- <code>decimal:&lt;precision&gt;</code>
 - `double`
 - `encrypted`
 - `encrypted:array`
@@ -239,7 +232,9 @@ public function address(): Attribute
 
 </div>
 
-示例， 让我们把以整数 (`0` 或 `1`) 形式存储在数据库中的 `is_admin` 属性转成布尔值：
+
+
+示例， 让我们把以整数（`0` 或 `1`）形式存储在数据库中的 `is_admin`  属性转成布尔值：
 
     <?php
 
@@ -250,7 +245,7 @@ public function address(): Attribute
     class User extends Model
     {
         /**
-         * 类型转换
+         * 类型转换。
          *
          * @var array
          */
@@ -259,14 +254,12 @@ public function address(): Attribute
         ];
     }
 
-
-
 现在当你访问 `is_admin` 属性时，虽然保存在数据库里的值是一个整数类型，但是返回值总是会被转换成布尔值类型：
 
     $user = App\Models\User::find(1);
 
     if ($user->is_admin) {
-        //
+        // ...
     }
 
 如果需要在运行时添加新的临时强制转换，可以使用 `mergeCasts` 这些强制转换定义将添加到模型上已定义的任何强制转换中：
@@ -276,12 +269,12 @@ public function address(): Attribute
         'options' => 'object',
     ]);
 
-> 注意： `null` 值属性将不会被转换。此外，禁止定义与关联同名的类型转换（或属性）。
+> **注意**： 值属性将不会被转换。此外，禁止定义与关联同名的类型转换（或属性）。
 
 <a name="stringable-casting"></a>
 #### 强制转换
 
-你可以用 `Illuminate\Database\Eloquent\Casts\AsStringable` 类将模型属性强制转换为 [`Illuminate\Support\Stringable` 对象](/docs/laravel/9.x/helpers#fluent-strings-method-list)：
+你可以用 `Illuminate\Database\Eloquent\Casts\AsStringable` 类将模型属性强制转换为 [ `Illuminate\Support\Stringable` 对象](/docs/laravel/10.x/helpersmd#fluent-strings-method-list):
 
     <?php
 
@@ -293,7 +286,7 @@ public function address(): Attribute
     class User extends Model
     {
         /**
-         * The attributes that should be cast.
+         * 类型转换。
          *
          * @var array
          */
@@ -305,7 +298,7 @@ public function address(): Attribute
 <a name="array-and-json-casting"></a>
 ### 数组 & JSON 转换
 
-当你在数据库存储序列化的 JSON 的数据时， `array` 类型的转换非常有用。比如：如果你的数据库具有被序列化为 JSON 的 `JSON` 或 `TEXT` 字段类型，并且在 Eloquent 模型中加入了 `array` 类型转换，那么当你访问的时候就会自动被转换为 PHP 数组：
+当你在数据库存储序列化的 `JSON` 的数据时， `array` 类型的转换非常有用。比如：如果你的数据库具有被序列化为 JSON 的 `JSON` 或 `TEXT` 字段类型，并且在 Eloquent 模型中加入了 `array` 类型转换，那么当你访问的时候就会自动被转换为 PHP 数组：
 
     <?php
 
@@ -316,7 +309,7 @@ public function address(): Attribute
     class User extends Model
     {
         /**
-         * The attributes that should be cast.
+         * 类型转换。
          *
          * @var array
          */
@@ -327,7 +320,7 @@ public function address(): Attribute
 
 
 
-一旦定义了转换，你访问 `options` 属性时他会自动从 JSON 类型反序列化为 PHP 数组。当你设置了  `options` 属性的值时，给定的数组也会自动序列化为 JSON 类型存储：
+一旦定义了转换，你访问 `options` 属性时他会自动从 JSON 类型反序列化为 PHP 数组。当你设置了 `options` 属性的值时，给定的数组也会自动序列化为 JSON 类型存储：
 
     use App\Models\User;
 
@@ -348,7 +341,7 @@ public function address(): Attribute
     $user->update(['options->key' => 'value']);
 
 <a name="array-object-and-collection-casting"></a>
-#### 数组对象 & 集合 类型转换
+#### 数组对象 & 集合类型转换
 
 虽然标准的 `array` 类型转换对于许多应用程序来说已经足够了，但它确实有一些缺点。由于 `array` 类型转换返回一个基础类型，因此不可能直接改变数组键的值。例如，以下代码将触发一个 PHP 错误：
 
@@ -361,7 +354,7 @@ public function address(): Attribute
     use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
     /**
-     * 类型转换.
+     * 类型转换。
      *
      * @var array
      */
@@ -369,12 +362,12 @@ public function address(): Attribute
         'options' => AsArrayObject::class,
     ];
 
-类似的，Laravel 提供了一个 `AsCollection`  类型转换，它将 JSON 属性转换为 Laravel [集合](/docs/laravel/9.x/collections) 实例：
+类似的，Laravel 提供了一个 `AsCollection` 类型转换，它将 JSON 属性转换为 Laravel [集合](/docs/laravel/10.x/collections) 实例：
 
     use Illuminate\Database\Eloquent\Casts\AsCollection;
 
     /**
-     * The attributes that should be cast.
+     * 类型转换。
      *
      * @var array
      */
@@ -387,12 +380,12 @@ public function address(): Attribute
 <a name="date-casting"></a>
 ### Date 转换
 
-默认情况下，Eloquent 会将 `created_at` 和 `updated_at` 字段转换为 [Carbon](https://github.com/briannesbitt/Carbon)实例，它继承了 PHP 原生的 `DateTime` 类并提供了各种有用的方法。你可以通过在模型的 `$casts` 属性数组中定义额外的日期类型转换，用来转换其他的日期属性。通常来说，日期应该使用 `datetime` 或 `immutable_datetime` 类型转换来转换。
+默认情况下，Eloquent 会将 `created_at` 和 `updated_at` 字段转换为 [Carbon](https://github.com/briannesbitt/Carbon) 实例，它继承了 PHP 原生的 `DateTime` 类并提供了各种有用的方法。你可以通过在模型的 `$casts` 属性数组中定义额外的日期类型转换，用来转换其他的日期属性。通常来说，日期应该使用 `datetime` 或 `immutable_datetime` 类型转换来转换。
 
-当使用 `date` 或 `datetime` 类型转换时，你也可以指定日期的格式。这种格式会被用在 [模型序列化为数组或者JSON](/docs/laravel/9.x/eloquent-serialization)：
+当使用 `date` 或 `datetime` 类型转换时，你也可以指定日期的格式。这种格式会被用在 [模型序列化为数组或者 JSON](/docs/laravel/10.x/eloquent-serialization)：
 
     /**
-     * The attributes that should be cast.
+     * 类型转换。
      *
      * @var array
      */
@@ -400,17 +393,14 @@ public function address(): Attribute
         'created_at' => 'datetime:Y-m-d',
     ];
 
-将列类型转换为日期时，可以将其值设置为 UNIX 时间戳、日期字符串（`Y-m-d`）、日期时间字符串或  `DateTime` / `Carbon` 实例。日期值将会被准确的转换并存储在数据库中。
+将列类型转换为日期时，可以将其值设置为 UNIX 时间戳、日期字符串（`Y-m-d`）、日期时间字符串或 `DateTime` / `Carbon` 实例。日期值将会被准确的转换并存储在数据库中。
 
 通过在模型中定义 `serializeDate` 方法，你可以自定义所有模型日期的默认序列化格式。此方法不会影响日期在数据库中存储的格式：
 
     /**
-     * 为 array / JSON 序列化准备日期格式
-     *
-     * @param  \DateTimeInterface  $date
-     * @return string
+     * 为 array / JSON 序列化准备日期格式。
      */
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format('Y-m-d');
     }
@@ -418,32 +408,30 @@ public function address(): Attribute
 在模型上定义 `$dateFormat` 属性后，模型的日期将会以你指定的格式实际存储于数据库中：
 
     /**
-     * 模型日期列的存储格式.
+     * 模型日期列的存储格式。
      *
      * @var string
      */
     protected $dateFormat = 'U';
 
-
-
 <a name="date-casting-and-timezones"></a>
+
+
 #### 日期转换，序列化，& 时区
 
-默认情况下，`date` 和 `datetime` 会序列化为UTC ISO-8601格式的（ `1986-05-28T21:05:54.000000Z` ）字符串，并不会受到应用的 `timezone` 配置影响。强烈建议您始终使用此序列化格式，并不更改应用程序的 `timezone` 配置（默认 `UTC` ）以将应用程序的日期存储在UTC时区中。在整个应用程序中始终使用 UTC 时区，会使与其他 PHP 和 JavaScript 类库的互操作性更高。
+默认情况下，`date` 和 `datetime` 会序列化为 UTC ISO-8601 格式的（ `1986-05-28T21:05:54.000000Z` ）字符串，并不会受到应用的 `timezone` 配置影响。强烈建议您始终使用此序列化格式，并不更改应用程序的 `timezone` 配置（默认 `UTC` ）以将应用程序的日期存储在 UTC 时区中。在整个应用程序中始终使用 UTC 时区，会使与其他 PHP 和 JavaScript 类库的互操作性更高。
 
-如果对 `date` 或 `datetime` 属性自定义了格式，例如 `datetime:Y-m-d H:i​:s`，那么在日期序列化期间将使用Carbon实例的内部时区。通常，这是应用程序的 `timezone` 配置选项中指定的时区。
+如果对 `date` 或 `datetime` 属性自定义了格式，例如 `datetime:Y-m-d H:i​:s`，那么在日期序列化期间将使用 Carbon 实例的内部时区。通常，这是应用程序的 `timezone` 配置选项中指定的时区。
 
 <a name="enum-casting"></a>
 ### 枚举转换
 
-> 注意：枚举转换仅适用于 PHP 8.1+.
-
-Eloquent 还允许您将属性值强制转换为 PHP 的 [枚举](https://www.php.net/manual/en/language.enumerations.backed.php)。为此，可以在模型的 `$casts` 数组属性中指定要转换的属性和枚举：
+Eloquent 还允许您将属性值强制转换为 PHP 的 [枚举](https://www.php.net/manual/en/language.enumerations.backed.php)。 为此，可以在模型的 `$casts` 数组属性中指定要转换的属性和枚举：
 
     use App\Enums\ServerStatus;
 
     /**
-     * 要转换的属性
+     * 类型转换。
      *
      * @var array
      */
@@ -453,21 +441,42 @@ Eloquent 还允许您将属性值强制转换为 PHP 的 [枚举](https://www.ph
 
 在模型上定义了转换后，与属性交互时，指定的属性都将在枚举中强制转换：
 
-    if ($server->status == ServerStatus::provisioned) {
-        $server->status = ServerStatus::ready;
+    if ($server->status == ServerStatus::Provisioned) {
+        $server->status = ServerStatus::Ready;
 
         $server->save();
     }
 
+<a name="casting-arrays-of-enums"></a>
+#### 转换枚举数组
 
+
+
+有时，你可能需要模型在单个列中存储枚举值的数组。为此，你可以使用 Laravel 提供的`AsEnumArrayObject`或`AsEnumCollection`强制转换：
+
+    use App\Enums\ServerStatus;
+    use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
+
+    /**
+     * 类型转换。
+     *
+     * @var array
+     */
+    protected $casts = [
+        'statuses' => AsEnumCollection::class.':'.ServerStatus::class,
+    ];
 
 <a name="encrypted-casting"></a>
-
 ### 加密转换
 
-`encrypted` 转换使用了 Laravel 的内置 [encryption](/docs/laravel/9.x/encryption) 功能加密模型的属性值。 此外，`encrypted:array`、`encrypted:collection`、`encrypted:object`、`AsEncryptedArrayObject` 和 `AsEncryptedCollection` 类型转换的工作方式与未加密的类型相同； 但是，正如您所料，底层值在存储在数据库中时是加密的。
+`encrypted` 转换使用了 Laravel 的内置 [encryption](/docs/laravel/10.x/encryption) 功能加密模型的属性值。 此外，`encrypted:array`、`encrypted:collection`、`encrypted:object`、`AsEncryptedArrayObject` 和 `AsEncryptedCollection` 类型转换的工作方式与未加密的类型相同； 但是，正如您所料，底层值在存储在数据库中时是加密的。
 
 由于加密文本的最终长度不可预测并且比其纯文本长度要长，因此请确保关联的数据库列属性是 `TEXT` 类型或更大。此外，由于数据库中的值是加密的，您将无法查询或搜索加密的属性值。
+
+<a name="key-rotation"></a>
+#### 密钥轮换
+
+如你所知，Laravel使用应用程序的 `app` 配置文件中指定的 `key` 配置值对字符串进行加密。通常，该值对应于 `APP_KEY` 环境变量的值。如果需要轮换应用程序的加密密钥，则需要使用新密钥手动重新加密加密属性。
 
 <a name="query-time-casting"></a>
 ### 查询时转换
@@ -483,7 +492,9 @@ Eloquent 还允许您将属性值强制转换为 PHP 的 [枚举](https://www.ph
                 ->whereColumn('user_id', 'users.id')
     ])->get();
 
-在该查询获取到的结果集中，`last_posted_at` 属性将会是一个字符串。假如我们在执行查询时进行 `datetime` 类型转换将更方便。你可以通过使用 `withCasts` 方法来完成上述操作：
+
+
+在该查询获取到的结果集中，`last_posted_at` 属性将会是一个字符串。假如我们在执行查询时进行 `datetime` 类型转换将更方便。你可以通过使用 `withCasts` 方法来完成上述操作：
 
     $users = User::select([
         'users.*',
@@ -496,48 +507,46 @@ Eloquent 还允许您将属性值强制转换为 PHP 的 [枚举](https://www.ph
 <a name="custom-casts"></a>
 ## 自定义类型转换
 
-Laravel 有多种内置的、有用的类型转换； 如果需要自定义的强制转换类型。 可以通过定义一个实现 `CastsAttributes` 接口的类来实现这一点。
+Laravel 有多种内置的、有用的类型转换； 如果需要自定义强制转换类型。要创建一个类型转换，执行`make:cast`命令。 新的强制转换类将被放置在你的`app/Casts`目录中:
 
+```shell
+php artisan make:cast Json
+```
 
-
-实现这个接口的类必须定义一个 `get` 和 `set` 方法。 `get` 方法负责将数据库中的原始值转换为转换值，而 `set` 方法应将转换值转换为可以存储在数据库中的原始值。 作为示例，我们将内置的 `json` 类型转换重新实现为自定义类型：
+所有自定义强制转换类都实现了`CastsAttributes`接口。 实现这个接口的类必须定义一个 `get` 和 `set` 方法。`get`方法负责将数据库中的原始值转换为转换值，而 `set` 方法应将转换值转换为可以存储在数据库中的原始值。 作为示例，我们将内置的 `json` 类型转换重新实现为自定义类型：
 
     <?php
 
     namespace App\Casts;
 
     use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+    use Illuminate\Database\Eloquent\Model;
 
     class Json implements CastsAttributes
     {
         /**
-         * 将取出的数据进行转换
+         * 将取出的数据进行转换。
          *
-         * @param  \Illuminate\Database\Eloquent\Model  $model
-         * @param  string  $key
-         * @param  mixed  $value
-         * @param  array  $attributes
-         * @return array
+         * @param  array<string, mixed>  $attributes
+         * @return array<string, mixed>
          */
-        public function get($model, $key, $value, $attributes)
+        public function get(Model $model, string $key, mixed $value, array $attributes): array
         {
             return json_decode($value, true);
         }
 
         /**
-         * 转换成将要进行存储的值
+         * 转换成将要进行存储的值。
          *
-         * @param  \Illuminate\Database\Eloquent\Model  $model
-         * @param  string  $key
-         * @param  array  $value
-         * @param  array  $attributes
-         * @return string
+         * @param  array<string, mixed>  $attributes
          */
-        public function set($model, $key, $value, $attributes)
+        public function set(Model $model, string $key, mixed $value, array $attributes): string
         {
             return json_encode($value);
         }
     }
+
+
 
 定义好自定义类型转换后，可以使用其类名称将其附加到模型属性里：
 
@@ -551,7 +560,7 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
     class User extends Model
     {
         /**
-         * 应被强制转换的属性
+         * 应被强制转换的属性。
          *
          * @var array
          */
@@ -563,53 +572,43 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
 <a name="value-object-casting"></a>
 ### 值对象转换
 
-你不仅可以将数据转换成原生的数据类型，还可以将数据转换成对象。两种自定义类型转换的定义方式非常类似。但是将数据转换成对象的自定义转换类中的 set 方法需要返回键值对数组，用于设置原始、可存储的值到对应的模型中。
+你不仅可以将数据转换成原生的数据类型，还可以将数据转换成对象。两种自定义类型转换的定义方式非常类似。但是将数据转换成对象的自定义转换类中的 `set` 方法需要返回键值对数组，用于设置原始、可存储的值到对应的模型中。
 
-举个例子，定义一个自定义类型转换类用于将多个模型属性值转换成单个 `Address` 值对象，假设 `Address` 对象有两个公有属性 `lineOne` 和 `lineTwo`:
-
-
-
-例如，我们将定义一个自定义转换类，将多个模型值转换为单个「地址」值对象。 我们将假设 `Address` 值有两个公共属性：`lineOne` 和 `lineTwo`：
+例如，我们将定义一个自定义转换类，将多个模型值转换为单个`Address`值对象。 我们将假设 `Address` 值有两个公共属性：`lineOne` 和 `lineTwo`：
 
     <?php
 
     namespace App\Casts;
 
-    use App\Models\Address as AddressModel;
+    use App\ValueObjects\Address as AddressValueObject;
     use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+    use Illuminate\Database\Eloquent\Model;
     use InvalidArgumentException;
 
     class Address implements CastsAttributes
     {
         /**
-         * 转换给定的值
+         * 转换给定的值。
          *
-         * @param  \Illuminate\Database\Eloquent\Model  $model
-         * @param  string  $key
-         * @param  mixed  $value
-         * @param  array  $attributes
-         * @return \App\Models\Address
+         * @param  array<string, mixed>  $attributes
          */
-        public function get($model, $key, $value, $attributes)
+        public function get(Model $model, string $key, mixed $value, array $attributes): AddressValueObject
         {
-            return new AddressModel(
+            return new AddressValueObject(
                 $attributes['address_line_one'],
                 $attributes['address_line_two']
             );
         }
 
         /**
-         * 准备给定值以进行存储
+         * 准备给定值以进行存储。
          *
-         * @param  \Illuminate\Database\Eloquent\Model  $model
-         * @param  string  $key
-         * @param  \App\Models\Address  $value
-         * @param  array  $attributes
-         * @return array
+         * @param  array<string, mixed>  $attributes
+         * @return array<string, string>
          */
-        public function set($model, $key, $value, $attributes)
+        public function set(Model $model, string $key, mixed $value, array $attributes): array
         {
-            if (! $value instanceof AddressModel) {
+            if (! $value instanceof AddressValueObject) {
                 throw new InvalidArgumentException('The given value is not an Address instance.');
             }
 
@@ -619,6 +618,8 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
             ];
         }
     }
+
+
 
 转换为值对象时，对值对象所做的任何更改都将在模型保存之前自动同步回模型：
 
@@ -630,27 +631,21 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
 
     $user->save();
 
-> 技巧：如果你计划将包含值对象的 Eloquent 模型序列化为 JSON 或数组，那么应该在值对象上实现 `Illuminate\Contracts\Support\Arrayable` 和 `JsonSerializable` 接口。
+> 注意：如果你计划将包含值对象的 Eloquent 模型序列化为 JSON 或数组，那么应该在值对象上实现 `Illuminate\Contracts\Support\Arrayable` 和 `JsonSerializable` 接口。
 
 <a name="array-json-serialization"></a>
 ### 数组 / JSON 序列化
 
-当使用 `toArray` 和 `toJson` 方法将 Eloquent 模型转换为数组或 JSON 时，自定义转换值对象通常会被序列化，只要它们实现 `Illuminate\Contracts\Support\Arrayable` 和 `JsonSerializable` 接口。 但是，在使用第三方库提供的值对象时，你可能无法将这些接口添加到对象中。
+当使用 `toArray` 和 `toJson` 方法将 Eloquent 模型转换为数组或 JSON 时，自定义转换值对象通常会被序列化，只要它们实现 `Illuminate\Contracts\Support\Arrayable` 和 `JsonSerializable` 接口。 但是，在使用第三方库提供的值对象时，你可能无法将这些接口添加到对象中。
 
-
-
-因此，你可以指定你自定义的类型转换类，它将负责序列化成值对象。为此，你自定义的类型转换类需要实现 `Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes` 接口。此接口声明类应包含 `serialize` 方法，该方法应返回值对象的序列化形式：
+因此，你可以指定你自定义的类型转换类，它将负责序列化成值对象。为此，你自定义的类型转换类需要实现 `Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes` 接口。此接口声明类应包含 `serialize` 方法，该方法应返回值对象的序列化形式：
 
     /**
-     * 获取值的序列化表示形式
+     * 获取值的序列化表示形式。
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
-     * @param  string  $key
-     * @param  mixed  $value
-     * @param  array  $attributes
-     * @return mixed
+     * @param  array<string, mixed>  $attributes
      */
-    public function serialize($model, string $key, $value, array $attributes)
+    public function serialize(Model $model, string $key, mixed $value, array $attributes): string
     {
         return (string) $value;
     }
@@ -658,44 +653,39 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
 <a name="inbound-casting"></a>
 ### 入站转换
 
-有时候，你可能只需要对写入模型的属性值进行类型转换而不需要对从模型中获取的属性值进行任何处理。一个典型入站类型转换的例子就是 「hashing」。入站类型转换类需要实现 `CastsInboundAttributes` 接口，只需要实现 `set` 方法。
+有时候，你可能只需要对写入模型的属性值进行类型转换而不需要对从模型中获取的属性值进行任何处理。
+
+
+入站自定义强制转换应该实现`CastsInboundAttributes`接口，该接口只需要定义一个`set`方法。`make:cast`Artisan 命令可以通过`——inbound`选项调用来生成一个入站强制转换类:
+
+```shell
+php artisan make:cast Hash --inbound
+```
+
+仅入站强制转换的一个经典示例是「hashing」强制转换。例如，我们可以定义一个类型转换，通过给定的算法散列入站值:
 
     <?php
 
     namespace App\Casts;
 
     use Illuminate\Contracts\Database\Eloquent\CastsInboundAttributes;
+    use Illuminate\Database\Eloquent\Model;
 
     class Hash implements CastsInboundAttributes
     {
         /**
-         * 哈希算法
-         *
-         * @var string
+         * 创建一个新的强制转换类实例。
          */
-        protected $algorithm;
-
-        /**
-         * 创建一个新的类型转换类实例
-         *
-         * @param  string|null  $algorithm
-         * @return void
-         */
-        public function __construct($algorithm = null)
-        {
-            $this->algorithm = $algorithm;
-        }
+        public function __construct(
+            protected string $algorithm = null,
+        ) {}
 
         /**
          * 转换成将要进行存储的值
          *
-         * @param  \Illuminate\Database\Eloquent\Model  $model
-         * @param  string  $key
-         * @param  array  $value
-         * @param  array  $attributes
-         * @return string
+         * @param  array<string, mixed>  $attributes
          */
-        public function set($model, $key, $value, $attributes)
+        public function set(Model $model, string $key, mixed $value, array $attributes): string
         {
             return is_null($this->algorithm)
                         ? bcrypt($value)
@@ -709,15 +699,13 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
 当将自定义类型转换附加到模型时，可以指定传入的类型转换参数。传入类型转换参数需使用 `:` 将参数与类名分隔，多个参数之间使用逗号分隔。这些参数将会传递到类型转换类的构造函数中：
 
     /**
-     * The attributes that should be cast.
+     * 应该强制转换的属性。
      *
      * @var array
      */
     protected $casts = [
         'secret' => Hash::class.':sha256',
     ];
-
-
 
 <a name="castables"></a>
 ### 可转换
@@ -730,7 +718,9 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
         'address' => Address::class,
     ];
 
-实现 `Castable` 接口的对象必须定义一个 `castUsing` 方法，此方法返回的是负责将 `Castable` 类进行自定义转换的转换器类名：
+
+
+实现 `Castable` 接口的对象必须定义一个 `castUsing` 方法，此方法返回的是负责将 `Castable` 类进行自定义转换的转换器类名：
 
     <?php
 
@@ -742,18 +732,17 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
     class Address implements Castable
     {
         /**
-         * 获取转换器的类名用以转换当前类型转换对象
+         * 获取转换器的类名用以转换当前类型转换对象。
          *
-         * @param  array  $arguments
-         * @return string
+         * @param  array<string, mixed>  $arguments
          */
-        public static function castUsing(array $arguments)
+        public static function castUsing(array $arguments): string
         {
             return AddressCast::class;
         }
     }
 
-使用 `Castable` 类时，仍然可以在 `$casts` 定义中提供参数。参数将传递给 `castUsing` 方法：
+使用 `Castable` 类时，仍然可以在 `$casts` 定义中提供参数。参数将传递给 `castUsing` 方法：
 
     use App\Models\Address;
 
@@ -772,22 +761,22 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
 
     use Illuminate\Contracts\Database\Eloquent\Castable;
     use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+    use Illuminate\Database\Eloquent\Model;
 
     class Address implements Castable
     {
         // ...
 
         /**
-         * 获取转换器类用以转换当前类型转换对象
+         * 获取转换器类用以转换当前类型转换对象。
          *
-         * @param  array  $arguments
-         * @return object|string
+         * @param  array<string, mixed>  $arguments
          */
-        public static function castUsing(array $arguments)
+        public static function castUsing(array $arguments): CastsAttributes
         {
             return new class implements CastsAttributes
             {
-                public function get($model, $key, $value, $attributes)
+                public function get(Model $model, string $key, mixed $value, array $attributes): Address
                 {
                     return new Address(
                         $attributes['address_line_one'],
@@ -795,7 +784,7 @@ Laravel 有多种内置的、有用的类型转换； 如果需要自定义的�
                     );
                 }
 
-                public function set($model, $key, $value, $attributes)
+                public function set(Model $model, string $key, mixed $value, array $attributes): array
                 {
                     return [
                         'address_line_one' => $value->lineOne,
