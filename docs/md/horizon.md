@@ -1,3 +1,4 @@
+
 # Laravel Horizon
 
 - [介绍](#introduction)
@@ -5,6 +6,7 @@
     - [配置](#configuration)
     - [均衡策略](#balancing-strategies)
     - [控制面板授权](#dashboard-authorization)
+    - [静默作业](#silenced-jobs)
 - [升级 Horizon](#upgrading-horizon)
 - [运行 Horizon](#running-horizon)
     - [部署 Horizon](#deploying-horizon)
@@ -17,9 +19,10 @@
 <a name="introduction"></a>
 ## 介绍
 
-> 提示：在深入了解 Laravel Horizon 之前，您应该熟悉 Laravel 的基础 [队列服务](/docs/laravel/9.x/queues)。 Horizon 为 Laravel 的队列增加了额外的功能，如果你还不熟悉 Laravel 提供的基本队列功能，这些功能可能会让人感到困惑。
+> **提示**  
+> 在深入了解 Laravel Horizon 之前，您应该熟悉 Laravel 的基础 [队列服务](/docs/laravel/10.x/queues)。 Horizon 为 Laravel 的队列增加了额外的功能，如果你还不熟悉 Laravel 提供的基本队列功能，这些功能可能会让人感到困惑。
 
-[Laravel Horizon](https://github.com/laravel/horizon) 为你的 Laravel [Redis queues](/docs/laravel/9.x/queues).提供了一个美观的仪表盘和代码驱动的配置；它可以方便的监控队列系统的关键指标：任务吞吐量、运行时间、作业失败情况。
+[Laravel Horizon](https://github.com/laravel/horizon) 为你的 Laravel [Redis queues](/docs/laravel/10.x/queues).提供了一个美观的仪表盘和代码驱动的配置。它可以方便的监控队列系统的关键指标：任务吞吐量、运行时间、作业失败情况。
 
 在使用 Horizon 时，所有队列的 worker 配置都存储在一个简单的配置文件中。通过在受版本控制的文件中定义应用程序的 worker 配置，你可以在部署应用程序时轻松扩展或修改应用程序的队列 worker。
 
@@ -28,7 +31,8 @@
 <a name="installation"></a>
 ## 安装
 
-> 注意：Laravel Horizon 要求你使用 [Redis](https://redis.io) 来为你的队列服务。因此，你应该确保在应用程序的 `config/queue.php` 配置文件中将队列连接设置为 `redis`。
+> **注意**
+> Laravel Horizon 要求你使用 [Redis](https://redis.io) 来为你的队列服务。因此，你应该确保在应用程序的 `config/queue.php` 配置文件中将队列连接设置为 `redis`。
 
 你可以使用 Composer 将 Horizon 安装到你的 Laravel 项目里：
 
@@ -36,20 +40,21 @@
 composer require laravel/horizon
 ```
 
+
+
 Horizon 安装之后，使用 `horizon:install` Artisan 命令发布资源：
 
 ```shell
 php artisan horizon:install
 ```
 
-
-
 <a name="configuration"></a>
 ### 配置
 
 Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizon.php` 文件。可以用这个配置文件配置工作选项，每个配置选项包含一个用途描述，请务必仔细研究这个文件。
 
->注意：Horizon 在内部使用名为 `horizon` 的 Redis 连接。此 Redis 连接名称是保留的，不应分配给 `database.php` 配置文件中的另一个 Redis 连接或作为 `horizon.php` 配置文件中的 `use` 选项的值。
+
+>**注意：**Horizon 在内部使用名为 `horizon` 的 Redis 连接。此 Redis 连接名称是保留的，不应分配给 `database.php` 配置文件中的另一个 Redis 连接或作为 `horizon.php` 配置文件中的 `use` 选项的值。
 
 <a name="environments"></a>
 #### 环境配置
@@ -72,9 +77,10 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
         ],
     ],
 
-当你启动 Horizon 时，它将使用指定应用程序运行环境所配置的 worker 进程选项。通常，环境配置由 `APP_ENV` [环境变量](/docs/laravel/9.x/configuration#determining-the-current-environment) 的值确定。例如，默认的 `local` Horizon 环境配置为启动三个工作进程，并自动平衡分配给每个队列的工作进程数量。默认的「生产」环境配置为最多启动 10 个 worker 进程，并自动平衡分配给每个队列的 worker 进程数量。
+当你启动 Horizon 时，它将使用指定应用程序运行环境所配置的 worker 进程选项。通常，环境配置由 `APP_ENV` [环境变量](/docs/laravel/10.x/configuration#determining-the-current-environment) 的值确定。例如，默认的 `local` Horizon 环境配置为启动三个工作进程，并自动平衡分配给每个队列的工作进程数量。默认的「生产」环境配置为最多启动 10 个 worker 进程，并自动平衡分配给每个队列的 worker 进程数量。
 
-> 注意：你应该确保你的 `horizon` 配置文件的 `environments` 部分包含计划在其上运行 Horizon 的每个 [环境](/docs/laravel/9.x/configuration#environment-configuration) 的配置。
+> **注意：**你应该确保你的 `horizon` 配置文件的 `environments` 部分包含计划在其上运行 Horizon 的每个 [环境](/docs/laravel/10.x/configuration#environment-configuration) 的配置。
+
 
 
 <a name="supervisors"></a>
@@ -99,7 +105,6 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
 `auto` 策略根据队列的当前工作负载来调整每个队列的工作进程数量。举个例子，如果你的 `notifications` 队列有 1000 个等待的任务，而你的 `render` 队列是空的，那么 Horizon 将为 `notifications` 队列分配更多的工作线程，直到队列为空。
 
 
-当 `balance` 选项被设置为 `false` 时，将使用默认的 Laravel 行为，它按照配置中列出的顺序处理队列。
 
 当使用 `auto` 策略时，你可以定义 `minProcesses` 和 `maxProcesses` 的配置选项来控制 Horizon  扩展进程的最小和最大数量：
 
@@ -109,6 +114,7 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
                 'connection' => 'redis',
                 'queue' => ['default'],
                 'balance' => 'auto',
+                'autoScalingStrategy' => 'time',
                 'minProcesses' => 1,
                 'maxProcesses' => 10,
                 'balanceMaxShift' => 1,
@@ -118,6 +124,9 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
         ],
     ],
 
+`autoScalingStrategy` 配置值决定了 Horizon 是根据清除队列所需的总时间（`time` 策略）还是根据队列上的作业总数（`size` 策略）来为队列分配更多的Worker 进程。
+
+
 `balanceMaxShift` 和 `balanceCooldown` 配置项可以确定 Horizon 将以多快的速度扩展进程，在上面的示例中，每 3 秒钟最多创建或销毁一个新进程，你可以根据应用程序的需要随意调整这些值。
 
 当 `balance` 选项设置为 `false` 时，将使用默认的 Laravel 行为，它按照队列在配置中列出的顺序处理队列。
@@ -125,34 +134,53 @@ Horizon 资源发布之后，其主要配置文件会被分配到 `config/horizo
 <a name="dashboard-authorization"></a>
 ### 控制面板授权
 
-Horizon 在 `/horizon` 上显示了一个控制面板。默认情况下，你只能在 `local` 环境中访问这个面板。在你的 `app/Providers/HorizonServiceProvider.php` 文件中，有一个 [授权拦截器（Gates）](/docs/laravel/9.x/authorization#gates) 的方法定义，该拦截器用于控制在**非本地**环境中对 Horizon 的访问。末可以根据需要修改此方法，来限制对 Horizon 的访问：
+Horizon 在 `/horizon` 上显示了一个控制面板。默认情况下，你只能在 `local` 环境中访问这个面板。在你的 `app/Providers/HorizonServiceProvider.php` 文件中，有一个 [授权拦截器（Gates）](/docs/laravel/10.x/authorization#gates) 的方法定义，该拦截器用于控制在**非本地**环境中对 Horizon 的访问。末可以根据需要修改此方法，来限制对 Horizon 的访问：
 
     /**
      * 注册 Horizon 授权
      *
      * 此方法决定了谁可以在非本地环境中访问 Horizon
-     *
-     * @return void
      */
-    protected function gate()
+    protected function gate(): void
     {
-        Gate::define('viewHorizon', function ($user) {
+        Gate::define('viewHorizon', function (User $user) {
             return in_array($user->email, [
                 'taylor@laravel.com',
             ]);
         });
     }
 
+
+
 <a name="alternative-authentication-strategies"></a>
 #### 可替代的身份验证策略
 
 需要留意的是，Laravel 会自动将经过认证的用户注入到拦截器（Gate）闭包中。如果你的应用程序通过其他方法（例如 IP 限制）提供 Horizon 安全性保障，那么你访问 Horizon 用户可能不需要实现这个「登录」动作。因此，你需要将上面的 `function ($user)` 更改为 `function ($user = null)` 以强制 Laravel 跳过身份验证。
 
+<a name="silenced-jobs"></a>
+### 静默作业
+
+有时，你可能对查看某些由你的应用程序或第三方软件包发出的工作不感兴趣。与其让这些作业在你的「已完成作业」列表中占用空间，你可以让它们静默。要开始的话，在你的应用程序的 `horizon` 配置文件中的 `silenced` 配置选项中添加作业的类名。
+
+    'silenced' => [
+        App\Jobs\ProcessPodcast::class,
+    ],
+
+或者，你希望静默的作业可以实现 `Laravel\Horizon\Contracts\Silenced` 接口。如果一个作业实现了这个接口，它将自动被静默，即使它不在 `silenced` 配置阵列中。
+
+    use Laravel\Horizon\Contracts\Silenced;
+
+    class ProcessPodcast implements ShouldQueue, Silenced
+    {
+        use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+        // ...
+    }
 
 <a name="upgrading-horizon"></a>
 ## 升级 Horizon
 
-当你升级到 Horizon 的一个新的主要版本时，你需要仔细阅读 [升级指南](https://github.com/laravel/horizon/blob/master/UPGRADE.md)。
+当你升级到 Horizon 的一个新的主要版本时，你需要仔细阅读 [升级指南](https://github.com/laravel/horizon/blob/master/UPGRADE.)。
 
 此外，升级到新的 Horizon 版本时，你应该重新发布 Horizon 资源：
 
@@ -166,11 +194,13 @@ php artisan horizon:publish
 {
     "scripts": {
         "post-update-cmd": [
-            "@php artisan horizon:publish --ansi"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ]
     }
 }
 ```
+
+
 
 <a name="running-horizon"></a>
 ## 运行 Horizon
@@ -209,8 +239,6 @@ php artisan horizon:status
 php artisan horizon:terminate
 ```
 
-
-
 <a name="deploying-horizon"></a>
 ### 部署 Horizon
 
@@ -223,6 +251,8 @@ php artisan horizon:terminate
 ```
 
 <a name="installing-supervisor"></a>
+
+
 #### 安装 Supervisor
 
 Supervisor 是一个用于 Linux 操作系统的进程监视器。如果 `Horizon` 进程被退出或终止，Supervisor 将自动重启你的 `Horizon` 进程。如果要在 Ubuntu 上安装 Supervisor，你可以使用以下命令。如果你不使用 Ubuntu，也可以使用操作系统的包管理器安装 Supervisor：
@@ -231,7 +261,7 @@ Supervisor 是一个用于 Linux 操作系统的进程监视器。如果 `Horizo
 sudo apt-get install supervisor
 ```
 
-> 技巧：如果你觉得自己配置 Supervisor 难如登天，可以考虑使用 [Laravel Forge](https://forge.laravel.com)，它将自动为你的 Laravel 项目安装和配置 Supervisor。
+> **技巧：**如果你觉得自己配置 Supervisor 难如登天，可以考虑使用 [Laravel Forge](https://forge.laravel.com)，它将自动为你的 Laravel 项目安装和配置 Supervisor。
 
 <a name="supervisor-configuration"></a>
 #### Supervisor 配置
@@ -250,8 +280,9 @@ stdout_logfile=/home/forge/example.com/horizon.log
 stopwaitsecs=3600
 ```
 
-> 注意：要确保 `stopwaitsecs` 的值大于运行时间最长的任务所消耗的秒数。否则，Supervisor 可能会在工作完成前终止任务。
+在定义 Supervisor 配置时，你应该确保 `stopwaitsecs` 的值大于最长运行作业所消耗的秒数。否则，Supervisor 可能会在作业处理完之前就将其杀死。
 
+> **注意：**虽然上面的例子对基于Ubuntu的服务器有效，但其他服务器操作系统对监督员配置文件的位置和文件扩展名可能有所不同。请查阅你的服务器的文档以了解更多信息。
 
 <a name="starting-supervisor"></a>
 #### 启动 Supervisor
@@ -266,10 +297,12 @@ sudo supervisorctl update
 sudo supervisorctl start horizon
 ```
 
-> 技巧：关于 Supervisor 的更多信息，可以查阅 [Supervisor 文档](http://supervisord.org/index.html)。
+> **技巧：**关于 Supervisor 的更多信息，可以查阅 [Supervisor 文档](http://supervisord.org/index.html)。
+
+
 
 <a name="tags"></a>
-## 标记
+## 标记 (Tags)
 
 Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通知和排队的事件监听器。实际上，Horizon 会根据附加到作业上的有 Eloquent 模型，智能地、自动地标记大多数任务。例如，看看下面的任务：
 
@@ -289,34 +322,20 @@ Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通�
         use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
         /**
-         * video 实例
-         *
-         * @var \App\Models\Video
-         */
-        public $video;
-
-        /**
          * 创建一个新的任务实例
-         *
-         * @param  \App\Models\Video  $video
-         * @return void
          */
-        public function __construct(Video $video)
-        {
-            $this->video = $video;
-        }
+        public function __construct(
+            public Video $video,
+        ) {}
 
         /**
          * 执行任务
-         *
-         * @return void
          */
-        public function handle()
+        public function handle(): void
         {
-            //
+            // ...
         }
     }
-
 
 如果此任务与 `App\Models\Video` 实例一起排队，且该实例的 `id` 为 `1`，则该作业将自动接收 `App\Models\Video:1` 标记。这是因为 Horizon 将为任何有 Eloquent 的模型检查任务的属性。如果找到了有 Eloquent 的模型，Horizon 将智能地使用模型的类名和主键标记任务：
 
@@ -326,8 +345,6 @@ Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通�
     $video = Video::find(1);
 
     RenderVideo::dispatch($video);
-
-
 
 <a name="manually-tagging-jobs"></a>
 #### 手动标记作业
@@ -339,9 +356,9 @@ Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通�
         /**
          * 获取应该分配给任务的标记
          *
-         * @return array
+         * @return array<int, string>
          */
-        public function tags()
+        public function tags(): array
         {
             return ['render', 'video:'.$this->video->id];
         }
@@ -350,16 +367,17 @@ Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通�
 <a name="notifications"></a>
 ## 通知
 
-> **注意：** 当配置 Horizon 发送 Slack 或 SMS 通知时，你应该查看 [相关通知驱动程序的先决条件](/docs/laravel/9.x/notifications)。
+> **注意：** 当配置 Horizon 发送 Slack 或 SMS 通知时，你应该查看 [相关通知驱动程序的先决条件](/docs/laravel/10.x/notifications)。
 
-如果你希望在一个队列有较长的等待时间时得到通知，你可以使用 `Horizon::routeMailNotificationsTo`, `Horizon::routeSlackNotificationsTo`, 和 `Horizon::routeSmsNotificationsTo` 方法。你可以从你的应用程序的 `HorizonServiceProvider` 调用这些方法：
+
+
+如果你希望在一个队列有较长的等待时间时得到通知，你可以使用 `Horizon::routeMailNotificationsTo`, `Horizon::routeSlackNotificationsTo`, 和 `Horizon::routeSmsNotificationsTo` 方法。你可以通过应用程序的 `App\Providers\HorizonServiceProvider` 中的 `boot` 方法来调用这些方法：
+
 
     /**
      * 服务引导
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         parent::boot();
 
@@ -381,20 +399,15 @@ Horizon 允许你将 `tags` 分配给任务，包括邮件、事件广播、通�
 <a name="metrics"></a>
 ## 指标
 
-Horizon 有一个指标控制面板，它提供了任务和队列的等待时间和吞吐量等信息。要让这些信息显示在这个控制面板上，你应该配置 Horizon 的 `snapshot` Artisan 命令，通过你的应用程序的 [调度器](/docs/laravel/9.x/scheduling) 每五分钟运行一次：
+Horizon 有一个指标控制面板，它提供了任务和队列的等待时间和吞吐量等信息。要让这些信息显示在这个控制面板上，你应该配置 Horizon 的 `snapshot` Artisan 命令，通过你的应用程序的 [调度器](/docs/laravel/10.x/scheduling) 每五分钟运行一次：
 
     /**
      * 定义应用程序的命令调度
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
-
-
 
 <a name="deleting-failed-jobs"></a>
 ## 删除失败的作业
