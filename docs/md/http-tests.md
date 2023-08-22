@@ -1,7 +1,7 @@
 # HTTP 测试
 
-- [简介](#简介)
-- [创建请求](#创建请求)
+- [简介](#introduction)
+- [创建请求](#making-requests)
     - [自定义请求头](#customizing-request-headers)
     - [Cookies](#cookies)
     - [会话 / 认证](#session-and-authentication)
@@ -13,8 +13,9 @@
 - [测试视图](#testing-views)
     - [渲染切面 & 组件](#rendering-blade-and-components)
 - [可用断言](#available-assertions)
-    - [回应断言](#response-assertions)
+    - [响应断言](#response-assertions)
     - [身份验证断言](#authentication-assertions)
+    - [验证断言](#validation-assertions)
 
 <a name="introduction"></a>
 ## 简介
@@ -32,11 +33,9 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
     class ExampleTest extends TestCase
     {
         /**
-         * 基本的测试示例.
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_a_basic_request()
+        public function test_a_basic_request(): void
         {
             $response = $this->get('/');
 
@@ -44,12 +43,12 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
         }
     }
 
-`get`方法向应用程序发出`Get`请求，而`assertStatus`方法则断言返回的响应应该具有给定的 HTTP 状态代码。除了这个简单的断言之外，Laravel 还包含各种用于检查响应头、内容、JSON 结构等的断言。
+`get` 方法向应用程序发出 `Get` 请求，而 `assertStatus` 方法则断言返回的响应应该具有给定的 HTTP 状态代码。除了这个简单的断言之外，Laravel 还包含各种用于检查响应头、内容、JSON 结构等的断言。
 
 <a name="making-requests"></a>
 ## 创建请求
 
-要向应用程序发出请求，可以在测试中调用`get`、`post`、`put`、`patch`或`delete`方法。这些方法实际上不会向应用程序发出“真正的”HTTP 请求。相反，整个网络请求是在内部模拟的。
+要向应用程序发出请求，可以在测试中调用`get`、`post`、`put`、`patch`或`delete`方法。这些方法实际上不会向应用程序发出「真正的」HTTP 请求。相反，整个网络请求是在内部模拟的。
 
 测试请求方法不返回`Illuminate\Http\Response`实例，而是返回`Illuminate\Testing\TestResponse`实例，该实例提供[各种有用的断言](##available-assertions),允许你检查应用程序的响应：
 
@@ -64,11 +63,9 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
     class ExampleTest extends TestCase
     {
         /**
-         * 基本的测试示例.
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_a_basic_request()
+        public function test_a_basic_request(): void
         {
             $response = $this->get('/');
 
@@ -78,7 +75,8 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
 
 通常，你的每个测试应该只向你的应用发出一个请求。如果在单个测试方法中执行多个请求，则可能会出现意外行为。
 
-> 技巧：为了方便起见，运行测试时会自动禁用 CSRF 中间件。
+> **技巧**
+> 为了方便起见，运行测试时会自动禁用 CSRF 中间件。
 
 <a name="customizing-request-headers"></a>
 ### 自定义请求头
@@ -94,11 +92,9 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
     class ExampleTest extends TestCase
     {
         /**
-         * 一个基本的功能测试示例
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_interacting_with_headers()
+        public function test_interacting_with_headers(): void
         {
             $response = $this->withHeaders([
                 'X-Header' => 'Value',
@@ -121,7 +117,7 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
 
     class ExampleTest extends TestCase
     {
-        public function test_interacting_with_cookies()
+        public function test_interacting_with_cookies(): void
         {
             $response = $this->withCookie('color', 'blue')->get('/');
 
@@ -133,7 +129,7 @@ Laravel 提供了一个非常流畅的 API，用于向应用程序发出 HTTP �
     }
 
 <a name="session-and-authentication"></a>
-### Session / Authentication
+### 会话 (Session) / 认证 (Authentication)
 
 Laravel 提供了几个可在 HTTP 测试时使用 Session 的辅助函数。首先，你需要传递一个数组给 `withSession` 方法来设置 session 数据。这样在应用程序的测试请求发送之前，就会先去给数据加载 session：
 
@@ -145,13 +141,13 @@ Laravel 提供了几个可在 HTTP 测试时使用 Session 的辅助函数。首
 
     class ExampleTest extends TestCase
     {
-        public function test_interacting_with_the_session()
+        public function test_interacting_with_the_session(): void
         {
             $response = $this->withSession(['banned' => false])->get('/');
         }
     }
 
-Laravel 的 session 通常用于维护当前已验证用户的状态。因此，`actingAs` 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如，我们可以使用 [工厂模式](/docs/laravel/9.x/database-testing#writing-factories) 生成并验证用户：
+Laravel 的 session 通常用于维护当前已验证用户的状态。因此，`actingAs` 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如，我们可以使用一个[工厂模式](/docs/laravel/10.x/eloquent-factories)来生成和认证一个用户：
 
     <?php
 
@@ -162,7 +158,7 @@ Laravel 的 session 通常用于维护当前已验证用户的状态。因此，
 
     class ExampleTest extends TestCase
     {
-        public function test_an_action_that_requires_authentication()
+        public function test_an_action_that_requires_authentication(): void
         {
             $user = User::factory()->create();
 
@@ -172,7 +168,7 @@ Laravel 的 session 通常用于维护当前已验证用户的状态。因此，
         }
     }
 
-你也可以通过传递看守器名称作为 `actingAs` 方法的第二参数以指定用户通过哪种看守器来认证：
+你也可以通过传递看守器名称作为 `actingAs` 方法的第二参数以指定用户通过哪种看守器来认证。提供给 `actingAs` 方法的防护也将成为测试期间的默认防护。
 
     $this->actingAs($user, 'web')
 
@@ -190,11 +186,9 @@ Laravel 的 session 通常用于维护当前已验证用户的状态。因此，
     class ExampleTest extends TestCase
     {
         /**
-         * 一个最基础的测试例子
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_basic_test()
+        public function test_basic_test(): void
         {
             $response = $this->get('/');
 
@@ -217,11 +211,9 @@ Laravel 的 session 通常用于维护当前已验证用户的状态。因此，
     class ExampleTest extends TestCase
     {
         /**
-         * 基本功能测试例子
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_basic_test()
+        public function test_basic_test(): void
         {
             $response = $this->get('/');
 
@@ -258,11 +250,9 @@ Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如�
     class ExampleTest extends TestCase
     {
         /**
-         * 基本功能测试示例
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_making_an_api_request()
+        public function test_making_an_api_request(): void
         {
             $response = $this->postJson('/api/user', ['name' => 'Sally']);
 
@@ -278,7 +268,8 @@ Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如�
 
     $this->assertTrue($response['created']);
 
-> 技巧：`assertJson` 方法将响应转换为数组，并利用 `PHPUnit::assertArraySubset` 验证给定数组是否存在于应用程序返回的 JSON 响应中。因此，如果 JSON 响应中还有其他属性，则只要存在给定的片段，此测试仍将通过。
+> **技巧**
+> `assertJson` 方法将响应转换为数组，并利用 `PHPUnit::assertArraySubset` 验证给定数组是否存在于应用程序返回的 JSON 响应中。因此，如果 JSON 响应中还有其他属性，则只要存在给定的片段，此测试仍将通过。
 
 <a name="verifying-exact-match"></a>
 #### 验证 JSON 完全匹配
@@ -294,11 +285,9 @@ Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如�
     class ExampleTest extends TestCase
     {
         /**
-         * 一个基本的功能测试示例。
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_asserting_an_exact_json_match()
+        public function test_asserting_an_exact_json_match(): void
         {
             $response = $this->postJson('/user', ['name' => 'Sally']);
 
@@ -324,11 +313,9 @@ Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如�
     class ExampleTest extends TestCase
     {
         /**
-         * 一个基本的功能测试示例。
-         *
-         * @return void
+         * 基本功能测试示例。
          */
-        public function test_asserting_a_json_paths_value()
+        public function test_asserting_a_json_paths_value(): void
         {
             $response = $this->postJson('/user', ['name' => 'Sally']);
 
@@ -338,18 +325,21 @@ Laravel 也提供了几个辅助函数来测试 JSON APIs 和其响应。例如�
         }
     }
 
+`assertJsonPath` 方法也接受一个闭包，可以用来动态地确定断言是否应该通过。
+
+    $response->assertJsonPath('team.owner.name', fn (string $name) => strlen($name) >= 3);
+
 <a name="fluent-json-testing"></a>
 ### JSON 流式测试
 
 Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 响应。首先，将闭包传递给 `assertJson` 方法。这个闭包将使用 `Illuminate\Testing\Fluent\AssertableJson` 的实例调用，该实例可用于对应用程序返回的 JSON 进行断言。 `where` 方法可用于对 JSON 的特定属性进行断言，而 `missing` 方法可用于断言 JSON 中缺少特定属性：
+
     use Illuminate\Testing\Fluent\AssertableJson;
 
     /**
-     * 一个基本的功能测试示例。
-     *
-     * @return void
+     * 基本功能测试示例。
      */
-    public function test_fluent_json()
+    public function test_fluent_json(): void
     {
         $response = $this->getJson('/users/1');
 
@@ -357,6 +347,8 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
             ->assertJson(fn (AssertableJson $json) =>
                 $json->where('id', 1)
                      ->where('name', 'Victoria Faith')
+                     ->where('email', fn (string $email) => str($email)->is('victoria@gmail.com'))
+                     ->whereNot('status', 'pending')
                      ->missing('password')
                      ->etc()
             );
@@ -364,9 +356,11 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
 
 #### 了解 `etc` 方法
 
-在上面的示例中，你可能已经注意到我们在断言链的末尾调用了 `etc` 方法。该方法通知 Laravel 在 JSON 对象上可能存在其他属性。如果未使用 `etc` 方法，则如果 JSON 对象上存在你未对其进行断言的其他属性，则测试将失败。
+在上面的例子中, 你可能已经注意到我们在断言链的末端调用了 `etc` 方法. 这个方法通知Laravel，在JSON对象上可能还有其他的属性存在。如果没有使用 `etc` 方法, 如果你没有对JSON对象的其他属性进行断言, 测试将失败.
 
-此行为背后的目的是通过强制你明确对属性做出断言或通过 `etc` 方法明确允许其他属性来保护你避免无意中在 JSON 响应中暴露敏感信息。
+这种行为背后的意图是保护你不会在你的 JSON 响应中无意地暴露敏感信息，因为它迫使你明确地对该属性进行断言或通过 `etc` 方法明确地允许额外的属性。
+
+然而，你应该知道，在你的断言链中不包括 `etc` 方法并不能确保额外的属性不会被添加到嵌套在 JSON 对象中的数组。`etc` 方法只能确保在调用 `etc` 方法的嵌套层中不存在额外的属性。
 
 <a name="asserting-json-attribute-presence-and-absence"></a>
 #### 断言属性存在/不存在
@@ -381,8 +375,8 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
 此外，`hasAll` 和 `missingAll` 方法允许同时断言多个属性的存在或不存在：
 
     $response->assertJson(fn (AssertableJson $json) =>
-        $json->hasAll('status', 'data')
-             ->missingAll('message', 'code')
+        $json->hasAll(['status', 'data'])
+             ->missingAll(['message', 'code'])
     );
 
 你可以使用 `hasAny` 方法来确定是否存在给定属性列表中的至少一个：
@@ -406,9 +400,10 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
     $response
         ->assertJson(fn (AssertableJson $json) =>
             $json->has(3)
-                 ->first(fn ($json) =>
+                 ->first(fn (AssertableJson $json) =>
                     $json->where('id', 1)
                          ->where('name', 'Victoria Faith')
+                         ->where('email', fn (string $email) => str($email)->is('victoria@gmail.com'))
                          ->missing('password')
                          ->etc()
                  )
@@ -432,9 +427,10 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
         ->assertJson(fn (AssertableJson $json) =>
             $json->has('meta')
                  ->has('users', 3)
-                 ->has('users.0', fn ($json) =>
+                 ->has('users.0', fn (AssertableJson $json) =>
                     $json->where('id', 1)
                          ->where('name', 'Victoria Faith')
+                         ->where('email', fn (string $email) => str($email)->is('victoria@gmail.com'))
                          ->missing('password')
                          ->etc()
                  )
@@ -445,9 +441,10 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
     $response
         ->assertJson(fn (AssertableJson $json) =>
             $json->has('meta')
-                 ->has('users', 3, fn ($json) =>
+                 ->has('users', 3, fn (AssertableJson $json) =>
                     $json->where('id', 1)
                          ->where('name', 'Victoria Faith')
+                         ->where('email', fn (string $email) => str($email)->is('victoria@gmail.com'))
                          ->missing('password')
                          ->etc()
                  )
@@ -492,7 +489,7 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
 
     class ExampleTest extends TestCase
     {
-        public function test_avatars_can_be_uploaded()
+        public function test_avatars_can_be_uploaded(): void
         {
             Storage::fake('avatars');
 
@@ -517,7 +514,7 @@ Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 
 <a name="fake-file-customization"></a>
 #### 虚拟文件定制
 
-在使用 `fake` 方法创建文件时，你可以指定图像的宽高以及大小，从而更好的验证测试规则：
+当使用 `UploadedFile` 类提供的 `fake` 方法创建文件时，你可以指定图片的宽度、高度和大小（以千字节为单位），以便更好地测试你的应用程序的验证规则。
 
     UploadedFile::fake()->image('avatar.jpg', $width, $height)->size(100);
 
@@ -544,7 +541,7 @@ Laravel 允许在不向应用程序发出模拟 HTTP 请求的情况下独立呈
 
     class ExampleTest extends TestCase
     {
-        public function test_a_welcome_view_can_be_rendered()
+        public function test_a_welcome_view_can_be_rendered(): void
         {
             $view = $this->view('welcome', ['name' => 'Taylor']);
 
@@ -561,7 +558,7 @@ Laravel 允许在不向应用程序发出模拟 HTTP 请求的情况下独立呈
 <a name="sharing-errors"></a>
 #### 共享错误
 
-一些视图可能依赖于 Laravel 提供的 [全局错误包](/docs/laravel/9.x/validation#quick-displaying-the-validation-errors) 中共享的错误。要在错误包中生成错误消息，可以使用 `withViewErrors` 方法：
+一些视图可能依赖于 Laravel 提供的 [全局错误包](/docs/laravel/10.x/validation#quick-displaying-the-validation-errors) 中共享的错误。要在错误包中生成错误消息，可以使用 `withViewErrors` 方法：
 
     $view = $this->withViewErrors([
         'name' => ['Please provide a valid name.']
@@ -572,7 +569,7 @@ Laravel 允许在不向应用程序发出模拟 HTTP 请求的情况下独立呈
 <a name="rendering-blade-and-components"></a>
 ### 渲染模板 & 组件
 
-必要的话，你可以使用 `blade` 方法来计算和呈现原始的 [Blade](/docs/laravel/9.x/blade) 字符串。与 `view` 方法一样，`blade` 方法返回的是 `Illuminate\Testing\TestView` 的实例：
+必要的话，你可以使用 `blade` 方法来计算和呈现原始的 [Blade](/docs/laravel/10.x/blade) 字符串。与 `view` 方法一样，`blade` 方法返回的是 `Illuminate\Testing\TestView` 的实例：
 
     $view = $this->blade(
         '<x-component :name="$name" />',
@@ -581,7 +578,7 @@ Laravel 允许在不向应用程序发出模拟 HTTP 请求的情况下独立呈
 
     $view->assertSee('Taylor');
 
-你可以使用 `component` 方法来评估和渲染 [Blade 组件](/docs/laravel/9.x/blade#components)。类似于 `view` 方法，`component` 方法返回一个 `Illuminate\Testing\TestView` 的实例：
+你可以使用 `component` 方法来评估和渲染 [Blade 组件](/docs/laravel/10.x/blade#components)。类似于 `view` 方法，`component` 方法返回一个 `Illuminate\Testing\TestView` 的实例：
 
     $view = $this->component(Profile::class, ['name' => 'Taylor']);
 
@@ -593,16 +590,18 @@ Laravel 允许在不向应用程序发出模拟 HTTP 请求的情况下独立呈
 <a name="response-assertions"></a>
 ### 响应断言
 
-Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断言方法，你可以在测试应用程序时使用它们。可以在由 `json`、`get`、`post`、`put` 和 `delete` 方法返回的响应上访问这些断言：
+Laravel 的 `Illuminate\Testing\TestResponse` 类提供了各种自定义断言方法，你可以在测试应用程序时使用它们。可以在由 `json`、`get`、`post`、`put` 和 `delete` 方法返回的响应上访问这些断言：
 
 <style>
     .collection-method-list > p {
-        column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+        columns: 14.4em 2; -moz-columns: 14.4em 2; -webkit-columns: 14.4em 2;
     }
 
     .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
@@ -623,20 +622,26 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 [assertJson](#assert-json)
 [assertJsonCount](#assert-json-count)
 [assertJsonFragment](#assert-json-fragment)
+[assertJsonIsArray](#assert-json-is-array)
+[assertJsonIsObject](#assert-json-is-object)
 [assertJsonMissing](#assert-json-missing)
 [assertJsonMissingExact](#assert-json-missing-exact)
 [assertJsonMissingValidationErrors](#assert-json-missing-validation-errors)
 [assertJsonPath](#assert-json-path)
+[assertJsonMissingPath](#assert-json-missing-path)
 [assertJsonStructure](#assert-json-structure)
 [assertJsonValidationErrors](#assert-json-validation-errors)
 [assertJsonValidationErrorFor](#assert-json-validation-error-for)
 [assertLocation](#assert-location)
+[assertContent](#assert-content)
 [assertNoContent](#assert-no-content)
+[assertStreamedContent](#assert-streamed-content)
 [assertNotFound](#assert-not-found)
 [assertOk](#assert-ok)
 [assertPlainCookie](#assert-plain-cookie)
 [assertRedirect](#assert-redirect)
 [assertRedirectContains](#assert-redirect-contains)
+[assertRedirectToRoute](#assert-redirect-to-route)
 [assertRedirectToSignedRoute](#assert-redirect-to-signed-route)
 [assertSee](#assert-see)
 [assertSeeInOrder](#assert-see-in-order)
@@ -650,7 +655,6 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 [assertSessionHasNoErrors](#assert-session-has-no-errors)
 [assertSessionDoesntHaveErrors](#assert-session-doesnt-have-errors)
 [assertSessionMissing](#assert-session-missing)
-[assertSimilarJson](#assert-similar-json)
 [assertStatus](#assert-status)
 [assertSuccessful](#assert-successful)
 [assertUnauthorized](#assert-unauthorized)
@@ -785,6 +789,20 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertJsonFragment(['name' => 'Taylor Otwell']);
 
+<a name="assert-json-is-array"></a>
+#### assertJsonIsArray
+
+断言响应的 JSON 是一个数组。
+
+    $response->assertJsonIsArray();
+
+<a name="assert-json-is-object"></a>
+#### assertJsonIsObject
+
+断言响应的 JSON 是一个对象。
+
+    $response->assertJsonIsObject();
+
 <a name="assert-json-missing"></a>
 #### assertJsonMissing
 
@@ -806,7 +824,8 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertJsonMissingValidationErrors($keys);
 
-> 提示：更通用的 [assertValid](#assert-valid) 方法可用于断言响应没有以 JSON 形式返回的验证错误**并且**没有错误被闪现到会话存储中。
+> **提示**
+> 更通用的 [assertValid](#assert-valid) 方法可用于断言响应没有以 JSON 形式返回的验证错误**并且**没有错误被闪现到会话存储中。
 
 <a name="assert-json-path"></a>
 #### assertJsonPath
@@ -817,7 +836,7 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
 例如，如果你的应用程序返回的 JSON 响应包含以下数据：
 
-```js
+```json
 {
     "user": {
         "name": "Steve Schoger"
@@ -829,6 +848,27 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertJsonPath('user.name', 'Steve Schoger');
 
+<a name="assert-json-missing-path"></a>
+#### assertJsonMissingPath
+
+断言响应具有给定的 JSON 结构：
+
+    $response->assertJsonMissingPath($path);
+
+例如，如果你的应用程序返回的 JSON 响应包含以下数据：
+
+```json
+{
+    "user": {
+        "name": "Steve Schoger"
+    }
+}
+```
+
+你可以断言它不包含 `user` 对象的 `email` 属性。
+
+    $response->assertJsonMissingPath('user.email');
+
 <a name="assert-json-structure"></a>
 #### assertJsonStructure
 
@@ -838,7 +878,7 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
 例如，如果你的应用程序返回的 JSON 响应包含以下数据：
 
-```js
+```json
 {
     "user": {
         "name": "Steve Schoger"
@@ -856,7 +896,7 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
 有时，你的应用程序返回的 JSON 响应可能包含对象数组：
 
-```js
+```json
 {
     "user": [
         {
@@ -892,7 +932,8 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertJsonValidationErrors(array $data, $responseKey = 'errors');
 
-> 技巧：更通用的 [assertInvalid](#assert-invalid) 方法可用于断言响应具有以 JSON 形式返回的验证错误**或**错误已闪存到会话存储。
+> **技巧**
+> 更通用的 [assertInvalid](#assert-invalid) 方法可用于断言响应具有以 JSON 形式返回的验证错误**或**错误已闪存到会话存储。
 
 <a name="assert-json-validation-error-for"></a>
 #### assertJsonValidationErrorFor
@@ -908,12 +949,26 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertLocation($uri);
 
+<a name="assert-content"></a>
+#### assertContent
+
+断言给定的字符串与响应内容匹配。
+
+    $response->assertContent($value);
+
 <a name="assert-no-content"></a>
 #### assertNoContent
 
 断言响应具有给定的 HTTP 状态码且没有内容：
 
     $response->assertNoContent($status = 204);
+
+<a name="assert-streamed-content"></a>
+#### assertStreamedContent
+
+断言给定的字符串与流式响应的内容相匹配。
+
+    $response->assertStreamedContent($value);
 
 <a name="assert-not-found"></a>
 #### assertNotFound
@@ -950,24 +1005,31 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
     $response->assertRedirectContains($string);
 
+<a name="assert-redirect-to-route"></a>
+#### assertRedirectToRoute
+
+断言响应是对给定的[命名路由](/docs/laravel/10.x/routing#named-routes)的重定向。
+
+    $response->assertRedirectToRoute($name = null, $parameters = []);
+
 <a name="assert-redirect-to-signed-route"></a>
 #### assertRedirectToSignedRoute
 
-断言响应是对给定签名路由的重定向：
+断言响应是对给定[签名路由](/docs/laravel/10.x/urls#signed-urls)的重定向：
 
     $response->assertRedirectToSignedRoute($name = null, $parameters = []);
 
 <a name="assert-see"></a>
 #### assertSee
 
-断言给定的字符串包含在响应中。除非传递第二个参数 `false` ，否则此断言将给定字符串进行转义后匹配：
+断言给定的字符串包含在响应中。除非传递第二个参数 `false`，否则此断言将给定字符串进行转义后匹配：
 
     $response->assertSee($value, $escaped = true);
 
 <a name="assert-see-in-order"></a>
 #### assertSeeInOrder
 
-断言给定的字符串按顺序包含在响应中。除非传递第二个参数 `false` ，否则此断言将给定字符串进行转义后匹配：
+断言给定的字符串按顺序包含在响应中。除非传递第二个参数 `false`，否则此断言将给定字符串进行转义后匹配：
 
     $response->assertSeeInOrder(array $values, $escaped = true);
 
@@ -981,7 +1043,7 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 <a name="assert-see-text-in-order"></a>
 #### assertSeeTextInOrder
 
-断言给定的字符串按顺序包含在响应的文本中。除非传递第二个参数 `false` ，否则此断言将给定字符串进行转义后匹配。在做出断言之前，响应内容将被传递到 PHP 的 `strip_tags` 函数：
+断言给定的字符串按顺序包含在响应的文本中。除非传递第二个参数 `false`，否则此断言将给定字符串进行转义后匹配。在做出断言之前，响应内容将被传递到 PHP 的 `strip_tags` 函数：
 
     $response->assertSeeTextInOrder(array $values, $escaped = true);
 
@@ -994,7 +1056,7 @@ Laravel 的 `Illuminate \ Testing \ TestResponse` 类提供了各种自定义断
 
 如果需要，可以提供一个闭包作为 `assertSessionHas` 方法的第二个参数。如果闭包返回 `true`，则断言将通过：
 
-    $response->assertSessionHas($key, function ($value) {
+    $response->assertSessionHas($key, function (User $value) {
         return $value->name === 'Taylor Otwell';
     });
 
@@ -1007,7 +1069,7 @@ session 在 [闪存输入数组](/docs/laravel/9.x/responses#redirecting-with-f
 
 如果需要，可以提供一个闭包作为 `assertSessionHasInput` 方法的第二个参数。如果闭包返回 `true`，则断言将通过：
 
-    $response->assertSessionHasInput($key, function ($value) {
+    $response->assertSessionHasInput($key, function (string $value) {
         return Crypt::decryptString($value) === 'secret';
     });
 
@@ -1044,10 +1106,13 @@ session 在 [闪存输入数组](/docs/laravel/9.x/responses#redirecting-with-f
         'name' => 'The given name was invalid.'
     ]);
 
+> **注意**
+> 更加通用的 [assertInvalid](#assert-invalid) 方法可以用来断言一个响应有验证错误，以JSON形式返回，**或** 将错误被闪存到会话存储中。
+
 <a name="assert-session-has-errors-in"></a>
 #### assertSessionHasErrorsIn
 
-断言会话在特定的 [错误包](/docs/laravel/9.x/validation#named-error-bags) 中包含给定 `$keys` 的错误。如果 `$keys` 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）：
+断言会话在特定的[错误包](/docs/laravel/10.x/validation#named-error-bags)中包含给定 `$keys` 的错误。如果 `$keys` 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）：
 
     $response->assertSessionHasErrorsIn($errorBag, $keys = [], $format = null);
 
@@ -1064,6 +1129,9 @@ session 在 [闪存输入数组](/docs/laravel/9.x/responses#redirecting-with-f
 断言会话对给定键没有验证错误：
 
     $response->assertSessionDoesntHaveErrors($keys = [], $format = null, $errorBag = 'default');
+
+> **注意**
+> 更加通用的 [assertValid](#assert-valid) 方法可以用来断言一个响应没有以JSON形式返回的验证错误，**同时** 不会将错误被闪存到会话存储中。
 
 <a name="assert-session-missing"></a>
 #### assertSessionMissing
@@ -1202,3 +1270,33 @@ Laravel 还提供了各种与身份验证相关的断言，你可以在应用程
 断言特定用户已通过身份验证：
 
     $this->assertAuthenticatedAs($user, $guard = null);
+
+<a name="validation-assertions"></a>
+## 验证断言
+
+Laravel 提供了两个主要的验证相关的断言，你可以用它来确保在你的请求中提供的数据是有效或无效的。
+
+<a name="validation-assert-valid"></a>
+#### assertValid
+
+断言响应对于给定的键没有验证错误。该方法可用于断言响应中的验证错误是以 JSON 结构返回的，或者验证错误已经闪现到会话中。
+
+    // 断言没有验证错误存在...
+    $response->assertValid();
+
+    //断言给定的键没有验证错误...
+    $response->assertValid(['name', 'email']);
+
+<a name="validation-assert-invalid"></a>
+#### assertInvalid
+
+断言响应对给定的键有验证错误。这个方法可用于断言响应中的验证错误是以 JSON 结构返回的，或者验证错误已经被闪现到会话中。
+
+    $response->assertInvalid(['name', 'email']);
+
+你也可以断言一个给定的键有一个特定的验证错误信息。当这样做时，你可以提供整个消息或只提供消息的一小部分。
+
+    $response->assertInvalid([
+        'name' => 'The name field is required.',
+        'email' => 'valid email address',
+    ]);
