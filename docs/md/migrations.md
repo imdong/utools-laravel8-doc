@@ -1,4 +1,4 @@
-# 数据库：迁移
+# 数据库: 迁移
 
 - [介绍](#introduction)
 - [生成迁移](#generating-migrations)
@@ -15,6 +15,7 @@
     - [可用的字段类型](#available-column-types)
     - [字段修饰符](#column-modifiers)
     - [修改字段](#modifying-columns)
+    - [重命名字段](#renaming-columns)
     - [删除字段](#dropping-columns)
 - [索引](#indexes)
     - [创建索引](#creating-indexes)
@@ -26,24 +27,26 @@
 <a name="introduction"></a>
 ## 介绍
 
-迁移就像是数据库的版本控制，让你的团队能够轻松地去定义和共享程序的数据库结构。迁移通常配合 Laravel 的结构生成器，可以轻松生成应用程序的数据库结构。如果团队中有成员在他的本地数据库环境中手动的添加了某个字段，那么你将会面对如何解决数据库迁移的问题。
+迁移就像数据库的版本控制，允许你的团队定义和共享应用程序的数据库架构定义。 如果你曾经不得不告诉团队成员在从代码控制中拉取更新后手动添加字段到他们的本地数据库，那么你就遇到了数据库迁移解决的问题。
 
- Laravel 9 `Schema` [facade](/docs/laravel/9.x/facades) 提供了数据库相关的支持，可以在所有 Laravel 支持的数据库管理系统中创建和操作表。
+Laravel `Schema` [facade](/docs/laravel/10.x/facades) 为所有 Laravel 支持的数据库系统的创建和操作表提供了不依赖于数据库的支持。通常情况下，迁移会使用 facade 来创建和修改数据表和字段。
 
 <a name="generating-migrations"></a>
 ## 生成迁移
 
-你可以使用 `make:migration` [Artisan command](/docs/laravel/9.x/artisan) 生成数据库迁移。新的迁移将放在你的 `database/migrations` 目录每个迁移文件名都包含一个时间戳，允许 Laravel 确定迁移的顺序：
+你可以使用 `make:migration` [Artisan 命令](/docs/laravel/10.x/artisan) 来生成数据库迁移。新的迁移文件将放在你的 `database/migrations` 目录下。每个迁移文件名都包含一个时间戳来使 Laravel 确定迁移的顺序：
 
 ```shell
 php artisan make:migration create_flights_table
 ```
 
-Laravel 会根据迁移文件的名称确定表的名称已经是否在前一种创建新的数据表。
+Laravel 将使用迁移文件的名称来猜测表名以及迁移是否会创建一个新表。如果 Laravel 能够从迁移文件的名称中确定表的名称，它将在生成的迁移文件中预填入指定的表，或者，你也可以直接在迁移文件中手动指定表名。
+
 
 如果要为生成的迁移指定自定义路径，你可以在执行 `make:migration` 命令时使用 `--path` 选项。给定的路径应该相对于应用程序的基本路径。
 
-> 技巧：可以使用 [stub publishing](/docs/laravel/9.x/artisan#stub-customization) 自定义发布。
+> **技巧**  
+> 可以使用 [stub publishing](/docs/laravel/10.x/artisanmd#stub-customization) 自定义发布。
 
 <a name="squashing-migrations"></a>
 ### 整合迁移
@@ -59,9 +62,19 @@ php artisan schema:dump --prune
 
 执行此命令时，Laravel 将向应用程序的 `database/schema` 目录写入一个「schema」文件。现在，当你尝试迁移数据库而没有执行其他迁移时，Laravel 将首先执行模式文件的 SQL 语句。在执行数据库结构文件的语句之后，Laravel 将执行不属于数据库结构的剩余的所有迁移。
 
+如果你的应用程序的测试使用的数据库连接与你在本地开发过程中通常使用的不同，你应该确保你已经使用该数据库连接转储了一个 schema 文件，以便你的测试能够建立你的数据库。你可能希望在切换（dump）你在本地开发过程中通常使用的数据库连接之后再做这件事。
+
+```shell
+php artisan schema:dump
+php artisan schema:dump --database=testing --prune
+```
+
+
+
 你应该将数据库模式文件提交给源代码管理，以便团队中的其他新开发人员可以快速创建应用程序的初始数据库结构。
 
-> 注意：整合迁移仅适用于 MySQL、PostgreSQL 和 SQLite 数据库，并使用数据库命令行的客户端。另外，数据库结构不能还原到内存中的 SQLite 数据库。
+> **注意**  
+> 整合迁移仅适用于 MySQL、PostgreSQL 和 SQLite 数据库，并使用数据库命令行的客户端。另外，数据库结构不能还原到内存中的 SQLite 数据库。
 
 <a name="migration-structure"></a>
 ## 迁移结构
@@ -79,11 +92,9 @@ php artisan schema:dump --prune
     return new class extends Migration
     {
         /**
-         * 运行迁移程序
-         *
-         * @return void
+         * 执行迁移
          */
-        public function up()
+        public function up(): void
         {
             Schema::create('flights', function (Blueprint $table) {
                 $table->id();
@@ -95,10 +106,8 @@ php artisan schema:dump --prune
 
         /**
          * 回滚迁移
-         *
-         * @return void
          */
-        public function down()
+        public function down(): void
         {
             Schema::drop('flights');
         }
@@ -110,7 +119,7 @@ php artisan schema:dump --prune
 如果你的迁移将与应用程序默认数据库连接以外的数据库连接进行交互，你应该设置迁移的 `$connection` 属性：
 
     /**
-     * 迁移应使用的数据库连接。
+     * The database connection that should be used by the migration.
      *
      * @var string
      */
@@ -118,13 +127,13 @@ php artisan schema:dump --prune
 
     /**
      * 执行迁移
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        //
+        // ...
     }
+
+
 
 <a name="running-migrations"></a>
 ## 执行迁移
@@ -140,6 +149,25 @@ php artisan migrate
 ```shell
 php artisan migrate:status
 ```
+
+如果你希望在不实际运行迁移的情况下看到将被执行的SQL语句，你可以在 `migrate` 命令中提供 `--pretend` 选项。
+
+```shell
+php artisan migrate --pretend
+```
+
+#### 在隔离的环境中执行迁移
+
+如果你在多个服务器上部署你的应用程序，并在部署过程中运行迁移，你可能不希望两个服务器同时尝试迁移数据库。为了避免这种情况，你可以在调用 `migrate` 命令时使用 `isolated` 选项。
+
+当提供 `isolated` 选项时, Laravel 将使用你的应用程序缓存驱动获得一个原子锁，然后再尝试运行你的迁移。所有其他试图运行 `migrate` 命令的尝试在锁被持有时都不会执行; 然而, 命令仍然会以成功的退出状态码退出:
+
+```shell
+php artisan migrate --isolated
+```
+
+> **注意**  
+> 要使用这个功能，你的应用程序必须使用 `memcached` / `redis` / `dynamodb` / `database` / `file`  或 `array` 缓存驱动作为你应用程序的默认缓存驱动。此外，所有的服务器必须与同一个中央缓存服务器进行通信。
 
 <a name="forcing-migrations-to-run-in-production"></a>
 #### 在生产环境中执行强制迁移
@@ -163,6 +191,12 @@ php artisan migrate:rollback
 
 ```shell
 php artisan migrate:rollback --step=5
+```
+
+你可以通过向 `rollback` 命令提供 `batch` 选项来回滚特定的批次迁移，其中 `batch` 选项对应于应用程序中 `migrations` 数据库表中的一个批次值。例如，下面的命令将回滚第三批中的所有迁移。
+
+```shell
+php artisan migrate:rollback --batch=3
 ```
 
 命令 `migrate:reset` 会回滚应用已运行过的所有迁移：
@@ -200,7 +234,8 @@ php artisan migrate:fresh
 php artisan migrate:fresh --seed
 ```
 
-> 注意：该命令 `migrate:fresh` 在删去所有数据表的过程中，会无视它们的前缀。如果数据库涉及到其它应用，使用该命令须十分小心。
+> **注意**  
+> 该命令 `migrate:fresh` 在删去所有数据表的过程中，会无视它们的前缀。如果数据库涉及到其它应用，使用该命令须十分小心。
 
 <a name="tables"></a>
 ## 数据表
@@ -312,7 +347,7 @@ php artisan migrate:fresh --seed
 <a name="columns"></a>
 ## 字段
 
-<a name="创建字段"></a>
+<a name="creating-columns"></a>
 ### 创建字段
 
 门面 `Schema` 的 `table` 方法可用于更新表。与 `create` 方法一样， `table` 方法接受两个参数：表名和一个闭包，该闭包接收一个 `illumb\Database\Schema\Blueprint` 实例，可以使用该实例向表中添加列：
@@ -327,7 +362,30 @@ php artisan migrate:fresh --seed
 <a name="可用的字段类型"></a>
 ### 可用的字段类型
 
-`Illuminate\Database\Schema\Blueprint` 提供了多种方法，用来创建表中对应类型的列。下面列出了所有可用的方法：
+Schema 构建器 `Illuminate\Database\Schema\Blueprint` 提供了多种方法，用来创建表中对应类型的列。下面列出了所有可用的方法：
+
+<style>
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
+    }
+
+    .collection-method-list a {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .collection-method code {
+        font-size: 14px;
+    }
+
+    .collection-method:not(.first-collection-method) {
+        margin-top: 50px;
+    }
+</style>
+
+<div class="collection-method-list" markdown="1">
 
 [bigIncrements](#column-method-bigIncrements)
 [bigInteger](#column-method-bigInteger)
@@ -343,13 +401,14 @@ php artisan migrate:fresh --seed
 [float](#column-method-float)
 [foreignId](#column-method-foreignId)
 [foreignIdFor](#column-method-foreignIdFor)
+[foreignUlid](#column-method-foreignUlid)
 [foreignUuid](#column-method-foreignUuid)
 [geometryCollection](#column-method-geometryCollection)
 [geometry](#column-method-geometry)
 [id](#column-method-id)
 [increments](#column-method-increments)
 [integer](#column-method-integer)
-[ipAddress](https://learnku.com/docs/laravel/9.x/migrations/12248#column-method-ipAddress)
+[ipAddress](#column-method-ipAddress)
 [json](#column-method-json)
 [jsonb](#column-method-jsonb)
 [lineString](#column-method-lineString)
@@ -357,13 +416,14 @@ php artisan migrate:fresh --seed
 [macAddress](#column-method-macAddress)
 [mediumIncrements](#column-method-mediumIncrements)
 [mediumInteger](#column-method-mediumInteger)
-[mediumText](8#column-method-mediumText)
+[mediumText](#column-method-mediumText)
 [morphs](#column-method-morphs)
 [multiLineString](#column-method-multiLineString)
 [multiPoint](#column-method-multiPoint)
 [multiPolygon](#column-method-multiPolygon)
 [nullableMorphs](#column-method-nullableMorphs)
 [nullableTimestamps](#column-method-nullableTimestamps)
+[nullableUlidMorphs](#column-method-nullableUlidMorphs)
 [nullableUuidMorphs](#column-method-nullableUuidMorphs)
 [point](#column-method-point)
 [polygon](#column-method-polygon)
@@ -376,7 +436,7 @@ php artisan migrate:fresh --seed
 [string](#column-method-string)
 [text](#column-method-text)
 [timeTz](#column-method-timeTz)
-[time](https://learnku.com/docs/laravel/9.x/migrations/12248#column-method-time)
+[time](#column-method-time)
 [timestampTz](#column-method-timestampTz)
 [timestamp](#column-method-timestamp)
 [timestampsTz](#column-method-timestampsTz)
@@ -390,457 +450,492 @@ php artisan migrate:fresh --seed
 [unsignedMediumInteger](#column-method-unsignedMediumInteger)
 [unsignedSmallInteger](#column-method-unsignedSmallInteger)
 [unsignedTinyInteger](#column-method-unsignedTinyInteger)
+[ulidMorphs](#column-method-ulidMorphs)
 [uuidMorphs](#column-method-uuidMorphs)
+[ulid](#column-method-ulid)
 [uuid](#column-method-uuid)
 [year](#column-method-year)
 
+</div>
+
 <a name="column-method-bigIncrements"></a>
-#### `bigIncrements()`
+#### `bigIncrements()` {.collection-method .first-collection-method}
 
 `bigIncrements` 方法用于在数据表中创建一个自增的 `UNSIGNED BIGINT` 类型（主键）的列：
 
     $table->bigIncrements('id');
 
 <a name="column-method-bigInteger"></a>
-#### `bigInteger()`
+#### `bigInteger()` {.collection-method}
 
 `bigInteger` 方法用于在数据表中创建一个 `BIGINT` 类型的列：
 
     $table->bigInteger('votes');
 
 <a name="column-method-binary"></a>
-#### `binary()`
+#### `binary()` {.collection-method}
 
 `binary` 方法用于在数据表中创建一个 `BLOB` 类型的列：
 
     $table->binary('photo');
 
 <a name="column-method-boolean"></a>
-#### `boolean()`
+#### `boolean()` {.collection-method}
 
 `boolean` 方法用于在数据表中创建一个 `BOOLEAN` 类型的列：
 
     $table->boolean('confirmed');
 
 <a name="column-method-char"></a>
-#### `char()`
+#### `char()` {.collection-method}
 
 `char` 方法用于在数据表中创建一个 `CHAR` 类型的列，长度由参数指定：
 
     $table->char('name', 100);
 
 <a name="column-method-dateTimeTz"></a>
-#### `dateTimeTz()`
+#### `dateTimeTz()` {.collection-method}
 
 `dateTimeTz` 方法用于在数据表中创建一个 `DATETIME` 类型（附有 timezone）的列，可选参数为精度的总位数：
 
     $table->dateTimeTz('created_at', $precision = 0);
 
 <a name="column-method-dateTime"></a>
-#### `dateTime()`
+#### `dateTime()` {.collection-method}
 
 `dateTime` 方法用于在数据表中创建一个 `DATETIME` 类型的列，可选参数为精度的总位数：
 
     $table->dateTime('created_at', $precision = 0);
 
 <a name="column-method-date"></a>
-#### `date()`
+#### `date()` {.collection-method}
 
 `date` 方法用于在数据表中创建一个 `DATE` 类型的列：
 
     $table->date('created_at');
 
 <a name="column-method-decimal"></a>
-#### `decimal()`
+#### `decimal()` {.collection-method}
 
 `decimal` 方法用于在数据表中创建一个 `DECIMAL` 类型的列，可选参数分别为有效字数总位数、小数部分总位数：
 
     $table->decimal('amount', $precision = 8, $scale = 2);
 
 <a name="column-method-double"></a>
-#### `double()`
+#### `double()` {.collection-method}
 
 `double` 方法用于在数据表中创建一个 `DOUBLE` 类型的列，可选参数分别为有效字数总位数、小数部分总位数：
 
     $table->double('amount', 8, 2);
 
 <a name="column-method-enum"></a>
-#### `enum()`
+#### `enum()` {.collection-method}
 
 `enum` 方法用于在数据表中创建一个 `ENUM` 类型的列，合法的值列表由参数指定：
 
     $table->enum('difficulty', ['easy', 'hard']);
 
 <a name="column-method-float"></a>
-#### `float()`
+#### `float()` {.collection-method}
 
  `float` 方法用于在数据表中创建一个 `FLOAT` 类型的列，可选参数分别为有效字数总位数、小数部分总位数：
 
     $table->float('amount', 8, 2);
 
 <a name="column-method-foreignId"></a>
-#### `foreignId()`
+#### `foreignId()` {.collection-method}
 
 `foreignId` 方法是 `unsignedBigInteger` 的别名：
 
     $table->foreignId('user_id');
 
 <a name="column-method-foreignIdFor"></a>
-#### `foreignIdFor()`
+#### `foreignIdFor()` {.collection-method}
 
 `foreignIdFor` 方法为给定模型类添加了 `{column}_id UNSIGNED BIGINT` 等效列：
 
     $table->foreignIdFor(User::class);
+<a name="column-method-foreignUlid"></a>
+#### `foreignUlid()` {.collection-method}
+
+`foreignUlid` 方法创建一个 `ULID` 等效列：
+
+    $table->foreignUlid('user_id');
 
 <a name="column-method-foreignUuid"></a>
-#### `foreignUuid()`
-
+#### `foreignUuid()` {.collection-method}
 `foreignUuid` 方法创建一个 `UUID` 等效列：
-
-    $table->foreignUuid('user_id');
+```
+$table->foreignUuid('user_id');
+```
 
 <a name="column-method-geometryCollection"></a>
-#### `geometryCollection()`
+#### `geometryCollection()` {.collection-method}
 
 `geometryCollection` 方法相当于 `GEOMETRYCOLLECTION` :
 
     $table->geometryCollection('positions');
 
 <a name="column-method-geometry"></a>
-#### `geometry()`
+#### `geometry()` {.collection-method}
 
 `geometry` 方法相当于 `GEOMETRY` :
 
     $table->geometry('positions');
 
 <a name="column-method-id"></a>
-#### `id()`
+#### `id()` {.collection-method}
 
  `id` 方法是`bigIncrements` 的别名。默认情况下，该方法将创建一个 `id` 列; 但是，如果要为列指定不同的名称，则可以传递列名：
 
     $table->id();
 
 <a name="column-method-increments"></a>
-#### `increments()`
+#### `increments()` {.collection-method}
 
 `increments` 方法创建一个自动递增相当于 `UNSIGNED INTEGER` 的列作为主键：
 
     $table->increments('id');
 
 <a name="column-method-integer"></a>
-#### `integer()`
+#### `integer()` {.collection-method}
 
 `integer` 方法相当于 `INTEGER` ：
 
     $table->integer('votes');
 
 <a name="column-method-ipAddress"></a>
-#### `ipAddress()`
+#### `ipAddress()` {.collection-method}
 
 `ipAddress` 方法相当于 `VARCHAR` ：
 
     $table->ipAddress('visitor');
 
 <a name="column-method-json"></a>
-#### `json()`
+#### `json()` {.collection-method}
 
 `json` 方法相当于 `JSON`：
 
     $table->json('options');
 
 <a name="column-method-jsonb"></a>
-#### `jsonb()`
+#### `jsonb()` {.collection-method}
 
 `jsonb` 方法相当于 `JSONB`：
 
     $table->jsonb('options');
 
 <a name="column-method-lineString"></a>
-#### `lineString()`
+#### `lineString()` {.collection-method}
 
  `lineString` 方法相当于 `LINESTRING`：
 
     $table->lineString('positions');
 
 <a name="column-method-longText"></a>
-#### `longText()`
+#### `longText()` {.collection-method}
 
  `longText` 方法相当于 `LONGTEXT`：
 
     $table->longText('description');
 
 <a name="column-method-macAddress"></a>
-#### `macAddress()`
+#### `macAddress()` {.collection-method}
 
 `macAddress` 方法创建一个用于保存 MAC 地址的列。一些数据库系统（如 PostgreSQL），为这种类型的数据提供了专用的类型。其他数据库系统相当于使用字符串类型：
 
     $table->macAddress('device');
 
 <a name="column-method-mediumIncrements"></a>
-#### `mediumIncrements()`
+#### `mediumIncrements()` {.collection-method}
 
  `mediumIncrements` 方法用于创建一个 `UNSIGNED MEDIUMINT` 类型的自动递增的列作为主键：
 
     $table->mediumIncrements('id');
 
 <a name="column-method-mediumInteger"></a>
-#### `mediumInteger()`
+#### `mediumInteger()` {.collection-method}
 
  `mediumInteger` 方法用于创建一个 `MEDIUMINT` 类型的列：
 
     $table->mediumInteger('votes');
 
 <a name="column-method-mediumText"></a>
-#### `mediumText()`
+#### `mediumText()` {.collection-method}
 
 `mediumText` 方法用于创建一个 `MEDIUMTEXT` 类型的列：
 
     $table->mediumText('description');
 
 <a name="column-method-morphs"></a>
-#### `morphs()`
+#### `morphs()` {.collection-method}
 
  `morphs` 方法用于快速创建一个名称为 `{column}_id` ，类型为 `UNSIGNED BIGINT` 的列和一个名称为 `{column}_type` ，类型为 `VARCHAR` 的列。
 
-这个方法在定义[多态关联](/docs/laravel/9.x/eloquent-relationships)所需的列时使用。在下面的例子中， `taggable_id` 和 `taggable_type` 这两个列会被创建：
+这个方法在定义[多态关联](/docs/laravel/10.x/eloquent-relationships)所需的列时使用。在下面的例子中， `taggable_id` 和 `taggable_type` 这两个列会被创建：
 
     $table->morphs('taggable');
 
 <a name="column-method-multiLineString"></a>
-#### `multiLineString()`
+#### `multiLineString()` {.collection-method}
 
  `multiLineString` 方法用于创建一个 `MULTILINESTRING` 类型的列：
 
     $table->multiLineString('positions');
 
 <a name="column-method-multiPoint"></a>
-#### `multiPoint()`
+#### `multiPoint()` {.collection-method}
 
  `multiPoint` 方法用于创建一个 `MULTIPOINT` 类型的列：
 
     $table->multiPoint('positions');
 
 <a name="column-method-multiPolygon"></a>
-#### `multiPolygon()`
+#### `multiPolygon()` {.collection-method}
 
  `multiPolygon` 方法用于创建一个 `MULTIPOLYGON` 类型的列：
 
     $table->multiPolygon('positions');
 
 <a name="column-method-nullableTimestamps"></a>
-#### `nullableTimestamps()`
+#### `nullableTimestamps()` {.collection-method}
 
 这个方法和 [timestamps](#column-method-timestamps) 方法类似；需要注意的是此方法创建的列是 `nullable` 的：
 
     $table->nullableTimestamps(0);
 
 <a name="column-method-nullableMorphs"></a>
-#### `nullableMorphs()`
+#### `nullableMorphs()` {.collection-method}
 
 这个方法和 [morphs](#column-method-morphs) 方法类似；需要注意的是此方法创建的列是 `nullable` 的：
 
     $table->nullableMorphs('taggable');
 
+<a name="column-method-nullableUlidMorphs"></a>
+#### `nullableUlidMorphs()` {.collection-method}
+
+这个方法和 [ulidMorphs](#column-method-ulidMorphs) 方法类似；需要注意的是此方法创建的列是 `nullable`。
+
+    $table->nullableUlidMorphs('taggable');
+
 <a name="column-method-nullableUuidMorphs"></a>
-#### `nullableUuidMorphs()`
+#### `nullableUuidMorphs()` {.collection-method}
 
 这个方法和 [uuidMorphs](#column-method-uuidMorphs) 方法类似；需要注意的是此方法创建的列是 `nullable` 的：
 
     $table->nullableUuidMorphs('taggable');
 
 <a name="column-method-point"></a>
-#### `point()`
+#### `point()` {.collection-method}
 
 `point` 方法相当于 `POINT`：
 
     $table->point('position');
 
 <a name="column-method-polygon"></a>
-#### `polygon()`
+#### `polygon()` {.collection-method}
 
-`polygon` 方法相当于 `POLYGON`：
+The `polygon` method creates a `POLYGON` equivalent column:
 
     $table->polygon('position');
 
 <a name="column-method-rememberToken"></a>
-#### `rememberToken()`
+#### `rememberToken()` {.collection-method}
 
-添加一个允许空值的 VARCHAR (100) 类型的 `remember_token` 字段，用于存储 [记住用户](/docs/laravel/9.x/authentication#remembering-users)：
+添加一个允许空值的 `VARCHAR (100)` 类型的 `remember_token` 字段，用于存储 [记住用户](/docs/laravel/10.x/authentication#remembering-users)：
 
     $table->rememberToken();
 
 <a name="column-method-set"></a>
-#### `set()`
+#### `set()` {.collection-method}
 
 `set` 方法使用给定的有效值列表创建一个 `SET` 等效列：
 
     $table->set('flavors', ['strawberry', 'vanilla']);
 
 <a name="column-method-smallIncrements"></a>
-#### `smallIncrements()`
+#### `smallIncrements()` {.collection-method}
 
 `smallIncrements` 方法创建一个自动递增的 `UNSIGNED SMALLINT` 等效列作为主键：
 
     $table->smallIncrements('id');
 
 <a name="column-method-smallInteger"></a>
-#### `smallInteger()`
+#### `smallInteger()` {.collection-method}
 
 `smallInteger` 方法创建一个 `SMALLINT` 等效列：
 
     $table->smallInteger('votes');
 
 <a name="column-method-softDeletesTz"></a>
-#### `softDeletesTz()`
+
+
+#### `softDeletesTz()` {.collection-method}
 
 `softDeletesTz` 方法添加了一个可为空的 `deleted_at` `TIMESTAMP`（带时区）等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的“软删除”功能所需的 `deleted_at` 时间戳：
 
     $table->softDeletesTz($column = 'deleted_at', $precision = 0);
 
 <a name="column-method-softDeletes"></a>
-#### `softDeletes()`
+#### `softDeletes()` {.collection-method}
 
 `softDeletes` 方法添加了一个可为空的 `deleted_at` `TIMESTAMP` 等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的「软删除」功能所需的 `deleted_at` 时间戳，相当于为软删除添加一个可空的 `deleted_at` 字段：
 
     $table->softDeletes($column = 'deleted_at', $precision = 0);
 
 <a name="column-method-string"></a>
-#### `string()`
+#### `string()` {.collection-method}
 
 `string` 方法创建一个给定长度的 `VARCHAR` 等效列，相当于指定长度的 VARCHAR：
 
     $table->string('name', 100);
 
 <a name="column-method-text"></a>
-#### `text()`
+#### `text()` {.collection-method}
 
 `text` 方法创建一个 `TEXT` 等效列：
 
     $table->text('description');
 
 <a name="column-method-timeTz"></a>
-#### `timeTz()`
+#### `timeTz()` {.collection-method}
 
 `timeTz` 方法创建一个具有可选精度（总位数）的 `TIME`（带时区）等效列：
 
     $table->timeTz('sunrise', $precision = 0);
 
 <a name="column-method-time"></a>
-#### `time()`
+#### `time()` {.collection-method}
 
 `time` 方法创建一个具有可选精度（总位数）的 `TIME` 等效列：
 
     $table->time('sunrise', $precision = 0);
 
 <a name="column-method-timestampTz"></a>
-#### `timestampTz()`
+#### `timestampTz()` {.collection-method}
 
 `timestampTz` 方法创建一个具有可选精度（总位数）的 `TIMESTAMP`（带时区）等效列：
 
     $table->timestampTz('added_at', $precision = 0);
 
 <a name="column-method-timestamp"></a>
-#### `timestamp()`
+#### `timestamp()` {.collection-method}
 
 `timestamp` 方法创建一个具有可选精度（总位数）的 `TIMESTAMP` 等效列：
 
     $table->timestamp('added_at', $precision = 0);
 
 <a name="column-method-timestampsTz"></a>
-#### `timestampsTz()`
+#### `timestampsTz()` {.collection-method}
 
 `timestampsTz` 方法创建 `created_at` 和 `updated_at` `TIMESTAMP`（带时区）等效列，具有可选精度（总位数）：
 
     $table->timestampsTz($precision = 0);
 
 <a name="column-method-timestamps"></a>
-#### `timestamps()`
+#### `timestamps()` {.collection-method}
 
 `timestamps` 方法创建具有可选精度（总位数）的 `created_at` 和 `updated_at` `TIMESTAMP` 等效列：
 
     $table->timestamps($precision = 0);
 
 <a name="column-method-tinyIncrements"></a>
-#### `tinyIncrements()`
+#### `tinyIncrements()` {.collection-method}
 
 `tinyIncrements` 方法创建一个自动递增的 `UNSIGNED TINYINT` 等效列作为主键：
 
     $table->tinyIncrements('id');
 
 <a name="column-method-tinyInteger"></a>
-#### `tinyInteger()`
+#### `tinyInteger()` {.collection-method}
 
 `tinyInteger` 方法用于创建一个 `TINYINT` 等效列：
 
     $table->tinyInteger('votes');
 
 <a name="column-method-tinyText"></a>
-#### `tinyText()`
+#### `tinyText()` {.collection-method}
 
 `tinyText` 方法用于创建一个 `TINYTEXT` 等效列：
 
     $table->tinyText('notes');
 
 <a name="column-method-unsignedBigInteger"></a>
-#### `unsignedBigInteger()`
+#### `unsignedBigInteger()` {.collection-method}
 
 `unsignedBigInteger` 方法用于创建一个 `UNSIGNED BIGINT` 等效列：
 
     $table->unsignedBigInteger('votes');
 
 <a name="column-method-unsignedDecimal"></a>
-#### `unsignedDecimal()`
+#### `unsignedDecimal()` {.collection-method}
 
 `unsignedDecimal` 方法用于创建一个 `UNSIGNED DECIMAL` 等效列，具有可选的精度（总位数）和小数位数（小数位数）：
 
     $table->unsignedDecimal('amount', $precision = 8, $scale = 2);
 
 <a name="column-method-unsignedInteger"></a>
-#### `unsignedInteger()`
+#### `unsignedInteger()` {.collection-method}
 
 `unsignedInteger` 方法用于创建一个 `UNSIGNED INTEGER` 等效列：
 
     $table->unsignedInteger('votes');
 
 <a name="column-method-unsignedMediumInteger"></a>
-#### `unsignedMediumInteger()`
+#### `unsignedMediumInteger()` {.collection-method}
 
 `unsignedMediumInteger` 方法用于创建一个 `UNSIGNED MEDIUMINT` 等效列：
 
     $table->unsignedMediumInteger('votes');
 
 <a name="column-method-unsignedSmallInteger"></a>
-#### `unsignedSmallInteger()`
+#### `unsignedSmallInteger()` {.collection-method}
 
 `unsignedSmallInteger` 方法用于创建一个 `UNSIGNED SMALLINT` 等效列：
 
     $table->unsignedSmallInteger('votes');
 
 <a name="column-method-unsignedTinyInteger"></a>
-#### `unsignedTinyInteger()`
+#### `unsignedTinyInteger()` {.collection-method}
 
 `unsignedTinyInteger` 方法用于创建一个 `UNSIGNED TINYINT` 等效列：
 
     $table->unsignedTinyInteger('votes');
 
+<a name="column-method-ulidMorphs"></a>
+#### `ulidMorphs()` {.collection-method}
+
+`ulidMorphs` 方法用于快速创建一个名称为 `{column}_id` ，类型为 `CHAR(26)` 的列和一个名称为 `{column}_type` ，类型为  `VARCHAR` 的列。
+
+这个方法用于定义使用 UUID 标识符的[多态关联](/docs/laravel/10.x/eloquent-relationships)所需的列时使用。在下面的例子中，`taggable_id` 和 `taggable_type` 这两个列将会被创建：
+
+    $table->ulidMorphs('taggable');
+
 <a name="column-method-uuidMorphs"></a>
-#### `uuidMorphs()`
+#### `uuidMorphs()` {.collection-method}
 
 `uuidMorphs` 方法用于快速创建一个名称为 `{column}_id` ，类型为 `CHAR(36)` 的列和一个名称为 `{column}_type` ，类型为  `VARCHAR` 的列。
 
-这个方法用于定义使用 UUID 标识符的[多态关联](/docs/laravel/9.x/eloquent-relationships)所需的列时使用。在下面的例子中，`taggable_id` 和 `taggable_type` 这两个列将会被创建：
+这个方法用于定义使用 UUID 标识符的[多态关联](/docs/laravel/10.x/eloquent-relationships)所需的列时使用。在下面的例子中，`taggable_id` 和 `taggable_type` 这两个列将会被创建：
 
     $table->uuidMorphs('taggable');
 
+<a name="column-method-ulid"></a>
+#### `ulid()` {.collection-method}
+
+`ulid` 方法用于创建一个 `ULID` 类型的列：
+
+    $table->ulid('id');
+
 <a name="column-method-uuid"></a>
-#### `uuid()`
+#### `uuid()` {.collection-method}
 
 `uuid` 方法用于创建一个 `UUID` 类型的列：
 
     $table->uuid('id');
 
 <a name="column-method-year"></a>
-#### `year()`
+#### `year()` {.collection-method}
 
 `year` 方法用于创建一个 `YEAR` 类型的列：
 
@@ -897,10 +992,8 @@ php artisan migrate:fresh --seed
     {
         /**
          * 运行迁移
-         *
-         * @return void
          */
-        public function up()
+        public function up(): void
         {
             Schema::create('flights', function (Blueprint $table) {
                 $table->id();
@@ -910,14 +1003,15 @@ php artisan migrate:fresh --seed
         }
     };
 
-> 注意：支持哪些默认值的表示方式取决于你的数据库驱动、数据库版本、还有字段类型。请参考合适的文档使用。还有一点要注意的是，使用数据库特定函数，可能会将你绑牢到特定的数据库驱动上。
+> **注意**  
+> 支持哪些默认值的表示方式取决于你的数据库驱动、数据库版本、还有字段类型。请参考合适的文档使用。还有一点要注意的是，使用数据库特定函数，可能会将你绑牢到特定的数据库驱动上。
 
 <a name="column-order"></a>
 #### 字段顺序
 
 使用 MySQL 数据库时，可以使用 `after` 方法在模式中的现有列后添加列：
 
-    $table->after('password', function ($table) {
+    $table->after('password', function (Blueprint $table) {
         $table->string('address_line1');
         $table->string('address_line2');
         $table->string('city');
@@ -926,10 +1020,22 @@ php artisan migrate:fresh --seed
 <a name="modifying-columns"></a>
 ### 修改字段
 
-<a name="先决条件"></a>
-#### 先决条件
+`change` 方法可以将现有的字段类型修改为新的类型或修改属性。比如，你可能想增加 `string` 字段的长度，可以使用 `change` 方法把 `name` 字段的长度从 25 增加到 50。所以，我们可以简单的更新字段属性然后调用  `change` 方法：
 
-在修饰字段之前，请确保你已经通过 Composer 包管理器安装了 `doctrine/dbal` 包。Doctrine DBAL 库用于确定字段的当前状态，并创建对该字段进行指定调整所需的 SQL 查询：
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('name', 50)->change();
+    });
+
+当修改一个列时，你必须明确包括所有你想在列定义上保留的修改器 —— 任何缺失的属性都将被丢弃。例如，为了保留 `unsigned`、`default` 和 `comment`  属性，你必须在修改列时明确每个属性的修改。
+
+    Schema::table('users', function (Blueprint $table) {
+        $table->integer('votes')->unsigned()->default(1)->comment('my comment')->change();
+    });
+
+<a name="modifying-columns-on-sqlite"></a>
+#### 在 SQLite 上修改列
+
+如果应用程序使用的是 SQLite 数据库，请确保你已经通过 Composer 包管理器安装了 `doctrine/dbal` 包。Doctrine DBAL 库用于确定字段的当前状态，并创建对该字段进行指定调整所需的 SQL 查询：
 
     composer require doctrine/dbal
 
@@ -945,40 +1051,35 @@ use Illuminate\Database\DBAL\TimestampType;
 ],
 ```
 
-> 注意：如果你的应用程序使用 Microsoft SQL 驱动，请确保你已经安装了`doctrine/dbal:^3.0`。
-
-<a name="更新字段属性"></a>
-#### 更新字段属性
-
-`change` 方法可以将现有的字段类型修改为新的类型或修改属性。比如，你可能想增加 `string` 字段的长度，可以使用 `change` 方法把 `name` 字段的长度从 25 增加到 50。所以，我们可以简单的更新字段属性然后调用  `change` 方法：
-
-    Schema::table('users', function (Blueprint $table) {
-        $table->string('name', 50)->change();
-    });
-
-我们同样可以使用 `nullable` 将字段修改为允许为空：
-
-    Schema::table('users', function (Blueprint $table) {
-        $table->string('name', 50)->nullable()->change();
-    });
-
-> 注意：只有以下字段类型能被「修改」: `bigInteger`, `binary`, `boolean`, `char`, `date`, `dateTime`, `dateTimeTz`, `decimal`, `integer`, `json`, `longText`, `mediumText`, `smallInteger`, `string`, `text`, `time`, `unsignedBigInteger`, `unsignedInteger`, `unsignedSmallInteger`, 和 `uuid`.   要修改 `timestamp` 字段类型， [Doctrine 类型必须被注册](#prerequisites)。
+> **注意**  
+> 当使用 `doctrine/dbal` 包时，你可以修改以下列类型：`bigInteger`、`binary`、`boolean`、`char`、`date`、`dateTime`、`dateTimeTz`、`decimal`、`double`、`integer`、`json`、`longText`、`mediumText`、`smallInteger`、`string`、`text`、`time`、`tinyText`、`unsignedBigInteger`、`unsignedInteger`、`unsignedSmallInteger`、`ulid`、和 `uuid`。
 
 <a name="renaming-columns"></a>
 #### 重命名字段
 
-可以使用结构生成器上的 `renameColumn` 方法来重命名字段。在重命名字段前，请确保你已经通过 Composer 包管理器安装了 `doctrine/dbal` 包：
+要重命名一个列，你可以使用模式构建器提供的 `renameColumn` 方法：
 
     Schema::table('users', function (Blueprint $table) {
         $table->renameColumn('from', 'to');
     });
 
-> 注意：当前不支持 `enum` 类型的字段重命名。
+<a name="renaming-columns-on-legacy-databases"></a>
+#### 在较低版本数据库上重命名列
+
+如果你运行的数据库低于以下版本，你应该确保在重命名列之前通过 Composer 软件包管理器安装了 `doctrine/dbal` 库。
+
+<div class="content-list" markdown="1">
+
+- MySQL < `8.0.3`
+- MariaDB < `10.5.2`
+- SQLite < `3.25.0`
+
+</div>
 
 <a name="dropping-columns"></a>
 ### 删除字段
 
-你可以使用结构生成器上的 `dropColumn` 方法来删除字段。如果你的应用程序使用的是 SQLite 数据库，你必须在调用`dropColumn`方法之前通过 Composer 包管理器安装了 `doctrine/dbal` 包：
+要删除一个列，你可以使用 `dropColumn` 方法。
 
     Schema::table('users', function (Blueprint $table) {
         $table->dropColumn('votes');
@@ -990,7 +1091,10 @@ use Illuminate\Database\DBAL\TimestampType;
         $table->dropColumn(['votes', 'avatar', 'location']);
     });
 
-> 注意：使用 SQLite 数据库时不支持在单个迁移中 **删除** 或 **修改** 多个字段。
+<a name="dropping-columns-on-legacy-databases"></a>
+#### 在较低版本的数据库中删除列的内容
+
+如果你运行的 SQLite 版本在 `3.35.0` 之前，你必须通过 Composer  软件包管理器安装 `doctrine/dbal` 包，然后才能使用 `dropColumn` 方法。不支持在使用该包时在一次迁移中删除或修改多个列。
 
 <a name="available-command-aliases"></a>
 #### 可用的命令别名
@@ -1057,10 +1161,8 @@ Laravel 的结构生成器提供了 Laravel 支持的所有类型的索引方法
 
     /**
      * 引导任何应用程序「全局配置」
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         Schema::defaultStringLength(191);
     }
@@ -1074,17 +1176,23 @@ Laravel 的结构生成器提供了 Laravel 支持的所有类型的索引方法
 
     $table->renameIndex('from', 'to')
 
+> **注意**  
+> 如果你的应用程序使用的是 SQLite 数据库，你必须通过 Composer 软件包管理器安装 `doctrine/dbal` 包，然后才能使用 `renameIndex` 方法。
+
 <a name="dropping-indexes"></a>
 ### 删除索引
 
 若要删除索引，则必须指定索引的名称。Laravel 默认会自动将数据表名称、索引的字段名及索引类型简单地连接在一起作为名称。举例如下：
+
 
 命令  |  说明
 -------  |  -----------
 `$table->dropPrimary('users_id_primary');`  |  从「users」表中删除主键
 `$table->dropUnique('users_email_unique');`  |  从「users」表中删除 unique 索引
 `$table->dropIndex('geo_state_index');`  |  从「geo」表中删除基本索引
+`$table->dropFullText('posts_body_fulltext');`  |  从「post」表中删除一个全文索引
 `$table->dropSpatialIndex('geo_location_spatialindex');`  | 从「geo」表中删除空间索引（不支持 SQLite）
+
 
 如果将字段数组传给 `dropIndex` 方法，会删除根据表名、字段和键类型生成的索引名称。
 
@@ -1106,7 +1214,7 @@ Laravel 还支持创建用于在数据库层中的强制引用完整性的外键
         $table->foreign('user_id')->references('id')->on('users');
     });
 
-由于这种外键约束的定义方式过于繁复，Laravel 额外提供了更简洁的方法，基于约定来提供更好的开发人员体验。上面的示例还可以这么写：
+由于这种外键约束的定义方式过于繁复，Laravel 额外提供了更简洁的方法，基于约定来提供更好的开发人员体验。当使用 `foreignId` 方法来创建列时，上面的示例还可以这么写：
 
     Schema::table('posts', function (Blueprint $table) {
         $table->foreignId('user_id')->constrained();
@@ -1129,8 +1237,8 @@ Laravel 还支持创建用于在数据库层中的强制引用完整性的外键
 
 方法  |  说明
 -------  |  -----------
-`$table->cascadeOnUpdate();` | 更新应该级联。
-`$table->restrictOnUpdate();`| 应该限制更新。
+`$table->cascadeOnUpdate();` | 更新应该级联
+`$table->restrictOnUpdate();`| 应该限制更新
 `$table->cascadeOnDelete();` | 删除应该级联
 `$table->restrictOnDelete();`| 应该限制删除
 `$table->nullOnDelete();`    | 删除应将外键值设置为空
@@ -1161,12 +1269,16 @@ Laravel 还支持创建用于在数据库层中的强制引用完整性的外键
 
     Schema::disableForeignKeyConstraints();
 
-> 注意：SQLite 默认禁用外键约束。使用 SQLite 时，请确保在数据库配置中[启用外键支持](/docs/laravel/9.x/database#configuration) 然后再尝试在迁移中创建它们。另外，SQLite 只在创建表时支持外键，并且[将在修改表时不会支持](https://www.sqlite.org/omitted.html)。
+    Schema::withoutForeignKeyConstraints(function () {
+        // 闭包中禁用的约束…
+    });
+
+> 注意：SQLite 默认禁用外键约束。使用 SQLite 时，请确保在数据库配置中[启用外键支持](/docs/laravel/10.x/databasemd#configuration) 然后再尝试在迁移中创建它们。另外，SQLite 只在创建表时支持外键，并且[将在修改表时不会支持](https://www.sqlite.org/omitted.html)。
 
 <a name="事件"></a>
 ## 事件
 
-为方便起见，每个迁移操作都会派发一个 [事件](/docs/laravel/9.x/events)。以下所有事件都扩展了基础 `Illuminate\Database\Events\MigrationEvent` 类：
+为方便起见，每个迁移操作都会派发一个 [事件](/docs/laravel/10.x/events)。以下所有事件都扩展了基础 `Illuminate\Database\Events\MigrationEvent` 类：
 
 类 | 描述
 -------|-------
