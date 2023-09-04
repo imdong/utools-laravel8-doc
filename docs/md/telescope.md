@@ -35,7 +35,7 @@
 <a name="introduction"></a>
 ## 简介
 
-[Laravel Telescope](https://github.com/laravel/telescope) 是Laravel本地开发环境的绝佳伴侣。Telescope可以洞察你的应用程序的请求、异常、日志条目、数据库查询、排队的作业、邮件、消息通知、缓存操作、定时计划任务、变量打印等。
+[Laravel Telescope](https://github.com/laravel/telescope) 是 Laravel 本地开发环境的绝佳伴侣。Telescope 可以洞察你的应用程序的请求、异常、日志条目、数据库查询、排队的作业、邮件、消息通知、缓存操作、定时计划任务、变量打印等。
 
 <img src="https://laravel.com/img/docs/telescope-example.png">
 
@@ -48,7 +48,7 @@
 composer require laravel/telescope
 ```
 
-安装Telescope后, 你应使用 `telescope:install` 命令来发布其公共资源，然后运行 `migrate` 命令执行数据库变更:
+安装 Telescope 后，你应使用 `telescope:install` 命令来发布其公共资源，然后运行 `migrate` 命令执行数据库变更来创建和保存 Telescope 需要的数据：
 
 ```shell
 php artisan telescope:install
@@ -61,10 +61,10 @@ php artisan migrate
 
 
 
-如果不打算使用 Telescope 的默认迁移，则应在应用程序的`App\Providers\AppServiceProvider` 类的 `register` 方法中调用  `Telescope::ignoreMigrations` 方法。你可以使用以下命令导出默认迁移：`php artisan vendor:publish --tag=telescope-migrations`
+如果不打算使用 Telescope 的默认迁移，则应在应用程序的 `App\Providers\AppServiceProvider` 类的 `register` 方法中调用 `Telescope::ignoreMigrations` 方法。你可以使用以下命令导出默认迁移：`php artisan vendor:publish --tag=telescope-migrations`
 
 <a name="local-only-installation"></a>
-### 本地安装
+### 仅本地安装
 
 如果你仅打算使用 Telescope 来帮助你的本地开发，你可以使用 `--dev` 标记安装 Telescope：
 
@@ -76,14 +76,12 @@ php artisan telescope:install
 php artisan migrate
 ```
 
-运行 `telescope:install` 后，应该从应用程序的 `config/app.php` 配置文件中删除 `TelescopeServiceProvider` 服务提供者注册。相反，手动注册 telescope 的服务提供者在 `App\Providers\AppServiceProvider` 类的 `register` 方法中。在注册提供者之前，我们会确保当前环境是 `local`：
+运行 `telescope:install` 后，应该从应用程序的 `config/app.php` 配置文件中删除 `TelescopeServiceProvider` 服务提供者注册。手动在 `App\Providers\AppServiceProvider` 类的 `register` 方法中注册 telescope 的服务提供者来替代。在注册提供者之前，我们会确保当前环境是 `local`：
 
     /**
-     * 注册应用服务
-     *
-     * @return void
+     * 注册应用服务。
      */
-    public function register()
+    public function register(): void
     {
         if ($this->app->environment('local')) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
@@ -91,7 +89,7 @@ php artisan migrate
         }
     }
 
-最后，你还应该将以下内容添加到你的 `composer.json` 文件中来防止 Telescope 扩展包被 [自动发现](/docs/laravel/9.x/packages#package-discovery)。
+最后，你还应该将以下内容添加到你的 `composer.json` 文件中来防止 Telescope 扩展包被 [自动发现](/docs/laravel/10.x/packages#package-discovery)：
 
 ```json
 "extra": {
@@ -106,7 +104,7 @@ php artisan migrate
 <a name="configuration"></a>
 ### 配置
 
-使用 Telescope，其主要配置文件将位于 `config/telescope.php`。此配置文件允许你配置监听 [观察者选项](#available-watchers)，每个配置选项都包含其用途说明，因此请务必彻底浏览此文件。
+发布 Telescope 的资源文件后，其主要配置文件将位于 `config/telescope.php`。此配置文件允许你配置监听 [观察者选项](#available-watchers)，每个配置选项都包含其用途说明，因此请务必彻底浏览此文件。
 
 如果需要，你可以使用 `enabled` 配置选项完全禁用 Telescope 的数据收集：
 
@@ -117,41 +115,41 @@ php artisan migrate
 <a name="data-pruning"></a>
 ### 数据修改
 
-有了数据修改， `telescope_entries` 表可以非常快速地累积记录。 为了缓解这个问题，你应该使用 [调度](/docs/laravel/9.x/scheduling) 每天运行 `telescope:prune` 命令：
+有了数据修改， `telescope_entries` 表可以非常快速地累积记录。 为了缓解这个问题，你应该使用 [调度](/docs/laravel/10.x/scheduling) 每天运行 `telescope:prune` 命令：
 
     $schedule->command('telescope:prune')->daily();
 
-默认情况下，将获取超过 24 小时的所有数据。在调用命令时可以使用 `hours` 选项来确定保留 `Telescope` 数据的时间。例如，以下命令将删除 48 小时前创建的所有记录：
+默认情况下，将获取超过 24 小时的所有数据。在调用命令时可以使用 `hours` 选项来确定保留 `Telescope` 数据的时间。例如，以下命令将删除 48 小时前创建的所有记录：
 
     $schedule->command('telescope:prune --hours=48')->daily();
 
 <a name="dashboard-authorization"></a>
 ### 仪表板授权
 
-访问 `/telescope` 即可显示仪表盘。默认情况下，你只能在 `local` 环境中访问此仪表板。 在 `app/Providers/TelescopeServiceProvider.php` 文件中，有一个 [gate 授权](/docs/laravel/9.x/authorization#gates) 。此授权能控制在 **非本地** 环境中对 Telescope 的访问。你可以根据需要随意修改此权限以限制对 Telescope 安装和访问：
+访问 `/telescope` 即可显示仪表盘。默认情况下，你只能在 `local` 环境中访问此仪表板。 在 `app/Providers/TelescopeServiceProvider.php` 文件中，有一个 [gate 授权](/docs/laravel/10.x/authorization#gates) 。此授权能控制在 **非本地** 环境中对 Telescope 的访问。你可以根据需要随意修改此权限以限制对 Telescope 安装和访问：
+
+    use App\Models\User;
 
     /**
      * 注册 Telescope gate。
      *
      * 该 gate 确定谁可以在非本地环境中访问 Telescope
-     *
-     * @return void
      */
-    protected function gate()
+    protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
+        Gate::define('viewTelescope', function (User $user) {
             return in_array($user->email, [
                 'taylor@laravel.com',
             ]);
         });
     }
 
-> 注意：你应该确保在生产环境中将 `APP_ENV` 环境变量更改为 `Production`。 否则，你的 Telescope 调试工具将公开可用。
+> 注意：你应该确保在生产环境中将 `APP_ENV` 环境变量更改为 `Production`。 否则，你的 Telescope 调试工具将公开可用。
 
 <a name="upgrading-telescope"></a>
 ## 更新 Telescope
 
-升级到 Telescope 的新主要版本时，务必仔细阅读 [升级指南](https://github.com/laravel/telescope/blob/master/UPGRADE.md).
+升级到 Telescope 的新主要版本时，务必仔细阅读 [升级指南](https://github.com/laravel/telescope/blob/master/UPGRADE.).
 
 
 
@@ -161,13 +159,13 @@ php artisan migrate
 php artisan telescope:publish
 ```
 
-为了使实例保持最新状态并避免将来的更新中出现问题，可以在应用程序的 `composer.json` 文件中的 `post-update-cmd` 脚本添加 `telescope:publish` 命令：
+为了使实例保持最新状态并避免将来的更新中出现问题，可以在应用程序的 `composer.json` 文件中的 `post-update-cmd` 脚本添加 `telescope:publish` 命令：
 
 ```json
 {
     "scripts": {
         "post-update-cmd": [
-            "@php artisan telescope:publish --ansi"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ]
     }
 }
@@ -186,10 +184,8 @@ php artisan telescope:publish
 
     /**
      * 注册应用服务
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->hideSensitiveRequestDetails();
 
@@ -212,14 +208,13 @@ php artisan telescope:publish
 `filter` 闭包过滤单个条目的数据， 你也可以使用 `filterBatch` 方法注册一个闭包，该闭包过滤给定请求或控制台命令的所有数据。如果闭包返回 `true`，则所有数据都由 Telescope 记录：
 
     use Illuminate\Support\Collection;
+    use Laravel\Telescope\IncomingEntry;
     use Laravel\Telescope\Telescope;
 
     /**
-     * 注册应用服务
-     *
-     * @return void
+     *  注册应用服务
      */
-    public function register()
+    public function register(): void
     {
         $this->hideSensitiveRequestDetails();
 
@@ -228,7 +223,7 @@ php artisan telescope:publish
                 return true;
             }
 
-            return $entries->contains(function ($entry) {
+            return $entries->contains(function (IncomingEntry $entry) {
                 return $entry->isReportableException() ||
                     $entry->isFailedJob() ||
                     $entry->isScheduledTask() ||
@@ -250,10 +245,8 @@ Telescope 允许你通过 「tag」 搜索条目。通常，标签是 Eloquent �
 
     /**
      * 注册应用服务
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->hideSensitiveRequestDetails();
 
@@ -267,7 +260,7 @@ Telescope 允许你通过 「tag」 搜索条目。通常，标签是 Eloquent �
 <a name="available-watchers"></a>
 ## 可用的观察者
 
-Telescope 「观察者」 在执行请求或控制台命令时收集应用数据。你可以在 `config/telescope.php` 配置文件中自定义启用的观察者列表：
+Telescope 「观察者」 在执行请求或控制台命令时收集应用数据。你可以在 `config/telescope.php` 配置文件中自定义启用的观察者列表：
 
     'watchers' => [
         Watchers\CacheWatcher::class => true,
@@ -288,7 +281,7 @@ Telescope 「观察者」 在执行请求或控制台命令时收集应用数据
 <a name="batch-watcher"></a>
 ### 批量监视器
 
-批量监视器记录队列 [批量任务](/docs/laravel/9.x/queues#job-batching) 的信息，包括任务和连接信息。
+批量监视器记录队列 [批量任务](/docs/laravel/10.x/queues#job-batching) 的信息，包括任务和连接信息。
 
 <a name="cache-watcher"></a>
 ### 缓存监视器
@@ -318,7 +311,7 @@ Telescope 「观察者」 在执行请求或控制台命令时收集应用数据
 <a name="event-watcher"></a>
 ### 事件监视器
 
-事件监视器记录应用分发的所有 [事件](/docs/laravel/9.x/events) 的有效负载、监听器和广播数据。事件监视器忽略了 Laravel 框架的内部事件。
+事件监视器记录应用分发的所有 [事件](/docs/laravel/10.x/events) 的有效负载、监听器和广播数据。事件监视器忽略了 Laravel 框架的内部事件。
 
 <a name="exception-watcher"></a>
 ### 异常监视器
@@ -328,7 +321,7 @@ Telescope 「观察者」 在执行请求或控制台命令时收集应用数据
 <a name="gate-watcher"></a>
 ### Gate（拦截）监视器
 
-Gate 监视器记录你的应用的 [gate 和策略](/docs/laravel/9.x/authorization) 检查的数据和结果。如果你希望将某些属性排除在监视器的记录之外，你可 `config/telescope.php` 文件的 `ignore_abilities` 选项中指定它们：
+Gate 监视器记录你的应用的 [gate 和策略](/docs/laravel/10.x/authorization) 检查的数据和结果。如果你希望将某些属性排除在监视器的记录之外，你可 `config/telescope.php` 文件的 `ignore_abilities` 选项中指定它们：
 
     'watchers' => [
         Watchers\GateWatcher::class => [
@@ -339,29 +332,42 @@ Gate 监视器记录你的应用的 [gate 和策略](/docs/laravel/9.x/authoriza
     ],
 
 <a name="http-client-watcher"></a>
-### HTTP 客户端监视器 
+### HTTP 客户端监视器
 
-HTTP 客户端监视器记录你的应用程序发出的传出 [HTTP 客户端请求](/docs/laravel/9.x/http-client)。
+
+
+HTTP 客户端监视器记录你的应用程序发出的传出 [HTTP 客户端请求](/docs/laravel/10.x/http-client)。
 
 <a name="job-watcher"></a>
 ### 任务监视器
 
-任务监视器记录应用程序分发的任何 [任务](/docs/laravel/9.x/queues) 的数据和状态。
+任务监视器记录应用程序分发的任何 [任务](/docs/laravel/10.x/queues) 的数据和状态。
 
 <a name="log-watcher"></a>
 ### 日志监视器
 
-日志监视器记录应用程序写入的任何日志的 [日志数据](/docs/laravel/8.x/logging)。
+日志监视器记录应用程序写入的任何日志的 [日志数据](/docs/laravel/10.x/logging)。
+
+默认情况下，Telescope 将只记录 [错误] 级别及以上的日志。但是，你可以修改应用程序的 `config/tescope.php` 配置文件中的 `level` 选项来修改此行为：
+
+    'watchers' => [
+        Watchers\LogWatcher::class => [
+            'enabled' => env('TELESCOPE_LOG_WATCHER', true),
+            'level' => 'debug',
+        ],
+
+        // ...
+    ],
 
 <a name="mail-watcher"></a>
 ### 邮件监视器
 
-邮件监视器允许你查看应用发送的 [邮件](/docs/laravel/9.x/mail) 及其相关数据的浏览器内预览。你也可以将该电子邮件下载为 `.eml` 文件。
+邮件监视器允许你查看应用发送的 [邮件](/docs/laravel/10.x/mail) 及其相关数据的浏览器内预览。你也可以将该电子邮件下载为 `.eml` 文件。
 
 <a name="model-watcher"></a>
 ### 模型监视器
 
-每当调度 Eloquent 的 [模型事件](/docs/laravel/9.x/eloquent#events) 时，模型监视器就会记录模型更改。你可以通过监视器的 `events` 选项指定应记录哪些模型事件：
+每当调度 Eloquent 的 [模型事件](/docs/laravel/10.x/eloquent#events) 时，模型监视器就会记录模型更改。你可以通过监视器的 `events` 选项指定应记录哪些模型事件：
 
     'watchers' => [
         Watchers\ModelWatcher::class => [
@@ -385,12 +391,14 @@ HTTP 客户端监视器记录你的应用程序发出的传出 [HTTP 客户端�
 <a name="notification-watcher"></a>
 ### 消息通知监视器
 
-消息通知监听器记录你的应用程序发送的所有 [消息通知](/docs/laravel/9.x/notifications) 。如果通知触发了电子邮件并且你启用了邮件监听器，则电子邮件也可以在邮件监视器屏幕上进行预览。
+消息通知监听器记录你的应用程序发送的所有 [消息通知](/docs/laravel/10.x/notifications) 。如果通知触发了电子邮件并且你启用了邮件监听器，则电子邮件也可以在邮件监视器屏幕上进行预览。
+
+
 
 <a name="query-watcher"></a>
 ### 数据查询监视器
 
-数据查询监视器记录应用程序执行的所有查询的原始 SQL、绑定和执行时间。监视器还将任何慢于 `100` 毫秒的查询标记为 `slow`。你可以使用监视器的 `slow` 选项自定义慢查询阈值：
+数据查询监视器记录应用程序执行的所有查询的原始 SQL、绑定和执行时间。监视器还将任何慢于 100 毫秒的查询标记为 `slow`。你可以使用监视器的 `slow` 选项自定义慢查询阈值：
 
     'watchers' => [
         Watchers\QueryWatcher::class => [
@@ -400,17 +408,15 @@ HTTP 客户端监视器记录你的应用程序发出的传出 [HTTP 客户端�
         ...
     ],
 
-
-
 <a name="redis-watcher"></a>
 ### Redis 监视器
 
-Redis 监视器记录你的应用程序执行的所有 [Redis](/docs/laravel/9.x/redis) 命令。如果你使用 Redis 进行缓存，Redis 监视器也会记录缓存命令。
+Redis 监视器记录你的应用程序执行的所有 [Redis](/docs/laravel/10.x/redis) 命令。如果你使用 Redis 进行缓存，Redis 监视器也会记录缓存命令。
 
 <a name="request-watcher"></a>
 ### 请求监视器
 
-请求监视器记录与应用程序处理的任何请求相关联的请求、请求头、会话和响应数据。你可以通过 `size_limit`（以KB为单位）选项限制记录的响应数据：
+请求监视器记录与应用程序处理的任何请求相关联的请求、请求头、会话和响应数据。你可以通过 `size_limit`（以 KB 为单位）选项限制记录的响应数据：
 
     'watchers' => [
         Watchers\RequestWatcher::class => [
@@ -423,31 +429,29 @@ Redis 监视器记录你的应用程序执行的所有 [Redis](/docs/laravel/9.x
 <a name="schedule-watcher"></a>
 ### 定时任务监视器
 
- 定时任务监视器记录应用程序运行的任何 [计划任务](/docs/laravel/9.x/scheduling) 的命令和输出。
+定时任务监视器记录应用程序运行的任何 [计划任务](/docs/laravel/10.x/scheduling) 的命令和输出。
 
 <a name="view-watcher"></a>
 ### 视图监视器
 
-视图监视器记录渲染视图时使用的 [视图](/docs/laravel/9.x/views) 名称、路径、数据和「composer」组件。
+视图监视器记录渲染视图时使用的 [视图](/docs/laravel/10.x/views) 名称、路径、数据和「composer」组件。
 
 <a name="displaying-user-avatars"></a>
 ## 显示用户头像
 
-Telescope 仪表盘显示保存给定条目时会有登录用户的用户头像。 默认情况下，Telescope 将使用 Gravatar Web 服务检索头像。 但是，你可以通过在 `App\Providers\TelescopeServiceProvider` 中注册一个回调来自定义头像 URL。 回调将收到用户的 ID 和电子邮件地址，并应返回用户的头像 URL：
+Telescope 仪表盘显示保存给定条目时会有登录用户的用户头像。 默认情况下，Telescope 将使用 Gravatar Web 服务检索头像。 但是，你可以通过在 `App\Providers\TelescopeServiceProvider` 类中注册一个回调来自定义头像 URL。 回调将收到用户的 ID 和电子邮件地址，并应返回用户的头像 URL：
 
     use App\Models\User;
     use Laravel\Telescope\Telescope;
 
     /**
      * 注册应用服务
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         // ...
 
-        Telescope::avatar(function ($id, $email) {
+        Telescope::avatar(function (string $id, string $email) {
             return '/avatars/'.User::find($id)->avatar_path;
         });
     }
