@@ -1,3 +1,4 @@
+
 # Laravel Socialite
 
 - [简介](#introduction)
@@ -30,12 +31,14 @@ composer require laravel/socialite
 <a name="upgrading-socialite"></a>
 ## 升级
 
-升级到 Socialite 的新主要版本时，请务必仔细查看 [the upgrade guide](https://github.com/laravel/socialite/blob/master/UPGRADE.md).
+升级到 Socialite 的新主要版本时，请务必仔细查看 [the upgrade guide](https://github.com/laravel/socialite/blob/master/UPGRADE.).
 
 <a name="configuration"></a>
 ## 配置
 
-在使用 Socialite 之前，需要为应用程序使用的 OAuth 服务添加凭据。这些凭证应该放在你的 `config/services.php` 配置文件中， 并且应该使用 `facebook`， `twitter`，`linkedin`， `google`， `github`， `gitlab`， 或 `bitbucket`作为键名，取决于应用程序所需的 Providers 。例如:
+在使用 Socialite 之前，你需要为应用程序使用的OAuth提供程序添加凭据。通常，可以通过在要验证的服务的仪表板中创建“开发人员应用程序”来检索这些凭据。
+
+这些凭证应该放在你的 `config/services.php` 配置文件中， 并且应该使用 `facebook`, `twitter` (OAuth 1.0), `twitter-oauth-2` (OAuth 2.0), `linkedin`, `google`, `github`, `gitlab`, 或者 `bitbucket`, 取决于应用程序所需的提供商：
 
     'github' => [
         'client_id' => env('GITHUB_CLIENT_ID'),
@@ -72,7 +75,7 @@ composer require laravel/socialite
 <a name="authentication-and-storage"></a>
 ### 身份验证和存储
 
-从 OAuth 提供程序检索到用户后，你可以确定该用户是否存在于应用程序的数据库中并[验证用户](/docs/laravel/9.x/authentication#authenticate-a-user-instance)。如果用户在应用程序的数据库中不存在，通常会在数据库中创建一条新记录来代表该用户：
+从 OAuth 提供程序检索到用户后，你可以确定该用户是否存在于应用程序的数据库中并[验证用户](/docs/laravel/10.x/authentication#authenticate-a-user-instance)。如果用户在应用程序的数据库中不存在，通常会在数据库中创建一条新记录来代表该用户：
 
     use App\Models\User;
     use Illuminate\Support\Facades\Auth;
@@ -81,22 +84,14 @@ composer require laravel/socialite
     Route::get('/auth/callback', function () {
         $githubUser = Socialite::driver('github')->user();
 
-        $user = User::where('github_id', $githubUser->id)->first();
-
-        if ($user) {
-            $user->update([
-                'github_token' => $githubUser->token,
-                'github_refresh_token' => $githubUser->refreshToken,
-            ]);
-        } else {
-            $user = User::create([
-                'name' => $githubUser->name,
-                'email' => $githubUser->email,
-                'github_id' => $githubUser->id,
-                'github_token' => $githubUser->token,
-                'github_refresh_token' => $githubUser->refreshToken,
-            ]);
-        }
+        $user = User::updateOrCreate([
+            'github_id' => $githubUser->id,
+        ], [
+            'name' => $githubUser->name,
+            'email' => $githubUser->email,
+            'github_token' => $githubUser->token,
+            'github_refresh_token' => $githubUser->refreshToken,
+        ]);
 
         Auth::login($user);
 
@@ -104,6 +99,7 @@ composer require laravel/socialite
     });
 
 > 技巧：有关特定 OAuth 提供商提供哪些用户信息的更多信息，请参阅有关 [检索用户详细信息](#retrieving-user-details) 的文档。
+
 
 
 <a name="access-scopes"></a>
@@ -139,7 +135,9 @@ composer require laravel/socialite
 <a name="retrieving-user-details"></a>
 ## 检索用户详细信息
 
-在将用户重定向回你的身份验证回调路由之后，你可以使用 Socialite 的 `user` 方法检索用户的详细信息。`user` 方法为返回的用户对象提供了各种属性和方法，你可以使用这些属性和方法在你自己的数据库中存储有关该用户的信息。你可以使用不同的属性和方法这取决于要进行身份验证的 OAuth 提供程序是否支持 OAuth 1.0 或 OAuth 2.0：
+在将用户重定向回你的身份验证回调路由之后，你可以使用 Socialite 的 `user` 方法检索用户的详细信息。`user` 方法为返回的用户对象提供了各种属性和方法，你可以使用这些属性和方法在你自己的数据库中存储有关该用户的信息。
+
+你可以使用不同的属性和方法这取决于要进行身份验证的 OAuth 提供程序是否支持 OAuth 1.0 或 OAuth 2.0：
 
     use Laravel\Socialite\Facades\Socialite;
 
@@ -174,8 +172,8 @@ composer require laravel/socialite
 
     $user = Socialite::driver('github')->userFromToken($token);
 
-<a name="retrieving-user-details-from-a-token-and-secret-oauth1"></a>
-#### 从令牌和秘钥中检索用户的详细信息 (OAuth1)
+<a name="retrieving-user-details-from-a-token-oauth2"></a>
+#### 从令牌中检索用户详细信息 (OAuth2)
 
 如果你已经有了一对有效的用户令牌/秘钥，你可以使用 Socialite 的 `userFromTokenAndSecret` 方法检索他们的详细信息：
 
