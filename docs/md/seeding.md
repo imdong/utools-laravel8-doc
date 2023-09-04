@@ -10,22 +10,23 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 内置了一个可为你的数据库填充测试数据的填充类。所有的填充类都放在  `database/seeds` 目录下。Laravel 默认定义了一个 `DatabaseSeeder` 类。通过这个类，你可以用 `call` 方法来运行其他的 seed 类，从而控制数据填充的顺序。
+Laravel 内置了一个可为你的数据库填充测试数据的数据填充类。所有的数据填充类都应该放在 `database/seeds` 目录下。Laravel 默认定义了一个 `DatabaseSeeder` 类。通过这个类，你可以用 `call` 方法来运行其他的 `seed` 类，从而控制数据填充的顺序。
 
-> 技巧：使用数据填充时会自动禁用 [批量赋值保护](/docs/laravel/9.x/eloquent#mass-assignment)。
+> **注意**  
+> 在数据库填充期间，[批量赋值保护](/docs/laravel/10.x/eloquentmd#mass-assignment)被自动禁用。
 
 <a name="writing-seeders"></a>
 ## 编写 Seeders
 
-运行 [Artisan 命令](/docs/laravel/9.x/artisan) `make:seeder` 可以生成 Seeder，框架生成的 seeders 都放在 `database/seeders` 目录下：
+运行 [Artisan 命令](/docs/laravel/10.x/artisan) `make:seeder` 可以生成 Seeder，生成的 seeders 都放在 `database/seeders` 目录下：
 
 ```shell
 php artisan make:seeder UserSeeder
 ```
 
-Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:seed` 这个 [Artisan command](/docs/laravel/9.x/artisan) 时被调用。在 `run` 方法里，你可以按需在数据库中插入数据。你也可以用 [构造查询器](/docs/laravel/9.x/queries) 或 [Eloquent 模型工厂](/docs/laravel/9.x/database-testing#defining-model-factories) 来手动插入数据。
+一个数据填充类默认只包含一个方法：`run` ，当执行 `db:seed` [Artisan命令](/docs/laravel/10.x/artisan) 时，被调用。在 `run` 方法中, 可以按需将数据插入数据库中。 也可以使用[查询构造器](/docs/laravel/10.x/queries)来手动插入数据，或者可以使用 [Eloquent 数据工厂](/docs/laravel/10.x/eloquent-factories)。
 
-如下所示, 在默认的 `DatabaseSeeder` 类中的 `run` 方法中添加一条数据插入语句：
+例如，在默认 `DatabaseSeeder` 类的 `run` 方法中添加一个数据库插入语句：
 
     <?php
 
@@ -39,11 +40,9 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
     class DatabaseSeeder extends Seeder
     {
         /**
-         * 执行数据填充
-         *
-         * @return void
+         * 运行数据填充
          */
-        public function run()
+        public function run(): void
         {
             DB::table('users')->insert([
                 'name' => Str::random(10),
@@ -53,25 +52,24 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
         }
     }
 
-> 技巧：你在 `run` 方法签名中可以用类型来约束你需要的依赖。它们会被 Laravel [服务容器](/docs/laravel/9.x/container) 自动解析。
+> **注意**  
+> 可以在 `run` 方法的参数中键入你需要的任何依赖性,它们将自动通过 Laravel [服务容器](/docs/laravel/10.x/container)注入。
 
 
 
 <a name="using-model-factories"></a>
 ### 使用模型工厂
 
-当然，手动为每个模型填充指定属性很麻烦，你可以使用 [模型工厂](/docs/laravel/9.x/database-testing#defining-model-factories) 轻松地生成大量数据库数据。首先，阅读 [模型工厂文档](/docs/laravel/9.x/database-testing#defining-model-factories) 来学习如何定义工厂文件。
+当然，手动指定每个模型填充的属性是很麻烦的。因此可以使用 [Eloquent 数据工厂](/docs/laravel/10.x/eloquent-factories)来更方便地生成大量的数据库记录。首先，查看 [Eloquent 数据工厂](/docs/laravel/10.x/eloquent-factories)，了解如何定义工厂。
 
-例如，创建 50 个用户并为每个用户创建关联：
+例如，创建50个用户，每个用户有一个相关的帖子：
 
     use App\Models\User;
 
     /**
-     * 执行数据填充
-     *
-     * @return void
+     * 运行数据库迁移
      */
-    public function run()
+    public function run(): void
     {
         User::factory()
                 ->count(50)
@@ -82,14 +80,12 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
 <a name="calling-additional-seeders"></a>
 ### 调用其他 Seeders
 
-在 `DatabaseSeeder` 类中，你可以使用 `call` 方法来运行其他的 seed 类。使用 `call` 方法可以将数据填充拆分成多个文件，这样就不会使单个 seeder 文件变得非常大。 只需向 `call` 方法中传递要运行的 seeder 类名称即可：
+在 `DatabaseSeeder` 类中，可以使用 `call` 方法来执行其他的填充类。使用 `call` 方法可以将数据库迁移分成多个文件，这样就不会出现单个数据填充类过大。`call` 方法接受一个由数据填充类组成的数组：
 
     /**
-     * 执行数据填充
-     *
-     * @return void
+     * 运行数据库迁移
      */
-    public function run()
+    public function run(): void
     {
         $this->call([
             UserSeeder::class,
@@ -101,7 +97,7 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
 <a name="muting-model-events"></a>
 ### 禁用模型事件
 
-在运行 Seeders 时，你可能希望阻止模型调用事件。你可以使用 `WithoutModelEvents` 特征来实现这一点。使用 `WithoutModelEvents` trait 可确保不调用模型事件，即使通过 `call` 方法执行了额外的 seed 类：
+在运行时，你可能想阻止模型调用事件，可以使用 `WithoutModelEvents` 特性。使用 `WithoutModelEvents` trait 可确保不调用模型事件，即使通过 `call` 方法执行了额外的 seed 类：
 
     <?php
 
@@ -115,11 +111,9 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
         use WithoutModelEvents;
 
         /**
-     * 执行数据填充
-         *
-         * @return void
+         * 运行数据库迁移
          */
-        public function run()
+        public function run(): void
         {
             $this->call([
                 UserSeeder::class,
@@ -130,7 +124,7 @@ Seeder 类只包含一个默认方法：`run`。这个方法会在执行 `db:see
 <a name="running-seeders"></a>
 ## 运行 Seeders
 
-你可以使用 Artisan 命令 `db:seed` 来填充数据库。默认情况下， `db:seed` 命令将运行 `Database\Seeders\DatabaseSeeder` 类，这个类又可以调用其他 seed 类。不过，你也可以使用 `--class` 选项来指定一个特定的 seeder 类：
+执行 `db:seed` Artisan 命令来为数据库填充数据。默认情况下，`db:seed` 命令会运行 `Database\Seeders\DatabaseSeeder` 类来调用其他数据填充类。当然，也可以使用 `--class` 选项来指定一个特定的填充类：
 
 ```shell
 php artisan db:seed
@@ -140,10 +134,12 @@ php artisan db:seed --class=UserSeeder
 
 
 
-你还可以使用 `migrate:fresh` 命令结合 `--seed` 选项，这将删除数据库中所有表并重新运行所有迁移。此命令对于完全重建数据库非常有用：
+你还可以使用 `migrate:fresh` 命令结合 `--seed` 选项，这将删除数据库中所有表并重新运行所有迁移。此命令对于完全重建数据库非常有用。 `--seeder` 选项可以用来指定要运行的填充文件：
 
 ```shell
 php artisan migrate:fresh --seed
+
+php artisan migrate:fresh --seed --seeder=UserSeeder 
 ```
 
 <a name="forcing-seeding-production"></a>
