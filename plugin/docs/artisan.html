@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -19,7 +19,7 @@
 <body>
     <div class="markdown-body"><h1 id="artisan-命令行">Artisan 命令行</h1>
 <ul>
-<li><a href="#introduction">简介</a><ul>
+<li><a href="#introduction">介绍</a><ul>
 <li><a href="#tinker">Tinker 命令 (REPL)</a></li>
 </ul>
 </li>
@@ -27,9 +27,10 @@
 <li><a href="#generating-commands">生成命令</a></li>
 <li><a href="#command-structure">命令结构</a></li>
 <li><a href="#closure-commands">闭包命令</a></li>
+<li><a href="#isolatable-commands">单例命令</a></li>
 </ul>
 </li>
-<li><a href="#defining-input-expectations">定义输入期望</a><ul>
+<li><a href="#defining-input-expectations">定义输入期望值</a><ul>
 <li><a href="#arguments">参数</a></li>
 <li><a href="#options">选项</a></li>
 <li><a href="#input-arrays">输入数组</a></li>
@@ -38,7 +39,7 @@
 </li>
 <li><a href="#command-io">I/O 命令</a><ul>
 <li><a href="#retrieving-input">检索输入</a></li>
-<li><a href="#prompting-for-input">交互式输入</a></li>
+<li><a href="#prompting-for-input">输入提示</a></li>
 <li><a href="#writing-output">编写输出</a></li>
 </ul>
 </li>
@@ -48,70 +49,70 @@
 </ul>
 </li>
 <li><a href="#signal-handling">信号处理</a></li>
-<li><a href="#stub-customization">Stub 定制</a></li>
-<li><a href="#events">响应</a></li>
+<li><a href="#stub-customization">Stub 自定义</a></li>
+<li><a href="#events">事件</a></li>
 </ul>
 <p><a name="introduction"></a></p>
-<h2 id="简介">简介</h2>
-<p>Artisan 是 Laravel 附带的命令行接口。Artisan 以 <code>artisan</code> 脚本的形式存在于应用的根目录，并提供了许多有用的命令，这些命令可以在构建应用时为你提供帮助。你可以通过 <code>list</code> 命令查看所有可用的 Artisan 命令：</p>
+<h2 id="介绍">介绍</h2>
+<p>Artisan 是 Laravel 中自带的命令行接口。Artisan 以 <code>artisan </code> 脚本的方式存在于应用的根目录中，提供了许多有用的命令，帮助开发者创建应用。使用 <code>list</code> 命令可以查看所有可用的Artisan 命令：</p>
 <pre><code class="language-shell">php artisan <span class="keyword token">list</span>
 </code></pre>
-<p>每个命令都包含了「help」界面，它会显示和概述命令的可用参数及选项。只需要在命令前加上 <code>help</code> 即可查看命令帮助界面：</p>
-<pre><code class="language-shel">php artisan help migrate
+<p>每个命令都与 &quot;help&quot; 帮助界面，它能显示和描述该命令可用的参数和选项。要查看帮助界面，请在命令前加上 <code>help</code> 即可：</p>
+<pre><code class="language-shell">php artisan help migrate
 </code></pre>
 <p><a name="laravel-sail"></a></p>
 <h4 id="laravel-sail">Laravel Sail</h4>
-<p>如果你将 <a href="sail.html">Laravel Sail</a> 用作本地开发环境，记得使用 <code>sail</code> 命令行来调用 Artisan 命令。Sail 将在应用的 Docker 容器中执行 Artisan 命令：</p>
-<pre><code class="language-shell">./sail artisan <span class="keyword token">list</span>
+<p>如果你使用 <a href="/docs/laravel/10.x/sail">Laravel Sail</a> 作为本地开发环境，记得使用 <code>sail</code> 命令行来调用 Artisan 命令。Sail 会在应用的 Docker容器中执行 Artisan 命令：</p>
+<pre><code class="language-shell">./vendor/bin/sail artisan <span class="keyword token">list</span>
 </code></pre>
 <p><a name="tinker"></a></p>
-<h3 id="tinker-命令-repl">Tinker 命令 (REPL)</h3>
-<p>Laravel Tinker 是为 Laravel 提供的强大的 REPL（交互式解释器），由 <a href="https://github.com/bobthecow/psysh">PsySH</a> 提供支持。</p>
+<h3 id="tinker-repl">Tinker (REPL)</h3>
+<p>Laravel Tinker 是为 Laravel 提供的强大的 REPL（交互式解释器），由 PsySH(<a href="https://github.com/bobthecow/psysh">https://github.com/bobthecow/psysh</a>) 驱动支持。</p>
 <p><a name="installation"></a></p>
 <h4 id="安装">安装</h4>
-<p>所有 Laravel 应用都默认包含了 Tinker。如果你之前已经将 Tinker 从应用中删除，可以使用 Composer 进行手动安装：</p>
+<p>所有的 Laravel 应用默认都自带 Tinker。不过，如果你此前删除了它，你可以使用 Composer 安装：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/tinker
 </code></pre>
 <blockquote>
-<p>技巧：正在寻找一个能与 Laravel 交互的图形用户界面吗？试试 <a href="https://tinkerwell.app">Tinkerwell</a>!</p>
+<p><strong>注意</strong><br>需要能与 Laravel 交互的图形用户界面吗？试试 <a href="https://tinkerwell.app">Tinkerwell</a>!</p>
 </blockquote>
 <p><a name="usage"></a></p>
-<h4 id="用法">用法</h4>
-<p>Tinker 让你可以在命令行与你的整个 Laravel 应用进行交互。包括但不限于 Eloquent 模型、任务、事件等。通过运行 Artisan 命令 <code>tinker</code> 进入 Tinker 环境。</p>
+<h4 id="使用">使用</h4>
+<p>Tinker 允许你在命令行中和整个 Laravel 应用交互，包括 Eloquent 模型、队列、事件等等。要进入 Tinker 环境，只需运行 <code>tinker</code> Artisan 命令：</p>
 <pre><code class="language-shell">php artisan tinker
 </code></pre>
-<p>你可以通过 <code>vendor:publish</code> 命令发布 Tinker 配置文件：</p>
+<p>你可以使用 <code>vendor:publish</code> 命令发布 Tinker 的配置文件：</p>
 <pre><code class="language-shell">php artisan vendor:publish --provider=&quot;Laravel\Tinker\TinkerServiceProvider&quot;
 </code></pre>
 <blockquote>
-<p>注意：<code>dispatch</code>辅助函数和<code>Dispatchable</code>类上的<code>dispatch</code>方法都依赖于垃圾回收来将任务放置到队列中。因此，当你使用 Tinker 时，请使用 <code>Bus::dispatch</code> 或 <code>Queue::push</code> 来分发任务。</p>
+<p><strong>警告</strong><br><code>dispatch</code> 辅助函数及 <code>Dispatchable</code> 类中 <code>dispatch</code> 方法依赖于垃圾回收将任务放置到队列中。因此，使用 tinker 时，请使用 <code>Bus::dispath</code> 或 <code>Queue::push</code> 来分发任务。</p>
 </blockquote>
 <p><a name="command-allow-list"></a></p>
 <h4 id="命令白名单">命令白名单</h4>
-<p>Tinker 采用白名单来确定允许哪些 Artisan 命令可以在 shell 中运行。默认情况下，你可以运行 <code>clear-compiled</code>、<code>down</code>、<code>env</code>、<code>inspire</code>、<code>migrate</code>、<code>optimize</code> 和 <code>up</code> 命令。如果你想将命令添加到白名单，请将该命令添加到 <code>tinker.php</code> 配置文件的 <code>commands</code> 数组中：</p>
+<p>Tinker 使用白名单来确定哪些 Artisan 命令可以在其 Shell 中运行。默认情况下，你可以运行 <code>clear-compiled</code>、<code>down</code>、<code>env</code>、<code>inspire</code>、<code>migrate</code>、<code>optimize</code> 和 <code>up</code> 命令。如果你想允许更多命令，你可以将它们添加到 <code>tinker.php</code> 配置文件的 <code>commands</code> 数组中：</p>
 <pre><code><span class="string token">'commands'</span> =&gt; [
     <span class="comment token">// App\Console\Commands\ExampleCommand::class,</span>
 ],
 </code></pre>
 <p><a name="classes-that-should-not-be-aliased"></a></p>
 <h4 id="别名黑名单">别名黑名单</h4>
-<p>大多数情况下，Tinker 会在你引入类时自动为其添加别名。然而，你可能不希望为某些类添加别名。你可以在 <code>tinker.php</code> 配置文件中的 <code>dont_alias</code> 数组里列举这些类来完成此操作：</p>
+<p>一般而言，Tinker 会在你引入类时自动为其添加别名。不过，你可能不希望为某些类添加别名。你可以在 <code>tinker.php</code> 配置文件的 <code>dont_alias</code> 数组中列举这些类来完成此操作：</p>
 <pre><code><span class="string token">'dont_alias'</span> =&gt; [
     App\Models\User::<span class="keyword token">class</span>,
 ],
 </code></pre>
 <p><a name="writing-commands"></a></p>
 <h2 id="编写命令">编写命令</h2>
-<p>除 Artisan 提供的命令外，你也可以编写自己的自定义命令。命令在多数情况下位于 <code>app/Console/Commands</code> 目录中。不过，只要你的命令可以由 Composer 加载，你就可以自由选择自己的存储位置。</p>
+<p>除了 Artisan 提供的命令之外，你可以创建自定义命令。一般而言，命令保存在 <code>app/Console/Commands</code> 目录；不过，你可以自由选择命令的存储位置，只要它能够被 Composer 加载即可。</p>
 <p><a name="generating-commands"></a></p>
 <h3 id="生成命令">生成命令</h3>
-<p>要创建新命令，可以使用 <code>make:command</code> Artisan 命令。该命令将在 <code>app/Console/Commands</code> 目录中创建一个新的命令类。如果你的应用程序中不存在此目录，请不要担心，它将在你第一次运行 <code>make:command</code> 命令时自动创建：</p>
+<p>要创建新命令，可以使用 <code>make:command</code> Artisan 命令。该命令会在 <code>app/Console/Commands</code> 目录下创建一个新的命令类。如果该目录不存在，也无需担心 - 它会在第一次运行 <code>make:command</code> Artisan 命令的时候自动创建：</p>
 <pre><code class="language-shell">php artisan make:command SendEmails
 </code></pre>
 <p><a name="command-structure"></a></p>
 <h3 id="命令结构">命令结构</h3>
-<p>生成命令后，应为该类的 <code>signature</code> 和 <code>description</code> 属性定义适当的值。当在 <code>list</code> 屏幕上显示命令时，将使用这些属性。 <code>signature</code> 属性还允许你定义 <a href="#defining-input-expectations">命令的输入期望值</a>。 <code>handle</code> 执行命令时将调用该方法。你可以将命令逻辑放在此方法中。</p>
-<p>让我们看一个示例命令。请注意，我们能够通过命令的 <code>handle</code> 方法请求我们需要的任何依赖项。Laravel <a href="container.html">服务容器</a> 将自动注入此方法签名中带有类型提示的所有依赖项：</p>
+<p>生成命令后，应该为该类的 <code>signature</code> 和 <code>description</code> 属性设置设当的值。当在 list 屏幕上显示命令时，将使用这些属性。<code>signature</code> 属性也会让你定义<a href="#defining-input-expectations">命令输入预期值</a>。<code>handle</code> 方法会在命令执行时被调用。你可以在该方法中编写命令逻辑。</p>
+<p>让我们看一个示例命令。请注意，我们能够通过命令的 <code>handle</code> 方法引入我们需要的任何依赖项。Laravel <a href="https://learnku.comcontainer.html">服务容器</a> 将自动注入此方法签名中带有类型提示的所有依赖项：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Console\Commands;
@@ -123,83 +124,108 @@
 <span class="keyword token">class</span> SendEmails <span class="keyword token">extends</span> Command
 {
     <span class="comment token">/**
-     * 命令名称及签名.
+     * 控制台命令的名称和签名
      *
      *<span class="phpdoc token"> @var</span> string
      */</span>
     <span class="keyword token">protected</span> <span class="variable token">$signature</span> = <span class="string token">'mail:send {user}'</span>;
 
     <span class="comment token">/**
-     * 命令描述.
+     * 命令描述
      *
      *<span class="phpdoc token"> @var</span> string
      */</span>
     <span class="keyword token">protected</span> <span class="variable token">$description</span> = <span class="string token">'Send a marketing email to a user'</span>;
 
     <span class="comment token">/**
-     * 创建命令.
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 执行命令
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct()
-    {
-        <span class="keyword token">parent</span>::__construct();
-    }
-
-    <span class="comment token">/**
-     * 执行命令.
-     *
-     *<span class="phpdoc token"> @param</span>  \App\Support\DripEmailer  $drip
-     *<span class="phpdoc token"> @return</span> mixed
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(DripEmailer <span class="variable token">$drip</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(DripEmailer <span class="variable token">$drip</span>): void
     {
         <span class="variable token">$drip</span>-&gt;send(User::find(<span class="variable token">$this</span>-&gt;argument(<span class="string token">'user'</span>)));
     }
 }
 </code></pre>
 <blockquote>
-<p>技巧：为了更好地复用代码，请尽量让你的命令类保持轻量并且能够延迟到应用服务中完成。在上面的示例中，我们注入了一个服务类来进行发送电子邮件的「繁重工作」。</p>
+<p><strong>注意</strong>
+为了更好地复用代码，请尽量让你的命令类保持轻量并且能够延迟到应用服务中完成。上例中，我们注入了一个服务类来进行发送电子邮件的「繁重工作」。</p>
 </blockquote>
 <p><a name="closure-commands"></a></p>
 <h3 id="闭包命令">闭包命令</h3>
-<p>基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 <code>app/Console/Kernel.php</code> 文件的  <code>commands</code> 方法中，Laravel 加载 <code>routes/console.php</code> 文件：</p>
+<p>基于闭包的命令为将控制台命令定义为类提供了一种替代方法。与路由闭包可以替代控制器一样，可以将命令闭包视为命令类的替代。在 <code>app/Console/Kernel.php</code> 文件的  <code>commands</code> 方法中 ，Laravel 加载 <code>routes/console.php</code> 文件：</p>
 <pre><code><span class="comment token">/**
  * 注册闭包命令
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> commands()
+<span class="keyword token">protected</span> <span class="keyword token">function</span> commands(): void
 {
     <span class="keyword token">require</span> base_path(<span class="string token">'routes/console.php'</span>);
 }
 </code></pre>
 <p>尽管该文件没有定义 HTTP 路由，但它定义了进入应用程序的基于控制台的入口 (routes) 。在这个文件中，你可以使用 <code>Artisan::command</code> 方法定义所有的闭包路由。 <code>command</code> 方法接受两个参数： <a href="#defining-input-expectations">命令名称</a> 和可调用的闭包，闭包接收命令的参数和选项：</p>
-<pre><code>Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<pre><code>Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$user</span>) {
     <span class="variable token">$this</span>-&gt;info(<span class="string token">"Sending email to: {$user}!"</span>);
 });
 </code></pre>
 <p>该闭包绑定到基础命令实例，因此你可以完全访问通常可以在完整命令类上访问的所有辅助方法。</p>
 <p><a name="type-hinting-dependencies"></a></p>
-<h4 id="类型约束依赖">类型约束依赖</h4>
-<p>除了接受命令参数及选项外，命令闭包也可以使用类型约束从 <a href="container.html">服务容器</a> 中解析其他的依赖关系：</p>
+<h4 id="type-hinting-dependencies">Type-Hinting Dependencies</h4>
+<p>除了接受命令参数及选项外，命令闭包也可以使用类型约束从 <a href="/docs/laravel/10.x/container">服务容器</a> 中解析其他的依赖关系：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 <span class="keyword token">use</span> App\Support\DripEmailer;
 
-Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (DripEmailer <span class="variable token">$drip</span>, <span class="variable token">$user</span>) {
+Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (DripEmailer <span class="variable token">$drip</span>, string <span class="variable token">$user</span>) {
     <span class="variable token">$drip</span>-&gt;send(User::find(<span class="variable token">$user</span>));
 });
 </code></pre>
 <p><a name="closure-command-descriptions"></a></p>
 <h4 id="闭包命令说明">闭包命令说明</h4>
 <p>在定义基于闭包的命令时，可以使用 <code>purpose</code> 方法向命令添加描述。当你运行 <code>php artisan list</code> 或 <code>php artisan help</code> 命令时，将显示以下描述：</p>
-<pre><code>Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<pre><code>Artisan::command(<span class="string token">'mail:send {user}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$user</span>) {
     <span class="comment token">// ...</span>
 })-&gt;purpose(<span class="string token">'Send a marketing email to a user'</span>);
 </code></pre>
+<p><a name="isolatable-commands"></a></p>
+<h3 id="单例命令">单例命令</h3>
+<blockquote>
+<p><strong>警告</strong>
+要使用该特性，应用必须使用 <code>memcached</code>、<code>redis</code>、<code>dynamodb</code>、<code>database</code>、<code>file</code> 或 <code>array</code> 作为默认的缓存驱动。另外，所有的服务器必须与同一个中央缓存服务器通信。</p>
+</blockquote>
+<p>有时您可能希望确保一次只能运行一个命令实例。为此，你可以在命令类上实现 <code>Illuminate\Contracts\Console\Isolatable</code> 接口：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Console\Commands;
+
+<span class="keyword token">use</span> Illuminate\Console\Command;
+<span class="keyword token">use</span> Illuminate\Contracts\Console\Isolatable;
+
+<span class="keyword token">class</span> SendEmails <span class="keyword token">extends</span> Command <span class="keyword token">implements</span> Isolatable
+{
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>当命令被标记为 <code>Isolatable</code> 时，Laravel 会自动为该命令添加 <code>--isolated</code> 选项。当命令中使用这一选项时，Laravel 会确保不会有该命令的其他实例同时运行。Laravel 通过在应用的默认缓存驱动中使用原子锁来实现这一功能。如果这一命令有其他实例在运行，则该命令不会执行；不过，该命令仍然会使用成功退出状态码退出：</p>
+<pre><code class="language-shell">php artisan mail:send 1 --isolated
+</code></pre>
+<p>如果你想自己指定命令无法执行时返回的退出状态码，你可用通过 <code>isolated</code> 选项提供：</p>
+<pre><code class="language-shell">php artisan mail:send 1 --isolated=12
+</code></pre>
+<p><a name="lock-expiration-time"></a></p>
+<h4 id="原子锁到期时间">原子锁到期时间</h4>
+<p>默认情况下，单例锁会在命令完成后过期。或者如果命令被打断且无法完成的话，锁会在一小时后过期。不过你也可以通过定义命令的 <code>isolationLockExpiresAt</code> 方法来调整过期时间：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> DateTimeInterface;
+<span class="keyword token">use</span> DateInterval;
+
+<span class="comment token">/**
+ * 定义单例锁的到期时间
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> isolationLockExpiresAt(): DateTimeInterface|DateInterval
+{
+    <span class="keyword token">return</span> now()-&gt;addMinutes(<span class="number token">5</span>);
+}
+</code></pre>
 <p><a name="defining-input-expectations"></a></p>
 <h2 id="定义输入期望">定义输入期望</h2>
-<p>在编写控制台命令时，通常是通过参数和选项来收集用户输入的。Laravel 让你可以非常方便地在 <code>signature</code> 属性中定义你期望用户输入的内容。<code>signature</code> 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。</p>
+<p>在编写控制台命令时，通常是通过参数和选项来收集用户输入的。 Laravel 让你可以非常方便地在 <code>signature</code> 属性中定义你期望用户输入的内容。<code>signature</code> 属性允许使用单一且可读性高，类似路由的语法来定义命令的名称、参数和选项。</p>
 <p><a name="arguments"></a></p>
 <h3 id="参数">参数</h3>
 <p>用户提供的所有参数和选项都用花括号括起来。在下面的示例中，该命令定义了一个必需的参数 <code>user</code>:</p>
@@ -219,7 +245,7 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 </code></pre>
 <p><a name="options"></a></p>
 <h3 id="选项">选项</h3>
-<p>选项类似于参数，是用户输入的另一种形式。在命令行中指定选项的时候，它们以两个短横线 (--) 作为前缀。这有两种类型的选项：接收值和不接受值。不接收值的选项就像是一个布尔「开关」。我们来看一下这种类型的选项的示例：</p>
+<p>选项类似于参数，是用户输入的另一种形式。在命令行中指定选项的时候，它们以两个短横线 (<code>--</code>) 作为前缀。这有两种类型的选项：接收值和不接受值。不接收值的选项就像是一个布尔「开关」。我们来看一下这种类型的选项的示例：</p>
 <pre><code><span class="comment token">/**
  * 命令的名称及其标识
  *
@@ -251,8 +277,8 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <p>要在定义选项的时候指定一个简写，你可以在选项名前面使用 <code>|</code> 隔符将选项名称与其简写分隔开来：</p>
 <pre><code>&#39;mail:send {user} {--Q|queue}&#39;
 </code></pre>
-<p>在终端上调用命令时，选项简写的前缀只用一个连字符：</p>
-<pre><code class="language-shell">php artisan mail:send 1 -Q
+<p>在终端上调用命令时，选项简写的前缀只用一个连字符，在为选项指定值时不应该包括<code>=</code>字符。</p>
+<pre><code class="language-shell">php artisan mail:send 1 -Qdefault
 </code></pre>
 <p><a name="input-arrays"></a></p>
 <h3 id="输入数组">输入数组</h3>
@@ -260,15 +286,15 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <pre><code>&#39;mail:send {user*}&#39;
 </code></pre>
 <p>当调用这个方法的时候，<code>user</code> 参数的输入参数将按顺序传递给命令。例如，以下命令将会设置 <code>user</code> 的值为 <code>foo</code> 和 <code>bar</code> ：</p>
-<pre><code class="language-shell">php artisan mail:send foo bar
+<pre><code class="language-shell">php artisan mail:send 1 2
 </code></pre>
-<p> <code>*</code> 字符可以与可选的参数结合使用，允许你定义零个或多个参数实例：</p>
+<p> <code>*</code> 字符可以与可选的参数结合使用，允许您定义零个或多个参数实例：</p>
 <pre><code>&#39;mail:send {user?*}&#39;
 </code></pre>
 <p><a name="option-arrays"></a></p>
 <h4 id="选项数组">选项数组</h4>
 <p>当定义需要多个输入值的选项时，传递给命令的每个选项值都应以选项名称作为前缀：</p>
-<pre><code>&#39;mail:send {user} {--id=*}&#39;
+<pre><code>&#39;mail:send {--id=*}&#39;
 </code></pre>
 <p>这样的命令可以通过传递多个 <code>--id</code> 参数来调用：</p>
 <pre><code class="language-shell">php artisan mail:send --id=1 --id=2
@@ -292,14 +318,10 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <p>当命令在执行时，你可能需要访问命令所接受的参数和选项的值。为此，你可以使用 <code>argument</code> 和 <code>option</code> 方法。如果选项或参数不存在，将会返回<code>null</code>：</p>
 <pre><code><span class="comment token">/**
  * 执行控制台命令。
- *
- *<span class="phpdoc token"> @return</span> int
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> handle()
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
 {
     <span class="variable token">$userId</span> = <span class="variable token">$this</span>-&gt;argument(<span class="string token">'user'</span>);
-
-    <span class="comment token">//</span>
 }
 </code></pre>
 <p>如果你需要检索所有的参数做为 <code>array</code>，请调用 <code>arguments</code> 方法：</p>
@@ -317,12 +339,12 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <p>除了显示输出以外，你还可以要求用户在执行命令期间提供输入。<code>ask</code> 方法将询问用户指定的问题来接收用户输入，然后用户输入将会传到你的命令中：</p>
 <pre><code><span class="comment token">/**
  * 执行命令指令
- *
- *<span class="phpdoc token"> @return</span> mixed
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> handle()
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
 {
     <span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;ask(<span class="string token">'What is your name?'</span>);
+
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><code>secret</code> 方法与 <code>ask</code> 相似，区别在于用户的输入将不可见。这个方法在需要输入一些诸如密码之类的敏感信息时是非常有用的：</p>
@@ -332,12 +354,12 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <h4 id="请求确认">请求确认</h4>
 <p>如果你需要请求用户进行一个简单的确认，可以使用 <code>confirm</code> 方法来实现。默认情况下，这个方法会返回 <code>false</code>。当然，如果用户输入 <code>y</code> 或 <code>yes</code>，这个方法将会返回 <code>true</code>。</p>
 <pre><code><span class="keyword token">if</span> (<span class="variable token">$this</span>-&gt;confirm(<span class="string token">'Do you wish to continue?'</span>)) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p>如有必要，你可以通过将 <code>true</code> 作为第二个参数传递给 <code>confirm</code> 方法，这样就可以在默认情况下返回 <code>true</code>：</p>
 <pre><code><span class="keyword token">if</span> (<span class="variable token">$this</span>-&gt;confirm(<span class="string token">'Do you wish to continue?'</span>, <span class="keyword token">true</span>)) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="auto-completion"></a></p>
@@ -346,7 +368,7 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <pre><code><span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;anticipate(<span class="string token">'What is your name?'</span>, [<span class="string token">'Taylor'</span>, <span class="string token">'Dayle'</span>]);
 </code></pre>
 <p>或者，你可以将一个闭包作为第二个参数传递给 <code>anticipate</code> 方法。每当用户键入字符时，闭包函数都会被调用。闭包函数应该接受一个包含用户输入的字符串形式的参数，并返回一个可供自动补全的选项的数组：</p>
-<pre><code><span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;anticipate(<span class="string token">'What is your address?'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+<pre><code><span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;anticipate(<span class="string token">'What is your address?'</span>, <span class="keyword token">function</span> (string <span class="variable token">$input</span>) {
     <span class="comment token">// 返回自动完成配置...</span>
 });
 </code></pre>
@@ -359,7 +381,7 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
     <span class="variable token">$defaultIndex</span>
 );
 </code></pre>
-<p>此外， <code>choice</code> 方法接受第四和第五可选参数，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：</p>
+<p>此外， <code>choice</code> 方法接受第四和第五可选参数 ，用于确定选择有效响应的最大尝试次数以及是否允许多次选择：</p>
 <pre><code><span class="variable token">$name</span> = <span class="variable token">$this</span>-&gt;choice(
     <span class="string token">'What is your name?'</span>,
     [<span class="string token">'Taylor'</span>, <span class="string token">'Dayle'</span>],
@@ -370,13 +392,11 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 </code></pre>
 <p><a name="writing-output"></a></p>
 <h3 id="文字输出">文字输出</h3>
-<p>你可以使用 <code>line</code>，<code>info</code>，<code>comment</code>，<code>question</code> 和 <code>error</code> 方法，发送输出到控制台。这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，<code>info</code> 将会以绿色文本在控制台展示。</p>
+<p>你可以使用 <code>line</code>，<code>info</code>，<code>comment</code>，<code>question</code> 和 <code>error</code> 方法，发送输出到控制台。 这些方法中的每一个都会使用合适的 ANSI 颜色以展示不同的用途。例如，我们要为用户展示一些常规信息。通常，<code>info</code> 将会以绿色文本在控制台展示。</p>
 <pre><code><span class="comment token">/**
- * 执行控制台命令
- *
- *<span class="phpdoc token"> @return</span> mixed
+ * Execute the console command.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> handle()
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
 {
     <span class="comment token">// ...</span>
 
@@ -411,7 +431,7 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <p>对于长时间运行的任务，显示一个进度条来告知用户任务的完成情况会很有帮助。使用 <code>withProgressBar</code> 方法，Laravel 将显示一个进度条，并在给定的可迭代值上推进每次迭代的进度：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
-<span class="variable token">$users</span> = <span class="variable token">$this</span>-&gt;withProgressBar(User::all(), <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<span class="variable token">$users</span> = <span class="variable token">$this</span>-&gt;withProgressBar(User::all(), <span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="variable token">$this</span>-&gt;performTask(<span class="variable token">$user</span>);
 });
 </code></pre>
@@ -431,17 +451,15 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <span class="variable token">$bar</span>-&gt;finish();
 </code></pre>
 <blockquote>
-<p>技巧：有关更多高级选项，请查看 <a href="https://symfony.com/doc/current/components/console/helpers/progressbar.html">Symfony 进度条组件文档</a>.</p>
+<p><strong>技巧：</strong>有关更多高级选项，请查看 <a href="https://symfony.com/doc/current/components/console/helpers/progressbar.html">Symfony 进度条组件文档</a>.</p>
 </blockquote>
 <p><a name="registering-commands"></a></p>
 <h2 id="注册命令">注册命令</h2>
-<p>你的所有控制台命令都在你的应用程序的 <code>App\Console\Kernel</code> 类中注册，这是你的应用程序的「控制台内核」。在此类的 <code>commands</code> 方法中，你将看到对内核的 <code>load</code> 方法的调用。 <code>load</code> 方法将扫描 <code>app/Console/Commands</code> 目录并自动将其中包含的每个命令注册到 Artisan。你甚至可以自由地调用 <code>load</code> 方法来扫描其他目录以查找 Artisan 命令：</p>
+<p>你的所有控制台命令都在您的应用程序的 <code>App\Console\Kernel</code> 类中注册，这是你的应用程序的「控制台内核」。在此类的 <code>commands</code> 方法中，你将看到对内核的 <code>load</code> 方法的调用。 <code>load</code> 方法将扫描 <code>app/Console/Commands</code> 目录并自动将其中包含的每个命令注册到 Artisan。 你甚至可以自由地调用 <code>load</code> 方法来扫描其他目录以查找 Artisan 命令：</p>
 <pre><code><span class="comment token">/**
- * 注册应用程序的命令。
- *
- *<span class="phpdoc token"> @return</span> void
+ * Register the commands for the application.
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> commands()
+<span class="keyword token">protected</span> <span class="keyword token">function</span> commands(): void
 {
     <span class="variable token">$this</span>-&gt;load(__DIR__.<span class="string token">'/Commands'</span>);
     <span class="variable token">$this</span>-&gt;load(__DIR__.<span class="string token">'/../Domain/Orders/Commands'</span>);
@@ -449,7 +467,7 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>如有必要，你可以通过将命令的类名添加到 <code>App\Console\Kernel</code> 类中的 <code>$commands</code> 属性来手动注册命令。如果你的内核上尚未定义此属性，则应手动定义它。当 Artisan 启动时，此属性中列出的所有命令将由 <a href="container.html">服务容器</a> 解析并注册到 Artisan：</p>
+<p>如有必要，你可以通过将命令的类名添加到 <code>App\Console\Kernel</code> 类中的 <code>$commands</code> 属性来手动注册命令。如果你的内核上尚未定义此属性，则应手动定义它。当 Artisan 启动时，此属性中列出的所有命令将由 <a href="/docs/laravel/10.x/container">服务容器</a> 解析并注册到 Artisan：</p>
 <pre><code><span class="keyword token">protected</span> <span class="variable token">$commands</span> = [
     Commands\SendEmails::<span class="keyword token">class</span>
 ];
@@ -459,12 +477,12 @@ Artisan::command(<span class="string token">'mail:send {user}'</span>, <span cla
 <p>有时你可能希望在 CLI 之外执行 Artisan 命令。例如，你可能希望从路由或控制器执行 Artisan 命令。你可以使用 <code>Artisan</code> 外观上的 <code>call</code> 方法来完成此操作。 <code>call</code> 方法接受命令的签名名称或类名作为其第一个参数，以及一个命令参数数组作为第二个参数。将返回退出代码：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Artisan;
 
-Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="keyword token">function</span> (string <span class="variable token">$user</span>) {
     <span class="variable token">$exitCode</span> = Artisan::call(<span class="string token">'mail:send'</span>, [
         <span class="string token">'user'</span> =&gt; <span class="variable token">$user</span>, <span class="string token">'--queue'</span> =&gt; <span class="string token">'default'</span>
     ]);
 
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <p>或者，你可以将整个 Artisan 命令作为字符串传递给 <code>call</code> 方法：</p>
@@ -490,15 +508,15 @@ Route::post(<span class="string token">'/mail'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="queueing-artisan-commands"></a></p>
 <h4 id="队列-artisan-命令">队列 Artisan 命令</h4>
-<p>使用 <code>Artisan</code> 门面的 <code>queue</code> 方法，你甚至可以对 Artisan 命令进行排队，以便你的 <a href="queues.html">队列工作者</a> 在后台处理它们。在使用此方法之前，请确保你已配置队列并正在运行队列侦听器：</p>
+<p>使用 <code>Artisan</code> 门面的 <code>queue</code> 方法，你甚至可以对 Artisan 命令进行排队，以便你的 <a href="/docs/laravel/10.x/queues">队列工作者</a> 在后台处理它们。在使用此方法之前，请确保你已配置队列并正在运行队列侦听器：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Artisan;
 
-Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="keyword token">function</span> (string <span class="variable token">$user</span>) {
     Artisan::queue(<span class="string token">'mail:send'</span>, [
         <span class="string token">'user'</span> =&gt; <span class="variable token">$user</span>, <span class="string token">'--queue'</span> =&gt; <span class="string token">'default'</span>
     ]);
 
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <p>使用 <code>onConnection</code> 和 <code>onQueue</code> 方法，你可以指定 Artisan 命令应分派到的连接或队列：</p>
@@ -510,17 +528,15 @@ Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="
 <h3 id="从其他命令调用命令">从其他命令调用命令</h3>
 <p>有时你可能希望从现有的 Artisan 命令调用其他命令。你可以使用 <code>call</code> 方法来执行此操作。这个 <code>call</code> 方法接受命令名称和命令参数/选项数组：</p>
 <pre><code><span class="comment token">/**
- * 执行控制台命令。
- *
- *<span class="phpdoc token"> @return</span> mixed
+ * Execute the console command.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> handle()
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
 {
     <span class="variable token">$this</span>-&gt;call(<span class="string token">'mail:send'</span>, [
         <span class="string token">'user'</span> =&gt; <span class="number token">1</span>, <span class="string token">'--queue'</span> =&gt; <span class="string token">'default'</span>
     ]);
 
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p>如果你想调用另一个控制台命令并禁止其所有输出，你可以使用 <code>callSilently</code> 方法。 <code>callSilently</code> 方法与 <code>call</code> 方法具有相同的签名：</p>
@@ -530,49 +546,33 @@ Route::post(<span class="string token">'/user/{user}/mail'</span>, <span class="
 </code></pre>
 <p><a name="signal-handling"></a></p>
 <h2 id="信号处理">信号处理</h2>
-<p>为 Artisan 控制台提供动力的 Symfony 控制台组件允许你指示你的命令处理哪些进程信号（如果有）。例如，你可以指示你的命令处理「SIGINT」和「SIGTERM」信号。</p>
-<p>首先，你应该在你的 Artisan 命令类上实现 <code>Symfony\Component\Console\Command\SignalableCommandInterface</code> 接口。这个接口需要你定义两个方法：<code>getSubscribedSignals</code>和<code>handleSignal</code>：</p>
-<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">use</span> Symfony\Component\Console\Command\SignalableCommandInterface;
-
-<span class="keyword token">class</span> StartServer <span class="keyword token">extends</span> Command <span class="keyword token">implements</span> SignalableCommandInterface
+<p>正如你可能知道的，操作系统允许向运行中的进程发送信号。例如，「SIGTERM」信号是操作系统要求程序终止的方式。如果你想在 Artisan 控制台命令中监听信号，并在信号发生时执行代码，你可以使用 <code>trap</code> 方法。</p>
+<pre><code><span class="comment token">/**
+ * 执行控制台命令。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
 {
-    <span class="comment token">// ...</span>
+    <span class="variable token">$this</span>-&gt;trap(SIGTERM, fn () =&gt; <span class="variable token">$this</span>-&gt;shouldKeepRunning = <span class="keyword token">false</span>);
 
-    <span class="comment token">/**
-     * 获取命令处理的信号列表。
-     *
-     *<span class="phpdoc token"> @return</span> array
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> getSubscribedSignals(): <span class="keyword token">array</span>
-    {
-        <span class="keyword token">return</span> [SIGINT, SIGTERM];
-    }
-
-    <span class="comment token">/**
-     * 处理传入信号。
-     *
-     *<span class="phpdoc token"> @param</span>  int  $signal
-     *<span class="phpdoc token"> @return</span> void
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handleSignal(int <span class="variable token">$signal</span>): void
-    {
-        <span class="keyword token">if</span> (<span class="variable token">$signal</span> === SIGINT) {
-            <span class="variable token">$this</span>-&gt;stopServer();
-
-            <span class="keyword token">return</span>;
-        }
+    <span class="keyword token">while</span> (<span class="variable token">$this</span>-&gt;shouldKeepRunning) {
+        <span class="comment token">// ...</span>
     }
 }
 </code></pre>
-<p>正如你所料，<code>getSubscribedSignals</code> 方法应该返回命令可以处理的信号数组，而 <code>handleSignal</code> 方法接收信号并可以做出相应地响应。</p>
+<p>为了一次监听多个信号，你可以向 <code>trap</code> 方法提供一个信号数组。</p>
+<pre><code><span class="variable token">$this</span>-&gt;trap([SIGTERM, SIGQUIT], <span class="keyword token">function</span> (int <span class="variable token">$signal</span>) {
+    <span class="variable token">$this</span>-&gt;shouldKeepRunning = <span class="keyword token">false</span>;
+
+    dump(<span class="variable token">$signal</span>); <span class="comment token">// SIGTERM / SIGQUIT</span>
+});
+</code></pre>
 <p><a name="stub-customization"></a></p>
 <h2 id="stub-定制">Stub 定制</h2>
 <p>Artisan 控制台的 <code>make</code> 命令用于创建各种类，例如控制器、作业、迁移和测试。这些类是使用「stub」文件生成的，这些文件中会根据你的输入填充值。但是，你可能需要对 Artisan 生成的文件进行少量更改。为此，你可以使用以下 <code>stub:publish</code> 命令将最常见的 Stub 命令发布到你的应用程序中，以便可以自定义它们：</p>
 <pre><code class="language-shell">php artisan stub:publish
 </code></pre>
 <p>已发布的 stub 将存放于你的应用根目录下的 <code>stubs</code> 目录中。对这些 stub 进行任何改动都将在你使用 Artisan <code>make</code> 命令生成相应的类的时候反映出来。</p>
+<p><a name="events"></a></p>
 <h2 id="事件">事件</h2>
 <p>Artisan 在运行命令时会调度三个事件： <code>Illuminate\Console\Events\ArtisanStarting</code>，<code>Illuminate\Console\Events\CommandStarting</code> 和  <code>Illuminate\Console\Events\CommandFinished</code>。当 Artisan 开始运行时，会立即调度 <code>ArtisanStarting</code> 事件。接下来，在命令运行之前立即调度  <code>CommandStarting</code> 事件。最后，一旦命令执行完毕，就会调度  <code>CommandFinished</code> 事件。</p>
 </div>
