@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -19,10 +19,13 @@
 <body>
     <div class="markdown-body"><h1 id="blade-模板">Blade 模板</h1>
 <ul>
-<li><a href="#introduction">简介</a></li>
+<li><a href="#introduction">简介</a><ul>
+<li><a href="#supercharging-blade-with-livewire">用 Livewire 为 Blade 赋能</a></li>
+</ul>
+</li>
 <li><a href="#displaying-data">数据显示</a><ul>
 <li><a href="#html-entity-encoding">HTML 实体编码</a></li>
-<li><a href="#blade-and-javascript-frameworks">Blade &amp; JavaScript 框架</a></li>
+<li><a href="#blade-and-javascript-frameworks">Blade 与 JavaScript 框架</a></li>
 </ul>
 </li>
 <li><a href="#blade-directives">Blade 指令</a><ul>
@@ -31,10 +34,10 @@
 <li><a href="#loops">循环</a></li>
 <li><a href="#the-loop-variable">循环变量</a></li>
 <li><a href="#conditional-classes">条件类</a></li>
-<li><a href="#checked-and-selected">Checked / Selected / Disabled</a></li>
+<li><a href="#additional-attributes">附加属性</a></li>
 <li><a href="#including-subviews">包括子视图</a></li>
 <li><a href="#the-once-directive"><code>@once</code> 指令</a></li>
-<li><a href="#raw-php">PHP</a></li>
+<li><a href="#raw-php">原始 PHP 语法</a></li>
 <li><a href="#comments">注释</a></li>
 </ul>
 </li>
@@ -45,9 +48,15 @@
 <li><a href="#reserved-keywords">保留关键字</a></li>
 <li><a href="#slots">插槽</a></li>
 <li><a href="#inline-component-views">内联组件视图</a></li>
-<li><a href="#anonymous-components">匿名组件</a></li>
 <li><a href="#dynamic-components">动态组件</a></li>
 <li><a href="#manually-registering-components">手动注册组件</a></li>
+</ul>
+</li>
+<li><a href="#anonymous-components">匿名组件</a><ul>
+<li><a href="#anonymous-index-components">匿名索引组件</a></li>
+<li><a href="#data-properties-attributes">数据特性/属性</a></li>
+<li><a href="#accessing-parent-data">访问父级数据</a></li>
+<li><a href="#anonymous-component-paths">匿名组件路径</a></li>
 </ul>
 </li>
 <li><a href="#building-layouts">创建布局</a><ul>
@@ -63,7 +72,7 @@
 </li>
 <li><a href="#stacks">堆栈</a></li>
 <li><a href="#service-injection">服务注入</a></li>
-<li><a href="#rendering-inline-blade-templates">渲染内联 Blade 模板</a></li>
+<li><a href="#rendering-blade-templates">渲染 Blade 模板</a></li>
 <li><a href="#extending-blade">Blade 扩展</a><ul>
 <li><a href="#custom-echo-handlers">自定义 Echo 处理</a></li>
 <li><a href="#custom-if-statements">自定义 if 语句</a></li>
@@ -73,14 +82,14 @@
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
 <p>Blade 是 Laravel 提供的一个简单而又强大的模板引擎。 和其他流行的 PHP 模板引擎不同，Blade 并不限制你在视图中使用原生 PHP 代码。实际上，所有 Blade 视图文件都将被编译成原生的 PHP 代码并缓存起来，除非它被修改，否则不会重新编译，这就意味着 Blade 基本上不会给你的应用增加任何负担。Blade 模板文件使用 <code>.blade.php</code> 作为文件扩展名，被存放在 <code>resources/views</code> 目录。</p>
-<p>Blade 视图可以使用全局 <code>view</code> 函数从 Route 或控制器返回。当然，正如有关 <a href="views.html">views</a> 的文档中所描述的，可以使用 <code>view</code> 函数的第二个参数将数据传递到 Blade 视图：</p>
+<p>Blade 视图可以使用全局 <code>view</code> 函数从 Route 或控制器返回。当然，正如有关 <a href="/docs/laravel/10.x/views">views</a> 的文档中所描述的，可以使用 <code>view</code> 函数的第二个参数将数据传递到 Blade 视图：</p>
 <pre><code>Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
     <span class="keyword token">return</span> view(<span class="string token">'greeting'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Finn'</span>]);
 });
 </code></pre>
-<blockquote>
-<p>技巧：想要让您的 Blade 模板更上一层楼并轻松构建动态界面？请阅读 <a href="https://laravel-livewire.com">Laravel Livewire</a>。</p>
-</blockquote>
+<p><a name="supercharging-blade-with-livewire"></a></p>
+<h3 id="用-livewire-为-blade-赋能">用 Livewire 为 Blade 赋能</h3>
+<p>想让你的 Blade 模板更上一层楼，轻松构建动态界面吗？看看<a href="https://laravel-livewire.com">Laravel Livewire</a>。Livewire 允许你编写 Blade 组件，这些组件具有动态功能，通常只能通过 React 或 Vue 等前端框架来实现，这提供了一个很好的方法来构建现代，没有复杂前端映射，基于客户端渲染，无须很多的构建步骤的  JavaScript 框架。</p>
 <p><a name="displaying-data"></a></p>
 <h2 id="显示数据">显示数据</h2>
 <p>你可以把变量置于花括号中以在视图中显示数据。例如，给定下方的路由：</p>
@@ -88,18 +97,18 @@
     <span class="keyword token">return</span> view(<span class="string token">'welcome'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Samantha'</span>]);
 });
 </code></pre>
-<p>您可以像如下这样显示 <code>name</code> 变量的内容：</p>
+<p>你可以像如下这样显示 <code>name</code> 变量的内容：</p>
 <pre><code class="language-blade">Hello, {{ <span class="variable token">$name</span> }}.
 </code></pre>
 <blockquote>
-<p>技巧：Blade 的 <code>{{ }}</code> 语句将被 PHP 的 <code>htmlspecialchars</code> 函数自动转义以防范 XSS 攻击。</p>
+<p><strong>技巧</strong>：Blade 的 <code>{{ }}</code> 语句将被 PHP 的 <code>htmlspecialchars</code> 函数自动转义以防范 XSS 攻击。</p>
 </blockquote>
-<p>您不仅限于显示传递给视图的变量的内容。您也可以回显任何 PHP 函数的结果。实际上，您可以将所需的任何 PHP 代码放入 Blade echo 语句中：</p>
+<p>你不仅限于显示传递给视图的变量的内容。你也可以回显任何 PHP 函数的结果。实际上，你可以将所需的任何 PHP 代码放入 Blade echo 语句中：</p>
 <pre><code class="language-blade">The current UNIX timestamp is {{ time() }}.
 </code></pre>
 <p><a name="html-entity-encoding"></a></p>
 <h3 id="html-实体编码">HTML 实体编码</h3>
-<p>默认情况下，Blade（和 Laravel <code>e</code> 助手）将对 HTML 实体进行双重编码。如果您想禁用双重编码，请从 <code>AppServiceProvider</code> 的 <code>boot</code> 方法调用 <code>Blade::withoutDoubleEncoding</code> 方法：</p>
+<p>默认情况下，Blade（和 Laravel <code>e</code> 助手）将对 HTML 实体进行双重编码。如果你想禁用双重编码，请从 <code>AppServiceProvider</code> 的 <code>boot</code> 方法调用 <code>Blade::withoutDoubleEncoding</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Providers;
@@ -110,11 +119,9 @@
 <span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
 {
     <span class="comment token">/**
-     * 在此启动任意服务
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * Bootstrap any application services.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
     {
         Blade::withoutDoubleEncoding();
     }
@@ -122,15 +129,15 @@
 </code></pre>
 <p><a name="displaying-unescaped-data"></a></p>
 <h4 id="展示非转义数据">展示非转义数据</h4>
-<p>默认情况下， Blade <code>{{ }}</code> 语句将被 PHP 的 <code>htmlspecialchars</code> 函数自动转义以防范 XSS 攻击。如果不想您的数据被转义，那么您可使用如下的语法：</p>
+<p>默认情况下， Blade <code>{{ }}</code> 语句将被 PHP 的 <code>htmlspecialchars</code> 函数自动转义以防范 XSS 攻击。如果不想你的数据被转义，那么你可使用如下的语法：</p>
 <pre><code class="language-blade">Hello, {!! <span class="variable token">$name</span> !!}.
 </code></pre>
 <blockquote>
-<p>注意：在应用中显示用户提供的数据时请格外小心，请尽可能的使用转义和双引号语法来防范 XSS 攻击。</p>
+<p><strong>注意：</strong>在应用中显示用户提供的数据时请格外小心，请尽可能的使用转义和双引号语法来防范 XSS 攻击。</p>
 </blockquote>
 <p><a name="blade-and-javascript-frameworks"></a></p>
 <h3 id="blade--javascript-框架">Blade &amp; JavaScript 框架</h3>
-<p>由于许多 JavaScript 框架也使用「花括号」来标识将显示在浏览器中的表达式，因此，您可以使用 @ 符号来表示 Blade 渲染引擎应当保持不变。例如：</p>
+<p>由于许多 JavaScript 框架也使用「花括号」来标识将显示在浏览器中的表达式，因此，你可以使用 <code>@</code> 符号来表示 Blade 渲染引擎应当保持不变。例如：</p>
 <pre><code class="language-blade">&lt;h1&gt;Laravel&lt;/h1&gt;
 
 Hello, @{{ name }}.
@@ -145,27 +152,27 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="rendering-json"></a></p>
 <h4 id="渲染-json">渲染 JSON</h4>
-<p>有时，您可能会将数组传递给视图，以将其呈现为 JSON，以便初始化 JavaScript 变量。 例如：</p>
+<p>有时，你可能会将数组传递给视图，以将其呈现为 JSON，以便初始化 JavaScript 变量。 例如：</p>
 <pre><code class="language-blade">&lt;script&gt;
     <span class="keyword token">var</span> app = <span class="preprocessor token">&lt;?php</span> <span class="keyword token">echo</span> json_encode(<span class="variable token">$array</span>); <span class="preprocessor token">?&gt;</span>;
 &lt;/script&gt;
 </code></pre>
-<p>或者，您可以使用 <code>Illuminate\Support\Js::from</code> 方法指令，而不是手动调用 <code>json_encode</code>。 <code>from</code> 方法接受与 PHP 的 <code>json_encode</code> 函数相同的参数；但是，它将确保正确转义生成的 JSON 以包含在 HTML 引号中。 <code>from</code> 方法将返回一个字符串 <code>JSON.parse</code> JavaScript 语句，它将给定对象或数组转换为有效的 JavaScript 对象：</p>
+<p>或者，你可以使用 <code>Illuminate\Support\Js::from</code> 方法指令，而不是手动调用 <code>json_encode</code>。 <code>from</code> 方法接受与 PHP 的 <code>json_encode</code> 函数相同的参数；但是，它将确保正确转义生成的 JSON 以包含在 HTML 引号中。 <code>from</code> 方法将返回一个字符串 <code>JSON.parse</code> JavaScript 语句，它将给定对象或数组转换为有效的 JavaScript 对象：</p>
 <pre><code class="language-blade">&lt;script&gt;
     <span class="keyword token">var</span> app = {{ Illuminate\Support\Js::from(<span class="variable token">$array</span>) }};
 &lt;/script&gt;
 </code></pre>
-<p>Laravel 应用程序框架的最新版本包括一个 <code>Js</code> 门面，它提供了在 Blade 模板中方便地访问此功能：</p>
+<p>Laravel 框架的最新版本包括一个 <code>Js</code> 门面，它提供了在 Blade 模板中方便地访问此功能：</p>
 <pre><code class="language-blade">&lt;script&gt;
     <span class="keyword token">var</span> app = {{ Js::from(<span class="variable token">$array</span>) }};
 &lt;/script&gt;
 </code></pre>
 <blockquote>
-<p>注意：您应该只使用 <code>Js::from</code> 渲染已经存在的变量为 JSON。 Blade 模板基于正则表达式，如果尝试将复杂表达式传递给 <code>Js::from</code> 可能会导致无法预测的错误。</p>
+<p><strong>注意：</strong>你应该只使用 <code>Js::from</code> 渲染已经存在的变量为 JSON。 Blade 模板基于正则表达式，如果尝试将复杂表达式传递给 <code>Js::from</code> 可能会导致无法预测的错误。</p>
 </blockquote>
 <p><a name="the-at-verbatim-directive"></a></p>
 <h4 id="verbatim-指令"><code>@verbatim</code> 指令</h4>
-<p>如果您在模板中显示很大一部分 JavaScript 变量，您可以将 HTML 嵌入到 <code>@verbatim</code> 指令中，这样，您就不需要在每一个 Blade 回显语句前添加 <code>@</code> 符号：</p>
+<p>如果你在模板中显示很大一部分 JavaScript 变量，你可以将 HTML 嵌入到 <code>@verbatim</code> 指令中，这样，你就不需要在每一个 Blade 回显语句前添加 <code>@</code> 符号：</p>
 <pre><code class="language-blade">@verbatim
     &lt;div <span class="keyword token">class</span>=<span class="string token">"container"</span>&gt;
         Hello, {{ name }}.
@@ -177,18 +184,18 @@ Hello, @{{ name }}.
 <p>除了模板继承和显示数据以外， Blade 还为常见的 PHP 控制结构提供了便捷的快捷方式，例如条件语句和循环。这些快捷方式为 PHP 控制结构提供了一个非常清晰、简洁的书写方式，同时，还与 PHP 中的控制结构保持了相似的语法特性。</p>
 <p><a name="if-statements"></a></p>
 <h3 id="if-语句">If 语句</h3>
-<p>您可以使用 <code>@if</code> ， <code>@elseif</code> ， <code>@else</code> 和 <code>@endif</code> 指令构造 <code>if</code> 语句。这些指令功能与它们所对应的 PHP 语句完全一致：</p>
+<p>你可以使用 <code>@if</code> ， <code>@elseif</code> ， <code>@else</code> 和 <code>@endif</code> 指令构造 <code>if</code> 语句。这些指令功能与它们所对应的 PHP 语句完全一致：</p>
 <pre><code class="language-blade">@<span class="keyword token">if</span> (count(<span class="variable token">$records</span>) === <span class="number token">1</span>)
-    <span class="comment token">// 有一条记录</span>
+    有一条记录
 @<span class="keyword token">elseif</span> (count(<span class="variable token">$records</span>) &gt; <span class="number token">1</span>)
-    <span class="comment token">// 有多条记录</span>
+    有多条记录
 @<span class="keyword token">else</span>
-    <span class="comment token">// 没有记录</span>
+    没有记录
 @<span class="keyword token">endif</span>
 </code></pre>
 <p>为了方便， Blade 还提供了一个 <code>@unless</code> 指令：</p>
 <pre><code class="language-blade">@unless (Auth::check())
-    <span class="comment token">// 还没有登录</span>
+    你还没有登录
 @endunless
 </code></pre>
 <blockquote>
@@ -205,7 +212,7 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="authentication-directives"></a></p>
 <h4 id="授权指令">授权指令</h4>
-<p><code>@auth</code> 和 <code>@guest</code> 指令可用于快速判断当前用户是否已经获得 <a href="authentication.html">授权</a> 或是游客：</p>
+<p><code>@auth</code> 和 <code>@guest</code> 指令可用于快速判断当前用户是否已经获得 <a href="/docs/laravel/10.x/authentication">授权</a> 或是游客：</p>
 <pre><code class="language-blade">@auth
     <span class="comment token">// 用户已经通过认证……</span>
 @endauth
@@ -214,7 +221,7 @@ Hello, @{{ name }}.
     <span class="comment token">// 用户没有通过认证……</span>
 @endguest
 </code></pre>
-<p>如有需要，您亦可在使用 <code>@auth</code> 和 <code>@guest</code> 指令时指定 <a href="https://learnku.com/docs/laravel/8.x/authentication" title="鉴权守卫">鉴权守卫</a>：</p>
+<p>如有需要，你亦可在使用 <code>@auth</code> 和 <code>@guest</code> 指令时指定 <a href="https://learnku.com/docs/laravel/10.x/authentication" title="认证守卫">认证守卫</a>：</p>
 <pre><code class="language-blade">@auth(<span class="string token">'admin'</span>)
     <span class="comment token">// 用户已经通过认证...</span>
 @endauth
@@ -225,12 +232,12 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="environment-directives"></a></p>
 <h4 id="环境指令">环境指令</h4>
-<p>您可以使用 <code>@production</code> 指令来判断应用是否处于生产环境：</p>
+<p>你可以使用 <code>@production</code> 指令来判断应用是否处于生产环境：</p>
 <pre><code class="language-blade">@production
     <span class="comment token">// 生产环境特定内容...</span>
 @endproduction
 </code></pre>
-<p>或者，您可以使用 <code>@env</code> 指令来判断应用是否运行于指定的环境：</p>
+<p>或者，你可以使用 <code>@env</code> 指令来判断应用是否运行于指定的环境：</p>
 <pre><code class="language-blade">@env(<span class="string token">'staging'</span>)
     <span class="comment token">//  应用运行于「staging」环境...</span>
 @endenv
@@ -241,7 +248,7 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="section-directives"></a></p>
 <h4 id="区块指令">区块指令</h4>
-<p>您可以使用 <code>@hasSection</code> 指令来判断区块是否有内容：</p>
+<p>你可以使用 <code>@hasSection</code> 指令来判断区块是否有内容：</p>
 <pre><code class="language-blade">@hasSection(<span class="string token">'navigation'</span>)
     &lt;div <span class="keyword token">class</span>=<span class="string token">"pull-right"</span>&gt;
         @yield(<span class="string token">'navigation'</span>)
@@ -250,7 +257,7 @@ Hello, @{{ name }}.
     &lt;div <span class="keyword token">class</span>=<span class="string token">"clearfix"</span>&gt;&lt;/div&gt;
 @<span class="keyword token">endif</span>
 </code></pre>
-<p>您可以使用 <code>sectionMissing</code> 指令来判断区块是否没有内容：</p>
+<p>你可以使用 <code>sectionMissing</code> 指令来判断区块是否没有内容：</p>
 <pre><code class="language-blade">@sectionMissing(<span class="string token">'navigation'</span>)
     &lt;div <span class="keyword token">class</span>=<span class="string token">"pull-right"</span>&gt;
         @<span class="keyword token">include</span>(<span class="string token">'default-navigation'</span>)
@@ -258,8 +265,8 @@ Hello, @{{ name }}.
 @<span class="keyword token">endif</span>
 </code></pre>
 <p><a name="switch-statements"></a></p>
-<h3 id="switch-statements">Switch Statements</h3>
-<p>您可使用 <code>@switch</code> ， <code>@case</code> ， <code>@break</code> ， <code>@default</code> 和 <code>@endswitch</code> 语句来构造 Switch 语句：</p>
+<h3 id="switch-语句">Switch 语句</h3>
+<p>你可使用 <code>@switch</code> ， <code>@case</code> ， <code>@break</code> ， <code>@default</code> 和 <code>@endswitch</code> 语句来构造 Switch 语句：</p>
 <pre><code class="language-blade">@<span class="keyword token">switch</span>(<span class="variable token">$i</span>)
     @<span class="keyword token">case</span>(<span class="number token">1</span>)
         First <span class="keyword token">case</span>...
@@ -295,7 +302,7 @@ Hello, @{{ name }}.
 @endwhile
 </code></pre>
 <blockquote>
-<p>技巧：在遍历 <code>foreach</code> 循环时，您可以使用 <a href="#the-loop-variable">循环变量</a> 去获取有关循环的有价值的信息，例如，您处于循环的第一个迭代亦或是处于最后一个迭代。</p>
+<p><strong>技巧：</strong>在遍历 <code>foreach</code> 循环时，你可以使用 <a href="#the-loop-variable">循环变量</a> 去获取有关循环的有价值的信息，例如，你处于循环的第一个迭代亦或是处于最后一个迭代。</p>
 </blockquote>
 <p>使用循环时，还可以使用 <code>@continue</code> 和 <code>@break</code> 循环或跳过当前迭代：</p>
 <pre><code class="language-blade">@<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
@@ -310,7 +317,7 @@ Hello, @{{ name }}.
     @<span class="keyword token">endif</span>
 @<span class="keyword token">endforeach</span>
 </code></pre>
-<p>您还可以在指令声明中包含继续或中断条件：</p>
+<p>你还可以在指令声明中包含继续或中断条件：</p>
 <pre><code class="language-blade">@<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
     @<span class="keyword token">continue</span>(<span class="variable token">$user</span>-&gt;type == <span class="number token">1</span>)
 
@@ -334,7 +341,7 @@ Hello, @{{ name }}.
     &lt;p&gt;<span class="keyword token">This</span> is user {{ <span class="variable token">$user</span>-&gt;id }}&lt;/p&gt;
 @<span class="keyword token">endforeach</span>
 </code></pre>
-<p>如果您处于嵌套循环中，您可以使用循环的 <code>$loop</code> 变量的 <code>parent</code> 属性访问父级循环：</p>
+<p>如果你处于嵌套循环中，你可以使用循环的 <code>$loop</code> 变量的 <code>parent</code> 属性访问父级循环：</p>
 <pre><code class="language-blade">@<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
     @<span class="keyword token">foreach</span> (<span class="variable token">$user</span>-&gt;posts <span class="keyword token">as</span> <span class="variable token">$post</span>)
         @<span class="keyword token">if</span> (<span class="variable token">$loop</span>-&gt;<span class="keyword token">parent</span>-&gt;first)
@@ -394,7 +401,7 @@ Hello, @{{ name }}.
 </tbody></table>
 <p><a name="conditional-classes"></a></p>
 <h3 id="有条件地编译-class-样式">有条件地编译 class 样式</h3>
-<p>该 <code>@class</code> 指令有条件地编译 CSS class 样式。该指令接收一个数组，其中数组的键包含您希望添加的一个或多个样式的类名，而值是一个布尔表达式。如果数组元素有一个数值的键，它将始终包含在呈现的 class 列表中：</p>
+<p>该 <code>@class</code> 指令有条件地编译 CSS class 样式。该指令接收一个数组，其中数组的键包含你希望添加的一个或多个样式的类名，而值是一个布尔表达式。如果数组元素有一个数值的键，它将始终包含在呈现的 class 列表中：</p>
 <pre><code class="language-blade">@php
     <span class="variable token">$isActive</span> = <span class="keyword token">false</span>;
     <span class="variable token">$hasError</span> = <span class="keyword token">true</span>;
@@ -409,15 +416,27 @@ Hello, @{{ name }}.
 
 &lt;span <span class="keyword token">class</span>=<span class="string token">"p-4 text-gray-500 bg-red"</span>&gt;&lt;/span&gt;
 </code></pre>
-<p><a name="checked-and-selected"></a></p>
-<h3 id="checked--selected--disabled">Checked / Selected / Disabled</h3>
-<p>为方便起见，您可以使用该 <code>@checked</code> 指令轻松判断给定的 HTML 复选框输入是否被「checked」。如果提供的条件判断为 <code>true</code> ，则此指令将回显 <code>checked</code>：</p>
+<p>同样，<code>@style</code> 指令可用于有条件地将内联 CSS 样式添加到一个 HTML 元素中。</p>
+<pre><code class="language-blade">@php
+    <span class="variable token">$isActive</span> = <span class="keyword token">true</span>;
+@endphp
+
+&lt;span @style([
+    <span class="string token">'background-color: red'</span>,
+    <span class="string token">'font-weight: bold'</span> =&gt; <span class="variable token">$isActive</span>,
+])&gt;&lt;/span&gt;
+
+&lt;span style=<span class="string token">"background-color: red; font-weight: bold;"</span>&gt;&lt;/span&gt;
+</code></pre>
+<p><a name="additional-attributes"></a></p>
+<h3 id="附加属性">附加属性</h3>
+<p>为方便起见，你可以使用该 <code>@checked</code> 指令轻松判断给定的 HTML 复选框输入是否被「选中（checked）」。如果提供的条件判断为 <code>true</code> ，则此指令将回显 <code>checked</code>：</p>
 <pre><code class="language-blade">&lt;input type=<span class="string token">"checkbox"</span>
         name=<span class="string token">"active"</span>
         value=<span class="string token">"active"</span>
         @checked(old(<span class="string token">'active'</span>, <span class="variable token">$user</span>-&gt;active)) /&gt;
 </code></pre>
-<p>同样，该 <code>@selected</code> 指令可用于判断给定的选项是否被「selected」：</p>
+<p>同样，该 <code>@selected</code> 指令可用于判断给定的选项是否被「选中（selected）」：</p>
 <pre><code class="language-blade">&lt;select name=<span class="string token">"version"</span>&gt;
     @<span class="keyword token">foreach</span> (<span class="variable token">$product</span>-&gt;versions <span class="keyword token">as</span> <span class="variable token">$version</span>)
         &lt;option value=<span class="string token">"{{ $version }}"</span> @selected(old(<span class="string token">'version'</span>) == <span class="variable token">$version</span>)&gt;
@@ -426,15 +445,27 @@ Hello, @{{ name }}.
     @<span class="keyword token">endforeach</span>
 &lt;/select&gt;
 </code></pre>
-<p>此外，该 <code>@disabled</code> 指令可用于判断给定元素是否为「disabled」:</p>
+<p>此外，该 <code>@disabled</code> 指令可用于判断给定元素是否为「禁用（disabled）」:</p>
 <pre><code class="language-blade">&lt;button type=<span class="string token">"submit"</span> @disabled(<span class="variable token">$errors</span>-&gt;isNotEmpty())&gt;Submit&lt;/button&gt;
+</code></pre>
+<p>此外，<code>@readonly</code> 指令可以用来指示某个元素是否应该是「只读 （readonly）」的。</p>
+<pre><code class="language-blade">&lt;input type=<span class="string token">"email"</span>
+        name=<span class="string token">"email"</span>
+        value=<span class="string token">"email@laravel.com"</span>
+        @readonly(<span class="variable token">$user</span>-&gt;isNotAdmin()) /&gt;
+</code></pre>
+<p>此外，<code>@required</code> 指令可以用来指示一个给定的元素是否应该是「必需的（required）」。</p>
+<pre><code class="language-blade">&lt;input type=<span class="string token">"text"</span>
+        name=<span class="string token">"title"</span>
+        value=<span class="string token">"title"</span>
+        @required(<span class="variable token">$user</span>-&gt;isAdmin()) /&gt;
 </code></pre>
 <p><a name="including-subviews"></a></p>
 <h3 id="包含子视图">包含子视图</h3>
 <blockquote>
-<p>技巧：虽然您可以自由使用该 <code>@include</code> 指令，但是 Blade <a href="#components">组件</a> 提供了类似的功能，并提供了优于该 <code>@include</code> 指令的功能，如数据和属性绑定。</p>
+<p><strong>技巧：</strong>虽然你可以自由使用该 <code>@include</code> 指令，但是 Blade <a href="#components">组件</a> 提供了类似的功能，并提供了优于该 <code>@include</code> 指令的功能，如数据和属性绑定。</p>
 </blockquote>
-<p>Blade 的 <code>@include</code> 指令允许您从一个视图中包含另外一个 Blade 视图。父视图中的所有变量在子视图中都可以使用：</p>
+<p>Blade 的 <code>@include</code> 指令允许你从一个视图中包含另外一个 Blade 视图。父视图中的所有变量在子视图中都可以使用：</p>
 <pre><code class="language-blade">&lt;div&gt;
     @<span class="keyword token">include</span>(<span class="string token">'shared.errors'</span>)
 
@@ -443,42 +474,42 @@ Hello, @{{ name }}.
     &lt;/form&gt;
 &lt;/div&gt;
 </code></pre>
-<p>尽管子视图可以继承父视图中所有可以使用的数据，但是您也可以传递一个额外的数组，这个数组在子视图中也可以使用:</p>
+<p>尽管子视图可以继承父视图中所有可以使用的数据，但是你也可以传递一个额外的数组，这个数组在子视图中也可以使用:</p>
 <pre><code class="language-blade">@<span class="keyword token">include</span>(<span class="string token">'view.name'</span>, [<span class="string token">'status'</span> =&gt; <span class="string token">'complete'</span>])
 </code></pre>
-<p>如果您想要使用 <code>@include</code> 包含一个不存在的视图，Laravel 将会抛出一个错误。如果您想要包含一个可能存在也可能不存在的视图，那么您应该使用 <code>@includeIf</code> 指令:</p>
+<p>如果你想要使用 <code>@include</code> 包含一个不存在的视图，Laravel 将会抛出一个错误。如果你想要包含一个可能存在也可能不存在的视图，那么你应该使用 <code>@includeIf</code> 指令:</p>
 <pre><code class="language-blade">@includeIf('view.name', ['status' =&gt; 'complete'])
 </code></pre>
-<p>如果想要使用 <code>@include</code>  包含一个给定值为 <code>true</code> 或 <code>false</code>的布尔表达式的视图，那么您可以使用 <code>@includeWhen</code> 和 <code>@includeUnless</code> 指令:</p>
+<p>如果想要使用 <code>@include</code>  包含一个给定值为 <code>true</code> 或 <code>false</code>的布尔表达式的视图，那么你可以使用 <code>@includeWhen</code> 和 <code>@includeUnless</code> 指令:</p>
 <pre><code class="language-blade">@includeWhen(<span class="variable token">$boolean</span>, <span class="string token">'view.name'</span>, [<span class="string token">'status'</span> =&gt; <span class="string token">'complete'</span>])
 
 @includeUnless(<span class="variable token">$boolean</span>, <span class="string token">'view.name'</span>, [<span class="string token">'status'</span> =&gt; <span class="string token">'complete'</span>])
 </code></pre>
-<p>如果想要包含一个视图数组中第一个存在的视图，您可以使用 <code>includeFirst</code> 指令:</p>
+<p>如果想要包含一个视图数组中第一个存在的视图，你可以使用 <code>includeFirst</code> 指令:</p>
 <pre><code class="language-blade">@includeFirst(['custom.admin', 'admin'], ['status' =&gt; 'complete'])
 </code></pre>
 <blockquote>
-<p>注意：在视图中，您应该避免使用 <code>__DIR__</code> 和 <code>__FILE__</code> 这些常量，因为他们将引用已缓存的和已编译的视图。</p>
+<p><strong>注意：</strong>在视图中，你应该避免使用 <code>__DIR__</code> 和 <code>__FILE__</code> 这些常量，因为他们将引用已缓存的和已编译的视图。</p>
 </blockquote>
 <p><a name="rendering-views-for-collections"></a></p>
 <h4 id="为集合渲染视图">为集合渲染视图</h4>
-<p>您可以使用 Blade 的 <code>@each</code> 指令将循环合并在一行内：</p>
+<p>你可以使用 Blade 的 <code>@each</code> 指令将循环合并在一行内：</p>
 <pre><code class="language-blade">@each(<span class="string token">'view.name'</span>, <span class="variable token">$jobs</span>, <span class="string token">'job'</span>)
 </code></pre>
-<p>该 <code>@each</code> 指令的第一个参数是数组或集合中的元素的要渲染的视图片段。第二个参数是您想要迭代的数组或集合，当第三个参数是一个表示当前迭代的视图的变量名。因此，如果您遍历一个名为 <code>jobs</code> 的数组，通常会在视图片段中使用 <code>job</code> 变量来访问每一个 job （jobs 数组的元素）。在您的视图片段中，可以使用 <code>key</code> 变量来访问当前迭代的键。</p>
-<p>您亦可传递第四个参数给 <code>@each</code> 指令。当给定的数组为空时，将会渲染该参数所对应的视图。</p>
+<p>该 <code>@each</code> 指令的第一个参数是数组或集合中的元素的要渲染的视图片段。第二个参数是你想要迭代的数组或集合，当第三个参数是一个表示当前迭代的视图的变量名。因此，如果你遍历一个名为 <code>jobs</code> 的数组，通常会在视图片段中使用 <code>job</code> 变量来访问每一个 job （jobs 数组的元素）。在你的视图片段中，可以使用 <code>key</code> 变量来访问当前迭代的键。</p>
+<p>你亦可传递第四个参数给 <code>@each</code> 指令。当给定的数组为空时，将会渲染该参数所对应的视图。</p>
 <pre><code class="language-blade">@each(<span class="string token">'view.name'</span>, <span class="variable token">$jobs</span>, <span class="string token">'job'</span>, <span class="string token">'view.empty'</span>)
 </code></pre>
 <blockquote>
-<p>注意：通过 <code>@each</code> 指令渲染的视图不会继承父视图的变量。如果子视图需要使用这些变量，您可以使用 <code>@foreach</code> 和 <code>@include</code> 来代替它。</p>
+<p><strong>注意：</strong>通过 <code>@each</code> 指令渲染的视图不会继承父视图的变量。如果子视图需要使用这些变量，你可以使用 <code>@foreach</code> 和 <code>@include</code> 来代替它。</p>
 </blockquote>
 <p><a name="the-once-directive"></a></p>
 <h3 id="once-指令"><code>@once</code> 指令</h3>
-<p>该 <code>@once</code> 指令允许您定义模板的一部分内容，这部分内容在每一个渲染周期中只会被计算一次。该指令在使用 <a href="#stacks">堆栈</a> 推送一段特定的 JavaScript 代码到页面的头部环境下是很有用的。例如，如果您想要在循环中渲染一个特定的 <a href="#components">组件</a> ，您可能希望仅在组件渲染的首次推送 JavaScript 代码到头部：</p>
+<p>该 <code>@once</code> 指令允许你定义模板的一部分内容，这部分内容在每一个渲染周期中只会被计算一次。该指令在使用 <a href="#stacks">堆栈</a> 推送一段特定的 JavaScript 代码到页面的头部环境下是很有用的。例如，如果你想要在循环中渲染一个特定的 <a href="#components">组件</a> ，你可能希望仅在组件渲染的首次推送 JavaScript 代码到头部：</p>
 <pre><code class="language-blade">@once
     @push(<span class="string token">'scripts'</span>)
         &lt;script&gt;
-            <span class="comment token">// 您自定义的 JavaScript 代码...</span>
+            <span class="comment token">// 你自定义的 JavaScript 代码...</span>
         &lt;/script&gt;
     @endpush
 @endonce
@@ -486,47 +517,50 @@ Hello, @{{ name }}.
 <p>由于该 <code>@once</code> 指令经常与 <code>@push</code> 或 <code>@prepend</code> 指令一起使用，为了使用方便，我们提供了 <code>@pushOnce</code> 和 <code>@prependOnce</code> 指令：</p>
 <pre><code class="language-blade">@pushOnce(<span class="string token">'scripts'</span>)
     &lt;script&gt;
-        <span class="comment token">// 您自定义的 JavaScript 代码...</span>
+        <span class="comment token">// 你自定义的 JavaScript 代码...</span>
     &lt;/script&gt;
 @endPushOnce
 </code></pre>
 <p><a name="raw-php"></a></p>
-<h3 id="php">PHP</h3>
-<p>在许多情况下，嵌入 PHP 代码到您的视图中是很有用的。您可以在模板中使用 Blade 的 <code>@php</code> 指令执行原生的 PHP 代码块：</p>
+<h3 id="原始-php-语法">原始 PHP 语法</h3>
+<p>在许多情况下，嵌入 PHP 代码到你的视图中是很有用的。你可以在模板中使用 Blade 的 <code>@php</code> 指令执行原生的 PHP 代码块：</p>
 <pre><code class="language-blade">@php
     <span class="variable token">$counter</span> = <span class="number token">1</span>;
 @endphp
 </code></pre>
+<p>如果只需要写一条 PHP 语句，可以在 <code>@php</code> 指令中包含该语句。</p>
+<pre><code class="language-blade">@php(<span class="variable token">$counter</span> = <span class="number token">1</span>)
+</code></pre>
 <p><a name="comments"></a></p>
 <h3 id="注释">注释</h3>
-<p>Blade 也允许您在视图中定义注释。但是，和 HTML 注释不同， Blade 注释不会被包含在应用返回的 HTML 中：</p>
-<pre><code class="language-blade">{{-- <span class="keyword token">This</span> comment will not be present in the rendered HTML --}}
+<p>Blade 也允许你在视图中定义注释。但是，和 HTML 注释不同， Blade 注释不会被包含在应用返回的 HTML 中：</p>
+<pre><code class="language-blade">{{-- 这个注释将不会出现在渲染的HTML中。 --}}
 </code></pre>
 <p><a name="components"></a></p>
 <h2 id="组件">组件</h2>
 <p>组件和插槽的作用与区块和布局的作用一致；不过，有些人可能觉着组件和插槽更易于理解。有两种书写组件的方法：基于类的组件和匿名组件。</p>
-<p>您可以使用 <code>make:component</code> Artisan 命令来创建一个基于类的组件。我们将会创建一个简单的  <code>Alert</code> 组件用于说明如何使用组件。该 <code>make:component</code> 命令将会把组件置于 <code>App\View\Components</code> 目录中：</p>
+<p>你可以使用 <code>make:component</code> Artisan 命令来创建一个基于类的组件。我们将会创建一个简单的  <code>Alert</code> 组件用于说明如何使用组件。该 <code>make:component</code> 命令将会把组件置于 <code>App\View\Components</code> 目录中：</p>
 <pre><code class="language-shell">php artisan make:component Alert
 </code></pre>
 <p>该 <code>make:component</code> 命令将会为组件创建一个视图模板。创建的视图被置于 <code>resources/views/components</code> 目录中。在为自己的应用程序编写组件时，会在 <code>app/View/Components</code> 目录和 <code>resources/views/components</code> 目录中自动发现组件，因此通常不需要进一步的组件注册。</p>
-<p>您还可以在子目录中创建组件：</p>
+<p>你还可以在子目录中创建组件：</p>
 <pre><code class="language-shell">php artisan make:component Forms/Input
 </code></pre>
 <p>上面的命令将在目录中创建一个 <code>Input</code> 组件， <code>App\View\Components\Forms</code> 视图将放置在 <code>resources/views/components/forms</code> 目录中。</p>
-<p>如果你想创建一个匿名组件（一个只有 Blade 模板并且没有类的组件），你可以在调用命令  <code>make:component</code> 使用该<code>--view</code>标志：</p>
+<p>如果你想创建一个匿名组件（一个只有 Blade 模板并且没有类的组件），你可以在调用命令  <code>make:component</code> 使用该 <code>--view</code> 标志：</p>
 <pre><code class="language-shell">php artisan make:component forms.input --view
 </code></pre>
 <p>上面的命令将在 <code>resources/views/components/forms/input.blade.php</code>创建一个 Blade 文件，该文件中可以通过 <code>&lt;x-forms.input /&gt;</code>作为组件呈现。</p>
 <p><a name="manually-registering-package-components"></a></p>
 <h4 id="手动注册包组件">手动注册包组件</h4>
-<p>当为您自己的应用编写组件的时候，Laravel 将会自动发现位于 <code>app/View/Components</code> 目录和 <code>resources/views/components</code> 目录中的组件。</p>
-<p>当然，如果您使用 Blade 组件编译一个包，您可能需要手动注册组件类及其 HTML 标签别名。您应该在包的服务提供者的 <code>boot</code> 方法中注册您的组件：</p>
+<p>当为你自己的应用编写组件的时候，Laravel 将会自动发现位于 <code>app/View/Components</code> 目录和 <code>resources/views/components</code> 目录中的组件。</p>
+<p>当然，如果你使用 Blade 组件编译一个包，你可能需要手动注册组件类及其 HTML 标签别名。你应该在包的服务提供者的 <code>boot</code> 方法中注册你的组件：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
 
 <span class="comment token">/**
- * 驱动您的包的服务
+ * 注册你的包的服务
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Blade::component(<span class="string token">'package-alert'</span>, Alert::<span class="keyword token">class</span>);
 }
@@ -534,15 +568,13 @@ Hello, @{{ name }}.
 <p>当组件注册完成后，便可使用标签别名来对其进行渲染。</p>
 <pre><code class="language-blade">&lt;x-package-alert/&gt;
 </code></pre>
-<p>或者，您可以使用该 <code>componentNamespace</code> 方法按照约定自动加载组件类。例如，一个 <code>Nightshade</code> 包可能有 <code>Calendar</code> 和 <code>ColorPicker</code> 组件驻留在 <code>Package\Views\Components</code> 命名空间中：</p>
+<p>或者，你可以使用该 <code>componentNamespace</code> 方法按照约定自动加载组件类。例如，一个 <code>Nightshade</code> 包可能有 <code>Calendar</code> 和 <code>ColorPicker</code> 组件驻留在 <code>Package\Views\Components</code> 命名空间中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
 
 <span class="comment token">/**
- * 驱动您的包的服务
- *
- *<span class="phpdoc token"> @return</span> void
+ * 注册你的包的服务
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Blade::componentNamespace(<span class="string token">'Nightshade\\Views\\Components'</span>, <span class="string token">'nightshade'</span>);
 }
@@ -554,67 +586,58 @@ Hello, @{{ name }}.
 <p>Blade 将自动检测链接到该组件的类，通过对组件名称进行帕斯卡大小写。使用「点」表示法也支持子目录。</p>
 <p><a name="rendering-components"></a></p>
 <h3 id="显示组件">显示组件</h3>
-<p>要显示一个组件，您可以在 Blade 模板中使用 Blade 组件标签。 Blade 组件以  <code>x-</code> 字符串开始，其后紧接组件类 kebab case 形式的名称（即单词与单词之间使用短横线 <code>-</code> 进行连接）：</p>
+<p>要显示一个组件，你可以在 Blade 模板中使用 Blade 组件标签。 Blade 组件以  <code>x-</code> 字符串开始，其后紧接组件类 kebab case 形式的名称（即单词与单词之间使用短横线 <code>-</code> 进行连接）：</p>
 <pre><code class="language-blade">&lt;x-alert/&gt;
 
 &lt;x-user-profile/&gt;
 </code></pre>
-<p>如果组件位于 <code>App\View\Components</code> 目录的子目录中，您可以使用 <code>.</code> 字符来指定目录层级。例如，假设我们有一个组件位于 <code>App\View\Components\Inputs\Button.php</code>，那么我们可以像这样渲染它：</p>
+<p>如果组件位于 <code>App\View\Components</code> 目录的子目录中，你可以使用 <code>.</code> 字符来指定目录层级。例如，假设我们有一个组件位于 <code>App\View\Components\Inputs\Button.php</code>，那么我们可以像这样渲染它：</p>
 <pre><code class="language-blade">&lt;x-inputs.button/&gt;
+</code></pre>
+<p>如果你想有条件地渲染你的组件，你可以在你的组件类上定义一个 <code>shouldRender</code> 方法。如果 <code>shouldRender</code> 方法返回 <code>false</code>，该组件将不会被渲染。</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="comment token">/**
+ * 该组件是否应该被渲染
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> shouldRender(): bool
+{
+    <span class="keyword token">return</span> Str::length(<span class="variable token">$this</span>-&gt;message) &gt; <span class="number token">0</span>;
+}
 </code></pre>
 <p><a name="passing-data-to-components"></a></p>
 <h3 id="传递数据到组件中">传递数据到组件中</h3>
-<p>您可以使用 HTML 属性传递数据到 Blade 组件中。普通的值可以通过简单的 HTML 属性来传递给组件。PHP 表达式和变量应该通过以 <code>:</code> 字符作为前缀的变量来进行传递：</p>
+<p>你可以使用 HTML 属性传递数据到 Blade 组件中。普通的值可以通过简单的 HTML 属性来传递给组件。PHP 表达式和变量应该通过以 <code>:</code> 字符作为前缀的变量来进行传递：</p>
 <pre><code class="language-blade">&lt;x-alert type="error" :message="$message"/&gt;
 </code></pre>
-<p>您应该在类的构造器中定义组件的必要数据。在组件的视图中，组件的所有 public 类型的属性都是可用的。不必通过组件类的 <code>render</code> 方法传递：</p>
+<p>你应该在类的构造器中定义组件的必要数据。在组件的视图中，组件的所有 public 类型的属性都是可用的。不必通过组件类的 <code>render</code> 方法传递：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\View\Components;
 
 <span class="keyword token">use</span> Illuminate\View\Component;
+<span class="keyword token">use</span> Illuminate\View\View;
 
 <span class="keyword token">class</span> Alert <span class="keyword token">extends</span> Component
 {
     <span class="comment token">/**
-     * alert 类型。
-     *
-     *<span class="phpdoc token"> @var</span> string
+     * 创建组件实例。
      */</span>
-    <span class="keyword token">public</span> <span class="variable token">$type</span>;
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+        <span class="keyword token">public</span> string <span class="variable token">$type</span>,
+        <span class="keyword token">public</span> string <span class="variable token">$message</span>,
+    ) {}
 
     <span class="comment token">/**
-     * alert 消息。
-     *
-     *<span class="phpdoc token"> @var</span> string
+     * 获取代表该组件的视图/内容
      */</span>
-    <span class="keyword token">public</span> <span class="variable token">$message</span>;
-
-    <span class="comment token">/**
-     * 创建一个组件实例。
-     *
-     *<span class="phpdoc token"> @param</span>  string  $type
-     *<span class="phpdoc token"> @param</span>  string  $message
-     *<span class="phpdoc token"> @return</span> void
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(<span class="variable token">$type</span>, <span class="variable token">$message</span>)
-    {
-        <span class="variable token">$this</span>-&gt;type = <span class="variable token">$type</span>;
-        <span class="variable token">$this</span>-&gt;message = <span class="variable token">$message</span>;
-    }
-
-    <span class="comment token">/**
-     * 获取组件的视图 / 内容
-     *
-     *<span class="phpdoc token"> @return</span> \Illuminate\View\View|\Closure|string
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> render()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> render(): View
     {
         <span class="keyword token">return</span> view(<span class="string token">'components.alert'</span>);
     }
 }
 </code></pre>
-<p>渲染组件时，您可以回显变量名来显示组件的 public 变量的内容：</p>
+<p>渲染组件时，你可以回显变量名来显示组件的 public 变量的内容：</p>
 <pre><code class="language-blade">&lt;div <span class="keyword token">class</span>=<span class="string token">"alert alert-{{ $type }}"</span>&gt;
     {{ <span class="variable token">$message</span> }}
 &lt;/div&gt;
@@ -624,17 +647,22 @@ Hello, @{{ name }}.
 <p>组件的构造器的参数应该使用 <code>驼峰式</code> 类型，在 HTML 属性中引用参数名时应该使用 <code>短横线隔开式 kebab-case ：单词与单词之间使用短横线 - 进行连接）</code> 。例如，给定如下的组件构造器：</p>
 <pre><code><span class="comment token">/**
  * 创建一个组件实例
- *
- *<span class="phpdoc token"> @param</span>  string  $alertType
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> __construct(<span class="variable token">$alertType</span>)
-{
-    <span class="variable token">$this</span>-&gt;alertType = <span class="variable token">$alertType</span>;
-}
+<span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+    <span class="keyword token">public</span> string <span class="variable token">$alertType</span>,
+) {}
 </code></pre>
 <p><code>$alertType</code>  参数可以像这样使用：</p>
 <pre><code class="language-blade">&lt;x-alert alert-type="danger" /&gt;
+</code></pre>
+<p><a name="short-attribute-syntax"></a></p>
+<h4 id="短属性语法省略属性语法">短属性语法/省略属性语法</h4>
+<p>当向组件传递属性时，你也可以使用「短属性语法/省略属性语法」（省略属性书写）。这通常很方便，因为属性名称经常与它们对应的变量名称相匹配。</p>
+<pre><code class="language-blade">{{-- 短属性语法/省略属性语法... --}}
+&lt;x-profile :<span class="variable token">$userId</span> :<span class="variable token">$name</span> /&gt;
+
+{{-- 等价于... --}}
+&lt;x-profile :user-id=<span class="string token">"$userId"</span> :name=<span class="string token">"$name"</span> /&gt;
 </code></pre>
 <p><a name="escaping-attribute-rendering"></a></p>
 <h4 id="转义属性渲染">转义属性渲染</h4>
@@ -649,33 +677,30 @@ Hello, @{{ name }}.
 &lt;/button&gt;
 </code></pre>
 <p><a name="component-methods"></a></p>
-<h4 id="组件方法">组件方法</h4>
+<h4 id="-组件方法">#### 组件方法</h4>
 <p>除了组件模板可用的公共变量外，还可以调用组件上的任何公共方法。例如，假设一个组件有一个 <code>isSelected</code> 方法：</p>
 <pre><code><span class="comment token">/**
  * 确定给定选项是否为当前选定的选项。
- *
- *<span class="phpdoc token"> @param</span>  string  $option
- *<span class="phpdoc token"> @return</span> bool
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> isSelected(<span class="variable token">$option</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> isSelected(string <span class="variable token">$option</span>): bool
 {
     <span class="keyword token">return</span> <span class="variable token">$option</span> === <span class="variable token">$this</span>-&gt;selected;
 }
 </code></pre>
-<p>通过调用与方法名称匹配的变量，可以从组件模板执行此方法：</p>
-<pre><code class="language-blade">&lt;option {{ <span class="variable token">$isSelected</span>(<span class="variable token">$value</span>) ? <span class="string token">'selected="selected"'</span> : <span class="string token">''</span> }} value=<span class="string token">"{{ $value }}"</span>&gt;
+<p>你可以通过调用与方法名称匹配的变量，从组件模板执行此方法：</p>
+<pre><code class="language-blade">&lt;option {{ <span class="variable token">$isSelected</span>(<span class="variable token">$value</span>) ? <span class="string token">'selected'</span> : <span class="string token">''</span> }} value=<span class="string token">"{{ $value }}"</span>&gt;
     {{ <span class="variable token">$label</span> }}
 &lt;/option&gt;
 </code></pre>
 <p><a name="using-attributes-slots-within-component-class"></a></p>
 <h4 id="访问组件类中的属性和插槽">访问组件类中的属性和插槽</h4>
 <p>Blade 组件还允许你访问类的 render 方法中的组件名称、属性和插槽。但是，为了访问这些数据，应该从组件的 <code>render</code> 方法返回闭包。闭包将接收一个  <code>$data</code> 数组作为它的唯一参数。此数组将包含几个元素，这些元素提供有关组件的信息：</p>
-<pre><code><span class="comment token">/**
+<pre><code><span class="keyword token">use</span> Closure;
+
+<span class="comment token">/**
  * 获取表示组件的视图 / 内容
- *
- *<span class="phpdoc token"> @return</span> \Illuminate\View\View|\Closure|string
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> render()
+<span class="keyword token">public</span> <span class="keyword token">function</span> render(): Closure
 {
     <span class="keyword token">return</span> <span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$data</span>) {
         <span class="comment token">// $data['componentName'];</span>
@@ -690,23 +715,17 @@ Hello, @{{ name }}.
 <p>闭包应该返回一个字符串。如果返回的字符串与现有视图相对应，则将呈现该视图；否则，返回的字符串将作为内联 Blade 视图进行计算。</p>
 <p><a name="additional-dependencies"></a></p>
 <h4 id="附加依赖项">附加依赖项</h4>
-<p>如果你的组件需要引入来自 Laravel 的 <a href="container.html">服务容器</a>的依赖项，你可以在组件的任何数据属性之前列出这些依赖项，这些依赖项将由容器自动注入：</p>
+<p>如果你的组件需要引入来自 Laravel 的 <a href="/docs/laravel/10.x/container">服务容器</a>的依赖项，你可以在组件的任何数据属性之前列出这些依赖项，这些依赖项将由容器自动注入：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Services\AlertCreator;
 
 <span class="comment token">/**
  * 创建组件实例
- *
- *<span class="phpdoc token"> @param</span>  \App\Services\AlertCreator  $creator
- *<span class="phpdoc token"> @param</span>  string  $type
- *<span class="phpdoc token"> @param</span>  string  $message
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> __construct(AlertCreator <span class="variable token">$creator</span>, <span class="variable token">$type</span>, <span class="variable token">$message</span>)
-{
-    <span class="variable token">$this</span>-&gt;creator = <span class="variable token">$creator</span>;
-    <span class="variable token">$this</span>-&gt;type = <span class="variable token">$type</span>;
-    <span class="variable token">$this</span>-&gt;message = <span class="variable token">$message</span>;
-}
+<span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+    <span class="keyword token">public</span> AlertCreator <span class="variable token">$creator</span>,
+    <span class="keyword token">public</span> string <span class="variable token">$type</span>,
+    <span class="keyword token">public</span> string <span class="variable token">$message</span>,
+) {}
 </code></pre>
 <p><a name="hiding-attributes-and-methods"></a></p>
 <h4 id="隐藏属性方法">隐藏属性/方法</h4>
@@ -720,18 +739,18 @@ Hello, @{{ name }}.
 <span class="keyword token">class</span> Alert <span class="keyword token">extends</span> Component
 {
     <span class="comment token">/**
-     * The alert type.
-     *
-     *<span class="phpdoc token"> @var</span> string
-     */</span>
-    <span class="keyword token">public</span> <span class="variable token">$type</span>;
-
-    <span class="comment token">/**
      * 不应向组件模板公开的属性/方法。
      *
      *<span class="phpdoc token"> @var</span> array
      */</span>
     <span class="keyword token">protected</span> <span class="variable token">$except</span> = [<span class="string token">'type'</span>];
+
+    <span class="comment token">/**
+     * Create the component instance.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+        <span class="keyword token">public</span> string <span class="variable token">$type</span>,
+    ) {}
 }
 </code></pre>
 <p><a name="component-attributes"></a></p>
@@ -739,13 +758,13 @@ Hello, @{{ name }}.
 <p>我们已经研究了如何将数据属性传递给组件；但是，有时你可能需要指定额外的 HTML 属性，例如  <code>class</code>，这些属性不是组件运行所需的数据的一部分。通常，你希望将这些附加属性向下传递到组件模板的根元素。例如，假设我们要呈现一个 <code>alert</code> 组件，如下所示：</p>
 <pre><code class="language-blade">&lt;x-alert type=<span class="string token">"error"</span> :message=<span class="string token">"$message"</span> <span class="keyword token">class</span>=<span class="string token">"mt-4"</span>/&gt;
 </code></pre>
-<p>所有不属于组件的构造器的属性都将被自动添加到组件的「属性包」中。该属性包将通过 <code>$attributes</code> 变量自动传递给组件。您可以通过回显这个变量来渲染所有的属性：</p>
+<p>所有不属于组件的构造器的属性都将被自动添加到组件的「属性包」中。该属性包将通过 <code>$attributes</code> 变量自动传递给组件。你可以通过回显这个变量来渲染所有的属性：</p>
 <pre><code class="language-blade">&lt;div {{ <span class="variable token">$attributes</span> }}&gt;
-    &lt;!-- Component content --&gt;
+    &lt;!-- 组件内容 --&gt;
 &lt;/div&gt;
 </code></pre>
 <blockquote>
-<p>注意：此时不支持在组件中使用诸如 <code>@env</code> 这样的指令。例如， <code>&lt;x-alert :live=&quot;@env(&#39;production&#39;)&quot;/&gt;</code> 不会被编译。</p>
+<p><strong>注意：</strong>此时不支持在组件中使用诸如 <code>@env</code> 这样的指令。例如， <code>&lt;x-alert :live=&quot;@env(&#39;production&#39;)&quot;/&gt;</code> 不会被编译。</p>
 </blockquote>
 <p><a name="default-merged-attributes"></a></p>
 <h4 id="默认--合并属性">默认 / 合并属性</h4>
@@ -764,7 +783,7 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="conditionally-merge-classes"></a></p>
 <h4 id="有条件地合并类">有条件地合并类</h4>
-<p>有时您可能希望在给定条件为 <code>true</code> 时合并类。 您可以通过该 <code>class</code> 方法完成此操作，该方法接受一个类数组，其中数组键包含您希望添加的一个或多个类，而值是一个布尔表达式。如果数组元素有一个数字键，它将始终包含在呈现的类列表中：</p>
+<p>有时你可能希望在给定条件为 <code>true</code> 时合并类。 你可以通过该 <code>class</code> 方法完成此操作，该方法接受一个类数组，其中数组键包含你希望添加的一个或多个类，而值是一个布尔表达式。如果数组元素有一个数字键，它将始终包含在呈现的类列表中：</p>
 <pre><code class="language-blade">&lt;div {{ <span class="variable token">$attributes</span>-&gt;<span class="keyword token">class</span>([<span class="string token">'p-4'</span>, <span class="string token">'bg-red'</span> =&gt; <span class="variable token">$hasError</span>]) }}&gt;
     {{ <span class="variable token">$message</span> }}
 &lt;/div&gt;
@@ -775,7 +794,7 @@ Hello, @{{ name }}.
 &lt;/button&gt;
 </code></pre>
 <blockquote>
-<p>技巧：如果您需要有条件地编译不应接收合并属性的其他 HTML 元素上的类，您可以使用 <a href="#conditional-classes"><code>@class</code> 指令</a>。</p>
+<p><strong>技巧：</strong>如果你需要有条件地编译不应接收合并属性的其他 HTML 元素上的类，你可以使用 <a href="#conditional-classes"><code>@class</code> 指令</a>。</p>
 </blockquote>
 <p><a name="non-class-attribute-merging"></a></p>
 <h4 id="非-class-属性的合并">非 class 属性的合并</h4>
@@ -802,7 +821,7 @@ Hello, @{{ name }}.
 <p><a name="filtering-attributes"></a></p>
 <h4 id="保留属性--过滤属性">保留属性 / 过滤属性</h4>
 <p>可以使用 <code>filter</code> 方法筛选属性。如果希望在属性包中保留属性，此方法接受应返回 <code>true</code> 的闭包：</p>
-<pre><code class="language-blade">{{ <span class="variable token">$attributes</span>-&gt;filter(fn (<span class="variable token">$value</span>, <span class="variable token">$key</span>) =&gt; <span class="variable token">$key</span> == <span class="string token">'foo'</span>) }}
+<pre><code class="language-blade">{{ <span class="variable token">$attributes</span>-&gt;filter(fn (string <span class="variable token">$value</span>, string <span class="variable token">$key</span>) =&gt; <span class="variable token">$key</span> == <span class="string token">'foo'</span>) }}
 </code></pre>
 <p>为了方便起见，你可以使用 <code>whereStartsWith</code> 方法检索其键以给定字符串开头的所有属性：</p>
 <pre><code class="language-blade">{{ <span class="variable token">$attributes</span>-&gt;whereStartsWith(<span class="string token">'wire:model'</span>) }}
@@ -815,10 +834,10 @@ Hello, @{{ name }}.
 </code></pre>
 <p>如果要检查组件上是否存在属性，可以使用 <code>has</code> 方法。此方法接受属性名称作为其唯一参数，并返回一个布尔值，指示该属性是否存在：</p>
 <pre><code class="language-blade">@<span class="keyword token">if</span> (<span class="variable token">$attributes</span>-&gt;has(<span class="string token">'class'</span>))
-    &lt;div&gt;&gt;存在 <span class="keyword token">class</span> 属性&lt;/div&gt;
+    &lt;div&gt;<span class="keyword token">Class</span> attribute is present&lt;/div&gt;
 @<span class="keyword token">endif</span>
 </code></pre>
-<p>可以使用 <code>get</code> 方法检索特定属性的值：</p>
+<p>你可以使用 <code>get</code> 方法检索特定属性的值：</p>
 <pre><code class="language-blade">{{ <span class="variable token">$attributes</span>-&gt;get(<span class="string token">'class'</span>) }}
 </code></pre>
 <p><a name="reserved-keywords"></a></p>
@@ -860,7 +879,7 @@ Hello, @{{ name }}.
     {{ <span class="variable token">$slot</span> }}
 &lt;/div&gt;
 </code></pre>
-<p>您可以使用 <code>x-slot</code> 标签来定义命名插槽的内容。任何没有在 <code>x-slot</code> 标签中的内容都将传递给  <code>$slot</code> 变量中的组件：</p>
+<p>你可以使用 <code>x-slot</code> 标签来定义命名插槽的内容。任何没有在 <code>x-slot</code> 标签中的内容都将传递给  <code>$slot</code> 变量中的组件：</p>
 <pre><code class="language-xml">&lt;x-alert&gt;
     &lt;x-slot:title&gt;
         Server Error
@@ -871,7 +890,7 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="scoped-slots"></a></p>
 <h4 id="作用域插槽">作用域插槽</h4>
-<p>如果您使用诸如 Vue 这样的 JavaScript 框架，那么您应该很熟悉「作用域插槽」，它允许您从插槽中的组件访问数据或者方法。 Laravel 中也有类似的用法，只需在您的组件中定义 public 方法或属性，并且使用 <code>$component</code> 变量来访问插槽中的组件。在此示例中，我们将假设组件在其组件类上定义了 <code>x-alert</code> 一个公共方法： <code>formatAlert</code></p>
+<p>如果你使用诸如 Vue 这样的 JavaScript 框架，那么你应该很熟悉「作用域插槽」，它允许你从插槽中的组件访问数据或者方法。 Laravel 中也有类似的用法，只需在你的组件中定义 public 方法或属性，并且使用 <code>$component</code> 变量来访问插槽中的组件。在此示例中，我们将假设组件在其组件类上定义了 <code>x-alert</code> 一个公共方法： <code>formatAlert</code></p>
 <pre><code class="language-blade">&lt;x-alert&gt;
     &lt;x-slot:title&gt;
         {{ <span class="variable token">$component</span>-&gt;formatAlert(<span class="string token">'Server Error'</span>) }}
@@ -882,7 +901,7 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="slot-attributes"></a></p>
 <h4 id="插槽属性">插槽属性</h4>
-<p>像 Blade 组件一样，您可以为插槽分配额外的 <a href="#component-attributes">属性</a> ，例如 CSS 类名：</p>
+<p>像 Blade 组件一样，你可以为插槽分配额外的 <a href="#component-attributes">属性</a> ，例如 CSS 类名：</p>
 <pre><code class="language-xml">&lt;x-card <span class="keyword token">class</span>=<span class="string token">"shadow-sm"</span>&gt;
     &lt;x-slot:heading <span class="keyword token">class</span>=<span class="string token">"font-bold"</span>&gt;
         Heading
@@ -895,7 +914,7 @@ Hello, @{{ name }}.
     &lt;/x-slot&gt;
 &lt;/x-card&gt;
 </code></pre>
-<p>要与插槽属性交互，您可以访问 <code>attributes</code> 插槽变量的属性。有关如何与属性交互的更多信息，请参阅有关 <a href="#component-attributes">组件属性</a> 的文档：</p>
+<p>要与插槽属性交互，你可以访问 <code>attributes</code> 插槽变量的属性。有关如何与属性交互的更多信息，请参阅有关 <a href="#component-attributes">组件属性</a> 的文档：</p>
 <pre><code class="language-blade">@props([
     <span class="string token">'heading'</span>,
     <span class="string token">'footer'</span>,
@@ -915,13 +934,11 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="inline-component-views"></a></p>
 <h3 id="内联组件视图">内联组件视图</h3>
-<p>对于小型组件而言，管理组件类和组件视图模板可能会很麻烦。因此，您可以从 <code>render</code> 方法中返回组件的内容：</p>
+<p>对于小型组件而言，管理组件类和组件视图模板可能会很麻烦。因此，你可以从 <code>render</code> 方法中返回组件的内容：</p>
 <pre><code><span class="comment token">/**
  * 获取组件的视图 / 内容。
- *
- *<span class="phpdoc token"> @return</span> \Illuminate\View\View|\Closure|string
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> render()
+<span class="keyword token">public</span> <span class="keyword token">function</span> render(): string
 {
     <span class="keyword token">return</span> &lt;&lt;&lt;<span class="string token">'blade'</span>
         &lt;div <span class="keyword token">class</span>=<span class="string token">"alert alert-danger"</span>&gt;
@@ -932,24 +949,67 @@ Hello, @{{ name }}.
 </code></pre>
 <p><a name="generating-inline-view-components"></a></p>
 <h4 id="生成内联视图组件">生成内联视图组件</h4>
-<p>要创建一个渲染内联视图的组件，您可以在运行 <code>make:component</code> 命令时使用  <code>inline</code> ：</p>
+<p>要创建一个渲染内联视图的组件，你可以在运行 <code>make:component</code> 命令时使用  <code>inline</code> ：</p>
 <pre><code class="language-shell">php artisan make:component Alert --inline
 </code></pre>
+<p><a name="dynamic-components"></a></p>
+<h3 id="动态组件">动态组件</h3>
+<p>有时你可能需要渲染一个组件，但直到运行时才知道应该渲染哪个组件。在这种情况下, 你可以使用 Laravel 内置的 <code>dynamic-component</code> 组件, 根据运行时的值或变量来渲染组件:</p>
+<pre><code class="language-blade">&lt;x-dynamic-component :component=<span class="string token">"$componentName"</span> <span class="keyword token">class</span>=<span class="string token">"mt-4"</span> /&gt;
+</code></pre>
+<p><a name="manually-registering-components"></a></p>
+<h3 id="手动注册组件">手动注册组件</h3>
+<blockquote>
+<p><strong>注意：</strong>以下关于手动注册组件的文档主要适用于那些正在编写包含视图组件的 Laravel 包的用户。如果你不是在写包，这一部分的组件文档可能与你无关。</p>
+</blockquote>
+<p>当为自己的应用程序编写组件时，组件会在<code>app/View/Components</code>目录和<code>resources/views/components</code>目录下被自动发现。</p>
+<p>但是，如果你正在建立一个利用 Blade 组件的包，或者将组件放在非传统的目录中，你将需要手动注册你的组件类和它的 HTML 标签别名，以便 Laravel 知道在哪里可以找到这个组件。你通常应该在你的包的服务提供者的<code>boot</code>方法中注册你的组件：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
+<span class="keyword token">use</span> VendorPackage\View\Components\AlertComponent;
+
+<span class="comment token">/**
+ * 注册你的包的服务。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+{
+    Blade::component(<span class="string token">'package-alert'</span>, AlertComponent::<span class="keyword token">class</span>);
+}
+</code></pre>
+<p>一旦你的组件被注册，它就可以使用它的标签别名进行渲染。</p>
+<pre><code class="language-blade">&lt;x-package-alert/&gt;
+</code></pre>
+<h4 id="自动加载包组件">自动加载包组件</h4>
+<p>另外，你可以使用<code>componentNamespace</code>方法来自动加载组件类。例如，一个<code>Nightshade</code>包可能有<code>Calendar</code>和<code>ColorPicker</code>组件，它们位于<code>PackageViews\Components</code>命名空间中。</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
+
+<span class="comment token">/**
+ * 注册你的包的服务。
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+{
+    Blade::componentNamespace(<span class="string token">'Nightshade\\Views\\Components'</span>, <span class="string token">'nightshade'</span>);
+}
+</code></pre>
+<p>这将允许使用<code>package-name::</code>语法的供应商名称空间来使用包的组件。</p>
+<pre><code class="language-blade">&lt;x-nightshade::calendar /&gt;
+&lt;x-nightshade::color-picker /&gt;
+</code></pre>
+<p>Blade 将通过组件名称的驼峰式大小写 (pascal-casing) 自动检测与该组件链接的类。也支持使用 &quot;点 &quot;符号的子目录。</p>
 <p><a name="anonymous-components"></a></p>
 <h3 id="匿名组件">匿名组件</h3>
-<p>与行内组件相同，匿名组件提供了一个通过单个文件管理组件的机制。然而，匿名组件使用的是一个没有关联类的单一视图文件。要定义一个匿名组件，您只需将 Blade 模板置于 <code>resources/views/components</code> 目录下。例如，假设您在 <code>resources/views/components/alert.blade.php</code>中定义了一个组件：</p>
+<p>与行内组件相同，匿名组件提供了一个通过单个文件管理组件的机制。然而，匿名组件使用的是一个没有关联类的单一视图文件。要定义一个匿名组件，你只需将 Blade 模板置于 <code>resources/views/components</code> 目录下。例如，假设你在 <code>resources/views/components/alert.blade.php</code>中定义了一个组件：</p>
 <pre><code class="language-blade">&lt;x-alert/&gt;
 </code></pre>
-<p>如果组件在 <code>components</code> 目录的子目录中，您可以使用 <code>.</code> 字符来指定其路径。例如，假设组件被定义在 <code>resources/views/components/inputs/button.blade.php</code> 中，您可以像这样渲染它：</p>
+<p>如果组件在 <code>components</code> 目录的子目录中，你可以使用 <code>.</code> 字符来指定其路径。例如，假设组件被定义在 <code>resources/views/components/inputs/button.blade.php</code> 中，你可以像这样渲染它：</p>
 <pre><code class="language-blade">&lt;x-inputs.button/&gt;
 </code></pre>
 <p><a name="anonymous-index-components"></a></p>
 <h4 id="匿名索引组件">匿名索引组件</h4>
-<p>有时，当一个组件由许多 Blade 模板组成时，您可能希望将给定组件的模板分组到一个目录中。例如，想象一个具有以下目录结构的「可折叠」组件：</p>
+<p>有时，当一个组件由许多 Blade 模板组成时，你可能希望将给定组件的模板分组到一个目录中。例如，想象一个具有以下目录结构的「可折叠」组件：</p>
 <pre><code class="language-none">/resources/views/components/accordion.blade.php
 /resources/views/components/accordion/item.blade.php
 </code></pre>
-<p>此目录结构允许您像这样呈现组件及其项目：</p>
+<p>此目录结构允许你像这样呈现组件及其项目：</p>
 <pre><code class="language-blade">&lt;x-accordion&gt;
     &lt;x-accordion.item&gt;
         ...
@@ -957,14 +1017,14 @@ Hello, @{{ name }}.
 &lt;/x-accordion&gt;
 </code></pre>
 <p>然而，为了通过 <code>x-accordion</code> 渲染组件， 我们被迫将「索引」组件模板放置在 <code>resources/views/components</code> 目录中，而不是与其他相关的模板嵌套在 <code>accordion</code> 目录中。</p>
-<p>幸运的是，Blade 允许您 <code>index.blade.php</code> 在组件的模板目录中放置文件。当 <code>index.blade.php</code> 组件存在模板时，它将被呈现为组件的「根」节点。因此，我们可以继续使用上面示例中给出的相同 Blade 语法；但是，我们将像这样调整目录结构：</p>
+<p>幸运的是，Blade 允许你 <code>index.blade.php</code> 在组件的模板目录中放置文件。当 <code>index.blade.php</code> 组件存在模板时，它将被呈现为组件的「根」节点。因此，我们可以继续使用上面示例中给出的相同 Blade 语法；但是，我们将像这样调整目录结构：</p>
 <pre><code class="language-none">/resources/views/components/accordion/index.blade.php
 /resources/views/components/accordion/item.blade.php
 </code></pre>
 <p><a name="data-properties-attributes"></a></p>
 <h4 id="数据--属性">数据 / 属性</h4>
-<p>由于匿名组件没有任何关联类，您可能想要区分哪些数据应该被作为变量传递给组件，而哪些属性应该被存放于 <a href="#component-attributes">属性包</a>中。</p>
-<p>您可以在组件的 Blade 模板的顶层使用 <code>@props</code> 指令来指定哪些属性应该作为数据变量。组件中的其他属性都将通过属性包的形式提供。如果您想要为某个数据变量指定一个默认值，您可以将属性名作为数组键，默认值作为数组值来实现：</p>
+<p>由于匿名组件没有任何关联类，你可能想要区分哪些数据应该被作为变量传递给组件，而哪些属性应该被存放于 <a href="#component-attributes">属性包</a>中。</p>
+<p>你可以在组件的 Blade 模板的顶层使用 <code>@props</code> 指令来指定哪些属性应该作为数据变量。组件中的其他属性都将通过属性包的形式提供。如果你想要为某个数据变量指定一个默认值，你可以将属性名作为数组键，默认值作为数组值来实现：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/components/alert.blade.php --&gt;
 
 @props([<span class="string token">'type'</span> =&gt; <span class="string token">'info'</span>, <span class="string token">'message'</span>])
@@ -977,8 +1037,8 @@ Hello, @{{ name }}.
 <pre><code class="language-blade">&lt;x-alert type=<span class="string token">"error"</span> :message=<span class="string token">"$message"</span> <span class="keyword token">class</span>=<span class="string token">"mb-4"</span>/&gt;
 </code></pre>
 <p><a name="accessing-parent-data"></a></p>
-<h4 id="访问父数据">访问父数据</h4>
-<p>有时您可能希望从子组件中的父组件访问数据。在这些情况下，您可以使用该 <code>@aware</code> 指令。例如，假设我们正在构建一个由父 <code>&lt;x-menu&gt;</code> 和 子组成的复杂菜单组件 <code>&lt;x-menu.item&gt;</code>：</p>
+<h4 id="访问父组件数据">访问父组件数据</h4>
+<p>有时你可能希望从子组件中的父组件访问数据。在这些情况下，你可以使用该 <code>@aware</code> 指令。例如，假设我们正在构建一个由父 <code>&lt;x-menu&gt;</code> 和 子组成的复杂菜单组件 <code>&lt;x-menu.item&gt;</code>：</p>
 <pre><code class="language-blade">&lt;x-menu color="purple"&gt;
     &lt;x-menu.item&gt;...&lt;/x-menu.item&gt;
     &lt;x-menu.item&gt;...&lt;/x-menu.item&gt;
@@ -1003,55 +1063,29 @@ Hello, @{{ name }}.
 &lt;/li&gt;
 </code></pre>
 <blockquote>
-<p>注意：该 <code>@aware</code> 指令无法访问未通过 HTML 属性显式传递给父组件的父数据。<code>@aware</code> 指令 不能访问未显式传递给父组件的默认值 <code>@props</code> 。</p>
+<p><strong>注意：</strong>该 <code>@aware</code> 指令无法访问未通过 HTML 属性显式传递给父组件的父数据。<code>@aware</code> 指令 不能访问未显式传递给父组件的默认值 <code>@props</code> 。</p>
 </blockquote>
-<p><a name="dynamic-components"></a></p>
-<h3 id="动态组件">动态组件</h3>
-<p>有时，您可能需要渲染一个组件，但在运行前不知道要渲染哪一个。这种情况下，您可以使用 Laravel 内置的 <code>dynamic-component</code> 组件来渲染一个基于值或变量的组件：</p>
-<pre><code class="language-blade">&lt;x-dynamic-component :component=<span class="string token">"$componentName"</span> <span class="keyword token">class</span>=<span class="string token">"mt-4"</span> /&gt;
-</code></pre>
-<p><a name="manually-registering-components"></a></p>
-<h3 id="手动注册组件">手动注册组件</h3>
-<blockquote>
-<p>注意：以下关于手动注册组件的文档主要适用于编写包含视图组件的 Laravel 包的人。如果您不编写包，则组件文档的这一部分可能与您无关。</p>
-</blockquote>
-<p>当为您自己的应用编写组件的时候，Laravel 将会自动发现位于 <code>app/View/Components</code> 目录和  <code>resources/views/components</code> 目录中的组件。</p>
-<p>当然，如果您使用 Blade 组件编译一个包，您可能需要手动注册组件类及其 HTML 标签别名。您应该在包的服务提供者的 <code>boot</code> 方法中注册您的组件：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
-<span class="keyword token">use</span> VendorPackage\View\Components\AlertComponent;
-
-<span class="comment token">/**
- * 驱动您的包的服务
- *
- *<span class="phpdoc token"> @return</span> void
+<p><a name="anonymous-component-paths"></a></p>
+<h3 id="匿名组件路径">匿名组件路径</h3>
+<p>如前所述，匿名组件通常是通过在你的<code>resources/views/components</code>目录下放置一个 Blade 模板来定义的。然而，你可能偶尔想在 Laravel 注册其他匿名组件的路径，除了默认路径。</p>
+<p><code>anonymousComponentPath</code>方法接受匿名组件位置的「路径」作为它的第一个参数，并接受一个可选的「命名空间」作为它的第二个参数，组件应该被放在这个命名空间下。通常，这个方法应该从你的应用程序的一个<a href="/docs/laravel/10.x/providers">服务提供者</a> 的<code>boot</code>方法中调用。</p>
+<pre><code><span class="comment token">/**
+ * 引导任何应用服务。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
-    Blade::component(<span class="string token">'package-alert'</span>, AlertComponent::<span class="keyword token">class</span>);
+    Blade::anonymousComponentPath(__DIR__.<span class="string token">'/../components'</span>);
 }
 </code></pre>
-<p>当组件注册完成后，便可使用标签别名来对其进行渲染。</p>
-<pre><code class="language-blade">&lt;x-package-alert/&gt;
+<p>当组件路径被注册而没有指定前缀时，就像上面的例子一样，它们在你的 Blade 组件中可能也没有相应的前缀。例如，如果一个<code>panel.blade.php</code>组件存在于上面注册的路径中，它可能会被呈现为这样。</p>
+<pre><code class="language-blade">&lt;x-panel /&gt;
 </code></pre>
-<h4 id="自动加载包组件">自动加载包组件</h4>
-<p>或者，您可以使用该 <code>componentNamespace</code> 方法按照约定自动加载组件类。例如，一个 <code>Nightshade</code> 包可能有 <code>Calendar</code> 和 <code>ColorPicker</code> 组件驻留在 <code>Package\Views\Components</code> 命名空间中：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
-
-<span class="comment token">/**
- * 驱动您的包的服务
- *
- *<span class="phpdoc token"> @return</span> void
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
-{
-    Blade::componentNamespace(<span class="string token">'Nightshade\\Views\\Components'</span>, <span class="string token">'nightshade'</span>);
-}
+<p>前缀「命名空间」可以作为第二个参数提供给<code>anonymousComponentPath</code>方法。</p>
+<pre><code>Blade::anonymousComponentPath(__DIR__.&#39;/../components&#39;, &#39;dashboard&#39;);
 </code></pre>
-<p>这将允许他们的供应商命名空间使用包组件，使用以下 <code>package-name::</code> 语法：</p>
-<pre><code class="language-blade">&lt;x-nightshade::calendar /&gt;
-&lt;x-nightshade::color-picker /&gt;
+<p>当提供一个前缀时，在该「命名空间」内的组件可以在渲染时将该组件的命名空间前缀到该组件的名称。</p>
+<pre><code class="language-blade">&lt;x-dashboard::panel /&gt;
 </code></pre>
-<p>Blade 将自动检测链接到该组件的类，通过对组件名称进行帕斯卡大小写。使用「点」表示法也支持子目录。</p>
 <p><a name="building-layouts"></a></p>
 <h2 id="构建布局">构建布局</h2>
 <p><a name="layouts-using-components"></a></p>
@@ -1059,7 +1093,7 @@ Hello, @{{ name }}.
 <p>大多数 web 应用程序在不同的页面上有相同的总体布局。如果我们必须在创建的每个视图中重复整个布局 HTML，那么维护我们的应用程序将变得非常麻烦和困难。谢天谢地，将此布局定义为单个 <a href="#components">Blade 组件</a> 并在整个应用程序中非常方便地使用它。</p>
 <p><a name="defining-the-layout-component"></a></p>
 <h4 id="定义布局组件">定义布局组件</h4>
-<p>例如，假设我们正在构建一个 todo list 应用程序。我们可以定义如下所示的 <code>layout</code> 组件：</p>
+<p>例如，假设我们正在构建一个「todo list」应用程序。我们可以定义如下所示的 <code>layout</code> 组件：</p>
 <pre><code class="language-blade">&lt;!-- resources/views/components/layout.blade.php --&gt;
 
 &lt;html&gt;
@@ -1150,7 +1184,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 </code></pre>
 <p>在本例中，<code>sidebar</code> 部分使用 <code>@parent</code>  指令将内容追加（而不是覆盖）到局部的侧栏位置。在呈现视图时， <code>@parent</code> 指令将被布局的内容替换。</p>
 <blockquote>
-<p>技巧：与前面的示例相反，本 <code>sidebar</code> 节以 <code>@endsection</code> 结束，而不是以 <code>@show</code> 结束。 <code>@endsection</code> 指令将只定义一个节，<code>@show</code> 将定义并 <strong>立即 yield</strong> 该节。</p>
+<p><strong>技巧：</strong>与前面的示例相反，本 <code>sidebar</code> 节以 <code>@endsection</code> 结束，而不是以 <code>@show</code> 结束。 <code>@endsection</code> 指令将只定义一个节，<code>@show</code> 将定义并 <strong>立即 yield</strong> 该节。</p>
 </blockquote>
 <p>该 <code>@yield</code> 指令还接受默认值作为其第二个参数。如果要生成的节点未定义，则将呈现此内容：</p>
 <pre><code class="language-blade">@yield(&#39;content&#39;, &#39;Default content&#39;)
@@ -1159,7 +1193,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 <h2 id="表单">表单</h2>
 <p><a name="csrf-field"></a></p>
 <h3 id="csrf-字段">CSRF 字段</h3>
-<p>无论何时在应用程序中定义 HTML 表单，都应该在表单中包含一个隐藏的 CSRF 令牌字段，以便 <a href="csrf.html">CSRF 保护中间件</a> 可以验证请求。你可以使用 <code>@csrf</code> Blade 指令生成令牌字段：</p>
+<p>无论何时在应用程序中定义 HTML 表单，都应该在表单中包含一个隐藏的 CSRF 令牌字段，以便 <a href="/docs/laravel/10.x/csrf">CSRF 保护中间件</a> 可以验证请求。你可以使用 <code>@csrf</code> Blade 指令生成令牌字段：</p>
 <pre><code class="language-blade">&lt;form method="POST" action="/profile"&gt;
     @csrf
 
@@ -1177,7 +1211,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="validation-errors"></a></p>
 <h3 id="表单校验错误">表单校验错误</h3>
-<p>该 <code>@error</code> 指令可用于快速检查给定属性是否存在 <a href="validation.html#quick-displaying-the-validation-errors">验证错误消息</a> 。在 <code>@error</code> 指令中，可以回显 <code>$message</code> 变量以显示错误消息：</p>
+<p>该 <code>@error</code> 指令可用于快速检查给定属性是否存在 <a href="/docs/laravel/10.x/validation#quick-displaying-the-validation-errors">验证错误消息</a> 。在 <code>@error</code> 指令中，可以回显 <code>$message</code> 变量以显示错误消息：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/post/create.blade.php --&gt;
 
 &lt;label <span class="keyword token">for</span>=<span class="string token">"title"</span>&gt;Post Title&lt;/label&gt;
@@ -1190,7 +1224,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
     &lt;div <span class="keyword token">class</span>=<span class="string token">"alert alert-danger"</span>&gt;{{ <span class="variable token">$message</span> }}&lt;/div&gt;
 @enderror
 </code></pre>
-<p>由于该 <code>@error</code> 指令编译为「if」语句，因此您可以在 <code>@else</code> 属性没有错误时使用该指令来呈现内容：</p>
+<p>由于该 <code>@error</code> 指令编译为「if」语句，因此你可以在 <code>@else</code> 属性没有错误时使用该指令来呈现内容：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/auth.blade.php --&gt;
 
 &lt;label <span class="keyword token">for</span>=<span class="string token">"email"</span>&gt;Email address&lt;/label&gt;
@@ -1199,7 +1233,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
     type=<span class="string token">"email"</span>
     <span class="keyword token">class</span>=<span class="string token">"@error('email') is-invalid @else is-valid @enderror"</span>&gt;
 </code></pre>
-<p>你可以将 <a href="validation.html#named-error-bags">特定错误包的名称</a> 作为第二个参数传递给 <code>@error</code> 指令，以便在包含多个表单的页面上检索验证错误消息：</p>
+<p>你可以将 <a href="/docs/laravel/10.x/validation#named-error-bags">特定错误包的名称</a> 作为第二个参数传递给 <code>@error</code> 指令，以便在包含多个表单的页面上检索验证错误消息：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/auth.blade.php --&gt;
 
 &lt;label <span class="keyword token">for</span>=<span class="string token">"email"</span>&gt;Email address&lt;/label&gt;
@@ -1219,6 +1253,11 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
     &lt;script src="/example.js"&gt;&lt;/script&gt;
 @endpush
 </code></pre>
+<p>如果你想在给定的布尔表达式评估为 <code>true</code> 时 <code>@push</code> 内容，你可以使用 <code>@pushIf</code> 指令。</p>
+<pre><code class="language-blade">@pushIf(<span class="variable token">$shouldPush</span>, <span class="string token">'scripts'</span>)
+    &lt;script src=<span class="string token">"/example.js"</span>&gt;&lt;/script&gt;
+@endPushIf
+</code></pre>
 <p>你可以根据需要多次推入堆栈。要呈现完整的堆栈内容，请将堆栈的名称传递给 <code>@stack</code> 指令：</p>
 <pre><code class="language-blade">&lt;head&gt;
     &lt;!-- Head Contents --&gt;
@@ -1228,18 +1267,18 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 </code></pre>
 <p>如果要将内容前置到堆栈的开头，应使用 <code>@prepend</code> 指令：</p>
 <pre><code class="language-blade">@push(<span class="string token">'scripts'</span>)
-    这是第二加载的...
+    <span class="keyword token">This</span> will be second...
 @endpush
 
 <span class="comment token">// Later...</span>
 
 @prepend(<span class="string token">'scripts'</span>)
-    这是第一加载的...
+    <span class="keyword token">This</span> will be first...
 @endprepend
 </code></pre>
 <p><a name="service-injection"></a></p>
 <h2 id="服务注入">服务注入</h2>
-<p>该 <code>@inject</code> 指令可用于从 Laravel <a href="container.html">服务容器</a>中检索服务。传递给 <code>@inject</code> 的第一个参数是要将服务放入的变量的名称，而第二个参数是要解析的服务的类或接口名称：</p>
+<p>该 <code>@inject</code> 指令可用于从 Laravel <a href="/docs/laravel/10.x/container">服务容器</a>中检索服务。传递给 <code>@inject</code> 的第一个参数是要将服务放入的变量的名称，而第二个参数是要解析的服务的类或接口名称：</p>
 <pre><code class="language-blade">@inject(<span class="string token">'metrics'</span>, <span class="string token">'App\Services\MetricsService'</span>)
 
 &lt;div&gt;
@@ -1248,7 +1287,7 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="rendering-inline-blade-templates"></a></p>
 <h2 id="渲染内联-blade-模板">渲染内联 Blade 模板</h2>
-<p>有时您可能需要将原始 Blade 模板字符串转换为有效的 HTML。您可以使用 <code>Blade</code> 门面提供的 <code>render</code> 方法来完成此操作。该 <code>render</code> 方法接受 Blade 模板字符串和提供给模板的可选数据数组：</p>
+<p>有时你可能需要将原始 Blade 模板字符串转换为有效的 HTML。你可以使用 <code>Blade</code> 门面提供的 <code>render</code> 方法来完成此操作。该 <code>render</code> 方法接受 Blade 模板字符串和提供给模板的可选数据数组：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
 
 <span class="keyword token">return</span> Blade::render(<span class="string token">'Hello, {{ $name }}'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Julian Bashir'</span>]);
@@ -1259,6 +1298,34 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Julian Bashir'</span>],
     deleteCachedView: <span class="keyword token">true</span>
 );
+</code></pre>
+<p><a name="rendering-blade-fragments"></a></p>
+<h2 id="渲染-blade-片段">渲染 Blade 片段</h2>
+<p>当使用 <a href="https://turbo.hotwired.dev/">Turbo</a> 和 <a href="https://htmx.org/">htmx</a> 等前端框架时，你可能偶尔需要在你的HTTP响应中只返回Blade模板的一个部分。Blade「片段（fragment）」允许你这样做。要开始，将你的Blade模板的一部分放在<code>@fragment</code>和<code>@endfragment</code>指令中。</p>
+<pre><code class="language-blade">@fragment(<span class="string token">'user-list'</span>)
+    &lt;ul&gt;
+        @<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
+            &lt;li&gt;{{ <span class="variable token">$user</span>-&gt;name }}&lt;/li&gt;
+        @<span class="keyword token">endforeach</span>
+    &lt;/ul&gt;
+@endfragment
+</code></pre>
+<p>然后，在渲染使用该模板的视图时，你可以调用 <code>fragment</code> 方法来指定只有指定的片段应该被包含在传出的 HTTP 响应中。</p>
+<pre><code class="language-php"><span class="keyword token">return</span> view(<span class="string token">'dashboard'</span>, [<span class="string token">'users'</span> =&gt; <span class="variable token">$users</span>])-&gt;fragment(<span class="string token">'user-list'</span>);
+</code></pre>
+<p><code>fragmentIf</code> 方法允许你根据一个给定的条件有条件地返回一个视图的片段。否则，整个视图将被返回。</p>
+<pre><code class="language-php"><span class="keyword token">return</span> view(<span class="string token">'dashboard'</span>, [<span class="string token">'users'</span> =&gt; <span class="variable token">$users</span>])
+    -&gt;fragmentIf(<span class="variable token">$request</span>-&gt;hasHeader(<span class="string token">'HX-Request'</span>), <span class="string token">'user-list'</span>);
+</code></pre>
+<p><code>fragments</code> 和 <code>fragmentsIf</code> 方法允许你在响应中返回多个视图片段。这些片段将被串联起来。</p>
+<pre><code class="language-php">view(<span class="string token">'dashboard'</span>, [<span class="string token">'users'</span> =&gt; <span class="variable token">$users</span>])
+    -&gt;fragments([<span class="string token">'user-list'</span>, <span class="string token">'comment-list'</span>]);
+
+view(<span class="string token">'dashboard'</span>, [<span class="string token">'users'</span> =&gt; <span class="variable token">$users</span>])
+    -&gt;fragmentsIf(
+        <span class="variable token">$request</span>-&gt;hasHeader(<span class="string token">'HX-Request'</span>),
+        [<span class="string token">'user-list'</span>, <span class="string token">'comment-list'</span>]
+    );
 </code></pre>
 <p><a name="extending-blade"></a></p>
 <h2 id="扩展-blade">扩展 Blade</h2>
@@ -1275,22 +1342,18 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 {
     <span class="comment token">/**
      * 注册应用的服务
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
     {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     }
 
     <span class="comment token">/**
-     * 启动应用的服务
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * Bootstrap any application services.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
     {
-        Blade::directive(<span class="string token">'datetime'</span>, <span class="keyword token">function</span> (<span class="variable token">$expression</span>) {
+        Blade::directive(<span class="string token">'datetime'</span>, <span class="keyword token">function</span> (string <span class="variable token">$expression</span>) {
             <span class="keyword token">return</span> <span class="string token">"&lt;?php echo ($expression)-&gt;format('m/d/Y H:i'); ?&gt;"</span>;
         });
     }
@@ -1300,21 +1363,19 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 <pre><code><span class="preprocessor token">&lt;?php</span> <span class="keyword token">echo</span> (<span class="variable token">$var</span>)-&gt;format(<span class="string token">'m/d/Y H:i'</span>); <span class="preprocessor token">?&gt;</span>
 </code></pre>
 <blockquote>
-<p>注意：更新 Blade 指令的逻辑后，需要删除所有缓存的 Blade 视图。可以使用 <code>view:clear</code> Artisan 命令。</p>
+<p><strong>注意：</strong>更新 Blade 指令的逻辑后，需要删除所有缓存的 Blade 视图。可以使用 <code>view:clear</code> Artisan 命令。</p>
 </blockquote>
 <p><a name="custom-echo-handlers"></a></p>
 <h3 id="自定义回显处理程序">自定义回显处理程序</h3>
-<p>如果您试图使用 Blade 来「回显」一个对象， 该对象的 <code>__toString</code> 方法将被调用。该<a href="https://www.php.net/manual/en/language.oop5.magic.php#object.tostring"><code>__toString</code></a> 方法是 PHP 内置的「魔术方法」之一。但是，有时您可能无法控制 <code>__toString</code> 给定类的方法，例如当您与之交互的类属于第三方库时。</p>
-<p>在这些情况下，Blade 允许您为该特定类型的对象注册自定义回显处理程序。为此，您应该调用 Blade 的 <code>stringable</code> 方法。该 <code>stringable</code> 方法接受一个闭包。这个闭包类型应该提示它负责呈现的对象的类型。通常，应该在应用程序的 <code>AppServiceProvider</code> 类的 <code>boot</code> 方法中调用该<code>stringable</code> 方法：</p>
+<p>如果你试图使用 Blade 来「回显」一个对象， 该对象的 <code>__toString</code> 方法将被调用。该<a href="https://www.php.net/manual/en/language.oop5.magic.php#object.tostring"><code>__toString</code></a> 方法是 PHP 内置的「魔术方法」之一。但是，有时你可能无法控制 <code>__toString</code> 给定类的方法，例如当你与之交互的类属于第三方库时。</p>
+<p>在这些情况下，Blade 允许您为该特定类型的对象注册自定义回显处理程序。为此，您应该调用 Blade 的 <code>stringable</code> 方法。该 <code>stringable</code> 方法接受一个闭包。这个闭包类型应该提示它负责呈现的对象的类型。通常，应该在应用程序的 <code>AppServiceProvider</code> 类的 <code>boot</code> 方法中调用该 <code>stringable</code> 方法：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
 <span class="keyword token">use</span> Money\Money;
 
 <span class="comment token">/**
  * Bootstrap any application services.
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Blade::stringable(<span class="keyword token">function</span> (Money <span class="variable token">$money</span>) {
         <span class="keyword token">return</span> <span class="variable token">$money</span>-&gt;formatTo(<span class="string token">'en_GB'</span>);
@@ -1326,32 +1387,30 @@ Route::get(<span class="string token">'/tasks'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="custom-if-statements"></a></p>
 <h3 id="自定义-if-声明">自定义 if 声明</h3>
-<p>在定义简单的自定义条件语句时，编写自定义指令通常比较复杂。因此，Blade 提供了一个  <code>Blade::if</code> 方法，允许你使用闭包快速定义自定义条件指令。例如，让我们定义一个自定义条件来检查为应用程序配置的默认 「存储」。我们可以在 <code>AppServiceProvider</code> 的 <code>boot</code> 方法中执行此操作：</p>
+<p>在定义简单的自定义条件语句时，编写自定义指令通常比较复杂。因此，Blade 提供了一个 Blade::if 方法，允许你使用闭包快速定义自定义条件指令。例如，让我们定义一个自定义条件来检查为应用程序配置的默认 「存储」。我们可以在 AppServiceProvider 的 boot 方法中执行此操作：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Blade;
 
 <span class="comment token">/**
- * 启动应用的服务
- *
- *<span class="phpdoc token"> @return</span> void
+ * Bootstrap any application services.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
-    Blade::<span class="keyword token">if</span>(<span class="string token">'disk'</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    Blade::<span class="keyword token">if</span>(<span class="string token">'disk'</span>, <span class="keyword token">function</span> (string <span class="variable token">$value</span>) {
         <span class="keyword token">return</span> config(<span class="string token">'filesystems.default'</span>) === <span class="variable token">$value</span>;
     });
 }
 </code></pre>
 <p>一旦定义了自定义条件，就可以在模板中使用它:</p>
 <pre><code class="language-blade">@disk(<span class="string token">'local'</span>)
-    &lt;!-- 应用正在使用 local 存储 ... --&gt;
+    &lt;!-- The application is using the local disk... --&gt;
 @elsedisk(<span class="string token">'s3'</span>)
-    &lt;!-- 应用正在使用 s3 存储 ... --&gt;
+    &lt;!-- The application is using the s3 disk... --&gt;
 @<span class="keyword token">else</span>
-    &lt;!-- 应用正在使用其他存储 ... --&gt;
+    &lt;!-- The application is using some other disk... --&gt;
 @enddisk
 
 @unlessdisk(<span class="string token">'local'</span>)
-    &lt;!-- 应用当前没有使用 local 存储 ... --&gt;
+    &lt;!-- The application is not using the local disk... --&gt;
 @enddisk
 </code></pre>
 </div>
