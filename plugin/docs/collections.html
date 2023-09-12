@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -36,10 +36,10 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p><code>Illuminate\Support\Collection</code> 类为处理数据数组提供了一个流畅、方便的包装器。例如，查看以下代码。我们将使用 <code>collect</code> 助手从数组中创建一个新的集合实例，对每个元素运行 <code>strtoupper</code> 函数，然后删除所有空元素：</p>
-<pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'taylor'</span>, <span class="string token">'abigail'</span>, <span class="keyword token">null</span>])-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$name</span>) {
+<p><code>Illuminate\Support\Collection</code> 类为处理数据数组提供了一个流畅、方便的包装器。 例如，查看以下代码。 我们将使用 <code>collect</code> 助手从数组中创建一个新的集合实例，对每个元素运行 <code>strtoupper</code> 函数，然后删除所有空元素：</p>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'taylor'</span>, <span class="string token">'abigail'</span>, <span class="keyword token">null</span>])-&gt;map(<span class="keyword token">function</span> (string <span class="variable token">$name</span>) {
     <span class="keyword token">return</span> strtoupper(<span class="variable token">$name</span>);
-})-&gt;reject(<span class="keyword token">function</span> (<span class="variable token">$name</span>) {
+})-&gt;reject(<span class="keyword token">function</span> (string <span class="variable token">$name</span>) {
     <span class="keyword token">return</span> <span class="keyword token">empty</span>(<span class="variable token">$name</span>);
 });
 </code></pre>
@@ -50,7 +50,7 @@
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 </code></pre>
 <blockquote>
-<p>技巧：<a href="eloquent.html">Eloquent</a> 查询的结果总是作为 <code>Collection</code> 实例返回。</p>
+<p><strong>技巧：</strong><a href="/docs/laravel/10.x/eloquent">Eloquent</a> 查询的结果总是作为 <code>Collection</code> 实例返回。</p>
 </blockquote>
 <p><a name="extending-collections"></a></p>
 <h3 id="扩展集合">扩展集合</h3>
@@ -59,7 +59,7 @@
 <span class="keyword token">use</span> Illuminate\Support\Str;
 
 Collection::macro(<span class="string token">'toUpper'</span>, <span class="keyword token">function</span> () {
-    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;map(<span class="keyword token">function</span> (string <span class="variable token">$value</span>) {
         <span class="keyword token">return</span> Str::upper(<span class="variable token">$value</span>);
     });
 });
@@ -70,15 +70,15 @@ Collection::macro(<span class="string token">'toUpper'</span>, <span class="keyw
 
 <span class="comment token">// ['FIRST', 'SECOND']</span>
 </code></pre>
-<p>通常，你应该在<a href="providers.html">service provider</a>的 <code>boot</code> 方法中声明集合宏。</p>
+<p>通常，你应该在<a href="/docs/laravel/10.x/providers">服务提供者</a>的 <code>boot</code> 方法中声明集合宏。</p>
 <p><a name="macro-arguments"></a></p>
 <h4 id="宏参数">宏参数</h4>
 <p>如有必要，可以定义接受其他参数的宏：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Collection;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Lang;
 
-Collection::macro(<span class="string token">'toLocale'</span>, <span class="keyword token">function</span> (<span class="variable token">$locale</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$value</span>) <span class="keyword token">use</span> (<span class="variable token">$locale</span>) {
+Collection::macro(<span class="string token">'toLocale'</span>, <span class="keyword token">function</span> (string <span class="variable token">$locale</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;map(<span class="keyword token">function</span> (string <span class="variable token">$value</span>) <span class="keyword token">use</span> (<span class="variable token">$locale</span>) {
         <span class="keyword token">return</span> Lang::get(<span class="variable token">$value</span>, [], <span class="variable token">$locale</span>);
     });
 });
@@ -91,17 +91,19 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <h2 id="可用的方法">可用的方法</h2>
 <p>对于剩余的大部分集合文档，我们将讨论 <code>Collection</code> 类中可用的每个方法。请记住，所有这些方法都可以链式调用，以便流畅地操作底层数组。此外，几乎每个方法都会返回一个新的 <code>Collection</code> 实例，允许你在必要时保留集合的原始副本：</p>
 <style>
-    #collection-method-list > p {
-        column-count: 3; -moz-column-count: 3; -webkit-column-count: 3;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
     }
 
-    #collection-method-list a {
+    .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
-<div id="collection-method-list" markdown="1">
+<div class="collection-method-list" markdown="1">
 
 <p><a href="#method-all">all</a>
 <a href="#method-average">average</a>
@@ -113,6 +115,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-combine">combine</a>
 <a href="#method-concat">concat</a>
 <a href="#method-contains">contains</a>
+<a href="#method-containsoneitem">containsOneItem</a>
 <a href="#method-containsstrict">containsStrict</a>
 <a href="#method-count">count</a>
 <a href="#method-countBy">countBy</a>
@@ -131,6 +134,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-except">except</a>
 <a href="#method-filter">filter</a>
 <a href="#method-first">first</a>
+<a href="#method-first-or-fail">firstOrFail</a>
 <a href="#method-first-where">firstWhere</a>
 <a href="#method-flatmap">flatMap</a>
 <a href="#method-flatten">flatten</a>
@@ -140,8 +144,10 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-get">get</a>
 <a href="#method-groupby">groupBy</a>
 <a href="#method-has">has</a>
+<a href="#method-hasany">hasAny</a>
 <a href="#method-implode">implode</a>
 <a href="#method-intersect">intersect</a>
+<a href="#method-intersectAssoc">intersectAssoc</a>
 <a href="#method-intersectbykeys">intersectByKeys</a>
 <a href="#method-isempty">isEmpty</a>
 <a href="#method-isnotempty">isNotEmpty</a>
@@ -149,6 +155,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-keyby">keyBy</a>
 <a href="#method-keys">keys</a>
 <a href="#method-last">last</a>
+<a href="#method-lazy">lazy</a>
 <a href="#method-macro">macro</a>
 <a href="#method-make">make</a>
 <a href="#method-map">map</a>
@@ -178,7 +185,6 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-random">random</a>
 <a href="#method-range">range</a>
 <a href="#method-reduce">reduce</a>
-<a href="#method-reduce-many">reduceMany</a>
 <a href="#method-reduce-spread">reduceSpread</a>
 <a href="#method-reject">reject</a>
 <a href="#method-replace">replace</a>
@@ -187,11 +193,11 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-search">search</a>
 <a href="#method-shift">shift</a>
 <a href="#method-shuffle">shuffle</a>
-<a href="#method-sliding">sliding</a>
 <a href="#method-skip">skip</a>
 <a href="#method-skipuntil">skipUntil</a>
 <a href="#method-skipwhile">skipWhile</a>
 <a href="#method-slice">slice</a>
+<a href="#method-sliding">sliding</a>
 <a href="#method-sole">sole</a>
 <a href="#method-some">some</a>
 <a href="#method-sort">sort</a>
@@ -221,6 +227,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-unlessempty">unlessEmpty</a>
 <a href="#method-unlessnotempty">unlessNotEmpty</a>
 <a href="#method-unwrap">unwrap</a>
+<a href="#method-value">value</a>
 <a href="#method-values">values</a>
 <a href="#method-when">when</a>
 <a href="#method-whenempty">whenEmpty</a>
@@ -240,6 +247,8 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <a href="#method-zip">zip</a></p>
 </div>
 
+
+
 <p><a name="method-listing"></a></p>
 <h2 id="方法列表">方法列表</h2>
 <style>
@@ -253,17 +262,17 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 </style>
 
 <p><a name="method-all"></a></p>
-<h4 id="all"><code>all()</code></h4>
+<h4 id="all-collection-method-first-collection-method"><code>all()</code> {.collection-method .first-collection-method}</h4>
 <p><code>all</code> 方法返回由集合表示的底层数组：</p>
 <pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;all();
 
 <span class="comment token">// [1, 2, 3]</span>
 </code></pre>
 <p><a name="method-average"></a></p>
-<h4 id="average"><code>average()</code></h4>
+<h4 id="average-collection-method"><code>average()</code> {.collection-method}</h4>
 <p><a href="#method-avg"><code>avg</code></a> 方法的别名。</p>
 <p><a name="method-avg"></a></p>
-<h4 id="avg"><code>avg()</code></h4>
+<h4 id="avg-collection-method"><code>avg()</code> {.collection-method}</h4>
 <p><code>avg</code> 方法返回给定键的 <a href="https://en.wikipedia.org/wiki/Average">平均值</a>：</p>
 <pre><code><span class="variable token">$average</span> = collect([
     [<span class="string token">'foo'</span> =&gt; <span class="number token">10</span>],
@@ -279,7 +288,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 <span class="comment token">// 2</span>
 </code></pre>
 <p><a name="method-chunk"></a></p>
-<h4 id="chunk"><code>chunk()</code></h4>
+<h4 id="chunk-collection-method"><code>chunk()</code> {.collection-method}</h4>
 <p><code>chunk</code> 方法将集合分成多个给定大小的较小集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>, <span class="number token">7</span>]);
 
@@ -289,7 +298,7 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 
 <span class="comment token">// [[1, 2, 3, 4], [5, 6, 7]]</span>
 </code></pre>
-<p>当使用诸如 <a href="https://getbootstrap.com/docs/4.1/layout/grid/">Bootstrap</a> 之类的网格系统时，此方法在 <a href="views.html">views</a> 中特别有用 . 例如，假设你有一组 <a href="eloquent.html">Eloquent</a> 模型要在网格中显示：</p>
+<p>当使用诸如 <a href="https://getbootstrap.com/docs/4.1/layout/grid/">Bootstrap</a> 之类的网格系统时，此方法在 <a href="/docs/laravel/10.x/views">views</a> 中特别有用。例如，假设你有一组 <a href="/docs/laravel/10.x/eloquent">Eloquent</a> 模型要在网格中显示：</p>
 <pre><code class="language-blade">@<span class="keyword token">foreach</span> (<span class="variable token">$products</span>-&gt;chunk(<span class="number token">3</span>) <span class="keyword token">as</span> <span class="variable token">$chunk</span>)
     &lt;div <span class="keyword token">class</span>=<span class="string token">"row"</span>&gt;
         @<span class="keyword token">foreach</span> (<span class="variable token">$chunk</span> <span class="keyword token">as</span> <span class="variable token">$product</span>)
@@ -299,11 +308,11 @@ Collection::macro(<span class="string token">'toLocale'</span>, <span class="key
 @<span class="keyword token">endforeach</span>
 </code></pre>
 <p><a name="method-chunkwhile"></a></p>
-<h4 id="chunkwhile"><code>chunkWhile()</code></h4>
+<h4 id="chunkwhile-collection-method"><code>chunkWhile()</code> {.collection-method}</h4>
 <p><code>chunkWhile</code> 方法根据给定回调的评估将集合分成多个更小的集合。传递给闭包的 <code>$chunk</code> 变量可用于检查前一个元素：</p>
 <pre><code><span class="variable token">$collection</span> = collect(str_split(<span class="string token">'AABBCCCD'</span>));
 
-<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;chunkWhile(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>, <span class="variable token">$chunk</span>) {
+<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;chunkWhile(<span class="keyword token">function</span> (string <span class="variable token">$value</span>, int <span class="variable token">$key</span>, Collection <span class="variable token">$chunk</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> === <span class="variable token">$chunk</span>-&gt;last();
 });
 
@@ -355,7 +364,7 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// [1, 2, 3]</span>
 </code></pre>
 <blockquote>
-<p>技巧：当你有一个 <code>Enumerable</code> 的实例并且需要一个非惰性集合实例时，<code>collect</code> 方法特别有用。由于 <code>collect()</code> 是 <code>Enumerable</code> 合约的一部分，你可以安全地使用它来获取 <code>Collection</code> 实例。</p>
+<p><strong>技巧：</strong>当你有一个 <code>Enumerable</code> 的实例并且需要一个非惰性集合实例时，<code>collect</code> 方法特别有用。由于 <code>collect()</code> 是 <code>Enumerable</code> 合约的一部分，你可以安全地使用它来获取 <code>Collection</code> 实例。</p>
 </blockquote>
 <p><a name="method-combine"></a></p>
 <h4 id="combine-collection-method"><code>combine()</code> {.collection-method}</h4>
@@ -385,7 +394,7 @@ get_class(<span class="variable token">$collection</span>);
 <p><code>contains</code> 方法确定集合是否包含给定项目。你可以将闭包传递给 <code>contains</code> 方法，以确定集合中是否存在与给定真值测试匹配的元素：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
 
-<span class="variable token">$collection</span>-&gt;contains(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$collection</span>-&gt;contains(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">5</span>;
 });
 
@@ -412,13 +421,28 @@ get_class(<span class="variable token">$collection</span>);
 
 <span class="comment token">// false</span>
 </code></pre>
-<p><code>contains</code> 方法在检查项目值时使用「松散」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 <a href="#method-containsstrict"><code>containsStrict</code></a> 方法使用「严格」比较进行过滤。</p>
+<p><code>contains</code> 方法在检查项目值时使用“松散”比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 <a href="#method-containsstrict"><code>containsStrict</code></a> 方法使用“严格”比较进行过滤。</p>
 <p>对于 <code>contains</code> 的逆操作，请参见 <a href="#method-doesntcontain">doesntContain</a> 方法。</p>
+<p><a name="method-containsoneitem"></a></p>
+<h4 id="containsoneitem-collection-method"><code>containsOneItem()</code> {.collection-method}</h4>
+<p><code>containsOneItem</code> 方法决定了集合是否包含一个项目。</p>
+<pre><code>collect([])-&gt;containsOneItem();
+
+<span class="comment token">// false</span>
+
+collect([<span class="string token">'1'</span>])-&gt;containsOneItem();
+
+<span class="comment token">// true</span>
+
+collect([<span class="string token">'1'</span>, <span class="string token">'2'</span>])-&gt;containsOneItem();
+
+<span class="comment token">// false</span>
+</code></pre>
 <p><a name="method-containsstrict"></a></p>
 <h4 id="containsstrict-collection-method"><code>containsStrict()</code> {.collection-method}</h4>
 <p>此方法与 <a href="#method-contains"><code>contains</code></a> 方法具有相同的签名；但是，所有值都使用「严格」比较进行比较。</p>
 <blockquote>
-<p>技巧：使用 <a href="eloquent-collections.html#method-contains">Eloquent Collections</a> 时会修改此方法的行为。</p>
+<p><strong>技巧：</strong>使用 <a href="/docs/laravel/10.x/eloquent-collections#method-contains">Eloquent Collections</a> 时会修改此方法的行为。</p>
 </blockquote>
 <p><a name="method-count"></a></p>
 <h4 id="count-collection-method"><code>count()</code> {.collection-method}</h4>
@@ -431,7 +455,7 @@ get_class(<span class="variable token">$collection</span>);
 </code></pre>
 <p><a name="method-countBy"></a></p>
 <h4 id="countby-collection-method"><code>countBy()</code> {.collection-method}</h4>
-<p><code>countBy</code> 方法计算集合中值的出现次数。默认情况下，该方法计算每个元素的出现次数，允许你计算集合中元素的某些「类型」：</p>
+<p><code>countBy</code> 方法计算集合中值的出现次数。默认情况下，该方法计算每个元素的出现次数，允许你计算集合中元素的某些“类型”：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">2</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
 <span class="variable token">$counted</span> = <span class="variable token">$collection</span>-&gt;countBy();
@@ -443,7 +467,7 @@ get_class(<span class="variable token">$collection</span>);
 <p>你将闭包传递给 <code>countBy</code> 方法以按自定义值计算所有项目：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'alice@gmail.com'</span>, <span class="string token">'bob@yahoo.com'</span>, <span class="string token">'carlos@gmail.com'</span>]);
 
-<span class="variable token">$counted</span> = <span class="variable token">$collection</span>-&gt;countBy(<span class="keyword token">function</span> (<span class="variable token">$email</span>) {
+<span class="variable token">$counted</span> = <span class="variable token">$collection</span>-&gt;countBy(<span class="keyword token">function</span> (string <span class="variable token">$email</span>) {
     <span class="keyword token">return</span> substr(strrchr(<span class="variable token">$email</span>, <span class="string token">"@"</span>), <span class="number token">1</span>);
 });
 
@@ -517,7 +541,7 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// [1, 3, 5]</span>
 </code></pre>
 <blockquote>
-<p>技巧：此方法的行为在使用 <a href="eloquent-collections.html#method-diff">Eloquent Collections</a> 时被修改。</p>
+<p><strong>技巧：</strong>此方法的行为在使用 <a href="/docs/laravel/10.x/eloquent-collections#method-diff">Eloquent Collections</a> 时被修改。</p>
 </blockquote>
 <p><a name="method-diffassoc"></a></p>
 <h4 id="diffassoc-collection-method"><code>diffAssoc()</code> {.collection-method}</h4>
@@ -566,7 +590,7 @@ get_class(<span class="variable token">$collection</span>);
 <p><code>doesntContain</code> 方法确定集合是否不包含给定项目。你可以将闭包传递给 <code>doesntContain</code> 方法，以确定集合中是否不存在与给定真值测试匹配的元素：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
 
-<span class="variable token">$collection</span>-&gt;doesntContain(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$collection</span>-&gt;doesntContain(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &lt; <span class="number token">5</span>;
 });
 
@@ -637,12 +661,14 @@ get_class(<span class="variable token">$collection</span>);
 <p><a name="method-each"></a></p>
 <h4 id="each-collection-method"><code>each()</code> {.collection-method}</h4>
 <p><code>each</code> 方法遍历集合中的项目并将每个项目传递给闭包：</p>
-<pre><code><span class="variable token">$collection</span>-&gt;each(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
-    <span class="comment token">//</span>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
+
+<span class="variable token">$collection</span>-&gt;each(<span class="keyword token">function</span> (int <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <p>如果你想停止遍历这些项目，你可以从你的闭包中返回 <code>false</code>：</p>
-<pre><code><span class="variable token">$collection</span>-&gt;each(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<pre><code><span class="variable token">$collection</span>-&gt;each(<span class="keyword token">function</span> (int <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">if</span> (<span class="comment token">/* condition */</span>) {
         <span class="keyword token">return</span> <span class="keyword token">false</span>;
     }
@@ -653,19 +679,19 @@ get_class(<span class="variable token">$collection</span>);
 <p><code>eachSpread</code> 方法迭代集合的项目，将每个嵌套项目值传递给给定的回调：</p>
 <pre><code><span class="variable token">$collection</span> = collect([[<span class="string token">'John Doe'</span>, <span class="number token">35</span>], [<span class="string token">'Jane Doe'</span>, <span class="number token">33</span>]]);
 
-<span class="variable token">$collection</span>-&gt;eachSpread(<span class="keyword token">function</span> (<span class="variable token">$name</span>, <span class="variable token">$age</span>) {
-    <span class="comment token">//</span>
+<span class="variable token">$collection</span>-&gt;eachSpread(<span class="keyword token">function</span> (string <span class="variable token">$name</span>, int <span class="variable token">$age</span>) {
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <p>你可以通过从回调中返回 <code>false</code> 来停止遍历项目：</p>
-<pre><code><span class="variable token">$collection</span>-&gt;eachSpread(<span class="keyword token">function</span> (<span class="variable token">$name</span>, <span class="variable token">$age</span>) {
+<pre><code><span class="variable token">$collection</span>-&gt;eachSpread(<span class="keyword token">function</span> (string <span class="variable token">$name</span>, int <span class="variable token">$age</span>) {
     <span class="keyword token">return</span> <span class="keyword token">false</span>;
 });
 </code></pre>
 <p><a name="method-every"></a></p>
 <h4 id="every-collection-method"><code>every()</code> {.collection-method}</h4>
 <p><code>every</code> 方法可用于验证集合的所有元素是否通过给定的真值测试：</p>
-<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;every(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;every(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
 });
 
@@ -674,7 +700,7 @@ get_class(<span class="variable token">$collection</span>);
 <p>如果集合为空，<code>every</code> 方法将返回 true：</p>
 <pre><code><span class="variable token">$collection</span> = collect([]);
 
-<span class="variable token">$collection</span>-&gt;every(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$collection</span>-&gt;every(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
 });
 
@@ -693,14 +719,14 @@ get_class(<span class="variable token">$collection</span>);
 </code></pre>
 <p>对于 <code>except</code> 的反义词，请参见 <a href="#method-only">only</a> 方法。</p>
 <blockquote>
-<p>技巧：此方法的行为在使用 <a href="eloquent-collections.html#method-except">Eloquent Collections</a> 时被修改。</p>
+<p>技巧：此方法的行为在使用 <a href="/docs/laravel/10.x/eloquent-collections#method-except">Eloquent Collections</a> 时被修改。</p>
 </blockquote>
 <p><a name="method-filter"></a></p>
 <h4 id="filter-collection-method"><code>filter()</code> {.collection-method}</h4>
 <p><code>filter</code> 方法使用给定的回调过滤集合，只保留那些通过给定真值测试的项目：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;filter(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;filter(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
 });
 
@@ -719,7 +745,7 @@ get_class(<span class="variable token">$collection</span>);
 <p><a name="method-first"></a></p>
 <h4 id="first-collection-method"><code>first()</code> {.collection-method}</h4>
 <p><code>first</code> 方法返回集合中通过给定真值测试的第一个元素：</p>
-<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;first(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;first(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
 });
 
@@ -729,6 +755,20 @@ get_class(<span class="variable token">$collection</span>);
 <pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;first();
 
 <span class="comment token">// 1</span>
+</code></pre>
+<p><a name="method-first-or-fail"></a></p>
+<h4 id="firstorfail-collection-method"><code>firstOrFail()</code> {.collection-method}</h4>
+<p><code>firstOrFail</code> 方法与 <code>first</code> 方法相同；但是，如果没有找到结果，将抛出 <code>Illuminate/Support/ItemNotFoundException</code> 异常。</p>
+<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;firstOrFail(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">5</span>;
+});
+
+<span class="comment token">// Throws ItemNotFoundException...</span>
+</code></pre>
+<p>你也可以调用 <code>firstOrFail</code> 方法，没有参数，以获得集合中的第一个元素。如果集合是空的，将抛出一个 <code>Illuminate\Support\ItemNotFoundException</code> 异常。</p>
+<pre><code>collect([])-&gt;firstOrFail();
+
+<span class="comment token">// Throws ItemNotFoundException...</span>
 </code></pre>
 <p><a name="method-first-where"></a></p>
 <h4 id="firstwhere-collection-method"><code>firstWhere()</code> {.collection-method}</h4>
@@ -763,7 +803,7 @@ get_class(<span class="variable token">$collection</span>);
     [<span class="string token">'age'</span> =&gt; <span class="number token">28</span>]
 ]);
 
-<span class="variable token">$flattened</span> = <span class="variable token">$collection</span>-&gt;flatMap(<span class="keyword token">function</span> (<span class="variable token">$values</span>) {
+<span class="variable token">$flattened</span> = <span class="variable token">$collection</span>-&gt;flatMap(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$values</span>) {
     <span class="keyword token">return</span> array_map(<span class="string token">'strtoupper'</span>, <span class="variable token">$values</span>);
 });
 
@@ -827,7 +867,7 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// ['taylor' =&gt; 'name', 'laravel' =&gt; 'framework']</span>
 </code></pre>
 <p><a name="method-forget"></a></p>
-<h4 id="forget"><code>forget()</code></h4>
+<h4 id="forget-collection-method"><code>forget()</code> {.collection-method}</h4>
 <p>该 <code>forget</code> 方法将通过指定的键来移除集合中对应的元素：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'name'</span> =&gt; <span class="string token">'taylor'</span>, <span class="string token">'framework'</span> =&gt; <span class="string token">'laravel'</span>]);
 
@@ -838,10 +878,10 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// ['framework' =&gt; 'laravel']</span>
 </code></pre>
 <blockquote>
-<p>注意：与大多数集合的方法不同的是， <code>forget</code> 不会返回修改后的新集合；它会直接修改原集合。</p>
+<p><strong>注意：</strong>与大多数集合的方法不同的是， <code>forget</code> 不会返回修改后的新集合；它会直接修改原集合。</p>
 </blockquote>
 <p><a name="method-forpage"></a></p>
-<h4 id="forpage"><code>forPage()</code></h4>
+<h4 id="forpage-collection-method"><code>forPage()</code> {.collection-method}</h4>
 <p>该 <code>forPage</code> 方法返回一个含有指定页码数集合项的新集合。这个方法接受页码数作为其第一个参数，每页显示的项数作为其第二个参数：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>, <span class="number token">7</span>, <span class="number token">8</span>, <span class="number token">9</span>]);
 
@@ -852,7 +892,7 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// [4, 5, 6]</span>
 </code></pre>
 <p><a name="method-get"></a></p>
-<h4 id="get"><code>get()</code></h4>
+<h4 id="get-collection-method"><code>get()</code> {.collection-method}</h4>
 <p>该 <code>get</code> 方法返回指定键的集合项，如果该键在集合中不存在，则返回 null：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'name'</span> =&gt; <span class="string token">'taylor'</span>, <span class="string token">'framework'</span> =&gt; <span class="string token">'laravel'</span>]);
 
@@ -875,7 +915,7 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// taylor@example.com</span>
 </code></pre>
 <p><a name="method-groupby"></a></p>
-<h4 id="groupby"><code>groupBy()</code></h4>
+<h4 id="groupby-collection-method"><code>groupBy()</code> {.collection-method}</h4>
 <p>该 <code>groupBy</code> 方法根据指定键对集合项进行分组：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'account_id'</span> =&gt; <span class="string token">'account-x10'</span>, <span class="string token">'product'</span> =&gt; <span class="string token">'Chair'</span>],
@@ -900,7 +940,7 @@ get_class(<span class="variable token">$collection</span>);
 */</span>
 </code></pre>
 <p>你可以传递回调，而不是传递字符串 <code>key</code>。回调应返回你希望通过以下方式键入组的值：</p>
-<pre><code><span class="variable token">$grouped</span> = <span class="variable token">$collection</span>-&gt;groupBy(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<pre><code><span class="variable token">$grouped</span> = <span class="variable token">$collection</span>-&gt;groupBy(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> substr(<span class="variable token">$item</span>[<span class="string token">'account_id'</span>], -<span class="number token">3</span>);
 });
 
@@ -926,9 +966,9 @@ get_class(<span class="variable token">$collection</span>);
     <span class="number token">40</span> =&gt; [<span class="string token">'user'</span> =&gt; <span class="number token">4</span>, <span class="string token">'skill'</span> =&gt; <span class="number token">2</span>, <span class="string token">'roles'</span> =&gt; [<span class="string token">'Role_2'</span>]],
 ]);
 
-<span class="variable token">$result</span> = <span class="variable token">$data</span>-&gt;groupBy([<span class="string token">'skill'</span>, <span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<span class="variable token">$result</span> = <span class="variable token">$data</span>-&gt;groupBy([<span class="string token">'skill'</span>, <span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span>[<span class="string token">'roles'</span>];
-}], <span class="variable token">$preserveKeys</span> = <span class="keyword token">true</span>);
+}], preserveKeys: <span class="keyword token">true</span>);
 
 <span class="comment token">/*
 [
@@ -972,6 +1012,19 @@ get_class(<span class="variable token">$collection</span>);
 
 <span class="comment token">// false</span>
 </code></pre>
+<p><a name="method-hasany"></a></p>
+<h4 id="hasany-collection-method"><code>hasAny()</code> {.collection-method}</h4>
+<p><code>hasAny</code> 方法确定在集合中是否存在任何给定的键。</p>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'account_id'</span> =&gt; <span class="number token">1</span>, <span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'amount'</span> =&gt; <span class="number token">5</span>]);
+
+<span class="variable token">$collection</span>-&gt;hasAny([<span class="string token">'product'</span>, <span class="string token">'price'</span>]);
+
+<span class="comment token">// true</span>
+
+<span class="variable token">$collection</span>-&gt;hasAny([<span class="string token">'name'</span>, <span class="string token">'price'</span>]);
+
+<span class="comment token">// false</span>
+</code></pre>
 <p><a name="method-implode"></a></p>
 <h4 id="implode-collection-method"><code>implode()</code> {.collection-method}</h4>
 <p><code>implode</code> 方法连接集合中的项目。它的参数取决于集合中项目的类型。如果集合包含数组或对象，你应该传递你希望加入的属性的键，以及你希望放置在值之间的「胶水」字符串：</p>
@@ -989,6 +1042,13 @@ get_class(<span class="variable token">$collection</span>);
 
 <span class="comment token">// '1-2-3-4-5'</span>
 </code></pre>
+<p>如果你想对被内部处理的值进行格式化，你可以给 <code>implode</code> 方法传递一个闭包。</p>
+<pre><code><span class="variable token">$collection</span>-&gt;implode(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> strtoupper(<span class="variable token">$item</span>[<span class="string token">'product'</span>]);
+}, <span class="string token">', '</span>);
+
+<span class="comment token">// DESK, CHAIR</span>
+</code></pre>
 <p><a name="method-intersect"></a></p>
 <h4 id="intersect-collection-method"><code>intersect()</code> {.collection-method}</h4>
 <p><code>intersect</code> 方法从原始集合中删除任何不存在于给定 <code>array</code> 或集合中的值。生成的集合将保留原始集合的键：</p>
@@ -1001,11 +1061,30 @@ get_class(<span class="variable token">$collection</span>);
 <span class="comment token">// [0 =&gt; 'Desk', 2 =&gt; 'Chair']</span>
 </code></pre>
 <blockquote>
-<p>技巧：使用 <a href="eloquent-collections.html#method-intersect">Eloquent Collections</a> 时会修改此方法的行为。</p>
+<p>技巧：使用 <a href="/docs/laravel/10.x/eloquent-collections#method-intersect">Eloquent Collections</a> 时会修改此方法的行为。</p>
 </blockquote>
+<p><a name="method-intersectAssoc"></a></p>
+<h4 id="intersectassoc-collection-method"><code>intersectAssoc()</code> {.collection-method}</h4>
+<p><code>intersectAssoc</code> 方法将原始集合与另一个集合或<code>array</code>进行比较，返回所有给定集合中存在的键/值对:</p>
+<pre><code><span class="variable token">$collection</span> = collect([
+    <span class="string token">'color'</span> =&gt; <span class="string token">'red'</span>,
+    <span class="string token">'size'</span> =&gt; <span class="string token">'M'</span>,
+    <span class="string token">'material'</span> =&gt; <span class="string token">'cotton'</span>
+]);
+
+<span class="variable token">$intersect</span> = <span class="variable token">$collection</span>-&gt;intersectAssoc([
+    <span class="string token">'color'</span> =&gt; <span class="string token">'blue'</span>,
+    <span class="string token">'size'</span> =&gt; <span class="string token">'M'</span>,
+    <span class="string token">'material'</span> =&gt; <span class="string token">'polyester'</span>
+]);
+
+<span class="variable token">$intersect</span>-&gt;all();
+
+<span class="comment token">// ['size' =&gt; 'M']</span>
+</code></pre>
 <p><a name="method-intersectbykeys"></a></p>
 <h4 id="intersectbykeys-collection-method"><code>intersectByKeys()</code> {.collection-method}</h4>
-<p><code>intersectByKeys</code> 方法从原始集合中删除给定 <code>array</code> 或集合中不存在的任何键及其对应值：</p>
+<p><code>intersectByKeys</code> 方法删除了原始集合中不存在于给定的 <code>array</code> 或集合中的任何键和其相应的值。</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     <span class="string token">'serial'</span> =&gt; <span class="string token">'UX301'</span>, <span class="string token">'type'</span> =&gt; <span class="string token">'screen'</span>, <span class="string token">'year'</span> =&gt; <span class="number token">2009</span>,
 ]);
@@ -1061,7 +1140,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 */</span>
 </code></pre>
 <p>你也可以将回调传递给该方法。回调应通过以下方式返回值以作为集合的键：</p>
-<pre><code><span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;keyBy(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<pre><code><span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;keyBy(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> strtoupper(<span class="variable token">$item</span>[<span class="string token">'product_id'</span>]);
 });
 
@@ -1091,7 +1170,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><a name="method-last"></a></p>
 <h4 id="last-collection-method"><code>last()</code> {.collection-method}</h4>
 <p><code>last</code> 方法返回集合中通过给定真值测试的最后一个元素：</p>
-<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;last(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;last(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &lt; <span class="number token">3</span>;
 });
 
@@ -1102,18 +1181,39 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 
 <span class="comment token">// 4</span>
 </code></pre>
+<p><a name="method-lazy"></a></p>
+<h4 id="lazy-collection-method"><code>lazy()</code> {.collection-method}</h4>
+<p><code>lazy</code> 方法从底层的项目数组中返回一个新的 <a href="#lazy-collections"><code>LazyCollection</code></a> 实例。</p>
+<pre><code><span class="variable token">$lazyCollection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;lazy();
+
+get_class(<span class="variable token">$lazyCollection</span>);
+
+<span class="comment token">// Illuminate\Support\LazyCollection</span>
+
+<span class="variable token">$lazyCollection</span>-&gt;all();
+
+<span class="comment token">// [1, 2, 3, 4]</span>
+</code></pre>
+<p>当你需要对一个包含许多项目的巨大 <code>Collection</code> 进行转换时，这一点特别有用。</p>
+<pre><code><span class="variable token">$count</span> = <span class="variable token">$hugeCollection</span>
+    -&gt;lazy()
+    -&gt;where(<span class="string token">'country'</span>, <span class="string token">'FR'</span>)
+    -&gt;where(<span class="string token">'balance'</span>, <span class="string token">'&gt;'</span>, <span class="string token">'100'</span>)
+    -&gt;count();
+</code></pre>
+<p>通过将集合转换为 <code>LazyCollection</code>，我们避免了分配大量的额外内存。虽然原始集合仍然在内存中保留 <em>它的</em> 值，但后续的过滤器不会。因此，在过滤集合的结果时，几乎没有额外的内存被分配。</p>
 <p><a name="method-macro"></a></p>
 <h4 id="macro-collection-method"><code>macro()</code> {.collection-method}</h4>
 <p>静态<code>macro()</code>方法允许你在运行时向「集合」类添加方法。有关详细信息，请参阅有关 <a href="#extending-collections">扩展集合</a> 的文档。</p>
 <p><a name="method-make"></a></p>
-<h4 id="make"><code>make()</code></h4>
+<h4 id="make-collection-method"><code>make()</code> {.collection-method}</h4>
 <p>静态 <code>make</code> 方法可以创建一个新的集合实例。请参照 <a href="#creating-collections">创建集合</a> 部分。</p>
 <p><a name="method-map"></a></p>
-<h4 id="map"><code>map()</code></h4>
-<p><code>map</code>方法遍历集合并将每一个值传入给定的回调函数。该回调函数可以任意修改集合项并返回，从而生成被修改过集合项的新集合:</p>
+<h4 id="map-collection-method"><code>map()</code> {.collection-method}</h4>
+<p>静态 <code>make</code> 方法可以创建一个新的集合实例。请参照 <a href="#creating-collections">创建集合</a> 部分。</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
 
-<span class="variable token">$multiplied</span> = <span class="variable token">$collection</span>-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$multiplied</span> = <span class="variable token">$collection</span>-&gt;map(<span class="keyword token">function</span> (int <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> * <span class="number token">2</span>;
 });
 
@@ -1122,23 +1222,19 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [2, 4, 6, 8, 10]</span>
 </code></pre>
 <blockquote>
-<p>注意：与其他大多数集合方法一样， <code>map</code> 会返回一个新的集合实例；它不会修改原集合。如果你想修改原集合，请使用 <a href="#method-transform"><code>transform</code></a> 方法。</p>
+<p><strong>注意：</strong>与其他大多数集合方法一样， <code>map</code> 会返回一个新的集合实例；它不会修改原集合。如果你想修改原集合，请使用 <a href="#method-transform"><code>transform</code></a> 方法。</p>
 </blockquote>
 <p><a name="method-mapinto"></a></p>
-<h4 id="mapinto"><code>mapInto()</code></h4>
+<h4 id="mapinto-collection-method"><code>mapInto()</code> {.collection-method}</h4>
 <p>该 <code>mapInto()</code> 方法可以迭代集合，通过将值传递给构造函数来创建给定类的新实例：</p>
 <pre><code><span class="keyword token">class</span> Currency
 {
     <span class="comment token">/**
      * Create a new currency instance.
-     *
-     *<span class="phpdoc token"> @param</span>  string  $code
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">function</span> __construct(string <span class="variable token">$code</span>)
-    {
-        <span class="variable token">$this</span>-&gt;code = <span class="variable token">$code</span>;
-    }
+    <span class="keyword token">function</span> __construct(
+        <span class="keyword token">public</span> string <span class="variable token">$code</span>
+    ) {}
 }
 
 <span class="variable token">$collection</span> = collect([<span class="string token">'USD'</span>, <span class="string token">'EUR'</span>, <span class="string token">'GBP'</span>]);
@@ -1150,13 +1246,13 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [Currency('USD'), Currency('EUR'), Currency('GBP')]</span>
 </code></pre>
 <p><a name="method-mapspread"></a></p>
-<h4 id="mapspread"><code>mapSpread()</code></h4>
+<h4 id="mapspread-collection-method"><code>mapSpread()</code> {.collection-method}</h4>
 <p>该 <code>mapSpread</code> 方法可以迭代集合，将每个嵌套项值给指定的回调函数。该回调函数可以自由修改该集合项并返回，从而生成被修改过集合项的新集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">0</span>, <span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>, <span class="number token">7</span>, <span class="number token">8</span>, <span class="number token">9</span>]);
 
 <span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;chunk(<span class="number token">2</span>);
 
-<span class="variable token">$sequence</span> = <span class="variable token">$chunks</span>-&gt;mapSpread(<span class="keyword token">function</span> (<span class="variable token">$even</span>, <span class="variable token">$odd</span>) {
+<span class="variable token">$sequence</span> = <span class="variable token">$chunks</span>-&gt;mapSpread(<span class="keyword token">function</span> (int <span class="variable token">$even</span>, int <span class="variable token">$odd</span>) {
     <span class="keyword token">return</span> <span class="variable token">$even</span> + <span class="variable token">$odd</span>;
 });
 
@@ -1165,7 +1261,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [1, 5, 9, 13, 17]</span>
 </code></pre>
 <p><a name="method-maptogroups"></a></p>
-<h4 id="maptogroups"><code>mapToGroups()</code></h4>
+<h4 id="maptogroups-collection-method"><code>mapToGroups()</code> {.collection-method}</h4>
 <p>该 <code>mapToGroups</code> 方法通过给定的回调函数对集合项进行分组。该回调函数应该返回一个包含单个键 / 值对的关联数组，从而生成一个分组值的新集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [
@@ -1182,7 +1278,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     ]
 ]);
 
-<span class="variable token">$grouped</span> = <span class="variable token">$collection</span>-&gt;mapToGroups(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$grouped</span> = <span class="variable token">$collection</span>-&gt;mapToGroups(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> [<span class="variable token">$item</span>[<span class="string token">'department'</span>] =&gt; <span class="variable token">$item</span>[<span class="string token">'name'</span>]];
 });
 
@@ -1215,7 +1311,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     ]
 ]);
 
-<span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;mapWithKeys(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;mapWithKeys(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> [<span class="variable token">$item</span>[<span class="string token">'email'</span>] =&gt; <span class="variable token">$item</span>[<span class="string token">'name'</span>]];
 });
 
@@ -1356,7 +1452,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 </code></pre>
 <p>关于 <code>only</code> 的反义词，见<a href="#method-except">except</a> 方法。</p>
 <blockquote>
-<p>技巧：使用 <a href="eloquent-collections.html#method-only">Eloquent Collections</a> 时会修改此方法的行为。</p>
+<p><strong>技巧：</strong>使用 <a href="eloquent-collections.html#method-only">Eloquent Collections</a> 时会修改此方法的行为。</p>
 </blockquote>
 <p><a name="method-pad"></a></p>
 <h4 id="pad-collection-method"><code>pad()</code> {.collection-method}</h4>
@@ -1377,11 +1473,11 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [0, 0, 'A', 'B', 'C']</span>
 </code></pre>
 <p><a name="method-partition"></a></p>
-<h4 id="partition"><code>partition()</code></h4>
+<h4 id="partition-collection-method"><code>partition()</code> {.collection-method}</h4>
 <p>该 <code>partition</code> 方法可以与 PHP 数组解构相结合，以将通过给定真值测试的元素与未通过的元素分开：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>]);
 
-[<span class="variable token">$underThree</span>, <span class="variable token">$equalOrAboveThree</span>] = <span class="variable token">$collection</span>-&gt;partition(<span class="keyword token">function</span> (<span class="variable token">$i</span>) {
+[<span class="variable token">$underThree</span>, <span class="variable token">$equalOrAboveThree</span>] = <span class="variable token">$collection</span>-&gt;partition(<span class="keyword token">function</span> (int <span class="variable token">$i</span>) {
     <span class="keyword token">return</span> <span class="variable token">$i</span> &lt; <span class="number token">3</span>;
 });
 
@@ -1394,36 +1490,27 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [3, 4, 5, 6]</span>
 </code></pre>
 <p><a name="method-pipe"></a></p>
-<h4 id="pipe"><code>pipe()</code></h4>
+<h4 id="pipe-collection-method"><code>pipe()</code> {.collection-method}</h4>
 <p>该 <code>pipe</code> 可以把集合放到回调参数中并返回回调的结果：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$piped</span> = <span class="variable token">$collection</span>-&gt;pipe(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$piped</span> = <span class="variable token">$collection</span>-&gt;pipe(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;sum();
 });
 
 <span class="comment token">// 6</span>
 </code></pre>
 <p><a name="method-pipeinto"></a></p>
-<h4 id="pipeinto"><code>pipeInto()</code></h4>
+<h4 id="pipeinto-collection-method"><code>pipeInto()</code> {.collection-method}</h4>
 <p>该 <code>pipeInto</code> 方法创建一个给定类的新实例，并将集合传递给构造函数：</p>
 <pre><code><span class="keyword token">class</span> ResourceCollection
 {
     <span class="comment token">/**
-     * The Collection instance.
-     */</span>
-    <span class="keyword token">public</span> <span class="variable token">$collection</span>;
-
-    <span class="comment token">/**
      * Create a new ResourceCollection instance.
-     *
-     *<span class="phpdoc token"> @param</span>  Collection  $collection
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(Collection <span class="variable token">$collection</span>)
-    {
-        <span class="variable token">$this</span>-&gt;collection = <span class="variable token">$collection</span>;
-    }
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+      <span class="keyword token">public</span> Collection <span class="variable token">$collection</span>,
+    ) {}
 }
 
 <span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
@@ -1435,15 +1522,17 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [1, 2, 3]</span>
 </code></pre>
 <p><a name="method-pipethrough"></a></p>
-<h4 id="pipethrough"><code>pipeThrough()</code></h4>
+<h4 id="pipethrough-collection-method"><code>pipeThrough()</code> {.collection-method}</h4>
 <p>该 <code>pipeThrough</code> 方法将集合传递给给定的闭包数组并返回执行的闭包的结果：</p>
-<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Collection;
+
+<span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
 <span class="variable token">$result</span> = <span class="variable token">$collection</span>-&gt;pipeThrough([
-    <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
         <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;merge([<span class="number token">4</span>, <span class="number token">5</span>]);
     },
-    <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
         <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;sum();
     },
 ]);
@@ -1451,7 +1540,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// 15</span>
 </code></pre>
 <p><a name="method-pluck"></a></p>
-<h4 id="pluck"><code>pluck()</code></h4>
+<h4 id="pluck-collection-method"><code>pluck()</code> {.collection-method}</h4>
 <p>该 <code>pluck</code> 可以获取集合中指定键对应的所有值：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product_id'</span> =&gt; <span class="string token">'prod-100'</span>, <span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>],
@@ -1474,9 +1563,15 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p>该 <code>pluck</code> 也支持利用「.」标记的方法取出多维数组的键值：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [
+        <span class="string token">'name'</span> =&gt; <span class="string token">'Laracon'</span>,
         <span class="string token">'speakers'</span> =&gt; [
             <span class="string token">'first_day'</span> =&gt; [<span class="string token">'Rosa'</span>, <span class="string token">'Judith'</span>],
-            <span class="string token">'second_day'</span> =&gt; [<span class="string token">'Angela'</span>, <span class="string token">'Kathleen'</span>],
+        ],
+    ],
+    [
+        <span class="string token">'name'</span> =&gt; <span class="string token">'VueConf'</span>,
+        <span class="string token">'speakers'</span> =&gt; [
+            <span class="string token">'first_day'</span> =&gt; [<span class="string token">'Abigail'</span>, <span class="string token">'Joey'</span>],
         ],
     ],
 ]);
@@ -1485,7 +1580,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 
 <span class="variable token">$plucked</span>-&gt;all();
 
-<span class="comment token">// ['Rosa', 'Judith']</span>
+<span class="comment token">// [['Rosa', 'Judith'], ['Abigail', 'Joey']]</span>
 </code></pre>
 <p>如果存在重复键，则将最后一个匹配元素插入到 plucked 集合中：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
@@ -1597,6 +1692,15 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [2, 4, 5] - (retrieved randomly)</span>
 </code></pre>
 <p>如果集合实例的项目少于请求的项目，则 <code>random</code> 方法将抛出 <code>InvalidArgumentException</code>。</p>
+<p><code>random</code> 方法也接受一个闭包，它将接收当前集合实例。</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Collection;
+
+<span class="variable token">$random</span> = <span class="variable token">$collection</span>-&gt;random(fn (Collection <span class="variable token">$items</span>) =&gt; min(<span class="number token">10</span>, count(<span class="variable token">$items</span>)));
+
+<span class="variable token">$random</span>-&gt;all();
+
+<span class="comment token">// [1, 2, 3, 4, 5] - (retrieved randomly)</span>
+</code></pre>
 <p><a name="method-range"></a></p>
 <h4 id="range-collection-method"><code>range()</code> {.collection-method}</h4>
 <p><code>range</code> 方法返回一个包含指定范围之间整数的集合：</p>
@@ -1611,14 +1715,14 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><code>reduce</code> 方法将集合减少为单个值，将每次迭代的结果传递给后续迭代：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$total</span> = <span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (<span class="variable token">$carry</span>, <span class="variable token">$item</span>) {
+<span class="variable token">$total</span> = <span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (int <span class="variable token">$carry</span>, int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$carry</span> + <span class="variable token">$item</span>;
 });
 
 <span class="comment token">// 6</span>
 </code></pre>
 <p><code>$carry</code> 在第一次迭代时的值为 <code>null</code>；但是，你可以通过将第二个参数传递给 <code>reduce</code> 来指定其初始值：</p>
-<pre><code><span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (<span class="variable token">$carry</span>, <span class="variable token">$item</span>) {
+<pre><code><span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (int <span class="variable token">$carry</span>, int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$carry</span> + <span class="variable token">$item</span>;
 }, <span class="number token">4</span>);
 
@@ -1637,7 +1741,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     <span class="string token">'eur'</span> =&gt; <span class="number token">1.22</span>,
 ];
 
-<span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (<span class="variable token">$carry</span>, <span class="variable token">$value</span>, <span class="variable token">$key</span>) <span class="keyword token">use</span> (<span class="variable token">$ratio</span>) {
+<span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (int <span class="variable token">$carry</span>, int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) <span class="keyword token">use</span> (<span class="variable token">$ratio</span>) {
     <span class="keyword token">return</span> <span class="variable token">$carry</span> + (<span class="variable token">$value</span> * <span class="variable token">$ratio</span>[<span class="variable token">$key</span>]);
 });
 
@@ -1648,7 +1752,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><code>reduceSpread</code> 方法将集合缩减为一个值数组，将每次迭代的结果传递给后续迭代。此方法类似于 <code>reduce</code> 方法；但是，它可以接受多个初始值：</p>
 <pre><code>[<span class="variable token">$creditsRemaining</span>, <span class="variable token">$batch</span>] = Image::where(<span class="string token">'status'</span>, <span class="string token">'unprocessed'</span>)
     -&gt;get()
-    -&gt;reduceSpread(<span class="keyword token">function</span> (<span class="variable token">$creditsRemaining</span>, <span class="variable token">$batch</span>, <span class="variable token">$image</span>) {
+    -&gt;reduceSpread(<span class="keyword token">function</span> (int <span class="variable token">$creditsRemaining</span>, Collection <span class="variable token">$batch</span>, Image <span class="variable token">$image</span>) {
         <span class="keyword token">if</span> (<span class="variable token">$creditsRemaining</span> &gt;= <span class="variable token">$image</span>-&gt;creditsRequired()) {
             <span class="variable token">$batch</span>-&gt;push(<span class="variable token">$image</span>);
 
@@ -1663,7 +1767,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><code>reject</code> 方法使用给定的闭包过滤集合。如果应从结果集合中删除项目，则闭包应返回 <code>true</code>：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;reject(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;reject(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
 });
 
@@ -1674,7 +1778,6 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p>对于 <code>reject</code> 方法的逆操作，请参见 <a href="#method-filter"><code>filter</code></a> 方法。</p>
 <p><a name="method-replace"></a></p>
 <h4 id="replace-collection-method"><code>replace()</code> {.collection-method}</h4>
-<p><code>replace</code> 方法的行为类似于 <code>merge</code>；但是，除了覆盖具有字符串键的匹配项之外，<code>replace</code> 方法还将覆盖集合中具有匹配数字键的项：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'Taylor'</span>, <span class="string token">'Abigail'</span>, <span class="string token">'James'</span>]);
 
 <span class="variable token">$replaced</span> = <span class="variable token">$collection</span>-&gt;replace([<span class="number token">1</span> =&gt; <span class="string token">'Victoria'</span>, <span class="number token">3</span> =&gt; <span class="string token">'Finn'</span>]);
@@ -1739,7 +1842,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// false</span>
 </code></pre>
 <p>或者，你可以提供自己的闭包来搜索通过给定真值测试的第一个项目：</p>
-<pre><code>collect([<span class="number token">2</span>, <span class="number token">4</span>, <span class="number token">6</span>, <span class="number token">8</span>])-&gt;search(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<pre><code>collect([<span class="number token">2</span>, <span class="number token">4</span>, <span class="number token">6</span>, <span class="number token">8</span>])-&gt;search(<span class="keyword token">function</span> (int <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> &gt; <span class="number token">5</span>;
 });
 
@@ -1780,34 +1883,9 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 
 <span class="comment token">// [3, 2, 5, 1, 4] - (generated randomly)</span>
 </code></pre>
-<p><a name="method-sliding"></a></p>
-<h4 id="sliding-collection-method"><code>sliding()</code> {.collection-method}</h4>
-<p><code>sliding</code> 方法返回一个新的块集合，表示集合中项目的「滑动窗口」视图：</p>
-<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
-
-<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;sliding(<span class="number token">2</span>);
-
-<span class="variable token">$chunks</span>-&gt;toArray();
-
-<span class="comment token">// [[1, 2], [2, 3], [3, 4], [4, 5]]</span>
-</code></pre>
-<p>这与 <a href="#method-eachspread"><code>eachSpread</code></a> 方法结合使用特别有用：</p>
-<pre><code><span class="variable token">$transactions</span>-&gt;sliding(<span class="number token">2</span>)-&gt;eachSpread(<span class="keyword token">function</span> (<span class="variable token">$previous</span>, <span class="variable token">$current</span>) {
-    <span class="variable token">$current</span>-&gt;total = <span class="variable token">$previous</span>-&gt;total + <span class="variable token">$current</span>-&gt;amount;
-});
-</code></pre>
-<p>你可以选择传递第二个「步长」值，该值确定每个块的第一项之间的距离：</p>
-<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
-
-<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;sliding(<span class="number token">3</span>, step: <span class="number token">2</span>);
-
-<span class="variable token">$chunks</span>-&gt;toArray();
-
-<span class="comment token">// [[1, 2, 3], [3, 4, 5]]</span>
-</code></pre>
 <p><a name="method-skip"></a></p>
 <h4 id="skip-collection-method"><code>skip()</code> {.collection-method}</h4>
-<p><code>skip</code> 方法返回一个新集合，从集合的开头删除给定数量的元素：</p>
+<p><code>skip</code> 方法返回一个新的集合，并从集合的开始删除指定数量的元素。</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>, <span class="number token">7</span>, <span class="number token">8</span>, <span class="number token">9</span>, <span class="number token">10</span>]);
 
 <span class="variable token">$collection</span> = <span class="variable token">$collection</span>-&gt;skip(<span class="number token">4</span>);
@@ -1821,7 +1899,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><code>skipUntil</code> 方法跳过集合中的项目，直到给定的回调返回 <code>true</code>，然后将集合中的剩余项目作为新的集合实例返回：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;skipUntil(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;skipUntil(<span class="keyword token">function</span> (int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> &gt;= <span class="number token">3</span>;
 });
 
@@ -1839,14 +1917,14 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [3, 4]</span>
 </code></pre>
 <blockquote>
-<p>注意：如果未找到给定值或回调从不返回 <code>true</code>，则 <code>skipUntil</code> 方法将返回一个空集合。</p>
+<p><strong>注意：</strong>如果没有找到给定的值或者回调从未返回 <code>true</code>，<code>skipUntil</code> 方法将返回一个空集合。</p>
 </blockquote>
 <p><a name="method-skipwhile"></a></p>
 <h4 id="skipwhile-collection-method"><code>skipWhile()</code> {.collection-method}</h4>
 <p><code>skipWhile</code> 方法在给定回调返回 <code>true</code> 时跳过集合中的项目，然后将集合中的剩余项目作为新集合返回：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;skipWhile(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;skipWhile(<span class="keyword token">function</span> (int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> &lt;= <span class="number token">3</span>;
 });
 
@@ -1855,11 +1933,11 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [4]</span>
 </code></pre>
 <blockquote>
-<p>注意：如果回调从不返回 <code>false</code>，则 <code>skipWhile</code> 方法将返回一个空集合。</p>
+<p><strong>注意：</strong>如果回调从未返回 <code>false</code>，<code>skipWhile</code> 方法将返回一个空集合。</p>
 </blockquote>
 <p><a name="method-slice"></a></p>
 <h4 id="slice-collection-method"><code>slice()</code> {.collection-method}</h4>
-<p><code>slice</code> 方法返回从给定索引开始的集合切片：</p>
+<p><code>slice</code> 方法返回从给定索引开始的集合的一个片断。</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>, <span class="number token">6</span>, <span class="number token">7</span>, <span class="number token">8</span>, <span class="number token">9</span>, <span class="number token">10</span>]);
 
 <span class="variable token">$slice</span> = <span class="variable token">$collection</span>-&gt;slice(<span class="number token">4</span>);
@@ -1868,24 +1946,49 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 
 <span class="comment token">// [5, 6, 7, 8, 9, 10]</span>
 </code></pre>
-<p>如果你想限制返回切片的大小，请将所需大小作为第二个参数传递给该方法：</p>
+<p>如果你想限制返回切片的大小，请将所需的大小作为第二个参数传给该方法。</p>
 <pre><code><span class="variable token">$slice</span> = <span class="variable token">$collection</span>-&gt;slice(<span class="number token">4</span>, <span class="number token">2</span>);
 
 <span class="variable token">$slice</span>-&gt;all();
 
 <span class="comment token">// [5, 6]</span>
 </code></pre>
-<p>默认情况下，返回的切片将保留键。如果你不希望保留原始键，可以使用 <a href="#method-values"><code>values</code></a> 方法重新索引它们。</p>
+<p>返回的切片将默认保留键值。如果你不希望保留原始键，你可以使用 <a href="#method-values"><code>values</code></a> 方法来重新索引它们。</p>
+<p><a name="method-sliding"></a></p>
+<h4 id="sliding-collection-method"><code>sliding()</code> {.collection-method}</h4>
+<p><code>sliding</code> 方法返回一个新的块集合，表示集合中项目的「滑动窗口」视图：</p>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
+
+<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;sliding(<span class="number token">2</span>);
+
+<span class="variable token">$chunks</span>-&gt;toArray();
+
+<span class="comment token">// [[1, 2], [2, 3], [3, 4], [4, 5]]</span>
+</code></pre>
+<p>这与 <a href="#method-eachspread"><code>eachSpread</code></a> 方法结合使用特别有用：</p>
+<pre><code><span class="variable token">$transactions</span>-&gt;sliding(<span class="number token">2</span>)-&gt;eachSpread(<span class="keyword token">function</span> (Collection <span class="variable token">$previous</span>, Collection <span class="variable token">$current</span>) {
+    <span class="variable token">$current</span>-&gt;total = <span class="variable token">$previous</span>-&gt;total + <span class="variable token">$current</span>-&gt;amount;
+});
+</code></pre>
+<p>你可以选择传递第二个「步长」值，该值确定每个块的第一项之间的距离：</p>
+<pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
+
+<span class="variable token">$chunks</span> = <span class="variable token">$collection</span>-&gt;sliding(<span class="number token">3</span>, step: <span class="number token">2</span>);
+
+<span class="variable token">$chunks</span>-&gt;toArray();
+
+<span class="comment token">// [[1, 2, 3], [3, 4, 5]]</span>
+</code></pre>
 <p><a name="method-sole"></a></p>
 <h4 id="sole-collection-method"><code>sole()</code> {.collection-method}</h4>
-<p><code>sole</code> 方法返回集合中通过给定真值测试的第一个元素，但前提是真值测试与一个元素完全匹配：</p>
-<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;sole(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$key</span>) {
+<p><code>sole</code> 方法返回集合中第一个通过给定真值测试的元素，但只有在真值测试正好匹配一个元素的情况下。</p>
+<pre><code>collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;sole(<span class="keyword token">function</span> (int <span class="variable token">$value</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span> === <span class="number token">2</span>;
 });
 
 <span class="comment token">// 2</span>
 </code></pre>
-<p>你还可以将键/值对传递给 <code>sole</code> 方法，该方法将返回集合中与给定对匹配的第一个元素，但前提是它恰好有一个元素匹配：</p>
+<p>你也可以向 <code>sole</code> 方法传递一个键/值对，它将返回集合中第一个与给定对相匹配的元素，但只有当它正好有一个元素相匹配时。</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Chair'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">100</span>],
@@ -1895,7 +1998,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 
 <span class="comment token">// ['product' =&gt; 'Chair', 'price' =&gt; 100]</span>
 </code></pre>
-<p>或者，如果只有一个元素，你也可以调用不带参数的 <code>sole</code> 方法来获取集合中的第一个元素：</p>
+<p>另外，如果只有一个元素，你也可以调用没有参数的 <code>sole</code> 方法来获得集合中的第一个元素。</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
 ]);
@@ -1921,7 +2024,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 </code></pre>
 <p>如果你的排序需求更高级，你可以使用自己的算法将回调传递给「排序」。参考 PHP 文档<a href="https://secure.php.net/manual/en/function.uasort.php#refsect1-function.uasort-parameters"><code>uasort</code></a>，就是集合的<code>sort</code>方法 调用内部使用。</p>
 <blockquote>
-<p>技巧：如果你需要对嵌套数组或对象的集合进行排序，请参阅 <a href="#method-sortby"><code>sortBy</code></a> 和 <a href="#method-sortbydesc"><code>sortByDesc</code></a> 方法。</p>
+<p><strong>技巧：</strong>如果你需要对嵌套数组或对象的集合进行排序，请参阅 <a href="#method-sortby"><code>sortBy</code></a> 和 <a href="#method-sortbydesc"><code>sortByDesc</code></a> 方法。</p>
 </blockquote>
 <p><a name="method-sortby"></a></p>
 <h4 id="sortby-collection-method"><code>sortBy()</code> {.collection-method}</h4>
@@ -1970,7 +2073,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Bookcase'</span>, <span class="string token">'colors'</span> =&gt; [<span class="string token">'Red'</span>, <span class="string token">'Beige'</span>, <span class="string token">'Brown'</span>]],
 ]);
 
-<span class="variable token">$sorted</span> = <span class="variable token">$collection</span>-&gt;sortBy(<span class="keyword token">function</span> (<span class="variable token">$product</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$sorted</span> = <span class="variable token">$collection</span>-&gt;sortBy(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$product</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> count(<span class="variable token">$product</span>[<span class="string token">'colors'</span>]);
 });
 
@@ -2017,8 +2120,8 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 ]);
 
 <span class="variable token">$sorted</span> = <span class="variable token">$collection</span>-&gt;sortBy([
-    fn (<span class="variable token">$a</span>, <span class="variable token">$b</span>) =&gt; <span class="variable token">$a</span>[<span class="string token">'name'</span>] &lt;=&gt; <span class="variable token">$b</span>[<span class="string token">'name'</span>],
-    fn (<span class="variable token">$a</span>, <span class="variable token">$b</span>) =&gt; <span class="variable token">$b</span>[<span class="string token">'age'</span>] &lt;=&gt; <span class="variable token">$a</span>[<span class="string token">'age'</span>],
+    fn (<span class="keyword token">array</span> <span class="variable token">$a</span>, <span class="keyword token">array</span> <span class="variable token">$b</span>) =&gt; <span class="variable token">$a</span>[<span class="string token">'name'</span>] &lt;=&gt; <span class="variable token">$b</span>[<span class="string token">'name'</span>],
+    fn (<span class="keyword token">array</span> <span class="variable token">$a</span>, <span class="keyword token">array</span> <span class="variable token">$b</span>) =&gt; <span class="variable token">$b</span>[<span class="string token">'age'</span>] &lt;=&gt; <span class="variable token">$a</span>[<span class="string token">'age'</span>],
 ]);
 
 <span class="variable token">$sorted</span>-&gt;values()-&gt;all();
@@ -2180,7 +2283,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Bookcase'</span>, <span class="string token">'colors'</span> =&gt; [<span class="string token">'Red'</span>, <span class="string token">'Beige'</span>, <span class="string token">'Brown'</span>]],
 ]);
 
-<span class="variable token">$collection</span>-&gt;sum(<span class="keyword token">function</span> (<span class="variable token">$product</span>) {
+<span class="variable token">$collection</span>-&gt;sum(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$product</span>) {
     <span class="keyword token">return</span> count(<span class="variable token">$product</span>[<span class="string token">'colors'</span>]);
 });
 
@@ -2211,7 +2314,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p><code>takeUntil</code> 方法返回集合中的项目，直到给定的回调返回 <code>true</code>：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;takeUntil(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;takeUntil(<span class="keyword token">function</span> (int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> &gt;= <span class="number token">3</span>;
 });
 
@@ -2229,14 +2332,14 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [1, 2]</span>
 </code></pre>
 <blockquote>
-<p>注意：如果未找到给定值或回调从未返回 <code>true</code>，则 <code>takeUntil</code> 方法将返回集合中的所有项目。</p>
+<p><strong>注意：</strong>如果未找到给定值或回调从未返回 <code>true</code>，则 <code>takeUntil</code> 方法将返回集合中的所有项目。</p>
 </blockquote>
 <p><a name="method-takewhile"></a></p>
 <h4 id="takewhile-collection-method"><code>takeWhile()</code> {.collection-method}</h4>
 <p><code>takeWhile</code> 方法返回集合中的项目，直到给定的回调返回 <code>false</code>：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>]);
 
-<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;takeWhile(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<span class="variable token">$subset</span> = <span class="variable token">$collection</span>-&gt;takeWhile(<span class="keyword token">function</span> (int <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> &lt; <span class="number token">3</span>;
 });
 
@@ -2245,14 +2348,14 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [1, 2]</span>
 </code></pre>
 <blockquote>
-<p>注意：如果回调从不返回 <code>false</code>，则 <code>takeWhile</code> 方法将返回集合中的所有项目。</p>
+<p><strong>注意：</strong>如果回调从不返回 <code>false</code>，则 <code>takeWhile</code> 方法将返回集合中的所有项目。</p>
 </blockquote>
 <p><a name="method-tap"></a></p>
 <h4 id="tap-collection-method"><code>tap()</code> {.collection-method}</h4>
 <p><code>tap</code> 方法将集合传递给给定的回调，允许你在特定点「点击」到集合中并在不影响集合本身的情况下对项目执行某些操作。然后集合由 <code>tap</code> 方法返回：</p>
 <pre><code>collect([<span class="number token">2</span>, <span class="number token">4</span>, <span class="number token">3</span>, <span class="number token">1</span>, <span class="number token">5</span>])
     -&gt;sort()
-    -&gt;tap(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    -&gt;tap(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
         Log::debug(<span class="string token">'Values after sorting'</span>, <span class="variable token">$collection</span>-&gt;values()-&gt;all());
     })
     -&gt;shift();
@@ -2260,9 +2363,9 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// 1</span>
 </code></pre>
 <p><a name="method-times"></a></p>
-<h4 id="times"><code>times()</code></h4>
+<h4 id="times-collection-method"><code>times()</code> {.collection-method}</h4>
 <p>静态 <code>times</code> 方法通过调用给定次数的回调函数来创建新集合：</p>
-<pre><code><span class="variable token">$collection</span> = Collection::times(<span class="number token">10</span>, <span class="keyword token">function</span> (<span class="variable token">$number</span>) {
+<pre><code><span class="variable token">$collection</span> = Collection::times(<span class="number token">10</span>, <span class="keyword token">function</span> (int <span class="variable token">$number</span>) {
     <span class="keyword token">return</span> <span class="variable token">$number</span> * <span class="number token">9</span>;
 });
 
@@ -2271,8 +2374,8 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [9, 18, 27, 36, 45, 54, 63, 72, 81, 90]</span>
 </code></pre>
 <p><a name="method-toarray"></a></p>
-<h4 id="toarray"><code>toArray()</code></h4>
-<p>该 <code>toArray</code> 方法将集合转换成 PHP <code>array</code>。如果集合的值是 <a href="eloquent.html">Eloquent</a> 模型，那也会被转换成数组：</p>
+<h4 id="toarray-collection-method"><code>toArray()</code> {.collection-method}</h4>
+<p>该 <code>toArray</code> 方法将集合转换成 PHP <code>array</code>。如果集合的值是 <a href="/docs/laravel/10.x/eloquent">Eloquent</a> 模型，那也会被转换成数组：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>]);
 
 <span class="variable token">$collection</span>-&gt;toArray();
@@ -2284,10 +2387,10 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 */</span>
 </code></pre>
 <blockquote>
-<p>注意：<code>toArray</code> 也会将 <code>Arrayable</code> 的实例、所有集合的嵌套对象转换为数组。如果你想获取原数组，可以使用 <a href="#method-all"><code>all</code></a> 方法。</p>
+<p><strong>注意：</strong><code>toArray</code> 也会将 <code>Arrayable</code> 的实例、所有集合的嵌套对象转换为数组。如果你想获取原数组，可以使用 <a href="#method-all"><code>all</code></a> 方法。</p>
 </blockquote>
 <p><a name="method-tojson"></a></p>
-<h4 id="tojson"><code>toJson()</code></h4>
+<h4 id="tojson-collection-method"><code>toJson()</code> {.collection-method}</h4>
 <p>该 <code>toJson</code> 方法将集合转换成 JSON 字符串：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>]);
 
@@ -2296,11 +2399,11 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// '{"name":"Desk", "price":200}'</span>
 </code></pre>
 <p><a name="method-transform"></a></p>
-<h4 id="transform"><code>transform()</code></h4>
+<h4 id="transform-collection-method"><code>transform()</code> {.collection-method}</h4>
 <p>该 <code>transform</code> 方法会遍历整个集合，并对集合中的每个元素都会调用其回调函数。集合中的元素将被替换为回调函数返回的值：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>]);
 
-<span class="variable token">$collection</span>-&gt;transform(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+<span class="variable token">$collection</span>-&gt;transform(<span class="keyword token">function</span> (int <span class="variable token">$item</span>, int <span class="variable token">$key</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span> * <span class="number token">2</span>;
 });
 
@@ -2309,10 +2412,10 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [2, 4, 6, 8, 10]</span>
 </code></pre>
 <blockquote>
-<p>注意：与大多数集合方法不同，<code>transform</code> 会修改集合本身。如果你想创建新集合，可以使用 <a href="#method-map"><code>map</code></a> 方法。</p>
+<p><strong>注意：</strong>与大多数集合方法不同，<code>transform</code> 会修改集合本身。如果你想创建新集合，可以使用 <a href="#method-map"><code>map</code></a> 方法。</p>
 </blockquote>
 <p><a name="method-undot"></a></p>
-<h4 id="undot"><code>undot()</code></h4>
+<h4 id="undot-collection-method"><code>undot()</code> {.collection-method}</h4>
 <p><code>undot()</code> 方法将使用「点」表示法的一维集合扩展为多维集合：</p>
 <pre><code><span class="variable token">$person</span> = collect([
     <span class="string token">'name.first_name'</span> =&gt; <span class="string token">'Marie'</span>,
@@ -2322,7 +2425,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
     <span class="string token">'address.suburb'</span> =&gt; <span class="string token">'Detroit'</span>,
     <span class="string token">'address.state'</span> =&gt; <span class="string token">'MI'</span>,
     <span class="string token">'address.postcode'</span> =&gt; <span class="string token">'48219'</span>
-])
+]);
 
 <span class="variable token">$person</span> = <span class="variable token">$person</span>-&gt;undot();
 
@@ -2345,7 +2448,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 */</span>
 </code></pre>
 <p><a name="method-union"></a></p>
-<h4 id="union"><code>union()</code></h4>
+<h4 id="union-collection-method"><code>union()</code> {.collection-method}</h4>
 <p>该 <code>union</code> 方法将给定数组添加到集合中。如果给定的数组含有与原集合一样的键，则首选原始集合的值：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span> =&gt; [<span class="string token">'a'</span>], <span class="number token">2</span> =&gt; [<span class="string token">'b'</span>]]);
 
@@ -2356,7 +2459,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <span class="comment token">// [1 =&gt; ['a'], 2 =&gt; ['b'], 3 =&gt; ['c']]</span>
 </code></pre>
 <p><a name="method-unique"></a></p>
-<h4 id="unique"><code>unique()</code></h4>
+<h4 id="unique-collection-method"><code>unique()</code> {.collection-method}</h4>
 <p>该 <code>unique</code> 方法返回集合中所有唯一项。返回的集合保留着原数组的键，所以在这个例子中，我们使用 <a href="#method-values"><code>values</code></a> 方法把键重置为连续编号的索引：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">2</span>]);
 
@@ -2387,7 +2490,7 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 */</span>
 </code></pre>
 <p>最后，你还可以将自己的闭包传递给该 <code>unique</code> 方法，以指定哪个值应确定项目的唯一性：</p>
-<pre><code><span class="variable token">$unique</span> = <span class="variable token">$collection</span>-&gt;unique(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+<pre><code><span class="variable token">$unique</span> = <span class="variable token">$collection</span>-&gt;unique(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span>[<span class="string token">'brand'</span>].<span class="variable token">$item</span>[<span class="string token">'type'</span>];
 });
 
@@ -2404,21 +2507,21 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 </code></pre>
 <p>该 <code>unique</code> 方法在检查项目值时使用「宽松」模式比较，意味着具有整数值的字符串将被视为等于相同值的整数。你可以使用  <a href="#method-uniquestrict"><code>uniqueStrict</code></a>  方法做「严格」模式比较。</p>
 <blockquote>
-<p>技巧：这个方法的行为在使用 <a href="eloquent-collections.html#method-unique">Eloquent 集合</a> 时被修改。</p>
+<p><strong>技巧：</strong>这个方法的行为在使用 <a href="/docs/laravel/10.x/eloquent-collections#method-unique">Eloquent 集合</a> 时被修改。</p>
 </blockquote>
 <p><a name="method-uniquestrict"></a></p>
-<h4 id="uniquestrict"><code>uniqueStrict()</code></h4>
+<h4 id="uniquestrict-collection-method"><code>uniqueStrict()</code> {.collection-method}</h4>
 <p>这个方法与 <a href="#method-unique"><code>unique</code></a> 方法一样，然而，所有的值是用「严格」模式来比较的。</p>
 <p><a name="method-unless"></a></p>
-<h4 id="unless"><code>unless()</code></h4>
+<h4 id="unless-collection-method"><code>unless()</code> {.collection-method}</h4>
 <p>该 <code>unless</code> 方法当传入的第一个参数不为 <code>true</code> 的时候，将执行给定的回调函数：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">true</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">true</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">4</span>);
 });
 
-<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">false</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">false</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">5</span>);
 });
 
@@ -2429,9 +2532,9 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 <p>可以将第二个回调传递给该 <code>unless</code> 方法。 <code>unless</code> 当给方法的第一个参数计算结果为时，将执行第二个回调 <code>true</code>:</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">true</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;unless(<span class="keyword token">true</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">4</span>);
-}, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+}, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">5</span>);
 });
 
@@ -2441,13 +2544,13 @@ collect([])-&gt;join(<span class="string token">', '</span>, <span class="string
 </code></pre>
 <p>与 <code>unless</code> 相反的，请参见 <a href="#method-when"><code>when</code></a> 方法。</p>
 <p><a name="method-unlessempty"></a></p>
-<h4 id="unlessempty"><code>unlessEmpty()</code></h4>
+<h4 id="unlessempty-collection-method"><code>unlessEmpty()</code> {.collection-method}</h4>
 <p><a href="#method-whennotempty"><code>whenNotEmpty</code></a> 的别名方法。</p>
 <p><a name="method-unlessnotempty"></a></p>
-<h4 id="unlessnotempty"><code>unlessNotEmpty()</code></h4>
+<h4 id="unlessnotempty-collection-method"><code>unlessNotEmpty()</code> {.collection-method}</h4>
 <p><a href="#method-whenempty"><code>whenEmpty</code></a> 的别名方法。</p>
 <p><a name="method-unwrap"></a></p>
-<h4 id="unwrap"><code>unwrap()</code></h4>
+<h4 id="unwrap-collection-method"><code>unwrap()</code> {.collection-method}</h4>
 <p>静态 <code>unwrap</code> 方法返回集合内部的可用元素：</p>
 <pre><code>Collection::unwrap(collect(<span class="string token">'John Doe'</span>));
 
@@ -2461,8 +2564,20 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 
 <span class="comment token">// 'John Doe'</span>
 </code></pre>
+<p><a name="method-value"></a></p>
+<h4 id="value-collection-method"><code>value()</code> {.collection-method}</h4>
+<p><code>value</code> 方法从集合的第一个元素中检索一个给定的值。</p>
+<pre><code><span class="variable token">$collection</span> = collect([
+    [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
+    [<span class="string token">'product'</span> =&gt; <span class="string token">'Speaker'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">400</span>],
+]);
+
+<span class="variable token">$value</span> = <span class="variable token">$collection</span>-&gt;value(<span class="string token">'price'</span>);
+
+<span class="comment token">// 200</span>
+</code></pre>
 <p><a name="method-values"></a></p>
-<h4 id="values"><code>values()</code></h4>
+<h4 id="values-collection-method"><code>values()</code> {.collection-method}</h4>
 <p>该 <code>values</code> 方法返回键被重置为连续编号的新集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     <span class="number token">10</span> =&gt; [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
@@ -2481,15 +2596,16 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p><a name="method-when"></a></p>
-<h4 id="when"><code>when()</code></h4>
-<p>当 <code>when</code> 方法的第一个参数传入为 <code>true</code> 时，将执行给定的回调函数：</p>
+<h4 id="when-collection-method"><code>when()</code> {.collection-method}</h4>
+<p>当 <code>when</code> 方法的第一个参数传入为 <code>true</code> 时，将执行给定的回调函数。
+集合实例和给到 <code>when</code> 方法的第一个参数将被提供给闭包。</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">true</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">true</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>, int <span class="variable token">$value</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">4</span>);
 });
 
-<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">false</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">false</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>, int <span class="variable token">$value</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">5</span>);
 });
 
@@ -2500,9 +2616,9 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <p>可以将第二个回调传递给该 <code>when</code> 方法。当给 <code>when</code> 方法的第一个参数计算结果为 <code>false</code> 时，将执行第二个回调：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 
-<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">false</span>, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;when(<span class="keyword token">false</span>, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>, int <span class="variable token">$value</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">4</span>);
-}, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+}, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="number token">5</span>);
 });
 
@@ -2512,11 +2628,11 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 </code></pre>
 <p>与 <code>when</code> 相反的方法，请查看 <a href="#method-unless"><code>unless</code></a> 方法。</p>
 <p><a name="method-whenempty"></a></p>
-<h4 id="whenempty"><code>whenEmpty()</code></h4>
+<h4 id="whenempty-collection-method"><code>whenEmpty()</code> {.collection-method}</h4>
 <p>该 <code>whenEmpty</code> 方法是当集合为空时，将执行给定的回调函数：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'Michael'</span>, <span class="string token">'Tom'</span>]);
 
-<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'Adam'</span>);
 });
 
@@ -2527,7 +2643,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 
 <span class="variable token">$collection</span> = collect();
 
-<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'Adam'</span>);
 });
 
@@ -2538,9 +2654,9 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <p>当集合不为空时，可以将第二个闭包传递给 <code>whenEmpty</code> 将要执行的方法：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'Michael'</span>, <span class="string token">'Tom'</span>]);
 
-<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'Adam'</span>);
-}, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+}, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'Taylor'</span>);
 });
 
@@ -2550,11 +2666,11 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 </code></pre>
 <p>与 <code>whenEmpty</code> 相反的方法，请查看 <a href="#method-whennotempty"><code>whenNotEmpty</code></a> 方法。</p>
 <p><a name="method-whennotempty"></a></p>
-<h4 id="whennotempty"><code>whenNotEmpty()</code></h4>
+<h4 id="whennotempty-collection-method"><code>whenNotEmpty()</code> {.collection-method}</h4>
 <p>该 <code>whenNotEmpty</code> 方法当集合不为空时，将执行给定的回调函数：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'michael'</span>, <span class="string token">'tom'</span>]);
 
-<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'adam'</span>);
 });
 
@@ -2565,7 +2681,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 
 <span class="variable token">$collection</span> = collect();
 
-<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'adam'</span>);
 });
 
@@ -2576,9 +2692,9 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <p>可以将第二个闭包传递给 <code>whenNotEmpty</code> 将在集合为空时执行的方法：</p>
 <pre><code><span class="variable token">$collection</span> = collect();
 
-<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+<span class="variable token">$collection</span>-&gt;whenNotEmpty(<span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'adam'</span>);
-}, <span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+}, <span class="keyword token">function</span> (Collection <span class="variable token">$collection</span>) {
     <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;push(<span class="string token">'taylor'</span>);
 });
 
@@ -2588,7 +2704,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 </code></pre>
 <p>与 <code>whenNotEmpty</code> 相反的方法，请查看 <a href="#method-whenempty"><code>whenEmpty</code></a> 方法。</p>
 <p><a name="method-where"></a></p>
-<h4 id="where"><code>where()</code></h4>
+<h4 id="where-collection-method"><code>where()</code> {.collection-method}</h4>
 <p>该 <code>where</code> 方法通过给定的键 / 值对查询过滤集合的结果：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
@@ -2609,7 +2725,8 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p>该 <code>where</code> 方法在检查集合项值时使用「宽松」模式比较，这意味着具有整数值的字符串会被认为等于相同值的整数。你可以使用 <a href="#method-wherestrict"><code>whereStrict</code></a> 方法进行「严格」模式比较。</p>
-<p>而且，你还可以将一个比较运算符作为第二个参数传递。</p>
+<p>而且，你还可以将一个比较运算符作为第二个参数传递。
+支持的运算符是有 &#39;===&#39;, &#39;！==&#39;, &#39;！=&#39;, &#39;==&#39;, &#39;=&#39;, &#39;&lt;&gt;&#39;, &#39;&gt;&#39;, &#39;&lt;&#39;, &#39;&gt;=&#39;, 和 &#39;&lt;=&#39;。</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Jim'</span>, <span class="string token">'deleted_at'</span> =&gt; <span class="string token">'2019-01-01 00:00:00'</span>],
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Sally'</span>, <span class="string token">'deleted_at'</span> =&gt; <span class="string token">'2019-01-02 00:00:00'</span>],
@@ -2628,10 +2745,10 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p><a name="method-wherestrict"></a></p>
-<h4 id="wherestrict"><code>whereStrict()</code></h4>
+<h4 id="wherestrict-collection-method"><code>whereStrict()</code> {.collection-method}</h4>
 <p>此方法和 <a href="#method-where"><code>where</code></a> 方法使用相似；但是它是「严格」模式去匹配值和类型。</p>
 <p><a name="method-wherebetween"></a></p>
-<h4 id="wherebetween"><code>whereBetween()</code></h4>
+<h4 id="wherebetween-collection-method"><code>whereBetween()</code> {.collection-method}</h4>
 <p>该 <code>whereBetween</code> 方法会筛选给定范围的集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
@@ -2654,7 +2771,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p><a name="method-wherein"></a></p>
-<h4 id="wherein"><code>whereIn()</code></h4>
+<h4 id="wherein-collection-method"><code>whereIn()</code> {.collection-method}</h4>
 <p>该 <code>whereIn</code> 方法会根据包含给定数组的键 / 值对来过滤集合：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'product'</span> =&gt; <span class="string token">'Desk'</span>, <span class="string token">'price'</span> =&gt; <span class="number token">200</span>],
@@ -2741,10 +2858,10 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 </code></pre>
 <p><code>whereNotIn</code> 方法在检查项目值时使用「loose」比较，这意味着具有整数值的字符串将被视为等于具有相同值的整数。使用 <a href="#method-wherenotinstrict"><code>whereNotInStrict</code></a> 方法使用「strict」比较进行过滤。</p>
 <p><a name="method-wherenotinstrict"></a></p>
-<h4 id="wherenotinstrict"><code>whereNotInStrict()</code></h4>
+<h4 id="wherenotinstrict-collection-method"><code>whereNotInStrict()</code> {.collection-method}</h4>
 <p>这个方法与 <a href="#method-wherenotin"><code>whereNotIn</code></a> 方法类似；不同的是会使用「严格」模式比较。</p>
 <p><a name="method-wherenotnull"></a></p>
-<h4 id="wherenotnull"><code>whereNotNull()</code></h4>
+<h4 id="wherenotnull-collection-method"><code>whereNotNull()</code> {.collection-method}</h4>
 <p>该 <code>whereNotNull</code> 方法筛选给定键不为 <code>null</code>的项：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>],
@@ -2764,7 +2881,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p><a name="method-wherenull"></a></p>
-<h4 id="wherenull"><code>whereNull()</code></h4>
+<h4 id="wherenull-collection-method"><code>whereNull()</code> {.collection-method}</h4>
 <p>该 <code>whereNull</code> 方法筛选给定键为 <code>null</code>的项：</p>
 <pre><code><span class="variable token">$collection</span> = collect([
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>],
@@ -2783,7 +2900,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 */</span>
 </code></pre>
 <p><a name="method-wrap"></a></p>
-<h4 id="wrap"><code>wrap()</code></h4>
+<h4 id="wrap-collection-method"><code>wrap()</code> {.collection-method}</h4>
 <p>静态 <code>wrap</code> 方法会将给定值封装到集合中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Collection;
 
@@ -2806,7 +2923,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <span class="comment token">// ['John Doe']</span>
 </code></pre>
 <p><a name="method-zip"></a></p>
-<h4 id="zip"><code>zip()</code></h4>
+<h4 id="zip-collection-method"><code>zip()</code> {.collection-method}</h4>
 <p>该 <code>zip</code> 方法在与集合的值对应的索引处合并给定数组的值：</p>
 <pre><code><span class="variable token">$collection</span> = collect([<span class="string token">'Chair'</span>, <span class="string token">'Desk'</span>]);
 
@@ -2817,8 +2934,8 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <span class="comment token">// [['Chair', 100], ['Desk', 200]]</span>
 </code></pre>
 <p><a name="higher-order-messages"></a></p>
-<h2 id="高阶消息传递">高阶消息传递</h2>
-<p>集合也提供对「高阶消息传递」的支持，即集合常见操作的快捷方式。支持高阶消息传递的集合方法有： <a href="#method-average"><code>average</code></a>，<a href="#method-avg"><code>avg</code></a>，<a href="#method-contains"><code>contains</code></a>， <a href="#method-each"><code>each</code></a>，<a href="#method-every"><code>every</code></a>，<a href="#method-filter"><code>filter</code></a>， <a href="#method-first"><code>first</code></a>，<a href="#method-flatmap"><code>flatMap</code></a>，<a href="#method-groupby"><code>groupBy</code></a>，<a href="#method-keyby"><code>keyBy</code></a>，<a href="#method-map"><code>map</code></a>，<a href="#method-max"><code>max</code></a>， <a href="#method-min"><code>min</code></a>，<a href="#method-partition"><code>partition</code></a>，<a href="#method-reject"><code>reject</code></a>， <a href="#method-skipuntil"><code>skipUntil</code></a>，<a href="#method-skipwhile"><code>skipWhile</code></a>，<a href="#method-some"><code>some</code></a>，<a href="#method-sortby"><code>sortBy</code></a>，<a href="#method-sortbydesc"><code>sortByDesc</code></a>， <a href="#method-sum"><code>sum</code></a>，<a href="#method-takeuntil"><code>takeUntil</code></a>，<a href="#method-takewhile"><code>takeWhile</code></a> 和 <a href="#method-unique"><code>unique</code></a>。</p>
+<h2 id="higher-order-messages">Higher Order Messages</h2>
+<p>集合也提供对「高阶消息传递」的支持，即集合常见操作的快捷方式。支持高阶消息传递的集合方法有： <a href="#method-average"><code>average</code></a>、<a href="#method-avg"><code>avg</code></a>、<a href="#method-contains"><code>contains</code></a>、<a href="#method-each"><code>each</code></a>、<a href="#method-every"><code>every</code></a>、<a href="#method-filter"><code>filter</code></a>、<a href="#method-first"><code>first</code></a>、<a href="#method-flatmap"><code>flatMap</code></a>、<a href="#method-groupby"><code>groupBy</code></a>、<a href="#method-keyby"><code>keyBy</code></a>、<a href="#method-map"><code>map</code></a>、<a href="#method-max"><code>max</code></a>、<a href="#method-min"><code>min</code></a>、<a href="#method-partition"><code>partition</code></a>、<a href="#method-reject"><code>reject</code></a>、<a href="#method-skipuntil"><code>skipUntil</code></a>、<a href="#method-skipwhile"><code>skipWhile</code></a>、<a href="#method-some"><code>some</code></a>、<a href="#method-sortby"><code>sortBy</code></a>、<a href="#method-sortbydesc"><code>sortByDesc</code></a>、<a href="#method-sum"><code>sum</code></a>、<a href="#method-takeuntil"><code>takeUntil</code></a>、<a href="#method-takeewhile"><code>takeWhile</code></a> 和 <a href="#method-unique"><code>unique</code></a>。</p>
 <p>每个高阶消息都可以作为集合实例上的动态属性进行访问。例如，让我们使用 <code>each</code> 高阶消息来调用集合中每个对象的方法：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
@@ -2836,7 +2953,7 @@ Collection::unwrap(<span class="string token">'John Doe'</span>);
 <p><a name="lazy-collection-introduction"></a></p>
 <h3 id="介绍-1">介绍</h3>
 <blockquote>
-<p>注意：在进一步了解 Laravel 的惰性集合之前，花点时间熟悉一下 <a href="https://www.php.net/manual/en/language.generators.overview.php">PHP 生成器</a>.</p>
+<p><strong>注意：</strong>在进一步了解 Laravel 的惰性集合之前，花点时间熟悉一下 <a href="https://www.php.net/manual/en/language.generators.overview.php">PHP 生成器</a>.</p>
 </blockquote>
 <p>为了补充已经强大的 <code>Collection</code> 类，<code>LazyCollection</code> 类利用 PHP 的 <a href="https://www.php.net/manual/en/language.generators.overview.php">generators</a> 允许你使用非常 大型数据集，同时保持较低的内存使用率。</p>
 <p>例如，假设你的应用程序需要处理数 GB 的日志文件，同时利用 Laravel 的集合方法来解析日志。可以使用惰性集合在给定时间仅将文件的一小部分保留在内存中，而不是一次将整个文件读入内存：</p>
@@ -2849,7 +2966,7 @@ LazyCollection::make(<span class="keyword token">function</span> () {
     <span class="keyword token">while</span> ((<span class="variable token">$line</span> = fgets(<span class="variable token">$handle</span>)) !== <span class="keyword token">false</span>) {
         yield <span class="variable token">$line</span>;
     }
-})-&gt;chunk(<span class="number token">4</span>)-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$lines</span>) {
+})-&gt;chunk(<span class="number token">4</span>)-&gt;map(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$lines</span>) {
     <span class="keyword token">return</span> LogEntry::fromLines(<span class="variable token">$lines</span>);
 })-&gt;each(<span class="keyword token">function</span> (LogEntry <span class="variable token">$logEntry</span>) {
     <span class="comment token">// Process the log entry...</span>
@@ -2858,14 +2975,14 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <p>或者，假设你需要遍历 10,000 个 Eloquent 模型。使用传统 Laravel 集合时，所有 10,000 个 Eloquent 模型必须同时加载到内存中：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
-<span class="variable token">$users</span> = User::all()-&gt;filter(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<span class="variable token">$users</span> = User::all()-&gt;filter(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id &gt; <span class="number token">500</span>;
 });
 </code></pre>
 <p>但是，查询构建器的 <code>cursor</code> 方法返回一个 <code>LazyCollection</code> 实例。这允许你仍然只对数据库运行一个查询，而且一次只在内存中加载一个 Eloquent 模型。在这个例子中，<code>filter</code> 回调在我们实际单独遍历每个用户之前不会执行，从而可以大幅减少内存使用量：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
-<span class="variable token">$users</span> = User::cursor()-&gt;filter(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<span class="variable token">$users</span> = User::cursor()-&gt;filter(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;id &gt; <span class="number token">500</span>;
 });
 
@@ -2889,7 +3006,20 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <p><a name="the-enumerable-contract"></a></p>
 <h3 id="枚举契约">枚举契约</h3>
 <p><code>Collection</code> 类上几乎所有可用的方法也可以在 <code>LazyCollection</code> 类上使用。这两个类都实现了 <code>Illuminate\Support\Enumerable</code> 契约，它定义了以下方法：</p>
-<div id="collection-method-list" markdown="1">
+<style>
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
+    }
+
+    .collection-method-list a {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+
+<div class="collection-method-list" markdown="1">
 
 <p><a href="#method-all">all</a>
 <a href="#method-average">average</a>
@@ -2918,6 +3048,7 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <a href="#method-except">except</a>
 <a href="#method-filter">filter</a>
 <a href="#method-first">first</a>
+<a href="#method-first-or-fail">firstOrFail</a>
 <a href="#method-first-where">firstWhere</a>
 <a href="#method-flatmap">flatMap</a>
 <a href="#method-flatten">flatten</a>
@@ -2928,6 +3059,7 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <a href="#method-has">has</a>
 <a href="#method-implode">implode</a>
 <a href="#method-intersect">intersect</a>
+<a href="#method-intersectAssoc">intersectAssoc</a>
 <a href="#method-intersectbykeys">intersectByKeys</a>
 <a href="#method-isempty">isEmpty</a>
 <a href="#method-isnotempty">isNotEmpty</a>
@@ -2964,6 +3096,7 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <a href="#method-shuffle">shuffle</a>
 <a href="#method-skip">skip</a>
 <a href="#method-slice">slice</a>
+<a href="#method-sole">sole</a>
 <a href="#method-some">some</a>
 <a href="#method-sort">sort</a>
 <a href="#method-sortby">sortBy</a>
@@ -3002,7 +3135,7 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 </div>
 
 <blockquote>
-<p>注意：改变集合的方法（例如 <code>shift</code>、<code>pop</code>、<code>prepend</code> 等）在 <code>LazyCollection</code> 类中<strong>不</strong>可用。</p>
+<p><strong>注意：</strong>改变集合的方法（例如 <code>shift</code>、<code>pop</code>、<code>prepend</code> 等）在 <code>LazyCollection</code> 类中<strong>不</strong>可用。</p>
 </blockquote>
 <p><a name="lazy-collection-methods"></a></p>
 <h3 id="惰性集合方法">惰性集合方法</h3>
@@ -3010,59 +3143,59 @@ LazyCollection::make(<span class="keyword token">function</span> () {
 <p><a name="method-takeUntilTimeout"></a></p>
 <h4 id="takeuntiltimeout-collection-method"><code>takeUntilTimeout()</code> {.collection-method}</h4>
 <p><code>takeUntilTimeout</code> 方法返回新的惰性集合，它会在给定时间前去枚举集合值，之后集合将停止枚举：</p>
-<pre><code class="language-php">    <span class="variable token">$lazyCollection</span> = LazyCollection::times(INF)
-        -&gt;takeUntilTimeout(now()-&gt;addMinute());
+<pre><code><span class="variable token">$lazyCollection</span> = LazyCollection::times(INF)
+    -&gt;takeUntilTimeout(now()-&gt;addMinute());
 
-    <span class="variable token">$lazyCollection</span>-&gt;each(<span class="keyword token">function</span> (<span class="variable token">$number</span>) {
-        dump(<span class="variable token">$number</span>);
+<span class="variable token">$lazyCollection</span>-&gt;each(<span class="keyword token">function</span> (int <span class="variable token">$number</span>) {
+    dump(<span class="variable token">$number</span>);
 
-        sleep(<span class="number token">1</span>);
-    });
+    sleep(<span class="number token">1</span>);
+});
 
-    <span class="comment token">// 1</span>
-    <span class="comment token">// 2</span>
-    <span class="comment token">// ...</span>
-    <span class="comment token">// 58</span>
-    <span class="comment token">// 59</span>
+<span class="comment token">// 1</span>
+<span class="comment token">// 2</span>
+<span class="comment token">// ...</span>
+<span class="comment token">// 58</span>
+<span class="comment token">// 59</span>
 </code></pre>
-<p>为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 <a href="scheduling.html">计划任务</a>，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：</p>
-<pre><code class="language-php">    <span class="keyword token">use</span> App\Models\Invoice;
-    <span class="keyword token">use</span> Illuminate\Support\Carbon;
+<p>为了具体阐述此方法，请设想一个使用游标从数据库提交发票的例子。你可以定义一个 <a href="/docs/laravel/10.x/scheduling">计划任务</a>，它每十五分钟执行一次，并且只执行发票提交操作的最大时间是 14 分钟：</p>
+<pre><code><span class="keyword token">use</span> App\Models\Invoice;
+<span class="keyword token">use</span> Illuminate\Support\Carbon;
 
-    Invoice::pending()-&gt;cursor()
-        -&gt;takeUntilTimeout(
-            Carbon::createFromTimestamp(LARAVEL_START)-&gt;add(<span class="number token">14</span>, <span class="string token">'minutes'</span>)
-        )
-        -&gt;each(fn (<span class="variable token">$invoice</span>) =&gt; <span class="variable token">$invoice</span>-&gt;submit());
+Invoice::pending()-&gt;cursor()
+    -&gt;takeUntilTimeout(
+        Carbon::createFromTimestamp(LARAVEL_START)-&gt;add(<span class="number token">14</span>, <span class="string token">'minutes'</span>)
+    )
+    -&gt;each(fn (Invoice <span class="variable token">$invoice</span>) =&gt; <span class="variable token">$invoice</span>-&gt;submit());
 </code></pre>
 <p><a name="method-tapEach"></a></p>
 <h4 id="tapeach-collection-method"><code>tapEach()</code> {.collection-method}</h4>
 <p>当 <code>each</code> 方法为集合中每一个元素调用给定回调时， <code>tapEach</code> 方法仅调用给定回调，因为这些元素正在逐个从列表中拉出：</p>
-<pre><code class="language-php">    <span class="comment token">// 没有任何输出</span>
-    <span class="variable token">$lazyCollection</span> = LazyCollection::times(INF)-&gt;tapEach(<span class="keyword token">function</span> (<span class="variable token">$value</span>) {
-        dump(<span class="variable token">$value</span>);
-    });
+<pre><code><span class="comment token">// 没有任何输出</span>
+<span class="variable token">$lazyCollection</span> = LazyCollection::times(INF)-&gt;tapEach(<span class="keyword token">function</span> (int <span class="variable token">$value</span>) {
+    dump(<span class="variable token">$value</span>);
+});
 
-    <span class="comment token">// 打印出三条数据</span>
-    <span class="variable token">$array</span> = <span class="variable token">$lazyCollection</span>-&gt;take(<span class="number token">3</span>)-&gt;all();
+<span class="comment token">// 打印出三条数据</span>
+<span class="variable token">$array</span> = <span class="variable token">$lazyCollection</span>-&gt;take(<span class="number token">3</span>)-&gt;all();
 
-    <span class="comment token">// 1</span>
-    <span class="comment token">// 2</span>
-    <span class="comment token">// 3</span>
+<span class="comment token">// 1</span>
+<span class="comment token">// 2</span>
+<span class="comment token">// 3</span>
 </code></pre>
 <p><a name="method-remember"></a></p>
 <h4 id="remember-collection-method"><code>remember()</code> {.collection-method}</h4>
 <p><code>remember</code> 方法返回一个新的惰性集合，这个集合已经记住（缓存）已枚举的所有值，当再次枚举该集合时不会获取它们：</p>
-<pre><code class="language-php">    <span class="comment token">// 没执行任何查询</span>
-    <span class="variable token">$users</span> = User::cursor()-&gt;remember();
+<pre><code><span class="comment token">// 没执行任何查询</span>
+<span class="variable token">$users</span> = User::cursor()-&gt;remember();
 
-    <span class="comment token">//  执行了查询操作</span>
-    <span class="comment token">// 并且前 5 个用户数据已经在数据库中查询完成</span>
-    <span class="variable token">$users</span>-&gt;take(<span class="number token">5</span>)-&gt;all();
+<span class="comment token">//  执行了查询操作</span>
+<span class="comment token">// The first 5 users are hydrated from the database...</span>
+<span class="variable token">$users</span>-&gt;take(<span class="number token">5</span>)-&gt;all();
 
-    <span class="comment token">// 前 5 个用户数据从缓存中获取</span>
-    <span class="comment token">// 剩余的（15 个）用户数据从数据库中查询</span>
-    <span class="variable token">$users</span>-&gt;take(<span class="number token">20</span>)-&gt;all();
+<span class="comment token">// 前 5 个用户数据从缓存中获取</span>
+<span class="comment token">// The rest are hydrated from the database...</span>
+<span class="variable token">$users</span>-&gt;take(<span class="number token">20</span>)-&gt;all();
 </code></pre>
 </div>
     <blockquote style="font-size: 0.9em;">
