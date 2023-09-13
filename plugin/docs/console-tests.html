@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -25,16 +25,14 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p>除了简化 HTTP 测试之外，Laravel 还提供了一个简单的 API 来测试应用程序的 <a href="artisan.html">自定义控制台命令</a>。</p>
+<p>除了简化 HTTP 测试之外，Laravel 还提供了一个简单的 API 来测试应用程序的 <a href="/docs/laravel/10.x/artisan">自定义控制台命令</a>。</p>
 <p><a name="success-failure-expectations"></a></p>
 <h2 id="期望成功失败">期望成功/失败</h2>
 <p>首先，让我们探索如何对 Artisan 命令的退出代码进行断言。为此，我们将使用 <code>artisan</code> 方法从我们的测试中调用 Artisan 命令。然后，我们将使用 <code>assertExitCode</code> 方法断言该命令以给定的退出代码完成：</p>
 <pre><code><span class="comment token">/**
  * 测试控制台命令。
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command()
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command(): void
 {
     <span class="variable token">$this</span>-&gt;artisan(<span class="string token">'inspire'</span>)-&gt;assertExitCode(<span class="number token">0</span>);
 }
@@ -62,19 +60,19 @@
     <span class="variable token">$this</span>-&gt;line(<span class="string token">'Your name is '</span>.<span class="variable token">$name</span>.<span class="string token">' and you prefer '</span>.<span class="variable token">$language</span>.<span class="string token">'.'</span>);
 });
 </code></pre>
-<p>你可以使用以下测试来测试此命令，该测试利用了 <code>expectsQuestion</code>、<code>expectsOutput</code>、<code>doesntExpectOutput</code> 和 <code>assertExitCode</code> 方法：</p>
+<p>你可以用下面的测试来测试这个命令，该测试利用了 <code>expectsQuestion</code>、<code>expectsOutput</code>、<code>doesntExpectOutput</code>、<code>expectsOutputToContain</code>、<code>doesntExpectOutputToContain</code> 和 <code>assertExitCode</code> 方法。</p>
 <pre><code><span class="comment token">/**
  * 测试控制台命令。
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command()
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_console_command(): void
 {
     <span class="variable token">$this</span>-&gt;artisan(<span class="string token">'question'</span>)
          -&gt;expectsQuestion(<span class="string token">'What is your name?'</span>, <span class="string token">'Taylor Otwell'</span>)
          -&gt;expectsQuestion(<span class="string token">'Which language do you prefer?'</span>, <span class="string token">'PHP'</span>)
          -&gt;expectsOutput(<span class="string token">'Your name is Taylor Otwell and you prefer PHP.'</span>)
          -&gt;doesntExpectOutput(<span class="string token">'Your name is Taylor Otwell and you prefer Ruby.'</span>)
+         -&gt;expectsOutputToContain(<span class="string token">'Taylor Otwell'</span>)
+         -&gt;doesntExpectOutputToContain(<span class="string token">'you prefer Ruby'</span>)
          -&gt;assertExitCode(<span class="number token">0</span>);
 }
 </code></pre>
