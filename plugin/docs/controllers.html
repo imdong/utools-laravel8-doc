@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -34,34 +34,35 @@
 <li><a href="#restful-scoping-resource-routes">范围资源路由</a></li>
 <li><a href="#restful-localizing-resource-uris">本地化资源 URI</a></li>
 <li><a href="#restful-supplementing-resource-controllers">补充资源控制器</a></li>
+<li><a href="#singleton-resource-controllers">单例资源控制器</a></li>
 </ul>
 </li>
-<li><a href="#dependency-injection-and-controllers">依赖注入 &amp; 控制器</a></li>
+<li><a href="#dependency-injection-and-controllers">依赖注入和控制器</a></li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p>您可能希望使用“控制器”类来组织此行为，而不是将所有请求处理逻辑定义为路由文件中的闭包。 控制器可以将相关的请求处理逻辑分组到一个类中。 例如，一个 <code>UserController</code> 类可能会处理所有与用户相关的传入请求，包括显示、创建、更新和删除用户。 默认情况下，控制器存储在 <code>app/Http/Controllers</code> 目录中。</p>
+<p>你可能希望使用「controller」类来组织此行为，而不是将所有请求处理逻辑定义为路由文件中的闭包。控制器可以将相关的请求处理逻辑分组到一个类中。 例如，一个 <code>UserController</code> 类可能会处理所有与用户相关的传入请求，包括显示、创建、更新和删除用户。 默认情况下，控制器存储在 <code>app/Http/Controllers</code> 目录中。</p>
 <p><a name="writing-controllers"></a></p>
 <h2 id="编写控制器">编写控制器</h2>
 <p><a name="basic-controllers"></a></p>
 <h3 id="基本控制器">基本控制器</h3>
-<p>让我们看一个基本控制器的例子。 请注意，控制器扩展了 Laravel 中包含的基本控制器类 <code>App\Http\Controllers\Controller</code>：</p>
+<p>如果要快速生成新控制器，可以使用 <code>make:controller</code> Artisan 命令。默认情况下，应用程序的所有控制器都存储在<code>app/Http/Controllers</code> 目录中：</p>
+<pre><code class="language-shell">php artisan make:controller UserController
+</code></pre>
+<p>让我们来看一个基本控制器的示例。控制器可以有任意数量的公共方法来响应传入的HTTP请求：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
-<span class="keyword token">use</span> App\Http\Controllers\Controller;
 <span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\View\View;
 
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 显示给定用户的个人资料。
-     *
-     *<span class="phpdoc token"> @param</span>  int  $id
-     *<span class="phpdoc token"> @return</span> \Illuminate\View\View
+     * 显示给定用户的配置文件。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> show(<span class="variable token">$id</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> show(string <span class="variable token">$id</span>): View
     {
         <span class="keyword token">return</span> view(<span class="string token">'user.profile'</span>, [
             <span class="string token">'user'</span> =&gt; User::findOrFail(<span class="variable token">$id</span>)
@@ -69,31 +70,29 @@
     }
 }
 </code></pre>
-<p>您可以像这样定义此控制器方法的路由：</p>
+<p>编写控制器类和方法后，可以定义到控制器方法的路由，如下所示：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\UserController;
 
 Route::get(<span class="string token">'/user/{id}'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'show'</span>]);
 </code></pre>
-<p>当传入的请求与指定的路由 URI 匹配时，将调用 <code>App\Http\Controllers\UserController</code> 类的 <code>show</code> 方法，并将路由参数传递给该方法。</p>
+<p>当传入的请求与指定的路由 URI 匹配时，将调用 <code>App\Http\Controllers\UserController</code> 类的 <code>show</code> 方法，并将路由参数传递给该方法。</p>
 <blockquote>
-<p>技巧：控制器并不是 <strong>必须</strong> 继承基础类。如果控制器没有继承基础类，你将无法使用一些便捷的功能，比如 <code>middleware</code> 和 <code>authorize</code> 方法。</p>
+<p>技巧：控制器并不是 <strong>必需</strong> 继承基础类。如果控制器没有继承基础类，你将无法使用一些便捷的功能，比如 <code>middleware</code> 和 <code>authorize</code> 方法。</p>
 </blockquote>
 <p><a name="single-action-controllers"></a></p>
 <h3 id="单动作控制器">单动作控制器</h3>
-<p>如果控制器动作特别复杂，您可能会发现将整个控制器类专用于该单个动作很方便。为此，您可以在控制器中定义一个 <code>__invoke</code> 方法：</p>
+<p>如果控制器动作特别复杂，你可能会发现将整个控制器类专用于该单个动作很方便。为此，您可以在控制器中定义一个 <code>__invoke</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
-<span class="keyword token">use</span> App\Http\Controllers\Controller;
 <span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Http\Response;
 
 <span class="keyword token">class</span> ProvisionServer <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 配置新的 Web 服务器。
-     *
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 设置新的web服务器。
      */</span>
     <span class="keyword token">public</span> <span class="keyword token">function</span> __invoke()
     {
@@ -101,29 +100,27 @@ Route::get(<span class="string token">'/user/{id}'</span>, [UserController::<spa
     }
 }
 </code></pre>
-<p>为单动作控制器注册路由时，不需要指定控制器方法。相反，您可以简单地将控制器的名称传递给路由器：</p>
+<p>为单动作控制器注册路由时，不需要指定控制器方法。相反，你可以简单地将控制器的名称传递给路由器：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\ProvisionServer;
 
 Route::post(<span class="string token">'/server'</span>, ProvisionServer::<span class="keyword token">class</span>);
 </code></pre>
-<p>您可以使用 <code>make:controller</code> Artisan 命令的 <code>--invokable</code> 选项生成可调用控制器：</p>
+<p>你可以使用 <code>make:controller</code> Artisan 命令的 <code>--invokable</code> 选项生成可调用控制器：</p>
 <pre><code class="language-shell">php artisan make:controller ProvisionServer --invokable
 </code></pre>
 <blockquote>
-<p>技巧：可以使用 <a href="artisan.html#stub-customization">stub 定制</a> 自定义控制器模板。</p>
+<p>技巧：可以使用 <a href="/docs/laravel/10.x/artisan#stub-customization">stub 定制</a> 自定义控制器模板。</p>
 </blockquote>
 <p><a name="controller-middleware"></a></p>
 <h2 id="控制器中间件">控制器中间件</h2>
-<p><a href="middleware.html">中间件</a> 可以在您的路由文件中分配给控制器的路由：</p>
+<p><a href="/docs/laravel/10.x/middleware">中间件</a> 可以在你的路由文件中分配给控制器的路由：</p>
 <pre><code>Route::get(<span class="string token">'profile'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'show'</span>])-&gt;middleware(<span class="string token">'auth'</span>);
 </code></pre>
-<p>或者，您可能会发现在控制器的构造函数中指定中间件很方便。使用控制器构造函数中的 <code>middleware</code> 方法，您可以将中间件分配给控制器的操作：</p>
+<p>或者，你可能会发现在控制器的构造函数中指定中间件很方便。使用控制器构造函数中的 <code>middleware</code> 方法，你可以将中间件分配给控制器的操作：</p>
 <pre><code><span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
      * Instantiate a new controller instance.
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
     <span class="keyword token">public</span> <span class="keyword token">function</span> __construct()
     {
@@ -133,15 +130,18 @@ Route::post(<span class="string token">'/server'</span>, ProvisionServer::<span 
     }
 }
 </code></pre>
-<p>控制器还允许您使用闭包注册中间件。这提供了一种方便的方法来为单个控制器定义内联中间件，而无需定义整个中间件类：</p>
-<pre><code><span class="variable token">$this</span>-&gt;middleware(<span class="keyword token">function</span> (<span class="variable token">$request</span>, <span class="variable token">$next</span>) {
+<p>控制器还允许你使用闭包注册中间件。这提供了一种方便的方法来为单个控制器定义内联中间件，而无需定义整个中间件类：</p>
+<pre><code><span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+
+<span class="variable token">$this</span>-&gt;middleware(<span class="keyword token">function</span> (Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>) {
     <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
 });
 </code></pre>
 <p><a name="resource-controllers"></a></p>
 <h2 id="资源型控制器">资源型控制器</h2>
-<p>如果你将应用程序中的每个 Eloquent 模型都视为资源，那么通常对应用程序中的每个资源都执行相同的操作。例如，假设你的应用程序中包含一个 <code>Photo</code> 模型和一个 <code>Movie</code> 模型。用户可能可以创建，读取，更新或者删除这些资源。</p>
-<p>Laravel 的资源路由通过单行代码即可将典型的「CURD (增删改查)」路由分配给控制器。首先，我们可以使用 Artisan 命令 <code>make:controller</code> 的 <code>--resource</code> 选项来快速创建一个控制器：</p>
+<p>如果你将应用程序中的每个 Eloquent 模型都视为资源，那么通常对应用程序中的每个资源都执行相同的操作。例如，假设你的应用程序中包含一个 <code>Photo</code> 模型和一个 <code>Movie</code> 模型。用户可能可以创建，读取，更新或者删除这些资源。</p>
+<p>Laravel 的资源路由通过单行代码即可将典型的增删改查（“CURD”）路由分配给控制器。首先，我们可以使用 Artisan 命令 <code>make:controller</code> 的 <code>--resource</code> 选项来快速创建一个控制器:</p>
 <pre><code class="language-shell">php artisan make:controller PhotoController --resource
 </code></pre>
 <p>这个命令将会生成一个控制器 <code>app/Http/Controllers/PhotoController.php</code>。其中包括每个可用资源操作的方法。接下来，你可以给控制器注册一个资源路由：</p>
@@ -149,22 +149,22 @@ Route::post(<span class="string token">'/server'</span>, ProvisionServer::<span 
 
 Route::resource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>);
 </code></pre>
-<p>这个单一的路由声明创建了多个路由来处理资源上的各种行为。生成的控制器为每个行为保留了方法，而且你可以通过运行 Artisan 命令 <code>route:list</code> 来快速了解你的应用程序。</p>
-<p>你可以通过将数组传参到 resources 方法中的方式来一次性的创建多个资源控制器：</p>
+<p>这个单一的路由声明创建了多个路由来处理资源上的各种行为。生成的控制器为每个行为保留了方法，而且你可以通过运行 Artisan 命令 <code>route:list</code> 来快速了解你的应用程序。</p>
+<p>你可以通过将数组传参到 <code>resources</code> 方法中的方式来一次性的创建多个资源控制器：</p>
 <pre><code>Route::resources([
     <span class="string token">'photos'</span> =&gt; PhotoController::<span class="keyword token">class</span>,
     <span class="string token">'posts'</span> =&gt; PostController::<span class="keyword token">class</span>,
 ]);
 </code></pre>
-<p><a name="资源控制器操作处理"></a></p>
+<p><a name="actions-handled-by-resource-controller"></a></p>
 <h4 id="资源控制器操作处理">资源控制器操作处理</h4>
 <table>
 <thead>
 <tr>
-<th>Verb</th>
-<th>URI</th>
-<th>Action</th>
-<th>Route Name</th>
+<th>请求方式</th>
+<th>请求URI</th>
+<th>行为</th>
+<th>路由名称</th>
 </tr>
 </thead>
 <tbody><tr>
@@ -222,14 +222,24 @@ Route::resource(<span class="string token">'photos'</span>, PhotoController::<sp
             <span class="keyword token">return</span> Redirect::route(<span class="string token">'photos.index'</span>);
         });
 </code></pre>
+<p><a name="soft-deleted-models"></a></p>
+<h4 id="软删除模型">软删除模型</h4>
+<p>通常情况下，隐式模型绑定将不会检索已经进行了 <a href="/docs/laravel/10.x/eloquent#soft-deleting">软删除</a> 的模型，并且会返回一个 404 HTTP 响应。但是，你可以在定义资源路由时调用 <code>withTrashed</code> 方法来告诉框架允许软删除的模型：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoController;
+
+Route::resource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>)-&gt;withTrashed();
+</code></pre>
+<p>当不传递参数调用 <code>withTrashed</code> 时，将在 <code>show</code>、<code>edit</code> 和 <code>update</code> 资源路由中允许软删除的模型。你可以通过一个数组指定这些路由的子集传递给 <code>withTrashed</code> 方法：</p>
+<pre><code>Route::resource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>)-&gt;withTrashed([<span class="string token">'show'</span>]);
+</code></pre>
 <p><a name="specifying-the-resource-model"></a></p>
 <h4 id="指定资源模型">指定资源模型</h4>
-<p>如果你使用了路由模型的绑定 <a href="https://learnku.com/docs/laravel/8.5/routing#route-model-binding">路由模型绑定</a> 并且想在资源控制器的方法中使用类型提示，你可以在生成控制器的时候使用 <code>--model</code> 选项：</p>
+<p>如果你使用了路由模型的绑定 <a href="/docs/laravel/10.x/routing#route-model-binding">路由模型绑定</a> 并且想在资源控制器的方法中使用类型提示，你可以在生成控制器的时候使用 <code>--model</code> 选项：</p>
 <pre><code class="language-shell">php artisan make:controller PhotoController --model=Photo --resource
 </code></pre>
 <p><a name="generating-form-requests"></a></p>
 <h4 id="生成表单请求">生成表单请求</h4>
-<p>您可以在生成资源控制器时提供 <code>--requests</code> 选项来让 Artisan 为控制器的 storage 和 update 方法生成 <a href="validation.html#form-request-validation">表单请求类</a> ：</p>
+<p>你可以在生成资源控制器时提供 <code>--requests</code>  选项来让 Artisan 为控制器的 storage 和 update 方法生成 <a href="/docs/laravel/10.x/validation#form-request-validation">表单请求类</a>：</p>
 <pre><code class="language-shell">php artisan make:controller PhotoController --model=Photo --resource --requests
 </code></pre>
 <p><a name="restful-partial-resource-routes"></a></p>
@@ -247,12 +257,12 @@ Route::resource(<span class="string token">'photos'</span>, PhotoController::<sp
 </code></pre>
 <p><a name="api-resource-routes"></a></p>
 <h4 id="api-资源路由">API 资源路由</h4>
-<p>当声明用于 API 的资源路由时，通常需要排除显示 HTML 模板的路由。例如 <code>create</code> 和 <code>edit</code>。为了方便，你可以使用 <code>apiResource</code> 方法来排除这两个路由：</p>
+<p>当声明用于 API 的资源路由时，通常需要排除显示 HTML 模板的路由，例如 <code>create</code> 和 <code>edit</code>。为了方便，你可以使用 <code>apiResource</code> 方法来排除这两个路由：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoController;
 
 Route::apiResource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>);
 </code></pre>
-<p>你也可以传递一个数组给 <code>apiResources</code> 方法来同时注册多个 API 资源控制器：</p>
+<p>你也可以传递一个数组给 <code>apiResources</code> 方法来同时注册多个 API 资源控制器：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoController;
 <span class="keyword token">use</span> App\Http\Controllers\PostController;
 
@@ -261,12 +271,12 @@ Route::apiResources([
     <span class="string token">'posts'</span> =&gt; PostController::<span class="keyword token">class</span>,
 ]);
 </code></pre>
-<p>要快速生成不包含 <code>create</code> 或 <code>edit</code> 方法的 API 资源控制器，你可以在执行 <code>make:controller</code> 命令时使用 <code>--api</code> 参数：</p>
+<p>要快速生成不包含 <code>create</code> 或 <code>edit</code> 方法的 API 资源控制器，你可以在执行 <code>make:controller</code> 命令时使用 <code>--api</code> 参数：</p>
 <pre><code class="language-shell">php artisan make:controller PhotoController --api
 </code></pre>
 <p><a name="restful-nested-resources"></a></p>
 <h3 id="嵌套资源">嵌套资源</h3>
-<p>有时可能需要定义一个嵌套的资源型路由。例如，照片资源可能被添加了多个评论。那么可以在路由中使用 <code>.</code> 符号来声明资源型控制器：</p>
+<p>有时可能需要定义一个嵌套的资源型路由。例如，照片资源可能被添加了多个评论。那么可以在路由中使用 <code>.</code> 符号来声明资源型控制器：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoCommentController;
 
 Route::resource(<span class="string token">'photos.comments'</span>, PhotoCommentController::<span class="keyword token">class</span>);
@@ -276,7 +286,7 @@ Route::resource(<span class="string token">'photos.comments'</span>, PhotoCommen
 </code></pre>
 <p><a name="scoping-nested-resources"></a></p>
 <h4 id="限定嵌套资源的范围">限定嵌套资源的范围</h4>
-<p>Laravel 的 <a href="routing.html#implicit-model-binding-scoping">隐式模型绑定</a> 特性可以自动限定嵌套绑定的范围，以便确认已解析的子模型会自动属于父模型。定义嵌套路由时，使用 <code>scoped</code> 方法，可以开启自动范围限定，也可以指定 Laravel 应该按照哪个字段检索子模型资源，有关如何完成此操作的更多信息，请参见有关 <a href="#restful-scoping-resource-routes">范围资源路由</a> 的文档。</p>
+<p>Laravel 的 <a href="/docs/laravel/10.x/routing#implicit-model-binding-scoping">隐式模型绑定</a> 特性可以自动限定嵌套绑定的范围，以便确认已解析的子模型会自动属于父模型。定义嵌套路由时，使用 scoped 方法，可以开启自动范围限定，也可以指定 Laravel 应该按照哪个字段检索子模型资源，有关如何完成此操作的更多信息，请参见有关 <a href="#restful-scoping-resource-routes">范围资源路由</a> 的文档。</p>
 <p><a name="shallow-nesting"></a></p>
 <h4 id="浅层嵌套">浅层嵌套</h4>
 <p>通常，并不是在所有情况下都需要在 URI 中同时拥有父 ID 和子 ID，因为子 ID 已经是唯一的标识符。当使用唯一标识符（如自动递增的主键）来标识 URL 中的模型时，可以选择使用「浅嵌套」的方式定义路由：</p>
@@ -288,10 +298,10 @@ Route::resource(<span class="string token">'photos.comments'</span>, CommentCont
 <table>
 <thead>
 <tr>
-<th>Verb</th>
-<th>URI</th>
-<th>Action</th>
-<th>Route Name</th>
+<th>请求方式</th>
+<th>请求URI</th>
+<th>行为</th>
+<th>路由名称</th>
 </tr>
 </thead>
 <tbody><tr>
@@ -339,7 +349,7 @@ Route::resource(<span class="string token">'photos.comments'</span>, CommentCont
 </tbody></table>
 <p><a name="restful-naming-resource-routes"></a></p>
 <h3 id="命名资源路由">命名资源路由</h3>
-<p>默认情况下，所有的资源控制器行为都有一个路由名称。你可以传入 <code>names</code> 数组来覆盖这些名称：</p>
+<p>默认情况下，所有的资源控制器行为都有一个路由名称。你可以传入 <code>names</code> 数组来覆盖这些名称：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoController;
 
 Route::resource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>)-&gt;names([
@@ -348,7 +358,7 @@ Route::resource(<span class="string token">'photos'</span>, PhotoController::<sp
 </code></pre>
 <p><a name="restful-naming-resource-route-parameters"></a></p>
 <h3 id="命名资源路由参数">命名资源路由参数</h3>
-<p>默认情况下，<code>Route::resource</code> 会根据资源名称的「单数」形式创建资源路由的路由参数。你可以使用 <code>parameters</code> 方法来轻松地覆盖资源路由名称。传入 <code>parameters</code> 方法应该是资源名称和参数名称的关联数组：</p>
+<p>默认情况下，<code>Route::resource</code> 会根据资源名称的「单数」形式创建资源路由的路由参数。你可以使用 <code>parameters</code> 方法来轻松地覆盖资源路由名称。传入 <code>parameters</code> 方法应该是资源名称和参数名称的关联数组：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\AdminUserController;
 
 Route::resource(<span class="string token">'users'</span>, AdminUserController::<span class="keyword token">class</span>)-&gt;parameters([
@@ -360,7 +370,7 @@ Route::resource(<span class="string token">'users'</span>, AdminUserController::
 </code></pre>
 <p><a name="restful-scoping-resource-routes"></a></p>
 <h3 id="限定范围的资源路由">限定范围的资源路由</h3>
-<p>Laravel 的 <a href="routing.html#implicit-model-binding-scoping">作用域隐式模型绑定</a> 功能可以自动确定嵌套绑定的范围，以便确认已解析的子模型属于父模型。通过在定义嵌套资源时使用 <code>scoped</code> 方法，你可以启用自动范围界定，并指示 Laravel 应该通过以下方式来检索子资源的哪个字段：</p>
+<p>Laravel 的 <a href="/docs/laravel/10.x/routing#implicit-model-binding-scoping">作用域隐式模型绑定</a> 功能可以自动确定嵌套绑定的范围，以便确认已解析的子模型属于父模型。通过在定义嵌套资源时使用 <code>scoped</code> 方法，你可以启用自动范围界定，并指示 Laravel 应该通过以下方式来检索子资源的哪个字段：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\PhotoCommentController;
 
 Route::resource(<span class="string token">'photos.comments'</span>, PhotoCommentController::<span class="keyword token">class</span>)-&gt;scoped([
@@ -370,16 +380,14 @@ Route::resource(<span class="string token">'photos.comments'</span>, PhotoCommen
 <p>此路由将注册一个有范围的嵌套资源，该资源可以通过以下 URI 进行访问：</p>
 <pre><code>/photos/{photo}/comments/{comment:slug}
 </code></pre>
-<p>当使用一个自定义键的隐式绑定作为嵌套路由参数时，Laravel 会自动限定查询范围，按照约定的命名方式去父类中查找关联方法，然后检索到对应的嵌套模型。在这种情况下，将假定 <code>Photo</code> 模型有一个叫 <code>comments</code>（路由参数名的复数）的关联方法，通过这个方法可以检索到 <code>Comment</code> 模型。</p>
+<p>当使用一个自定义键的隐式绑定作为嵌套路由参数时，Laravel 会自动限定查询范围，按照约定的命名方式去父类中查找关联方法，然后检索到对应的嵌套模型。在这种情况下，将假定 <code>Photo</code> 模型有一个叫 <code>comments</code> （路由参数名的复数）的关联方法，通过这个方法可以检索到 <code>Comment</code> 模型。</p>
 <p><a name="restful-localizing-resource-uris"></a></p>
 <h3 id="本地化资源-uris">本地化资源 URIs</h3>
-<p>默认情况下，<code>Route::resource</code> 将会用英文动词创建资源 URIs。如果需要自定义 <code>create</code> 和 <code>edit</code> 行为的动名词，你可以在 <code>App\Providers\RouteServiceProvider</code> 的 <code>boot</code> 方法中使用 <code>Route::resourceVerbs</code> 方法实现：</p>
+<p>默认情况下，<code>Route::resource</code> 将会用英文动词创建资源 URIs。如果需要自定义 <code>create</code> 和 <code>edit</code> 行为的动名词，你可以在 <code>App\Providers\RouteServiceProvider</code> 的 <code>boot</code> 方法中使用 <code>Route::resourceVerbs</code> 方法实现：</p>
 <pre><code><span class="comment token">/**
  * 定义你的路由模型绑定，模式过滤器等
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Route::resourceVerbs([
         <span class="string token">'create'</span> =&gt; <span class="string token">'crear'</span>,
@@ -389,27 +397,159 @@ Route::resource(<span class="string token">'photos.comments'</span>, PhotoCommen
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>一旦这些动词被定义，资源路由注册，例如<code>route::resource(&#39;fotos&#39;, PhotoController::class)</code>将产生以下URI：</p>
-<pre><code>/fotos/crear
+<p>Laravel 的复数器支持<a href="/docs/laravel/10.x/localization#pluralization-language">配置几种不同的语言</a>。自定义动词和复数语言后，诸如 <code>Route::resource(&#39;publicacion&#39;, PublicacionController::class)</code> 之类的资源路由注册将生成以下URI：</p>
+<pre><code>/publicacion/crear
 
-/fotos/{foto}/editar
+/publicacion/{publicaciones}/editar
 </code></pre>
 <p><a name="restful-supplementing-resource-controllers"></a></p>
 <h3 id="补充资源控制器">补充资源控制器</h3>
-<p>如果您需要向资源控制器添加超出默认资源路由集的其他路由，则应在调用 <code>Route::resource</code> 方法之前定义这些路由；否则，由 <code>resource</code> 方法定义的路由可能会无意中优先于您的补充路由：</p>
-<pre><code><span class="keyword token">use</span> App\Http\Controller\PhotoController;
-
-Route::get(<span class="string token">'/photos/popular'</span>, [PhotoController::<span class="keyword token">class</span>, <span class="string token">'popular'</span>]);
+<p>如果你需要向资源控制器添加超出默认资源路由集的其他路由，则应在调用 <code>Route::resource</code> 方法之前定义这些路由；否则，由 <code>resource</code> 方法定义的路由可能会无意中优先于您的补充路由：
+单例资源
+    use App\Http\Controller\PhotoController;</p>
+<pre><code>Route::get(<span class="string token">'/photos/popular'</span>, [PhotoController::<span class="keyword token">class</span>, <span class="string token">'popular'</span>]);
 Route::resource(<span class="string token">'photos'</span>, PhotoController::<span class="keyword token">class</span>);
 </code></pre>
 <blockquote>
-<p>技巧：请记住让您的控制器保持集中。如果您发现自己经常需要典型资源操作集之外的方法，请考虑将控制器拆分为两个更小的控制器。</p>
+<p>技巧：请记住让你的控制器保持集中。如果你发现自己经常需要典型资源操作集之外的方法，请考虑将控制器拆分为两个更小的控制器。</p>
 </blockquote>
+<p><a name="singleton-resource-controllers"></a></p>
+<h3 id="单例资源控制器">单例资源控制器</h3>
+<p>有时候，应用中的资源可能只有一个实例。比如，用户「个人资料」可被编辑或更新，但是一个用户只会有一份「个人资料」。同样，一张图片也只有一个「缩略图」。这些资源就是所谓「单例资源」，这意味着该资源有且只能有一个实例存在。这种情况下，你可以注册成单例(signleton)资源控制器:</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Http\Controllers\ProfileController;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Route;
+
+Route::singleton(<span class="string token">'profile'</span>, ProfileController::<span class="keyword token">class</span>);
+</code></pre>
+<p>上例中定义的单例资源会注册如下所示的路由。如你所见，单例资源中「新建」路由没有被注册；并且注册的路由不接收路由参数，因为该资源中只有一个实例存在：</p>
+<table>
+<thead>
+<tr>
+<th>请求方式</th>
+<th>请求 URI</th>
+<th>行为</th>
+<th>路由名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/profile</code></td>
+<td>show</td>
+<td>profile.show</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/profile/edit</code></td>
+<td>edit</td>
+<td>profile.edit</td>
+</tr>
+<tr>
+<td>PUT/PATCH</td>
+<td><code>/profile</code></td>
+<td>update</td>
+<td>profile.update</td>
+</tr>
+</tbody></table>
+<p>单例资源也可以在标准资源内嵌套使用：</p>
+<pre><code class="language-php">Route::singleton(<span class="string token">'photos.thumbnail'</span>, ThumbnailController::<span class="keyword token">class</span>);
+</code></pre>
+<p>上例中， <code>photo</code> 资源将接收所有的<a href="#actions-handled-by-resource-controller">标准资源路由</a>；不过，<code>thumbnail</code> 资源将会是个单例资源，它的路由如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>请求方式</th>
+<th>请求 URI</th>
+<th>行为</th>
+<th>路由名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>show</td>
+<td>photos.thumbnail.show</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/photos/{photo}/thumbnail/edit</code></td>
+<td>edit</td>
+<td>photos.thumbnail.edit</td>
+</tr>
+<tr>
+<td>PUT/PATCH</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>update</td>
+<td>photos.thumbnail.update</td>
+</tr>
+</tbody></table>
+<p><a name="creatable-singleton-resources"></a></p>
+<h4 id="creatable-单例资源">Creatable 单例资源</h4>
+<p>有时，你可能需要为单例资源定义 create 和 storage 路由。要实现这一功能，你可以在注册单例资源路由时，调用 <code>creatable</code> 方法：</p>
+<pre><code class="language-php">Route::singleton(<span class="string token">'photos.thumbnail'</span>, ThumbnailController::<span class="keyword token">class</span>)-&gt;creatable();
+</code></pre>
+<p>如下所示，将注册以下路由。还为可创建的单例资源注册 <code>DELETE</code> 路由：</p>
+<table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>URI</th>
+<th>Action</th>
+<th>Route Name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/photos/{photo}/thumbnail/create</code></td>
+<td>create</td>
+<td>photos.thumbnail.create</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>store</td>
+<td>photos.thumbnail.store</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>show</td>
+<td>photos.thumbnail.show</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/photos/{photo}/thumbnail/edit</code></td>
+<td>edit</td>
+<td>photos.thumbnail.edit</td>
+</tr>
+<tr>
+<td>PUT/PATCH</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>update</td>
+<td>photos.thumbnail.update</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/photos/{photo}/thumbnail</code></td>
+<td>destroy</td>
+<td>photos.thumbnail.destroy</td>
+</tr>
+</tbody></table>
+<p>如果希望 Laravel 为单个资源注册 <code>DELETE</code> 路由，但不注册创建或存储路由，则可以使用 <code>destroyable</code> 方法：</p>
+<pre><code class="language-php">Route::singleton(...)-&gt;destroyable();
+</code></pre>
+<p><a name="api-singleton-resources"></a></p>
+<h4 id="api-单例资源">API 单例资源</h4>
+<p><code>apiSingleton</code> 方法可用于注册将通过API操作的单例资源，从而不需要 <code>create</code> 和 <code>edit</code>  路由：</p>
+<pre><code class="language-php">Route::apiSingleton(<span class="string token">'profile'</span>, ProfileController::<span class="keyword token">class</span>);
+</code></pre>
+<p>当然， API 单例资源也可以是 <code>可创建的</code> ，它将注册 <code>store</code> 和 <code>destroy</code> 资源路由：</p>
+<pre><code class="language-php">Route::apiSingleton(<span class="string token">'photos.thumbnail'</span>, ProfileController::<span class="keyword token">class</span>)-&gt;creatable();
+</code></pre>
 <p><a name="dependency-injection-and-controllers"></a></p>
 <h2 id="依赖注入和控制器">依赖注入和控制器</h2>
 <p><a name="constructor-injection"></a></p>
 <h4 id="构造函数注入">构造函数注入</h4>
-<p>Laravel <a href="container.html">服务容器</a> 用于解析所有 Laravel 控制器。因此，您可以在其构造函数中对控制器可能需要的任何依赖项进行类型提示。声明的依赖项将自动解析并注入到控制器实例中：</p>
+<p>Laravel <a href="/docs/laravel/10.x/container">服务容器</a> 用于解析所有 Laravel 控制器。因此，可以在其构造函数中对控制器可能需要的任何依赖项进行类型提示。声明的依赖项将自动解析并注入到控制器实例中：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
@@ -419,71 +559,61 @@ Route::resource(<span class="string token">'photos'</span>, PhotoController::<sp
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 用户存储库实例。
+     * 创建新控制器实例。
      */</span>
-    <span class="keyword token">protected</span> <span class="variable token">$users</span>;
-
-    <span class="comment token">/**
-     * 创建一个新的控制器实例。
-     *
-     *<span class="phpdoc token"> @param</span>  \App\Repositories\UserRepository  $users
-     *<span class="phpdoc token"> @return</span> void
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(UserRepository <span class="variable token">$users</span>)
-    {
-        <span class="variable token">$this</span>-&gt;users = <span class="variable token">$users</span>;
-    }
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+        <span class="keyword token">protected</span> UserRepository <span class="variable token">$users</span>,
+    ) {}
 }
 </code></pre>
 <p><a name="method-injection"></a></p>
 <h4 id="方法注入">方法注入</h4>
-<p>除了构造函数注入之外，您还可以类型提示依赖于控制器的方法。方法注入的一个常见用例是将 <code>Illuminate\Http\Request</code> 实例注入到控制器方法中：</p>
+<p>除了构造函数注入，还可以在控制器的方法上键入提示依赖项。方法注入的一个常见用例是将 <code>Illuminate\Http\Request</code> 实例注入到控制器方法中：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
+<span class="keyword token">use</span> Illuminate\Http\RedirectResponse;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 存储一个新用户。
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 存储新用户。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>): RedirectResponse
     {
         <span class="variable token">$name</span> = <span class="variable token">$request</span>-&gt;name;
 
-        <span class="comment token">//</span>
+        <span class="comment token">// 存储用户。。。</span>
+
+        <span class="keyword token">return</span> redirect(<span class="string token">'/users'</span>);
     }
 }
 </code></pre>
-<p>如果你的控制器方法要从路由参数中获取输入内容，请在你的依赖项之后列出你的路由参数。例如，你可以像下方这样定义路由：</p>
+<p>如果控制器方法也需要路由参数，那就在其他依赖项之后列出路由参数。例如，路由是这样定义的：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\UserController;
 
 Route::put(<span class="string token">'/user/{id}'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'update'</span>]);
 </code></pre>
-<p>如下所示，您依然可以类型提示 <code>Illuminate\Http\Request</code> 并通过定义您的控制器方法访问 <code>id</code> 参数：</p>
+<p>如下所示，你依然可以类型提示 <code>Illuminate\Http\Request</code> 并通过定义您的控制器方法访问 <code>id</code> 参数：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
+<span class="keyword token">use</span> Illuminate\Http\RedirectResponse;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 修改指定的用户。
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @param</span>  string  $id
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 更新给定用户。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>, <span class="variable token">$id</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>, string <span class="variable token">$id</span>): RedirectResponse
     {
-        <span class="comment token">//</span>
+        <span class="comment token">// 更新用户。。。</span>
+
+        <span class="keyword token">return</span> redirect(<span class="string token">'/users'</span>);
     }
 }
 </code></pre>
