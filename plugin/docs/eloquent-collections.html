@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -17,16 +17,16 @@
 </head>
 
 <body>
-    <div class="markdown-body"><h1 id="eloquent-集合">Eloquent: 集合</h1>
+    <div class="markdown-body"><h1 id="eloquent：集合">Eloquent：集合</h1>
 <ul>
-<li><a href="#introduction">简介</a></li>
+<li><a href="#introduction">介绍</a></li>
 <li><a href="#available-methods">可用的方法</a></li>
 <li><a href="#custom-collections">自定义集合</a></li>
 </ul>
 <p><a name="introduction"></a></p>
-<h2 id="简介">简介</h2>
-<p>所有返回多个模型查询结果的 Eloquent 方法的返回值都是 <code>Illuminate\Database\Eloquent\Collection</code> 对象的实例，包括通过 <code>get</code> 方法或通过关联关系获取到的结果。 Eloquent 集合对象扩展了 Laravel 的 <a href="https://learnku.comcollections/12225.html">base collection</a>，因此它自然地继承了许多用于流畅地处理 Eloquent 模型的底层数组的方法。请务必查看 Laravel 集合文档以了解所有这些有用的方法！</p>
-<p>而且，所有的集合都可以作为迭代器，你可以像遍历简单的 PHP 数组一样来遍历它们：</p>
+<h2 id="介绍">介绍</h2>
+<p>所有以多个模型为查询结果的 Eloquent 方法的返回值都是 <code>Illuminate\Database\Eloquent\Collection</code> 类的实例, 其中包括了通过 <code>get</code> 方法和关联关系获取的结果。Eloquent 集合对象扩展了 Laravel 的<a href="/docs/laravel/10.x/collections">基础集合类</a>，因此它自然地继承了许多用于流畅地处理 Eloquent 模型的底层数组的方法。请务必查看 Laravel 集合文档以了解所有这些有用的方法！</p>
+<p>所有的集合都可作为迭代器，你可以像遍历普通的 PHP 数组一样来遍历它们:</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$users</span> = User::where(<span class="string token">'active'</span>, <span class="number token">1</span>)-&gt;get();
@@ -35,28 +35,30 @@
     <span class="keyword token">echo</span> <span class="variable token">$user</span>-&gt;name;
 }
 </code></pre>
-<p>不过，集合比数组更加强大，它通过更加直观的接口暴露出可链式调用的 map / reduce 等操作。例如，让我们移除所有未激活的用户并收集剩余用户的名字：</p>
-<pre><code><span class="variable token">$names</span> = User::all()-&gt;reject(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+<p>然而，正如前面所提到的，集合远比数组要强大，而且暴露了一系列直观的、可用于链式调用的 map/reduce 方法。打个比方，我们可以删除所有不活跃的模型，然后收集余下的所有用户的名字。</p>
+<pre><code><span class="variable token">$names</span> = User::all()-&gt;reject(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;active === <span class="keyword token">false</span>;
-})-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$user</span>) {
+})-&gt;map(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
     <span class="keyword token">return</span> <span class="variable token">$user</span>-&gt;name;
 });
 </code></pre>
 <p><a name="eloquent-collection-conversion"></a></p>
 <h4 id="eloquent-集合转换">Eloquent 集合转换</h4>
-<p>大多数 Eloquent 集合方法会返回新的 Eloquent 集合实例，但是 <code>collapse</code>， <code>flatten</code>， <code>flip</code>， <code>keys</code>， <code>pluck</code> 和 <code>zip</code> 方法除外，它们会返回一个 <a href="https://learnku.comcollections/12225.html">base collection</a> 实例。 同样，如果 <code>map</code> 操作返回的集合不包括任何 Eloquent 模型， 那么它会被自动转换成集合基类。</p>
+<p>在大多数 Eloquent 集合方法返回一个新的 Eloquent 集合实例的前提下，<code>collapse</code>，<code>flatten</code>，<code>flip</code>， <code>keys</code>，<code>pluck</code>，以及 <code>zip</code> 方法返回一个<a href="/docs/laravel/10.x/collections">基础集合类</a>的实例。 如果一个 <code>map</code> 方法返回了一个不包含任何模型的 Eloquent 集合，它也会被转换成一个基础集合实例。</p>
 <p><a name="available-methods"></a></p>
 <h2 id="可用的方法">可用的方法</h2>
-<p>所有 Eloquent 的集合都继承了 <a href="collections.html#available-methods">Laravel collection</a>  对象；因此， 他们也继承了所有集合基类提供的强大的方法。</p>
-<p>另外， <code>Illuminate\Database\Eloquent\Collection</code> 类提供了一套上层的方法来帮你管理你的模型集合。大多数方法返回  <code>Illuminate\Database\Eloquent\Collection</code> 实例；然而，也会有一些方法， 例如 <code>modelKeys</code>， 它们会返回基于 <code>Illuminate\Support\Collection</code> 类的实例。</p>
+<p>所有 Eloquent 的集合都继承了 <a href="/docs/laravel/10.x/collectionsmd#available-methods">Laravel collection</a> 对象；因此， 他们也继承了所有集合基类提供的强大的方法。</p>
+<p>另外， <code>Illuminate\Database\Eloquent\Collection</code> 类提供了一套上层的方法来帮你管理你的模型集合。大多数方法返回 <code>Illuminate\Database\Eloquent\Collection</code> 实例；然而，也会有一些方法， 例如 <code>modelKeys</code>， 它们会返回基于 <code>Illuminate\Support\Collection</code> 类的实例。</p>
 <style>
-    #collection-method-list > p {
-        column-count: 1; -moz-column-count: 1; -webkit-column-count: 1;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+    .collection-method-list > p {
+        columns: 14.4em 1; -moz-columns: 14.4em 1; -webkit-columns: 14.4em 1;
     }
 
-    #collection-method-list a {
+    .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .collection-method code {
@@ -68,9 +70,10 @@
     }
 </style>
 
-<div id="collection-method-list" markdown="1">
+<div class="collection-method-list" markdown="1">
 
-<p><a href="#method-contains">contains</a>
+<p><a href="#method-append">append</a>
+<a href="#method-contains">contains</a>
 <a href="#method-diff">diff</a>
 <a href="#method-except">except</a>
 <a href="#method-find">find</a>
@@ -82,89 +85,112 @@
 <a href="#method-makeVisible">makeVisible</a>
 <a href="#method-makeHidden">makeHidden</a>
 <a href="#method-only">only</a>
+<a href="#method-setVisible">setVisible</a>
+<a href="#method-setHidden">setHidden</a>
 <a href="#method-toquery">toQuery</a>
 <a href="#method-unique">unique</a></p>
 </div>
 
+<p><a name="method-append"></a></p>
+<h4 id="appendattributes-collection-method-first-collection-method"><code>append($attributes)</code> {.collection-method .first-collection-method}</h4>
+<p>可以使用<code>append</code>方法来为集合中的模型<a href="/docs/laravel/10.x/eloquent-serializationmd#appending-values-to-json">追加属性</a>。 可以是数组或单个属性追加:</p>
+<pre><code><span class="variable token">$users</span>-&gt;append(<span class="string token">'team'</span>);
+
+<span class="variable token">$users</span>-&gt;append([<span class="string token">'team'</span>, <span class="string token">'is_admin'</span>]);
+</code></pre>
 <p><a name="method-contains"></a></p>
-<h4 id="containskey-operator--null-value--null"><code>contains($key, $operator = null, $value = null)</code></h4>
-<p><code>contains</code> 方法可用于判断集合中是否包含指定的模型实例。这个方法接收一个主键或者模型实例：</p>
+<h4 id="containskey-operator--null-value--null-collection-method"><code>contains($key, $operator = null, $value = null)</code> {.collection-method}</h4>
+<p><code>contains</code> 方法可用于判断集合中是否包含指定的模型实例。这个方法接收一个主键或者模型实例：</p>
 <pre><code><span class="variable token">$users</span>-&gt;contains(<span class="number token">1</span>);
 
 <span class="variable token">$users</span>-&gt;contains(User::find(<span class="number token">1</span>));
 </code></pre>
 <p><a name="method-diff"></a></p>
-<h4 id="diffitems"><code>diff($items)</code></h4>
-<p><code>diff</code>  方法返回不在给定集合中的所有模型：</p>
+<h4 id="diffitems-collection-method"><code>diff($items)</code> {.collection-method}</h4>
+<p><code>diff</code> 方法返回不在给定集合中的所有模型：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;diff(User::whereIn(<span class="string token">'id'</span>, [<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;get());
 </code></pre>
 <p><a name="method-except"></a></p>
-<h4 id="exceptkeys"><code>except($keys)</code></h4>
-<p><code>except</code> 方法返回给定主键外的所有模型：</p>
+<h4 id="exceptkeys-collection-method"><code>except($keys)</code> {.collection-method}</h4>
+<p><code>except</code> 方法返回给定主键外的所有模型：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;except([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 </code></pre>
 <p><a name="method-find"></a></p>
-<h4 id="findkey"><code>find($key)</code></h4>
-<p><code>find</code> 方法查找给定主键的模型。如果 <code>$key</code> 是一个模型实例， <code>find</code> 将会尝试返回与主键匹配的模型。 如果 <code>$key</code> 是一个关联数组， <code>find</code> 将返回所有数组主键匹配的模型：</p>
+<h4 id="findkey-collection-method"><code>find($key)</code> {.collection-method}</h4>
+<p><code>find</code> 方法查找给定主键的模型。如果 <code>$key</code> 是一个模型实例， <code>find</code> 将会尝试返回与主键匹配的模型。 如果 <code>$key</code> 是一个关联数组， <code>find</code> 将返回所有数组主键匹配的模型：</p>
 <pre><code><span class="variable token">$users</span> = User::all();
 
 <span class="variable token">$user</span> = <span class="variable token">$users</span>-&gt;find(<span class="number token">1</span>);
 </code></pre>
 <p><a name="method-fresh"></a></p>
-<h4 id="freshwith--"><code>fresh($with = [])</code></h4>
-<p><code>fresh</code>  方法用于从数据库中检索集合中每个模型的新实例。此外，还将加载任何指定的关联关系：</p>
+<h4 id="freshwith---collection-method"><code>fresh($with = [])</code> {.collection-method}</h4>
+<p><code>fresh</code> 方法用于从数据库中检索集合中每个模型的新实例。此外，还将加载任何指定的关联关系：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;fresh();
 
 <span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;fresh(<span class="string token">'comments'</span>);
 </code></pre>
 <p><a name="method-intersect"></a></p>
-<h4 id="intersectitems"><code>intersect($items)</code></h4>
-<p><code>intersect</code> 方法返回给定集合与当前模型的交集：</p>
+<h4 id="intersectitems-collection-method"><code>intersect($items)</code> {.collection-method}</h4>
+<p><code>intersect</code> 方法返回给定集合与当前模型的交集：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;intersect(User::whereIn(<span class="string token">'id'</span>, [<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;get());
 </code></pre>
 <p><a name="method-load"></a></p>
-<h4 id="loadrelations"><code>load($relations)</code></h4>
-<p><code>load</code> 方法为集合中的所有模型加载给定关联关系：</p>
+<h4 id="loadrelations-collection-method"><code>load($relations)</code> {.collection-method}</h4>
+<p><code>load</code> 方法为集合中的所有模型加载给定关联关系：</p>
 <pre><code><span class="variable token">$users</span>-&gt;load([<span class="string token">'comments'</span>, <span class="string token">'posts'</span>]);
 
 <span class="variable token">$users</span>-&gt;load(<span class="string token">'comments.author'</span>);
+
+<span class="variable token">$users</span>-&gt;load([<span class="string token">'comments'</span>, <span class="string token">'posts'</span> =&gt; fn (<span class="variable token">$query</span>) =&gt; <span class="variable token">$query</span>-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)]);
 </code></pre>
 <p><a name="method-loadMissing"></a></p>
-<h4 id="loadmissingrelations"><code>loadMissing($relations)</code></h4>
-<p>如果尚未加载关联关系，则 <code>loadMissing</code> 方法将加载集合中所有模型的给定关联关系：</p>
+<h4 id="loadmissingrelations-collection-method"><code>loadMissing($relations)</code> {.collection-method}</h4>
+<p>如果尚未加载关联关系，则 <code>loadMissing</code> 方法将加载集合中所有模型的给定关联关系：</p>
 <pre><code><span class="variable token">$users</span>-&gt;loadMissing([<span class="string token">'comments'</span>, <span class="string token">'posts'</span>]);
 
 <span class="variable token">$users</span>-&gt;loadMissing(<span class="string token">'comments.author'</span>);
+
+<span class="variable token">$users</span>-&gt;loadMissing([<span class="string token">'comments'</span>, <span class="string token">'posts'</span> =&gt; fn (<span class="variable token">$query</span>) =&gt; <span class="variable token">$query</span>-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)]);
 </code></pre>
 <p><a name="method-modelKeys"></a></p>
-<h4 id="modelkeys"><code>modelKeys()</code></h4>
-<p><code>modelKeys</code> 方法返回集合中所有模型的主键：</p>
+<h4 id="modelkeys-collection-method"><code>modelKeys()</code> {.collection-method}</h4>
+<p><code>modelKeys</code> 方法返回集合中所有模型的主键：</p>
 <pre><code><span class="variable token">$users</span>-&gt;modelKeys();
 
 <span class="comment token">// [1, 2, 3, 4, 5]</span>
 </code></pre>
 <p><a name="method-makeVisible"></a></p>
-<h4 id="makevisibleattributes"><code>makeVisible($attributes)</code></h4>
-<p><code>makeVisible</code>  方法 <a href="eloquent-serialization.html#hiding-attributes-from-json">使模型上的隐藏属性可见</a> ：</p>
+<h4 id="makevisibleattributes-collection-method"><code>makeVisible($attributes)</code> {.collection-method}</h4>
+<p><code>makeVisible</code> 方法<a href="/docs/laravel/10.x/eloquent-serializationmd#hiding-attributes-from-json">使模型上的隐藏属性可见</a> ：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;makeVisible([<span class="string token">'address'</span>, <span class="string token">'phone_number'</span>]);
 </code></pre>
 <p><a name="method-makeHidden"></a></p>
-<h4 id="makehiddenattributes"><code>makeHidden($attributes)</code></h4>
-<p><code>makeHidden</code> 方法 <a href="eloquent-serialization.html#hiding-attributes-from-json">隐藏模型属性</a> ：</p>
+<h4 id="makehiddenattributes-collection-method"><code>makeHidden($attributes)</code> {.collection-method}</h4>
+<p><code>makeHidden</code> 方法<a href="/docs/laravel/10.x/eloquent-serializationmd#hiding-attributes-from-json">隐藏模型属性</a> ：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;makeHidden([<span class="string token">'address'</span>, <span class="string token">'phone_number'</span>]);
 </code></pre>
 <p><a name="method-only"></a></p>
-<h4 id="onlykeys"><code>only($keys)</code></h4>
-<p><code>only</code> 方法返回具有给定主键的所有模型：</p>
+<h4 id="onlykeys-collection-method"><code>only($keys)</code> {.collection-method}</h4>
+<p><code>only</code> 方法返回具有给定主键的所有模型：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;only([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
 </code></pre>
+<p><a name="method-setVisible"></a></p>
+<h4 id="setvisibleattributes-collection-method"><code>setVisible($attributes)</code> {.collection-method}</h4>
+<p><code>setVisible</code>方法<a href="/docs/laravel/10.x/eloquent-serializationmd#temporarily-modifying-attribute-visibility">临时覆盖</a>集合中每个模型的所有可见属性:</p>
+<pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;setVisible([<span class="string token">'id'</span>, <span class="string token">'name'</span>]);
+</code></pre>
+<p><a name="method-setHidden"></a></p>
+<h4 id="sethiddenattributes-collection-method"><code>setHidden($attributes)</code> {.collection-method}</h4>
+<p><code>setHidden</code>方法<a href="/docs/laravel/10.x/eloquent-serializationmd#temporarily-modifying-attribute-visibility">临时覆盖</a>集合中每个模型的所有隐藏属性:</p>
+<pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;setHidden([<span class="string token">'email'</span>, <span class="string token">'password'</span>, <span class="string token">'remember_token'</span>]);
+</code></pre>
 <p><a name="method-toquery"></a></p>
-<h4 id="toquery"><code>toQuery()</code></h4>
-<p><code>toQuery</code> 方法返回一个 Eloquent 查询生成器实例，该实例包含集合模型主键上的 <code>whereIn</code> 约束：</p>
+<h4 id="toquery-collection-method"><code>toQuery()</code> {.collection-method}</h4>
+<p><code>toQuery</code> 方法返回一个 Eloquent 查询生成器实例，该实例包含集合模型主键上的 <code>whereIn</code> 约束：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$users</span> = User::where(<span class="string token">'status'</span>, <span class="string token">'VIP'</span>)-&gt;get();
@@ -174,8 +200,8 @@
 ]);
 </code></pre>
 <p><a name="method-unique"></a></p>
-<h4 id="uniquekey--null-strict--false"><code>unique($key = null, $strict = false)</code></h4>
-<p><code>unique</code> 方法返回集合中所有不重复的模型，若模型在集合中存在相同类型且相同主键的另一模型，该模型将被删除：</p>
+<h4 id="uniquekey--null-strict--false-collection-method"><code>unique($key = null, $strict = false)</code> {.collection-method}</h4>
+<p><code>unique</code> 方法返回集合中所有不重复的模型，若模型在集合中存在相同类型且相同主键的另一模型，该模型将被删除：</p>
 <pre><code><span class="variable token">$users</span> = <span class="variable token">$users</span>-&gt;unique();
 </code></pre>
 <p><a name="custom-collections"></a></p>
@@ -186,17 +212,18 @@
 <span class="keyword token">namespace</span> App\Models;
 
 <span class="keyword token">use</span> App\Support\UserCollection;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Collection;
 <span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * Create a new Eloquent Collection instance.
+     * 创建新的Elquent Collection实例。
      *
-     *<span class="phpdoc token"> @param</span>  array  $models
-     *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Collection
+     *<span class="phpdoc token"> @param</span>  array&lt;int, \Illuminate\Database\Eloquent\Model&gt;  $models
+     *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Collection&lt;int, \Illuminate\Database\Eloquent\Model&gt;
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> newCollection(<span class="keyword token">array</span> <span class="variable token">$models</span> = [])
+    <span class="keyword token">public</span> <span class="keyword token">function</span> newCollection(<span class="keyword token">array</span> <span class="variable token">$models</span> = []): Collection
     {
         <span class="keyword token">return</span> <span class="keyword token">new</span> UserCollection(<span class="variable token">$models</span>);
     }
