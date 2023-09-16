@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -23,36 +23,16 @@
 <li><a href="#resetting-the-database-after-each-test">每次测试后重置数据库</a></li>
 </ul>
 </li>
-<li><a href="#defining-model-factories">定义模型的工厂</a><ul>
-<li><a href="#concept-overview">概念概述</a></li>
-<li><a href="#generating-factories">创建工厂</a></li>
-<li><a href="#factory-states">工厂状态</a></li>
-<li><a href="#factory-callbacks">工厂回调</a></li>
-</ul>
-</li>
-<li><a href="#creating-models-using-factories">使用工厂创建模型</a><ul>
-<li><a href="#instantiating-models">实例化模型</a></li>
-<li><a href="#persisting-models">持久化模型</a></li>
-<li><a href="#sequences">序列</a></li>
-</ul>
-</li>
-<li><a href="#factory-relationships">工厂关系</a><ul>
-<li><a href="#has-many-relationships">一对多关系</a></li>
-<li><a href="#belongs-to-relationships">一对多（反向）关系</a></li>
-<li><a href="#many-to-many-relationships">多对多关系</a></li>
-<li><a href="#polymorphic-relationships">多态关系</a></li>
-<li><a href="#defining-relationships-within-factories">定义工厂内部关系</a></li>
-</ul>
-</li>
+<li><a href="#model-factories">模型工厂</a></li>
 <li><a href="#running-seeders">运行 Seeders</a></li>
-<li><a href="#available-assertions">可用断言</a></li>
+<li><a href="#available-assertions">可用的断言</a></li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p>Laravel 提供了各种有用的工具和断言，使测试数据库驱动的应用程序更加容易。此外，Laravel 模型工厂和 Seeders 可以轻松地使用应用程序的 Eloquent 模型和关系创建测试数据库记录。我们将在下面的文档中讨论所有这些强大的功能。</p>
+<p>Laravel 提供了各种有用的工具和断言，从而让测试数据库驱动变得更加容易。除此之外，Laravel 模型工厂和 Seeders 可以轻松地使用应用程序的 Eloquent 模型和关系来创建测试数据库记录。</p>
 <p><a name="resetting-the-database-after-each-test"></a></p>
 <h3 id="每次测试后重置数据库">每次测试后重置数据库</h3>
-<p>在继续进行之前，让我们讨论如何在每个测试之后重置数据库，以便前一个测试的数据不会干扰后续测试。Laravel 包含的 Trait<code>Illuminate\Foundation\Testing\RefreshDatabase</code> 将为你解决这一问题。只需在测试类上使用这个 Trait：</p>
+<p>在进行测试之前，让我们讨论一下如何在每次测试后重置数据库，以便让先前测试的数据不会干扰后续测试。 Laravel 包含的 <code>Illuminate\Foundation\Testing\RefreshDatabase</code> trait 会为你解决这个问题。只需在您的测试类上使用该 Trait：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -66,11 +46,9 @@
     <span class="keyword token">use</span> RefreshDatabase;
 
     <span class="comment token">/**
-     * 一个基本的功能测试示例。
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 一个基本的功能测试例子。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_example()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_example(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
 
@@ -78,417 +56,24 @@
     }
 }
 </code></pre>
-<p>如果你的数据库模式（Schema）是最新的，那么这个 Trait<code>Illuminate\Foundation\Testing\RefreshDatabase</code> 并不会迁移数据库。相反，它将只在一个数据库事务中执行测试。因此，任何由测试用例添加到数据库的记录，如果不使用这个 Trait，可能仍然存在于数据库中。</p>
-<p>如果你想使用迁移来完全重置数据库，可以使用 Trait <code>Illuminate\Foundation\Testing\DatabaseMigrations</code> 来代替。然而，<code>DatabaseMigrations</code>Trait 明显比 <code>RefreshDatabase</code> Trait 慢。</p>
-<p><a name="defining-model-factories"></a></p>
-<h2 id="定义模型工厂">定义模型工厂</h2>
-<p><a name="concept-overview"></a></p>
-<h3 id="概念概述">概念概述</h3>
-<p>首先，让我们谈谈 Eloquent 模型工厂。测试时，你可能需要在执行测试之前向数据库中插入一些记录。 Laravel 允许你使用模型工厂为每个 <a href="eloquent.html">Eloquent 模型</a> 定义一组默认属性，而不是在创建测试数据时手动指定每一列的值。</p>
-<p>要了解如何编写工厂的示例，请查看应用程序中的 <code>database/factories/UserFactory.php</code> 文件。这个工厂包含在所有新的 Laravel 源码程序中，并包含以下工厂定义：</p>
-<pre><code><span class="keyword token">namespace</span> Database\Factories;
+<p>如果你的数据库结构是最新的，那么这个 Trait<code>Illuminate\Foundation\Testing\RefreshDatabase</code> 并不会迁移数据库。相反，它只会在一个数据库事务中执行测试。因此，任何由测试用例添加到数据库的记录，如果不使用这个 Trait，可能仍然存在于数据库中。</p>
+<p>如果你想使用迁移来完全重置数据库，可以使用这个 Trait <code>Illuminate\Foundation\Testing\DatabaseMigrations</code> 来替代。然而，<code>DatabaseMigrations</code> 这个 Trait 明显比 <code>RefreshDatabase</code> Trait 要慢。</p>
+<p><a name="model-factories"></a></p>
+<h2 id="模型工厂">模型工厂</h2>
+<p>当我们测试的时候，可能需要在执行测试之前向数据库插入一些数据。Laravel 允许你使用 <a href="/docs/laravel/10.x/eloquent-factories">模型工厂</a> 为每个 <a href="/docs/laravel/10.x/eloquent">Eloquent 模型</a> 定义一组默认值，而不是在创建测试数据时手动指定每一列的值。</p>
+<p>要学习有关创建和使用模型工厂来创建模型的更多信息，请参阅完整的 <a href="/docs/laravel/10.x/eloquent-factories">模型工厂文档</a>。定义模型工厂后，你可以在测试中使用该工厂来创建模型：</p>
+<pre><code><span class="keyword token">use</span> App\Models\User;
 
-<span class="keyword token">use</span> App\Models\User;
-<span class="keyword token">use</span> Illuminate\Database\Eloquent\Factories\Factory;
-<span class="keyword token">use</span> Illuminate\Support\Str;
-
-<span class="keyword token">class</span> UserFactory <span class="keyword token">extends</span> Factory
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_models_can_be_instantiated(): void
 {
-    <span class="comment token">/**
-     * 定义模型的默认值。
-     *
-     *<span class="phpdoc token"> @return</span> array
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> definition()
-    {
-        <span class="keyword token">return</span> [
-            <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;name,
-            <span class="string token">'email'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;unique()-&gt;safeEmail,
-            <span class="string token">'email_verified_at'</span> =&gt; now(),
-            <span class="string token">'password'</span> =&gt; <span class="string token">'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'</span>, <span class="comment token">// password</span>
-            <span class="string token">'remember_token'</span> =&gt; Str::random(<span class="number token">10</span>),
-        ];
-    }
-}
-</code></pre>
-<p>正如你所见，在最基本的形式中，factories 是继承 Laravel 的基础 factory 类和定义 <code>definition</code> 方法的类。<code>definition</code> 方法返回使用 factory 创建模型时应用的默认属性值集合。</p>
-<p>通过 <code>faker</code> 属性， factories 可以访问 <a href="https://github.com/FakerPHP/Faker">Faker</a>  PHP 函数库，它允许你便捷的生成各种随机数据来进行测试。</p>
-<blockquote>
-<p>技巧：你也可以在 <code>config/app.php</code> 配置文件中添加 <code>faker_locale</code> 选项来设置 Faker 的语言环境。</p>
-</blockquote>
-<p><a name="generating-factories"></a></p>
-<h3 id="创建工厂">创建工厂</h3>
-<p>要创建工厂，请使用 <a href="artisan.html">Artisan 命令</a> <code>make:factory</code>：</p>
-<pre><code class="language-shell">php artisan make:factory PostFactory
-</code></pre>
-<p>新工厂将放置在你的 <code>database/factories</code> 目录下。</p>
-<p><a name="factory-and-model-discovery-conventions"></a></p>
-<h4 id="模型和工厂的关联约定">模型和工厂的关联约定</h4>
-<p>定义工厂后，可以在模型中使用 <code>Illuminate\Database\Eloquent\Factories\HasFactory</code> 特性提供的 <code>factory</code> 静态方法，来为模型实例化工厂。</p>
-<p><code>HasFactory</code> 特性的 <code>factory</code> 方法将按约定来为模型确定合适的工厂。具体来说，该方法将在 <code>Database\Factorys</code> 的命名空间下查找类名与模型名相匹配，并以 <code>Factory</code> 为后缀的工厂。如果当前约定不适用于你的特定应用程序或工厂，你可以重写模型中的 <code>newFactory</code> 方法，返回模型实际对应的工厂实例：</p>
-<pre><code><span class="keyword token">use</span> Database\Factories\Administration\FlightFactory;
-
-<span class="comment token">/**
- * 为当前模型创建一个工厂实例
- *
- *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Factories\Factory
- */</span>
-<span class="keyword token">protected</span> <span class="keyword token">static</span> <span class="keyword token">function</span> newFactory()
-{
-    <span class="keyword token">return</span> FlightFactory::<span class="keyword token">new</span>();
-}
-</code></pre>
-<p>接下来，在对应的工厂中定义 <code>model</code> 属性：</p>
-<pre><code><span class="keyword token">use</span> App\Administration\Flight;
-<span class="keyword token">use</span> Illuminate\Database\Eloquent\Factories\Factory;
-
-<span class="keyword token">class</span> FlightFactory <span class="keyword token">extends</span> Factory
-{
-    <span class="comment token">/**
-     * 工厂对应的模型名称
-     *
-     *<span class="phpdoc token"> @var</span> string
-     */</span>
-    <span class="keyword token">protected</span> <span class="variable token">$model</span> = Flight::<span class="keyword token">class</span>;
-}
-</code></pre>
-<p><a name="factory-states"></a></p>
-<h3 id="工厂状态">工厂状态</h3>
-<p>你可以定义各自独立的状态操作方法，并可以任意组合应用于你的模型工厂。例如，你的 <code>Database\Factories\UserFactory</code> 工厂可能包含修改其默认属性值的 <code>suspended</code> 状态方法</p>
-<p>状态转换方法通常会调用 Laravel 的基础工厂类提供的 <code>state</code> 方法 。 <code>state</code> 方法接收一个闭包，该闭包将收到工厂的原始属性数组，并应该返回要修改的属性数组：</p>
-<pre><code><span class="comment token">/**
- * 标识用户已停用
- *
- *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Factories\Factory
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> suspended()
-{
-    <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;state(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$attributes</span>) {
-        <span class="keyword token">return</span> [
-            <span class="string token">'account_status'</span> =&gt; <span class="string token">'suspended'</span>,
-        ];
-    });
-}
-</code></pre>
-<p><a name="factory-callbacks"></a></p>
-<h3 id="工厂回调">工厂回调</h3>
-<p>工厂回调是通过 <code>afterMaking</code> 和 <code>afterCreating</code> 方法来注册的，并且允许你在创建模型之后执行其他任务。 你应该通过在工厂类上定义 <code>configure</code> 方法来注册这些回调。 实例化工厂后，Laravel 将自动调用此方法：</p>
-<pre><code><span class="keyword token">namespace</span> Database\Factories;
-
-<span class="keyword token">use</span> App\Models\User;
-<span class="keyword token">use</span> Illuminate\Database\Eloquent\Factories\Factory;
-<span class="keyword token">use</span> Illuminate\Support\Str;
-
-<span class="keyword token">class</span> UserFactory <span class="keyword token">extends</span> Factory
-{
-    <span class="comment token">/**
-     * 配置模型工厂
-     *
-     *<span class="phpdoc token"> @return</span> $this
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> configure()
-    {
-        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;afterMaking(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
-            <span class="comment token">//</span>
-        })-&gt;afterCreating(<span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
-            <span class="comment token">//</span>
-        });
-    }
+    <span class="variable token">$user</span> = User::factory()-&gt;create();
 
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p><a name="creating-models-using-factories"></a></p>
-<h2 id="使用工厂创建模型">使用工厂创建模型</h2>
-<p><a name="instantiating-models"></a></p>
-<h3 id="实例化模型">实例化模型</h3>
-<p>一旦你定义了工厂，就可以使用 <code>Illuminate\Database\Eloquent\Factories\HasFactory</code> 特性为你的模型提供的 <code>factory</code> 静态方法来实例化工厂。让我们来看几个创建模型的例子。首先，我们将使用 <code>make</code> 方法来创建模型而且不需要将它们持久化到数据库中：</p>
-<pre><code><span class="keyword token">use</span> App\Models\User;
-
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_models_can_be_instantiated()
-{
-    <span class="variable token">$user</span> = User::factory()-&gt;make();
-
-    <span class="comment token">// 在测试中使用模型...</span>
-}
-</code></pre>
-<p>你可以使用 <code>count</code> 方法创建许多模型的集合：</p>
-<pre><code><span class="variable token">$users</span> = User::factory()-&gt;count(<span class="number token">3</span>)-&gt;make();
-</code></pre>
-<p><a name="applying-states"></a></p>
-<h4 id="应用各种状态">应用各种状态</h4>
-<p>你也可以应用你的任何一个 <a href="#factory-states">states</a> 到模型. 如果你想向模型应用多个状态转换，则可以直接调用状态转换方法：</p>
-<pre><code><span class="variable token">$users</span> = User::factory()-&gt;count(<span class="number token">5</span>)-&gt;suspended()-&gt;make();
-</code></pre>
-<p><a name="overriding-attributes"></a></p>
-<h4 id="覆盖属性">覆盖属性</h4>
-<p>如果你想覆盖模型的一些默认值, 你可以将数组传递给<code>make</code>方法. 只有指定的属性将被替换，而这些属性的其余部分保持设置为其默认值，则为出厂指定：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()-&gt;make([
-    <span class="string token">'name'</span> =&gt; <span class="string token">'Abigail Otwell'</span>,
-]);
-</code></pre>
-<p>或者，可以直接在出厂实例上调用<code>state</code>方法以执行内联状态转换：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()-&gt;state([
-    <span class="string token">'name'</span> =&gt; <span class="string token">'Abigail Otwell'</span>,
-])-&gt;make();
-</code></pre>
-<blockquote>
-<p>技巧：<a href="eloquent.html#mass-assignment">批量分配保护</a> 使用工厂创建模型时会自动禁用.</p>
-</blockquote>
-<p><a name="persisting-models"></a></p>
-<h3 id="持久化模型">持久化模型</h3>
-<p><code>create</code> 方法创建模型实例，并使用  Eloquent 的 <code>save</code> 方法其持久化到数据库中：</p>
-<pre><code><span class="keyword token">use</span> App\Models\User;
-
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_models_can_be_persisted()
-{
-    <span class="comment token">// 创建单个 App\Models\User 实例...</span>
-    <span class="variable token">$user</span> = User::factory()-&gt;create();
-
-    <span class="comment token">// 创建三个 App\Models\User 实例...</span>
-    <span class="variable token">$users</span> = User::factory()-&gt;count(<span class="number token">3</span>)-&gt;create();
-
-    <span class="comment token">// 在测试中使用模型...</span>
-}
-</code></pre>
-<p>你可以通过将属性数组传递给 <code>create</code> 方法来覆盖模型上的属性：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()-&gt;create([
-    <span class="string token">'name'</span> =&gt; <span class="string token">'Abigail'</span>,
-]);
-</code></pre>
-<p><a name="sequences"></a></p>
-<h3 id="序列">序列</h3>
-<p>有时，你可能希望为每个创建的模型替换给定模型属性的值。 你可以通过将状态转换定义为 Sequence 实例来完成此操作。 例如，我们可能希望为每个创建的用户在 User 模型上的 <code>admin</code> 列的值在 <code>Y</code> 和 <code>N</code> 之间切换：</p>
-<pre><code><span class="keyword token">use</span> App\Models\User;
-<span class="keyword token">use</span> Illuminate\Database\Eloquent\Factories\Sequence;
-
-<span class="variable token">$users</span> = User::factory()
-                -&gt;count(<span class="number token">10</span>)
-                -&gt;state(<span class="keyword token">new</span> Sequence(
-                    [<span class="string token">'admin'</span> =&gt; <span class="string token">'Y'</span>],
-                    [<span class="string token">'admin'</span> =&gt; <span class="string token">'N'</span>],
-                ))
-                -&gt;create();
-</code></pre>
-<p>在本例中，将创建 5 个用户 <code>admin</code> 值为 <code>Y</code>，创建另外 5 个用户 <code>admin</code> 值为 <code>N</code>。</p>
-<p>如有必要，你可以引入闭包作为 sequence 的值，每次 sequence 需要新值的时候这个闭包都会被调用。</p>
-<pre><code><span class="variable token">$users</span> = User::factory()
-                -&gt;count(<span class="number token">10</span>)
-                -&gt;state(<span class="keyword token">new</span> Sequence(
-                    fn (<span class="variable token">$sequence</span>) =&gt; [<span class="string token">'role'</span> =&gt; UserRoles::all()-&gt;random()],
-                ))
-                -&gt;create();
-</code></pre>
-<p>在序列闭包中，你可以访问注入闭包的序列实例的 <code>$index</code> 或 <code>$count</code> 属性。 <code>$index</code> 属性包含到目前为止已发生的序列的迭代次数，而 <code>$count</code> 属性包含将调用序列的总次数：</p>
-<pre><code><span class="variable token">$users</span> = User::factory()
-                -&gt;count(<span class="number token">10</span>)
-                -&gt;sequence(fn (<span class="variable token">$sequence</span>) =&gt; [<span class="string token">'name'</span> =&gt; <span class="string token">'Name '</span>.<span class="variable token">$sequence</span>-&gt;index])
-                -&gt;create();
-</code></pre>
-<p><a name="factory-relationships"></a></p>
-<h2 id="工厂关系">工厂关系</h2>
-<p><a name="has-many-relationships"></a></p>
-<h3 id="一对多关系">一对多关系</h3>
-<p>接下来，让我们探索使用 Laravel 流畅的工厂方法建立 Eloquent 模型关系。 首先，假设我们的应用程序具有 <code>App\Models\User</code> 模型和 <code>App\Models\Post</code> 模型。同样，假设 <code>User</code> 模型定义了与 <code>Post</code> 的 <code>hasMany</code> 关系 。 我们可以通过 Laravel 的工厂提供的 <code>has</code> 方法创建一个拥有三个帖子的用户。 <code>has</code> 方法接受工厂实例：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Post;
-<span class="keyword token">use</span> App\Models\User;
-
-<span class="variable token">$user</span> = User::factory()
-            -&gt;has(Post::factory()-&gt;count(<span class="number token">3</span>))
-            -&gt;create();
-</code></pre>
-<p>按照惯例，在将 <code>Post</code> 模型传递给 <code>has</code> 方法时，Laravel 会假设 <code>User</code> 模型必须有一个定义关系的 <code>posts</code> 方法。如有必要，你可以明确指定要操作的关系的名称：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;has(Post::factory()-&gt;count(<span class="number token">3</span>), <span class="string token">'posts'</span>)
-            -&gt;create();
-</code></pre>
-<p>当然，你可以对相关模型执行状态操作。此外，如果状态更改需要访问父模型，则可以传递基于闭包的状态转换：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;has(
-                Post::factory()
-                        -&gt;count(<span class="number token">3</span>)
-                        -&gt;state(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$attributes</span>, User <span class="variable token">$user</span>) {
-                            <span class="keyword token">return</span> [<span class="string token">'user_type'</span> =&gt; <span class="variable token">$user</span>-&gt;type];
-                        })
-            )
-            -&gt;create();
-</code></pre>
-<p><a name="has-many-relationships-using-magic-methods"></a></p>
-<h4 id="使用魔术方法">使用魔术方法</h4>
-<p>为了方便起见 ，你可以使用 Laravel 的 魔术工厂关系方法来构建关系。例如，以下示例将使用约定来确定应通过 <code>User</code> 模型上的 <code>posts</code> 关系方法创建相关模型：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;hasPosts(<span class="number token">3</span>)
-            -&gt;create();
-</code></pre>
-<p>在使用魔术方法创建工厂关系时，你可以传递要在相关模型上覆盖的属性数组：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;hasPosts(<span class="number token">3</span>, [
-                <span class="string token">'published'</span> =&gt; <span class="keyword token">false</span>,
-            ])
-            -&gt;create();
-</code></pre>
-<p>如果状态更改需要访问父模型，你可以提供基于闭包的状态转换：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;hasPosts(<span class="number token">3</span>, <span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$attributes</span>, User <span class="variable token">$user</span>) {
-                <span class="keyword token">return</span> [<span class="string token">'user_type'</span> =&gt; <span class="variable token">$user</span>-&gt;type];
-            })
-            -&gt;create();
-</code></pre>
-<p><a name="belongs-to-relationships"></a></p>
-<h3 id="从属关系">从属关系</h3>
-<p>既然我们已经探索了如何使用工厂构建「has many」关系，那么让我们来看看该关系的反面。<code>for</code> 方法可用于定义工厂创建的模型所属的父模型。例如，我们可以创建三个属于单个用户的 <code>App\Models\Post</code> 模型实例：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Post;
-<span class="keyword token">use</span> App\Models\User;
-
-<span class="variable token">$posts</span> = Post::factory()
-            -&gt;count(<span class="number token">3</span>)
-            -&gt;<span class="keyword token">for</span>(User::factory()-&gt;state([
-                <span class="string token">'name'</span> =&gt; <span class="string token">'Jessica Archer'</span>,
-            ]))
-            -&gt;create();
-</code></pre>
-<p>如果你已经有一个应该与你正在创建的模型相关联的父模型实例，可以传递这个模型实例给 <code>for</code> 方法：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()-&gt;create();
-
-<span class="variable token">$posts</span> = Post::factory()
-            -&gt;count(<span class="number token">3</span>)
-            -&gt;<span class="keyword token">for</span>(<span class="variable token">$user</span>)
-            -&gt;create();
-</code></pre>
-<p><a name="belongs-to-relationships-using-magic-methods"></a></p>
-<h4 id="从属关系使用魔法方法">从属关系使用魔法方法</h4>
-<p>为方便起见，你可以使用工厂的魔术关系方法来定义「属于」关系。例如，下面的示例将使用约定来确定这三个帖子应该属于 <code>Post</code> 模型上的 <code>user</code> 关系：</p>
-<pre><code><span class="variable token">$posts</span> = Post::factory()
-            -&gt;count(<span class="number token">3</span>)
-            -&gt;forUser([
-                <span class="string token">'name'</span> =&gt; <span class="string token">'Jessica Archer'</span>,
-            ])
-            -&gt;create();
-</code></pre>
-<p><a name="many-to-many-relationships"></a></p>
-<h3 id="多对多关系">多对多关系</h3>
-<p>像 <a href="#has-many-relationships">一对多关系</a>,一样，可以使用 <code> has</code> 方法创建「多对多」关系：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Role;
-<span class="keyword token">use</span> App\Models\User;
-
-<span class="variable token">$user</span> = User::factory()
-            -&gt;has(Role::factory()-&gt;count(<span class="number token">3</span>))
-            -&gt;create();
-</code></pre>
-<p><a name="pivot-table-attributes"></a></p>
-<h4 id="pivot-中转-表属性">Pivot (中转) 表属性</h4>
-<p>如果需要定义应该在链接模型的中转表 / 中间表上设置的属性，可以使用 <code>hasAttached</code> 方法。此方法接受中转表属性名称和值的数组作为其第二个参数：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Role;
-<span class="keyword token">use</span> App\Models\User;
-
-<span class="variable token">$user</span> = User::factory()
-            -&gt;hasAttached(
-                Role::factory()-&gt;count(<span class="number token">3</span>),
-                [<span class="string token">'active'</span> =&gt; <span class="keyword token">true</span>]
-            )
-            -&gt;create();
-</code></pre>
-<p>如果你的状态更改需要访问相关模型，则可以提供基于闭包的状态转换：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;hasAttached(
-                Role::factory()
-                    -&gt;count(<span class="number token">3</span>)
-                    -&gt;state(<span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$attributes</span>, User <span class="variable token">$user</span>) {
-                        <span class="keyword token">return</span> [<span class="string token">'name'</span> =&gt; <span class="variable token">$user</span>-&gt;name.<span class="string token">' Role'</span>];
-                    }),
-                [<span class="string token">'active'</span> =&gt; <span class="keyword token">true</span>]
-            )
-            -&gt;create();
-</code></pre>
-<p>你可以通过将模型实例传递给 <code>hasAttached</code> 方法的形式，将其附加到正在创建的模型实例中。下面示例中是将三个相同的角色附加到三个用户：</p>
-<pre><code><span class="variable token">$roles</span> = Role::factory()-&gt;count(<span class="number token">3</span>)-&gt;create();
-
-<span class="variable token">$user</span> = User::factory()
-            -&gt;count(<span class="number token">3</span>)
-            -&gt;hasAttached(<span class="variable token">$roles</span>, [<span class="string token">'active'</span> =&gt; <span class="keyword token">true</span>])
-            -&gt;create();
-</code></pre>
-<p><a name="many-to-many-relationships-using-magic-methods"></a></p>
-<h4 id="多对多关系使用魔术方法">多对多关系使用魔术方法</h4>
-<p>为方便起见，你可以使用工厂的魔术关系方法来定义多对多关系。例如，下面的示例将使用约定来确定应通过  <code>User</code> 模型上的 <code>Roles</code> 关系方法创建相关模型：</p>
-<pre><code><span class="variable token">$user</span> = User::factory()
-            -&gt;hasRoles(<span class="number token">1</span>, [
-                <span class="string token">'name'</span> =&gt; <span class="string token">'Editor'</span>
-            ])
-            -&gt;create();
-</code></pre>
-<p><a name="polymorphic-relationships"></a></p>
-<h3 id="多态关系">多态关系</h3>
-<p><a href="eloquent-relationships.html#polymorphic-relationships">多态关系</a> 也可以使用工厂创建。多态的 「morph many」关系的创建方式与典型的 「has many」 关系的创建方式相同。例如，如果 <code>App\Models\Post</code> 模型与 <code>App\Models\Comment</code> 模型存在 <code>morMany</code> 关系：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Post;
-
-<span class="variable token">$post</span> = Post::factory()-&gt;hasComments(<span class="number token">3</span>)-&gt;create();
-</code></pre>
-<p><a name="morph-to-relationships"></a></p>
-<h4 id="变形关系">变形关系</h4>
-<p>魔术方法不能用于创建 <code>morTo</code> 关系。相反，必须直接使用 <code>for</code> 方法，并且必须显式提供关系的名称。例如，假设 <code>Comment</code> 模型有一个 <code>commentable</code> 方法，该方法定义了一个 <code>morTo</code> 关系。在这种情况下，我们可以直接使用 <code>for</code> 方法创建属于单个帖子的三条评论：</p>
-<pre><code><span class="variable token">$comments</span> = Comment::factory()-&gt;count(<span class="number token">3</span>)-&gt;<span class="keyword token">for</span>(
-    Post::factory(), <span class="string token">'commentable'</span>
-)-&gt;create();
-</code></pre>
-<p><a name="polymorphic-many-to-many-relationships"></a></p>
-<h4 id="多态多对多关系">多态多对多关系</h4>
-<p>可以像创建非多态的 「多对多」(<code>morphToMany</code> / <code>morphedByMany</code>) 关系一样创建多态的「多对多」关系：</p>
-<pre><code><span class="keyword token">use</span> App\Models\Tag;
-<span class="keyword token">use</span> App\Models\Video;
-
-<span class="variable token">$videos</span> = Video::factory()
-            -&gt;hasAttached(
-                Tag::factory()-&gt;count(<span class="number token">3</span>),
-                [<span class="string token">'public'</span> =&gt; <span class="keyword token">true</span>]
-            )
-            -&gt;create();
-</code></pre>
-<p>当然，魔术 <code>has</code> 方法也可以用于创建多态「多对多」关系：</p>
-<pre><code><span class="variable token">$videos</span> = Video::factory()
-            -&gt;hasTags(<span class="number token">3</span>, [<span class="string token">'public'</span> =&gt; <span class="keyword token">true</span>])
-            -&gt;create();
-</code></pre>
-<p><a name="defining-relationships-within-factories"></a></p>
-<h3 id="定义工厂内的关系">定义工厂内的关系</h3>
-<p>要在模型工厂中定义关系，通常会将新工厂实例分配给关系的外键。这通常用于「反向」关系，像 <code>belongsTo</code> 和 <code>morphTo</code> 关系。例如，如果你想在创建帖子的同时创建一个新用户，你可以执行以下操作：</p>
-<pre><code><span class="keyword token">use</span> App\Models\User;
-
-<span class="comment token">/**
- * 定义模型的默认状态
- *
- *<span class="phpdoc token"> @return</span> array
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> definition()
-{
-    <span class="keyword token">return</span> [
-        <span class="string token">'user_id'</span> =&gt; User::factory(),
-        <span class="string token">'title'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;title(),
-        <span class="string token">'content'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;paragraph(),
-    ];
-}
-</code></pre>
-<p>如果关系的列依赖于定义它的工厂，你可以为属性分配一个闭包。闭包将接收工厂的评估属性数组：</p>
-<pre><code><span class="comment token">/**
- * 定义模型的默认状态
- *
- *<span class="phpdoc token"> @return</span> array
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> definition()
-{
-    <span class="keyword token">return</span> [
-        <span class="string token">'user_id'</span> =&gt; User::factory(),
-        <span class="string token">'user_type'</span> =&gt; <span class="keyword token">function</span> (<span class="keyword token">array</span> <span class="variable token">$attributes</span>) {
-            <span class="keyword token">return</span> User::find(<span class="variable token">$attributes</span>[<span class="string token">'user_id'</span>])-&gt;type;
-        },
-        <span class="string token">'title'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;title(),
-        <span class="string token">'content'</span> =&gt; <span class="variable token">$this</span>-&gt;faker-&gt;paragraph(),
-    ];
-}
-</code></pre>
 <p><a name="running-seeders"></a></p>
-<h2 id="运行填充">运行填充</h2>
-<p>如果你在功能测试时希望使用 <a href="seeding.html">数据库填充</a> 来填充你的数据库， 你可以调用 <code>seed</code> 方法。 默认情况下，  <code>seed</code> 方法将会执行 <code>DatabaseSeeder</code>， 它应该执行你的所有其他种子器。或者，你传递指定的种子器类名给 <code>seed</code> 方法：</p>
+<h2 id="运行-seeders">运行 seeders</h2>
+<p>如果你在功能测试时希望使用 <a href="/docs/laravel/10.x/seeding">数据库 seeders</a> 来填充你的数据库， 你可以调用 <code>seed</code> 方法。 默认情况下，  <code>seed</code> 方法将会执行 <code>DatabaseSeeder</code>， 它将会执行你的所有其他 seeders。或者，你传递指定的 seeder 类名给 <code>seed</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -504,21 +89,19 @@
     <span class="keyword token">use</span> RefreshDatabase;
 
     <span class="comment token">/**
-     * 测试创建新订单
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 测试创建新订单。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_created()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_created(): void
     {
         <span class="comment token">// 运行 DatabaseSeeder...</span>
         <span class="variable token">$this</span>-&gt;seed();
 
-        <span class="comment token">// 运行指定填充...</span>
+        <span class="comment token">// 运行指定 seeder...</span>
         <span class="variable token">$this</span>-&gt;seed(OrderStatusSeeder::<span class="keyword token">class</span>);
 
         <span class="comment token">// ...</span>
 
-        <span class="comment token">// 运行指定数组内填充...</span>
+        <span class="comment token">// 运行指定的 seeders...</span>
         <span class="variable token">$this</span>-&gt;seed([
             OrderStatusSeeder::<span class="keyword token">class</span>,
             TransactionStatusSeeder::<span class="keyword token">class</span>,
@@ -527,7 +110,7 @@
     }
 }
 </code></pre>
-<p>或者，你可以指示 <code>RefreshDatabase</code> trait 在每次测试之前自动为数据库填充数据。你可以通过在测试类上定义 <code>$seed</code> 属性来实现：</p>
+<p>或者通过 <code>RefreshDatabase</code> trait 在每次测试之前自动为数据库填充数据。你也可以通过在测试类上定义 <code>$seed</code> 属性来实现：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests;
@@ -539,18 +122,19 @@
     <span class="keyword token">use</span> CreatesApplication;
 
     <span class="comment token">/**
-     * 指示是否应在每次测试之前运行默认数据填充
+     * Indicates whether the default seeder should run before each test.
      *
      *<span class="phpdoc token"> @var</span> bool
      */</span>
     <span class="keyword token">protected</span> <span class="variable token">$seed</span> = <span class="keyword token">true</span>;
 }
 </code></pre>
-<p>当 <code>$seed</code> 属性为 <code>true</code> 时，测试将在每个使用 <code>RefreshDatabase</code> trait 的测试之前运行 <code>Database\Seeders\DatabaseSeeder</code> 类。但是，你可以通过在测试类上定义 <code>$seeder</code> 属性来指定应该执行的特定数据填充：</p>
+<p>当 <code>$seed</code> 属性为 <code>true</code> 时，这个测试将在每个使用 <code>RefreshDatabase</code> trait 的测试之前运行 <code>Database\Seeders\DatabaseSeeder</code> 类。但是，你可以通过在测试类上定义 <code>$seeder</code> 属性来指定要执行的 seeder：</p>
 <pre><code><span class="keyword token">use</span> Database\Seeders\OrderStatusSeeder;
 
 <span class="comment token">/**
- * 每次测试前运行指定数据填充     *
+ * 在测试前指定要运行的 seeder
+ *
  *<span class="phpdoc token"> @var</span> string
  */</span>
 <span class="keyword token">protected</span> <span class="variable token">$seeder</span> = OrderStatusSeeder::<span class="keyword token">class</span>;
@@ -579,12 +163,17 @@
 </code></pre>
 <p><a name="assert-deleted"></a></p>
 <h4 id="assertsoftdeleted">assertSoftDeleted</h4>
-<p> <code>assertSoftDeleted</code> 断言给定的 Eloquent 模型已被「软删除」：</p>
+<p> <code>assertSoftDeleted</code> 方法断言给定的 Eloquent 模型已被「软删除」的记录：</p>
 <pre><code><span class="variable token">$this</span>-&gt;assertSoftDeleted(<span class="variable token">$user</span>);
+</code></pre>
+<p><a name="assert-not-deleted"></a></p>
+<h4 id="assertnotsoftdeleted">assertNotSoftDeleted</h4>
+<p><code>assertNotSoftDeleted</code> 方法断言给定的 Eloquent 模型没有被「软删除」的记录：</p>
+<pre><code><span class="variable token">$this</span>-&gt;assertNotSoftDeleted(<span class="variable token">$user</span>);
 </code></pre>
 <p><a name="assert-model-exists"></a></p>
 <h4 id="assertmodelexists">assertModelExists</h4>
-<p>断言给定模型存在于数据库中：</p>
+<p>断言数据库中存在给定的模型：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$user</span> = User::factory()-&gt;create();
@@ -593,7 +182,7 @@
 </code></pre>
 <p><a name="assert-model-missing"></a></p>
 <h4 id="assertmodelmissing">assertModelMissing</h4>
-<p>断言数据库中不存在给定模型：</p>
+<p>断言数据库中不存在给定的模型：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$user</span> = User::factory()-&gt;create();
@@ -601,6 +190,13 @@
 <span class="variable token">$user</span>-&gt;delete();
 
 <span class="variable token">$this</span>-&gt;assertModelMissing(<span class="variable token">$user</span>);
+</code></pre>
+<p><a name="expects-database-query-count"></a></p>
+<h4 id="expectsdatabasequerycount">expectsDatabaseQueryCount</h4>
+<p>可以在测试开始时调用 <code>expectsDatabaseQueryCount</code> 方法，以指定你希望在测试期间运行的数据库查询总数。如果实际执行的查询数量与这个预期不完全匹配，那么测试将失败：</p>
+<pre><code><span class="variable token">$this</span>-&gt;expectsDatabaseQueryCount(<span class="number token">5</span>);
+
+<span class="comment token">// Test...</span>
 </code></pre>
 </div>
     <blockquote style="font-size: 0.9em;">
