@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -27,7 +27,7 @@
 </li>
 <li><a href="#attribute-casting">属性转换</a><ul>
 <li><a href="#array-and-json-casting">数组 &amp; JSON 转换</a></li>
-<li><a href="#date-casting">Date 转换</a></li>
+<li><a href="#date-casting">日期转换</a></li>
 <li><a href="#enum-casting">枚举转换</a></li>
 <li><a href="#encrypted-casting">加密转换</a></li>
 <li><a href="#query-time-casting">查询时转换</a></li>
@@ -38,38 +38,36 @@
 <li><a href="#array-json-serialization">数组 / JSON 序列化</a></li>
 <li><a href="#inbound-casting">入站转换</a></li>
 <li><a href="#cast-parameters">类型转换参数</a></li>
-<li><a href="#castables">Castables</a></li>
+<li><a href="#castables">可转换</a></li>
 </ul>
 </li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>当你在 Eloquent 模型实例中获取或设置某些属性值的时候，访问器和修改器允许你对 Eloquent 属性值进行格式化。例如，你可能需要使用 <a href="https://learnku.com/docs/laravel/8.5/encryption">Laravel 加密器</a> 来加密保存在数据库中的值，而在使用 Eloquent 模型访问该属性的时候自动进行解密其值。</p>
+<p>当你在 Eloquent 模型实例中获取或设置某些属性值时，访问器和修改器允许你对 Eloquent 属性值进行格式化。例如，你可能需要使用<a href="/docs/laravel/10.x/encryption"> Laravel 加密器</a> 来加密保存在数据库中的值，而在使用 Eloquent 模型访问该属性的时候自动进行解密其值。</p>
 <p>或者，当通过 Eloquent 模型访问存储在数据库的 JSON 字符串时，你可能希望将其转换为数组。</p>
 <p><a name="accessors-and-mutators"></a></p>
 <h2 id="访问器--修改器">访问器 &amp; 修改器</h2>
 <p><a name="defining-an-accessor"></a></p>
 <h3 id="定义一个访问器">定义一个访问器</h3>
 <p>访问器会在访问一个模型的属性时转换 Eloquent 值。要定义访问器，请在模型中创建一个受保护的「驼峰式」方法来表示可访问属性。此方法名称对应到真正的底层模型 <code>属性/数据库字段</code> 的表示。</p>
-<p>在本例中，我们将为 first_name 属性定义一个访问器。在尝试检索 first_name 属性的值时，Eloquent 会自动调用访问器。所有属性访问器/修改器方法必须声明 <code>Illuminate\Database\Eloquent\Casts\Attribute</code> 的返回类型提示：</p>
+<p>在本例中，我们将为 <code>first_name</code> 属性定义一个访问器。在尝试检索 <code>first_name</code> 属性的值时，Eloquent 会自动调用访问器。所有属性访问器 / 修改器方法必须声明 <code>Illuminate\Database\Eloquent\Casts\Attribute</code>的返回类型提示：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
- 
+
 <span class="keyword token">namespace</span> App\Models;
- 
+
 <span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
 <span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
- 
+
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
      * 获取用户的名字。
-     *
-     *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Casts\Attribute
      */</span>
     <span class="keyword token">protected</span> <span class="keyword token">function</span> firstName(): Attribute
     {
         <span class="keyword token">return</span> Attribute::make(
-            get: fn (<span class="variable token">$value</span>) =&gt; ucfirst(<span class="variable token">$value</span>),
+            get: fn (string <span class="variable token">$value</span>) =&gt; ucfirst(<span class="variable token">$value</span>),
         );
     }
 }
@@ -83,7 +81,7 @@
 <span class="variable token">$firstName</span> = <span class="variable token">$user</span>-&gt;first_name;
 </code></pre>
 <blockquote>
-<p>技巧：如果要将这些计算值添加到模型的数组/JSON 表示中，<a href="eloquent-serialization.html#appending-values-to-json">你需要追加它们</a>.</p>
+<p><strong>注意</strong>： 如果要将这些计算值添加到模型的 array / JSON 中表示，<a href="/docs/laravel/10.x/eloquent-serializationmd#appending-values-to-json">你需要追加它们</a>.</p>
 </blockquote>
 <p><a name="building-value-objects-from-multiple-attributes"></a></p>
 <h4 id="从多个属性构建值对象">从多个属性构建值对象</h4>
@@ -93,19 +91,18 @@
 
 <span class="comment token">/**
  * 与用户地址交互。
- *
- *<span class="phpdoc token"> @return</span>  \Illuminate\Database\Eloquent\Casts\Attribute
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> address(): Attribute
+<span class="keyword token">protected</span> <span class="keyword token">function</span> address(): Attribute
 {
-    <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
-        get: fn (<span class="variable token">$value</span>, <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
+    <span class="keyword token">return</span> Attribute::make(
+        get: fn (mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_two'</span>],
         ),
     );
 }
 </code></pre>
+<p><a name="accessor-caching"></a></p>
 <h4 id="访问器缓存">访问器缓存</h4>
 <p>从访问器返回值对象时，对值对象所做的任何更改都将在模型保存之前自动同步回模型。 这是可能的，因为 Eloquent 保留了访问器返回的实例，因此每次调用访问器时都可以返回相同的实例：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
@@ -117,28 +114,26 @@
 
 <span class="variable token">$user</span>-&gt;save();
 </code></pre>
-<p>有时您可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，您可以在定义访问器时调用 <code>shouldCache</code> 方法：</p>
+<p>有时你可能希望为字符串和布尔值等原始值启用缓存，特别是当它们是计算密集型时。要实现这一点，你可以在定义访问器时调用 <code>shouldCache</code> 方法：</p>
 <pre><code class="language-php"><span class="keyword token">protected</span> <span class="keyword token">function</span> hash(): Attribute
 {
     <span class="keyword token">return</span> Attribute::make(
-        get: fn (<span class="variable token">$value</span>) =&gt; bcrypt(gzuncompress(<span class="variable token">$value</span>)),
-      )-&gt;shouldCache();
+        get: fn (string <span class="variable token">$value</span>) =&gt; bcrypt(gzuncompress(<span class="variable token">$value</span>)),
+    )-&gt;shouldCache();
 }
 </code></pre>
 <p>如果要禁用属性的缓存，可以在定义属性时调用 <code>withoutObjectCaching</code> 方法：</p>
 <pre><code class="language-php"><span class="comment token">/**
- * 与 user 的 address 交互.
- *
- *<span class="phpdoc token"> @return</span>  \Illuminate\Database\Eloquent\Casts\Attribute
+ * 与 user 的 address 交互。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> address(): Attribute
+<span class="keyword token">protected</span> <span class="keyword token">function</span> address(): Attribute
 {
-    <span class="keyword token">return</span> (<span class="keyword token">new</span> Attribute(
-        get: fn (<span class="variable token">$value</span>, <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
+    <span class="keyword token">return</span> Attribute::make(
+        get: fn (mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_two'</span>],
         ),
-    ))-&gt;withoutObjectCaching();
+    )-&gt;withoutObjectCaching();
 }
 </code></pre>
 <p><a name="defining-a-mutator"></a></p>
@@ -154,21 +149,18 @@
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * 与 user 的first name 交互
-     *
-     *<span class="phpdoc token"> @param</span>  string  $value
-     *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Casts\Attribute
+     * 与 user 的 first name 交互。
      */</span>
     <span class="keyword token">protected</span> <span class="keyword token">function</span> firstName(): Attribute
     {
-        <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
-            get: fn (<span class="variable token">$value</span>) =&gt; ucfirst(<span class="variable token">$value</span>),
-            set: fn (<span class="variable token">$value</span>) =&gt; strtolower(<span class="variable token">$value</span>),
+        <span class="keyword token">return</span> Attribute::make(
+            get: fn (string <span class="variable token">$value</span>) =&gt; ucfirst(<span class="variable token">$value</span>),
+            set: fn (string <span class="variable token">$value</span>) =&gt; strtolower(<span class="variable token">$value</span>),
         );
     }
 }
 </code></pre>
-<p>修改器的闭包会接收将要设置的值，并允许我们使用和返回该值。要使该修改器生效，只需在模型上设置  <code>first_name</code> 即可：</p>
+<p>修改器的闭包会接收将要设置的值，并允许我们使用和返回该值。要使该修改器生效，只需在模型上设置 <code>first_name</code> 即可：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
@@ -178,19 +170,17 @@
 <p>在本例中，值 <code>Sally</code> 将会触发 <code>set</code> 回调。然后，修改器会使用 <code>strtolower</code> 函数处理姓名，并将结果值设置在模型的 <code>$attributes</code> 数组中。</p>
 <p><a name="mutating-multiple-attributes"></a></p>
 <h4 id="修改多个属性">修改多个属性</h4>
-<p>有时你的修改器可能需要修改底层模型的多个属性。 为此，你的 <code>set</code> 闭包可以返回一个数组，数组中的每个键都应该与模型的属性/数据库列相对应：</p>
+<p>有时你的修改器可能需要修改底层模型的多个属性。 为此，你的 <code>set</code> 闭包可以返回一个数组，数组中的每个键都应该与模型的属性 / 数据库列相对应：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Support\Address;
 <span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\Attribute;
 
 <span class="comment token">/**
- * 与user模型的address交互.
- *
- *<span class="phpdoc token"> @return</span>  \Illuminate\Database\Eloquent\Casts\Attribute
+ * 与user模型的address交互。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> address(): Attribute
+<span class="keyword token">protected</span> <span class="keyword token">function</span> address(): Attribute
 {
-    <span class="keyword token">return</span> <span class="keyword token">new</span> Attribute(
-        get: fn (<span class="variable token">$value</span>, <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
+    <span class="keyword token">return</span> Attribute::make(
+        get: fn (mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>) =&gt; <span class="keyword token">new</span> Address(
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_two'</span>],
         ),
@@ -216,7 +206,7 @@
 <li><code>datetime</code></li>
 <li><code>immutable_date</code></li>
 <li><code>immutable_datetime</code></li>
-<li><code>decimal:</code><code>&lt;digits&gt;</code></li>
+<li><code>decimal:&lt;precision&gt;</code></li>
 <li><code>double</code></li>
 <li><code>encrypted</code></li>
 <li><code>encrypted:array</code></li>
@@ -231,7 +221,9 @@
 </ul>
 </div>
 
-<p>示例， 让我们把以整数 (<code>0</code> 或 <code>1</code>) 形式存储在数据库中的 <code>is_admin</code> 属性转成布尔值：</p>
+
+
+<p>示例， 让我们把以整数（<code>0</code> 或 <code>1</code>）形式存储在数据库中的 <code>is_admin</code>  属性转成布尔值：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -241,7 +233,7 @@
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * 类型转换
+     * 类型转换。
      *
      *<span class="phpdoc token"> @var</span> array
      */</span>
@@ -254,7 +246,7 @@
 <pre><code><span class="variable token">$user</span> = App\Models\User::find(<span class="number token">1</span>);
 
 <span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;is_admin) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p>如果需要在运行时添加新的临时强制转换，可以使用 <code>mergeCasts</code> 这些强制转换定义将添加到模型上已定义的任何强制转换中：</p>
@@ -264,11 +256,11 @@
 ]);
 </code></pre>
 <blockquote>
-<p>注意： <code>null</code> 值属性将不会被转换。此外，禁止定义与关联同名的类型转换（或属性）。</p>
+<p><strong>注意</strong>： 值属性将不会被转换。此外，禁止定义与关联同名的类型转换（或属性）。</p>
 </blockquote>
 <p><a name="stringable-casting"></a></p>
 <h4 id="强制转换">强制转换</h4>
-<p>你可以用 <code>Illuminate\Database\Eloquent\Casts\AsStringable</code> 类将模型属性强制转换为 <a href="helpers.html#fluent-strings-method-list"><code>Illuminate\Support\Stringable</code> 对象</a>：</p>
+<p>你可以用 <code>Illuminate\Database\Eloquent\Casts\AsStringable</code> 类将模型属性强制转换为 <a href="/docs/laravel/10.x/helpersmd#fluent-strings-method-list"> <code>Illuminate\Support\Stringable</code> 对象</a>:</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -279,7 +271,7 @@
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * The attributes that should be cast.
+     * 类型转换。
      *
      *<span class="phpdoc token"> @var</span> array
      */</span>
@@ -290,7 +282,7 @@
 </code></pre>
 <p><a name="array-and-json-casting"></a></p>
 <h3 id="数组--json-转换">数组 &amp; JSON 转换</h3>
-<p>当你在数据库存储序列化的 JSON 的数据时， <code>array</code> 类型的转换非常有用。比如：如果你的数据库具有被序列化为 JSON 的 <code>JSON</code> 或 <code>TEXT</code> 字段类型，并且在 Eloquent 模型中加入了 <code>array</code> 类型转换，那么当你访问的时候就会自动被转换为 PHP 数组：</p>
+<p>当你在数据库存储序列化的 <code>JSON</code> 的数据时， <code>array</code> 类型的转换非常有用。比如：如果你的数据库具有被序列化为 JSON 的 <code>JSON</code> 或 <code>TEXT</code> 字段类型，并且在 Eloquent 模型中加入了 <code>array</code> 类型转换，那么当你访问的时候就会自动被转换为 PHP 数组：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -300,7 +292,7 @@
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * The attributes that should be cast.
+     * 类型转换。
      *
      *<span class="phpdoc token"> @var</span> array
      */</span>
@@ -309,7 +301,7 @@
     ];
 }
 </code></pre>
-<p>一旦定义了转换，你访问 <code>options</code> 属性时他会自动从 JSON 类型反序列化为 PHP 数组。当你设置了  <code>options</code> 属性的值时，给定的数组也会自动序列化为 JSON 类型存储：</p>
+<p>一旦定义了转换，你访问 <code>options</code> 属性时他会自动从 JSON 类型反序列化为 PHP 数组。当你设置了 <code>options</code> 属性的值时，给定的数组也会自动序列化为 JSON 类型存储：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
@@ -328,7 +320,7 @@
 <span class="variable token">$user</span>-&gt;update([<span class="string token">'options-&gt;key'</span> =&gt; <span class="string token">'value'</span>]);
 </code></pre>
 <p><a name="array-object-and-collection-casting"></a></p>
-<h4 id="数组对象--集合-类型转换">数组对象 &amp; 集合 类型转换</h4>
+<h4 id="数组对象--集合类型转换">数组对象 &amp; 集合类型转换</h4>
 <p>虽然标准的 <code>array</code> 类型转换对于许多应用程序来说已经足够了，但它确实有一些缺点。由于 <code>array</code> 类型转换返回一个基础类型，因此不可能直接改变数组键的值。例如，以下代码将触发一个 PHP 错误：</p>
 <pre><code><span class="variable token">$user</span> = User::find(<span class="number token">1</span>);
 
@@ -338,7 +330,7 @@
 <pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\AsArrayObject;
 
 <span class="comment token">/**
- * 类型转换.
+ * 类型转换。
  *
  *<span class="phpdoc token"> @var</span> array
  */</span>
@@ -346,11 +338,11 @@
     <span class="string token">'options'</span> =&gt; AsArrayObject::<span class="keyword token">class</span>,
 ];
 </code></pre>
-<p>类似的，Laravel 提供了一个 <code>AsCollection</code>  类型转换，它将 JSON 属性转换为 Laravel <a href="collections.html">集合</a> 实例：</p>
+<p>类似的，Laravel 提供了一个 <code>AsCollection</code> 类型转换，它将 JSON 属性转换为 Laravel <a href="/docs/laravel/10.x/collections">集合</a> 实例：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\AsCollection;
 
 <span class="comment token">/**
- * The attributes that should be cast.
+ * 类型转换。
  *
  *<span class="phpdoc token"> @var</span> array
  */</span>
@@ -360,10 +352,10 @@
 </code></pre>
 <p><a name="date-casting"></a></p>
 <h3 id="date-转换">Date 转换</h3>
-<p>默认情况下，Eloquent 会将 <code>created_at</code> 和 <code>updated_at</code> 字段转换为 <a href="https://github.com/briannesbitt/Carbon">Carbon</a>实例，它继承了 PHP 原生的 <code>DateTime</code> 类并提供了各种有用的方法。你可以通过在模型的 <code>$casts</code> 属性数组中定义额外的日期类型转换，用来转换其他的日期属性。通常来说，日期应该使用 <code>datetime</code> 或 <code>immutable_datetime</code> 类型转换来转换。</p>
-<p>当使用 <code>date</code> 或 <code>datetime</code> 类型转换时，你也可以指定日期的格式。这种格式会被用在 <a href="eloquent-serialization.html">模型序列化为数组或者JSON</a>：</p>
+<p>默认情况下，Eloquent 会将 <code>created_at</code> 和 <code>updated_at</code> 字段转换为 <a href="https://github.com/briannesbitt/Carbon">Carbon</a> 实例，它继承了 PHP 原生的 <code>DateTime</code> 类并提供了各种有用的方法。你可以通过在模型的 <code>$casts</code> 属性数组中定义额外的日期类型转换，用来转换其他的日期属性。通常来说，日期应该使用 <code>datetime</code> 或 <code>immutable_datetime</code> 类型转换来转换。</p>
+<p>当使用 <code>date</code> 或 <code>datetime</code> 类型转换时，你也可以指定日期的格式。这种格式会被用在 <a href="/docs/laravel/10.x/eloquent-serialization">模型序列化为数组或者 JSON</a>：</p>
 <pre><code><span class="comment token">/**
- * The attributes that should be cast.
+ * 类型转换。
  *
  *<span class="phpdoc token"> @var</span> array
  */</span>
@@ -371,22 +363,19 @@
     <span class="string token">'created_at'</span> =&gt; <span class="string token">'datetime:Y-m-d'</span>,
 ];
 </code></pre>
-<p>将列类型转换为日期时，可以将其值设置为 UNIX 时间戳、日期字符串（<code>Y-m-d</code>）、日期时间字符串或  <code>DateTime</code> / <code>Carbon</code> 实例。日期值将会被准确的转换并存储在数据库中。</p>
+<p>将列类型转换为日期时，可以将其值设置为 UNIX 时间戳、日期字符串（<code>Y-m-d</code>）、日期时间字符串或 <code>DateTime</code> / <code>Carbon</code> 实例。日期值将会被准确的转换并存储在数据库中。</p>
 <p>通过在模型中定义 <code>serializeDate</code> 方法，你可以自定义所有模型日期的默认序列化格式。此方法不会影响日期在数据库中存储的格式：</p>
 <pre><code><span class="comment token">/**
- * 为 array / JSON 序列化准备日期格式
- *
- *<span class="phpdoc token"> @param</span>  \DateTimeInterface  $date
- *<span class="phpdoc token"> @return</span> string
+ * 为 array / JSON 序列化准备日期格式。
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> serializeDate(DateTimeInterface <span class="variable token">$date</span>)
+<span class="keyword token">protected</span> <span class="keyword token">function</span> serializeDate(DateTimeInterface <span class="variable token">$date</span>): string
 {
     <span class="keyword token">return</span> <span class="variable token">$date</span>-&gt;format(<span class="string token">'Y-m-d'</span>);
 }
 </code></pre>
 <p>在模型上定义 <code>$dateFormat</code> 属性后，模型的日期将会以你指定的格式实际存储于数据库中：</p>
 <pre><code><span class="comment token">/**
- * 模型日期列的存储格式.
+ * 模型日期列的存储格式。
  *
  *<span class="phpdoc token"> @var</span> string
  */</span>
@@ -394,18 +383,15 @@
 </code></pre>
 <p><a name="date-casting-and-timezones"></a></p>
 <h4 id="日期转换，序列化，-时区">日期转换，序列化，&amp; 时区</h4>
-<p>默认情况下，<code>date</code> 和 <code>datetime</code> 会序列化为UTC ISO-8601格式的（ <code>1986-05-28T21:05:54.000000Z</code> ）字符串，并不会受到应用的 <code>timezone</code> 配置影响。强烈建议您始终使用此序列化格式，并不更改应用程序的 <code>timezone</code> 配置（默认 <code>UTC</code> ）以将应用程序的日期存储在UTC时区中。在整个应用程序中始终使用 UTC 时区，会使与其他 PHP 和 JavaScript 类库的互操作性更高。</p>
-<p>如果对 <code>date</code> 或 <code>datetime</code> 属性自定义了格式，例如 <code>datetime:Y-m-d H:i​:s</code>，那么在日期序列化期间将使用Carbon实例的内部时区。通常，这是应用程序的 <code>timezone</code> 配置选项中指定的时区。</p>
+<p>默认情况下，<code>date</code> 和 <code>datetime</code> 会序列化为 UTC ISO-8601 格式的（ <code>1986-05-28T21:05:54.000000Z</code> ）字符串，并不会受到应用的 <code>timezone</code> 配置影响。强烈建议您始终使用此序列化格式，并不更改应用程序的 <code>timezone</code> 配置（默认 <code>UTC</code> ）以将应用程序的日期存储在 UTC 时区中。在整个应用程序中始终使用 UTC 时区，会使与其他 PHP 和 JavaScript 类库的互操作性更高。</p>
+<p>如果对 <code>date</code> 或 <code>datetime</code> 属性自定义了格式，例如 <code>datetime:Y-m-d H:i​:s</code>，那么在日期序列化期间将使用 Carbon 实例的内部时区。通常，这是应用程序的 <code>timezone</code> 配置选项中指定的时区。</p>
 <p><a name="enum-casting"></a></p>
 <h3 id="枚举转换">枚举转换</h3>
-<blockquote>
-<p>注意：枚举转换仅适用于 PHP 8.1+.</p>
-</blockquote>
-<p>Eloquent 还允许您将属性值强制转换为 PHP 的 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">枚举</a>。为此，可以在模型的 <code>$casts</code> 数组属性中指定要转换的属性和枚举：</p>
+<p>Eloquent 还允许您将属性值强制转换为 PHP 的 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">枚举</a>。 为此，可以在模型的 <code>$casts</code> 数组属性中指定要转换的属性和枚举：</p>
 <pre><code><span class="keyword token">use</span> App\Enums\ServerStatus;
 
 <span class="comment token">/**
- * 要转换的属性
+ * 类型转换。
  *
  *<span class="phpdoc token"> @var</span> array
  */</span>
@@ -414,16 +400,34 @@
 ];
 </code></pre>
 <p>在模型上定义了转换后，与属性交互时，指定的属性都将在枚举中强制转换：</p>
-<pre><code><span class="keyword token">if</span> (<span class="variable token">$server</span>-&gt;status == ServerStatus::provisioned) {
-    <span class="variable token">$server</span>-&gt;status = ServerStatus::ready;
+<pre><code><span class="keyword token">if</span> (<span class="variable token">$server</span>-&gt;status == ServerStatus::Provisioned) {
+    <span class="variable token">$server</span>-&gt;status = ServerStatus::Ready;
 
     <span class="variable token">$server</span>-&gt;save();
 }
 </code></pre>
+<p><a name="casting-arrays-of-enums"></a></p>
+<h4 id="转换枚举数组">转换枚举数组</h4>
+<p>有时，你可能需要模型在单个列中存储枚举值的数组。为此，你可以使用 Laravel 提供的<code>AsEnumArrayObject</code>或<code>AsEnumCollection</code>强制转换：</p>
+<pre><code><span class="keyword token">use</span> App\Enums\ServerStatus;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Casts\AsEnumCollection;
+
+<span class="comment token">/**
+ * 类型转换。
+ *
+ *<span class="phpdoc token"> @var</span> array
+ */</span>
+<span class="keyword token">protected</span> <span class="variable token">$casts</span> = [
+    <span class="string token">'statuses'</span> =&gt; AsEnumCollection::<span class="keyword token">class</span>.<span class="string token">':'</span>.ServerStatus::<span class="keyword token">class</span>,
+];
+</code></pre>
 <p><a name="encrypted-casting"></a></p>
 <h3 id="加密转换">加密转换</h3>
-<p><code>encrypted</code> 转换使用了 Laravel 的内置 <a href="encryption.html">encryption</a> 功能加密模型的属性值。 此外，<code>encrypted:array</code>、<code>encrypted:collection</code>、<code>encrypted:object</code>、<code>AsEncryptedArrayObject</code> 和 <code>AsEncryptedCollection</code> 类型转换的工作方式与未加密的类型相同； 但是，正如您所料，底层值在存储在数据库中时是加密的。</p>
+<p><code>encrypted</code> 转换使用了 Laravel 的内置 <a href="/docs/laravel/10.x/encryption">encryption</a> 功能加密模型的属性值。 此外，<code>encrypted:array</code>、<code>encrypted:collection</code>、<code>encrypted:object</code>、<code>AsEncryptedArrayObject</code> 和 <code>AsEncryptedCollection</code> 类型转换的工作方式与未加密的类型相同； 但是，正如您所料，底层值在存储在数据库中时是加密的。</p>
 <p>由于加密文本的最终长度不可预测并且比其纯文本长度要长，因此请确保关联的数据库列属性是 <code>TEXT</code> 类型或更大。此外，由于数据库中的值是加密的，您将无法查询或搜索加密的属性值。</p>
+<p><a name="key-rotation"></a></p>
+<h4 id="密钥轮换">密钥轮换</h4>
+<p>如你所知，Laravel使用应用程序的 <code>app</code> 配置文件中指定的 <code>key</code> 配置值对字符串进行加密。通常，该值对应于 <code>APP_KEY</code> 环境变量的值。如果需要轮换应用程序的加密密钥，则需要使用新密钥手动重新加密加密属性。</p>
 <p><a name="query-time-casting"></a></p>
 <h3 id="查询时转换">查询时转换</h3>
 <p>有时你可能需要在执行查询时应用强制转换，例如从表中选择原始值时。 例如，考虑以下查询：</p>
@@ -436,7 +440,7 @@
             -&gt;whereColumn(<span class="string token">'user_id'</span>, <span class="string token">'users.id'</span>)
 ])-&gt;get();
 </code></pre>
-<p>在该查询获取到的结果集中，<code>last_posted_at</code> 属性将会是一个字符串。假如我们在执行查询时进行 <code>datetime</code> 类型转换将更方便。你可以通过使用 <code>withCasts</code> 方法来完成上述操作：</p>
+<p>在该查询获取到的结果集中，<code>last_posted_at</code> 属性将会是一个字符串。假如我们在执行查询时进行 <code>datetime</code> 类型转换将更方便。你可以通过使用 <code>withCasts</code> 方法来完成上述操作：</p>
 <pre><code><span class="variable token">$users</span> = User::select([
     <span class="string token">'users.*'</span>,
     <span class="string token">'last_posted_at'</span> =&gt; Post::selectRaw(<span class="string token">'MAX(created_at)'</span>)
@@ -447,40 +451,36 @@
 </code></pre>
 <p><a name="custom-casts"></a></p>
 <h2 id="自定义类型转换">自定义类型转换</h2>
-<p>Laravel 有多种内置的、有用的类型转换； 如果需要自定义的强制转换类型。 可以通过定义一个实现 <code>CastsAttributes</code> 接口的类来实现这一点。</p>
-<p>实现这个接口的类必须定义一个 <code>get</code> 和 <code>set</code> 方法。 <code>get</code> 方法负责将数据库中的原始值转换为转换值，而 <code>set</code> 方法应将转换值转换为可以存储在数据库中的原始值。 作为示例，我们将内置的 <code>json</code> 类型转换重新实现为自定义类型：</p>
+<p>Laravel 有多种内置的、有用的类型转换； 如果需要自定义强制转换类型。要创建一个类型转换，执行<code>make:cast</code>命令。 新的强制转换类将被放置在你的<code>app/Casts</code>目录中:</p>
+<pre><code class="language-shell">php artisan make:cast Json
+</code></pre>
+<p>所有自定义强制转换类都实现了<code>CastsAttributes</code>接口。 实现这个接口的类必须定义一个 <code>get</code> 和 <code>set</code> 方法。<code>get</code>方法负责将数据库中的原始值转换为转换值，而 <code>set</code> 方法应将转换值转换为可以存储在数据库中的原始值。 作为示例，我们将内置的 <code>json</code> 类型转换重新实现为自定义类型：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Casts;
 
 <span class="keyword token">use</span> Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 
 <span class="keyword token">class</span> Json <span class="keyword token">implements</span> CastsAttributes
 {
     <span class="comment token">/**
-     * 将取出的数据进行转换
+     * 将取出的数据进行转换。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
-     *<span class="phpdoc token"> @param</span>  string  $key
-     *<span class="phpdoc token"> @param</span>  mixed  $value
-     *<span class="phpdoc token"> @param</span>  array  $attributes
-     *<span class="phpdoc token"> @return</span> array
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
+     *<span class="phpdoc token"> @return</span> array&lt;string, mixed&gt;
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> get(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> get(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): <span class="keyword token">array</span>
     {
         <span class="keyword token">return</span> json_decode(<span class="variable token">$value</span>, <span class="keyword token">true</span>);
     }
 
     <span class="comment token">/**
-     * 转换成将要进行存储的值
+     * 转换成将要进行存储的值。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
-     *<span class="phpdoc token"> @param</span>  string  $key
-     *<span class="phpdoc token"> @param</span>  array  $value
-     *<span class="phpdoc token"> @param</span>  array  $attributes
-     *<span class="phpdoc token"> @return</span> string
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> set(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> set(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): string
     {
         <span class="keyword token">return</span> json_encode(<span class="variable token">$value</span>);
     }
@@ -497,7 +497,7 @@
 <span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
 {
     <span class="comment token">/**
-     * 应被强制转换的属性
+     * 应被强制转换的属性。
      *
      *<span class="phpdoc token"> @var</span> array
      */</span>
@@ -508,48 +508,41 @@
 </code></pre>
 <p><a name="value-object-casting"></a></p>
 <h3 id="值对象转换">值对象转换</h3>
-<p>你不仅可以将数据转换成原生的数据类型，还可以将数据转换成对象。两种自定义类型转换的定义方式非常类似。但是将数据转换成对象的自定义转换类中的 set 方法需要返回键值对数组，用于设置原始、可存储的值到对应的模型中。</p>
-<p>举个例子，定义一个自定义类型转换类用于将多个模型属性值转换成单个 <code>Address</code> 值对象，假设 <code>Address</code> 对象有两个公有属性 <code>lineOne</code> 和 <code>lineTwo</code>:</p>
-<p>例如，我们将定义一个自定义转换类，将多个模型值转换为单个「地址」值对象。 我们将假设 <code>Address</code> 值有两个公共属性：<code>lineOne</code> 和 <code>lineTwo</code>：</p>
+<p>你不仅可以将数据转换成原生的数据类型，还可以将数据转换成对象。两种自定义类型转换的定义方式非常类似。但是将数据转换成对象的自定义转换类中的 <code>set</code> 方法需要返回键值对数组，用于设置原始、可存储的值到对应的模型中。</p>
+<p>例如，我们将定义一个自定义转换类，将多个模型值转换为单个<code>Address</code>值对象。 我们将假设 <code>Address</code> 值有两个公共属性：<code>lineOne</code> 和 <code>lineTwo</code>：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Casts;
 
-<span class="keyword token">use</span> App\Models\Address <span class="keyword token">as</span> AddressModel;
+<span class="keyword token">use</span> App\ValueObjects\Address <span class="keyword token">as</span> AddressValueObject;
 <span class="keyword token">use</span> Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 <span class="keyword token">use</span> InvalidArgumentException;
 
 <span class="keyword token">class</span> Address <span class="keyword token">implements</span> CastsAttributes
 {
     <span class="comment token">/**
-     * 转换给定的值
+     * 转换给定的值。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
-     *<span class="phpdoc token"> @param</span>  string  $key
-     *<span class="phpdoc token"> @param</span>  mixed  $value
-     *<span class="phpdoc token"> @param</span>  array  $attributes
-     *<span class="phpdoc token"> @return</span> \App\Models\Address
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> get(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> get(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): AddressValueObject
     {
-        <span class="keyword token">return</span> <span class="keyword token">new</span> AddressModel(
+        <span class="keyword token">return</span> <span class="keyword token">new</span> AddressValueObject(
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
             <span class="variable token">$attributes</span>[<span class="string token">'address_line_two'</span>]
         );
     }
 
     <span class="comment token">/**
-     * 准备给定值以进行存储
+     * 准备给定值以进行存储。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
-     *<span class="phpdoc token"> @param</span>  string  $key
-     *<span class="phpdoc token"> @param</span>  \App\Models\Address  $value
-     *<span class="phpdoc token"> @param</span>  array  $attributes
-     *<span class="phpdoc token"> @return</span> array
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
+     *<span class="phpdoc token"> @return</span> array&lt;string, string&gt;
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> set(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> set(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): <span class="keyword token">array</span>
     {
-        <span class="keyword token">if</span> (! <span class="variable token">$value</span> instanceof AddressModel) {
+        <span class="keyword token">if</span> (! <span class="variable token">$value</span> instanceof AddressValueObject) {
             <span class="keyword token">throw</span> <span class="keyword token">new</span> InvalidArgumentException(<span class="string token">'The given value is not an Address instance.'</span>);
         }
 
@@ -570,65 +563,51 @@
 <span class="variable token">$user</span>-&gt;save();
 </code></pre>
 <blockquote>
-<p>技巧：如果你计划将包含值对象的 Eloquent 模型序列化为 JSON 或数组，那么应该在值对象上实现 <code>Illuminate\Contracts\Support\Arrayable</code> 和 <code>JsonSerializable</code> 接口。</p>
+<p>注意：如果你计划将包含值对象的 Eloquent 模型序列化为 JSON 或数组，那么应该在值对象上实现 <code>Illuminate\Contracts\Support\Arrayable</code> 和 <code>JsonSerializable</code> 接口。</p>
 </blockquote>
 <p><a name="array-json-serialization"></a></p>
 <h3 id="数组--json-序列化">数组 / JSON 序列化</h3>
-<p>当使用 <code>toArray</code> 和 <code>toJson</code> 方法将 Eloquent 模型转换为数组或 JSON 时，自定义转换值对象通常会被序列化，只要它们实现 <code>Illuminate\Contracts\Support\Arrayable</code> 和 <code>JsonSerializable</code> 接口。 但是，在使用第三方库提供的值对象时，你可能无法将这些接口添加到对象中。</p>
-<p>因此，你可以指定你自定义的类型转换类，它将负责序列化成值对象。为此，你自定义的类型转换类需要实现 <code>Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes</code> 接口。此接口声明类应包含 <code>serialize</code> 方法，该方法应返回值对象的序列化形式：</p>
+<p>当使用 <code>toArray</code> 和 <code>toJson</code> 方法将 Eloquent 模型转换为数组或 JSON 时，自定义转换值对象通常会被序列化，只要它们实现 <code>Illuminate\Contracts\Support\Arrayable</code> 和 <code>JsonSerializable</code> 接口。 但是，在使用第三方库提供的值对象时，你可能无法将这些接口添加到对象中。</p>
+<p>因此，你可以指定你自定义的类型转换类，它将负责序列化成值对象。为此，你自定义的类型转换类需要实现 <code>Illuminate\Contracts\Database\Eloquent\SerializesCastableAttributes</code> 接口。此接口声明类应包含 <code>serialize</code> 方法，该方法应返回值对象的序列化形式：</p>
 <pre><code><span class="comment token">/**
- * 获取值的序列化表示形式
+ * 获取值的序列化表示形式。
  *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
- *<span class="phpdoc token"> @param</span>  string  $key
- *<span class="phpdoc token"> @param</span>  mixed  $value
- *<span class="phpdoc token"> @param</span>  array  $attributes
- *<span class="phpdoc token"> @return</span> mixed
+ *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> serialize(<span class="variable token">$model</span>, string <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> serialize(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): string
 {
     <span class="keyword token">return</span> (string) <span class="variable token">$value</span>;
 }
 </code></pre>
 <p><a name="inbound-casting"></a></p>
 <h3 id="入站转换">入站转换</h3>
-<p>有时候，你可能只需要对写入模型的属性值进行类型转换而不需要对从模型中获取的属性值进行任何处理。一个典型入站类型转换的例子就是 「hashing」。入站类型转换类需要实现 <code>CastsInboundAttributes</code> 接口，只需要实现 <code>set</code> 方法。</p>
+<p>有时候，你可能只需要对写入模型的属性值进行类型转换而不需要对从模型中获取的属性值进行任何处理。</p>
+<p>入站自定义强制转换应该实现<code>CastsInboundAttributes</code>接口，该接口只需要定义一个<code>set</code>方法。<code>make:cast</code>Artisan 命令可以通过<code>——inbound</code>选项调用来生成一个入站强制转换类:</p>
+<pre><code class="language-shell">php artisan make:cast Hash --inbound
+</code></pre>
+<p>仅入站强制转换的一个经典示例是「hashing」强制转换。例如，我们可以定义一个类型转换，通过给定的算法散列入站值:</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Casts;
 
 <span class="keyword token">use</span> Illuminate\Contracts\Database\Eloquent\CastsInboundAttributes;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 
 <span class="keyword token">class</span> Hash <span class="keyword token">implements</span> CastsInboundAttributes
 {
     <span class="comment token">/**
-     * 哈希算法
-     *
-     *<span class="phpdoc token"> @var</span> string
+     * 创建一个新的强制转换类实例。
      */</span>
-    <span class="keyword token">protected</span> <span class="variable token">$algorithm</span>;
-
-    <span class="comment token">/**
-     * 创建一个新的类型转换类实例
-     *
-     *<span class="phpdoc token"> @param</span>  string|null  $algorithm
-     *<span class="phpdoc token"> @return</span> void
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(<span class="variable token">$algorithm</span> = <span class="keyword token">null</span>)
-    {
-        <span class="variable token">$this</span>-&gt;algorithm = <span class="variable token">$algorithm</span>;
-    }
+    <span class="keyword token">public</span> <span class="keyword token">function</span> __construct(
+        <span class="keyword token">protected</span> string <span class="variable token">$algorithm</span> = <span class="keyword token">null</span>,
+    ) {}
 
     <span class="comment token">/**
      * 转换成将要进行存储的值
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Model  $model
-     *<span class="phpdoc token"> @param</span>  string  $key
-     *<span class="phpdoc token"> @param</span>  array  $value
-     *<span class="phpdoc token"> @param</span>  array  $attributes
-     *<span class="phpdoc token"> @return</span> string
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $attributes
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> set(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> set(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): string
     {
         <span class="keyword token">return</span> is_null(<span class="variable token">$this</span>-&gt;algorithm)
                     ? bcrypt(<span class="variable token">$value</span>)
@@ -640,7 +619,7 @@
 <h3 id="转换参数">转换参数</h3>
 <p>当将自定义类型转换附加到模型时，可以指定传入的类型转换参数。传入类型转换参数需使用 <code>:</code> 将参数与类名分隔，多个参数之间使用逗号分隔。这些参数将会传递到类型转换类的构造函数中：</p>
 <pre><code><span class="comment token">/**
- * The attributes that should be cast.
+ * 应该强制转换的属性。
  *
  *<span class="phpdoc token"> @var</span> array
  */</span>
@@ -657,7 +636,7 @@
     <span class="string token">'address'</span> =&gt; Address::<span class="keyword token">class</span>,
 ];
 </code></pre>
-<p>实现 <code>Castable</code> 接口的对象必须定义一个 <code>castUsing</code> 方法，此方法返回的是负责将 <code>Castable</code> 类进行自定义转换的转换器类名：</p>
+<p>实现 <code>Castable</code> 接口的对象必须定义一个 <code>castUsing</code> 方法，此方法返回的是负责将 <code>Castable</code> 类进行自定义转换的转换器类名：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -668,18 +647,17 @@
 <span class="keyword token">class</span> Address <span class="keyword token">implements</span> Castable
 {
     <span class="comment token">/**
-     * 获取转换器的类名用以转换当前类型转换对象
+     * 获取转换器的类名用以转换当前类型转换对象。
      *
-     *<span class="phpdoc token"> @param</span>  array  $arguments
-     *<span class="phpdoc token"> @return</span> string
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $arguments
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">static</span> <span class="keyword token">function</span> castUsing(<span class="keyword token">array</span> <span class="variable token">$arguments</span>)
+    <span class="keyword token">public</span> <span class="keyword token">static</span> <span class="keyword token">function</span> castUsing(<span class="keyword token">array</span> <span class="variable token">$arguments</span>): string
     {
         <span class="keyword token">return</span> AddressCast::<span class="keyword token">class</span>;
     }
 }
 </code></pre>
-<p>使用 <code>Castable</code> 类时，仍然可以在 <code>$casts</code> 定义中提供参数。参数将传递给 <code>castUsing</code> 方法：</p>
+<p>使用 <code>Castable</code> 类时，仍然可以在 <code>$casts</code> 定义中提供参数。参数将传递给 <code>castUsing</code> 方法：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Address;
 
 <span class="keyword token">protected</span> <span class="variable token">$casts</span> = [
@@ -695,22 +673,22 @@
 
 <span class="keyword token">use</span> Illuminate\Contracts\Database\Eloquent\Castable;
 <span class="keyword token">use</span> Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
 
 <span class="keyword token">class</span> Address <span class="keyword token">implements</span> Castable
 {
     <span class="comment token">// ...</span>
 
     <span class="comment token">/**
-     * 获取转换器类用以转换当前类型转换对象
+     * 获取转换器类用以转换当前类型转换对象。
      *
-     *<span class="phpdoc token"> @param</span>  array  $arguments
-     *<span class="phpdoc token"> @return</span> object|string
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $arguments
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">static</span> <span class="keyword token">function</span> castUsing(<span class="keyword token">array</span> <span class="variable token">$arguments</span>)
+    <span class="keyword token">public</span> <span class="keyword token">static</span> <span class="keyword token">function</span> castUsing(<span class="keyword token">array</span> <span class="variable token">$arguments</span>): CastsAttributes
     {
         <span class="keyword token">return</span> <span class="keyword token">new</span> <span class="keyword token">class</span> <span class="keyword token">implements</span> CastsAttributes
         {
-            <span class="keyword token">public</span> <span class="keyword token">function</span> get(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+            <span class="keyword token">public</span> <span class="keyword token">function</span> get(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): Address
             {
                 <span class="keyword token">return</span> <span class="keyword token">new</span> Address(
                     <span class="variable token">$attributes</span>[<span class="string token">'address_line_one'</span>],
@@ -718,7 +696,7 @@
                 );
             }
 
-            <span class="keyword token">public</span> <span class="keyword token">function</span> set(<span class="variable token">$model</span>, <span class="variable token">$key</span>, <span class="variable token">$value</span>, <span class="variable token">$attributes</span>)
+            <span class="keyword token">public</span> <span class="keyword token">function</span> set(Model <span class="variable token">$model</span>, string <span class="variable token">$key</span>, mixed <span class="variable token">$value</span>, <span class="keyword token">array</span> <span class="variable token">$attributes</span>): <span class="keyword token">array</span>
             {
                 <span class="keyword token">return</span> [
                     <span class="string token">'address_line_one'</span> =&gt; <span class="variable token">$value</span>-&gt;lineOne,
