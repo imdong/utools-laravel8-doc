@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -25,50 +25,50 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>Laravel 的加密机制使用的是 OpenSSL 所提供的 AES-256 和 AES-128 加密。强烈建议你使用 Laravel 内建的加密工具，而不是用其它的加密算法。所有 Laravel 加密之后的结果都会使用消息认证码 (MAC) 签名，使其底层值不能在加密后再次修改。</p>
+<p>Laravel 的加密服务提供了一个简单、方便的接口，使用 OpenSSL 所提供的 AES-256 和 AES-128 加密和解密文本。所有 Laravel 加密的结果都会使用消息认证码 (MAC) 进行签名，因此一旦加密，其底层值就不能被修改或篡改。</p>
 <p><a name="configuration"></a></p>
 <h2 id="配置">配置</h2>
-<p>在使用 Laravel 的加密工具之前，你必须先设置 <code>config/app.php</code> 配置文件中的 <code>key</code> 配置项。该配置项由环境变量 <code>APP_KEY</code> 设定。你应当使用 <code>php artisan key:generate</code> 命令来生成该变量的值，<code>key:generate</code> 命令将使用 PHP 的安全随机字节生成器为你的应用程序构建加密安全密钥。通常情况下，在 <a href="installation.html">安装 Laravel</a> 中会为你生成 <code>APP_KEY</code> 环境变量的值。</p>
+<p>在使用 Laravel 的加密工具之前，你必须先设置 <code>config/app.php</code> 配置文件中的 <code>key</code> 配置项。该配置项由环境变量 <code>APP_KEY</code> 设定。你应当使用 <code>php artisan key:generate</code> 命令来生成该变量的值，<code>key:generate</code> 命令将使用 PHP 的安全随机字节生成器为你的应用程序构建加密安全密钥。通常情况下，在 <a href="/docs/laravel/10.x/installation">Laravel 安装</a> 中会为你生成 APP_KEY 环境变量的值。</p>
 <p><a name="using-the-encrypter"></a></p>
 <h2 id="基本用法">基本用法</h2>
 <p><a name="encrypting-a-value"></a></p>
 <h4 id="加密一个值">加密一个值</h4>
-<p>你可以使用 <code>Crypt</code> 门面提供的 <code>encryptString</code> 来加密一个值。所有加密的值都使用 OpenSSL 的 <code>AES-256-CBC</code> 来进行加密。此外，所有加密过的值都会使用消息认证码 (MAC) 来签名，以检测加密字符串是否被篡改过：</p>
+<p>你可以使用 <code>Crypt</code> 门面提供的 <code>encryptString</code> 方法来加密一个值。所有加密的值都使用 OpenSSL 的 AES-256-CBC 来进行加密。此外，所有加密过的值都会使用消息认证码 (MAC) 来签名，可以防止恶意用户对值进行篡改：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
 <span class="keyword token">use</span> App\Http\Controllers\Controller;
 <span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Http\RedirectResponse;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Crypt;
 
 <span class="keyword token">class</span> DigitalOceanTokenController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 为用户存储一个 DigitalOcean API 令牌
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     *  为用户存储一个 DigitalOcean API 令牌。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> storeSecret(Request <span class="variable token">$request</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>): RedirectResponse
     {
         <span class="variable token">$request</span>-&gt;user()-&gt;fill([
             <span class="string token">'token'</span> =&gt; Crypt::encryptString(<span class="variable token">$request</span>-&gt;token),
         ])-&gt;save();
+
+        <span class="keyword token">return</span> redirect(<span class="string token">'/secrets'</span>);
     }
 }
 </code></pre>
 <p><a name="decrypting-a-value"></a></p>
 <h4 id="解密一个值">解密一个值</h4>
-<p>你可以使用 <code>Crypt</code> 门面提供的 <code>decryptString</code> 来进行解密。如果该值不能被正确解密，例如消息认证码 (MAC) 无效，会抛出异常 <code>Illuminate\Contracts\Encryption\DecryptException</code>：</p>
+<p>你可以使用 <code>Crypt</code> 门面提供的 <code>decryptString</code> 来进行解密。如果该值不能被正确解密，例如消息认证码 (MAC) 无效，会抛出异常 <code>Illuminate\Contracts\Encryption\DecryptException</code>：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Contracts\Encryption\DecryptException;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Crypt;
 
 <span class="keyword token">try</span> {
     <span class="variable token">$decrypted</span> = Crypt::decryptString(<span class="variable token">$encryptedValue</span>);
 } <span class="keyword token">catch</span> (DecryptException <span class="variable token">$e</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 </div>
