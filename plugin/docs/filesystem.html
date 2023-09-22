@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -23,7 +23,8 @@
 <li><a href="#configuration">配置</a><ul>
 <li><a href="#the-local-driver">本地驱动</a></li>
 <li><a href="#the-public-disk">公共磁盘</a></li>
-<li><a href="#driver-prerequisites">驱动要求</a></li>
+<li><a href="#driver-prerequisites">驱动先决要求</a></li>
+<li><a href="#scoped-and-read-only-filesystems">分区和只读文件系统</a></li>
 <li><a href="#amazon-s3-compatible-filesystems">Amazon S3 兼容文件系统</a></li>
 </ul>
 </li>
@@ -34,39 +35,45 @@
 <li><a href="#retrieving-files">检索文件</a><ul>
 <li><a href="#downloading-files">下载文件</a></li>
 <li><a href="#file-urls">文件 URL</a></li>
+<li><a href="#temporary-urls">临时 URL</a></li>
 <li><a href="#file-metadata">文件元数据</a></li>
 </ul>
 </li>
 <li><a href="#storing-files">保存文件</a><ul>
+<li><a href="#prepending-appending-to-files">预置和附加文件</a></li>
+<li><a href="#copying-moving-files">复制和移动文件</a></li>
+<li><a href="#automatic-streaming">自动流式传输</a></li>
 <li><a href="#file-uploads">文件上传</a></li>
 <li><a href="#file-visibility">文件可见性</a></li>
 </ul>
 </li>
 <li><a href="#deleting-files">删除文件</a></li>
 <li><a href="#directories">目录</a></li>
+<li><a href="#testing">测试</a></li>
 <li><a href="#custom-filesystems">自定义文件系统</a></li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>Laravel 提供了一个强大的文件系统抽象概念，这得益于 Frank de Jonge 强大的 <a href="https://github.com/thephpleague/flysystem">Flysystem</a> 扩展包。Laravel 文件系统集成为使用本地文件系统、SFTP 和 Amazon S3 提供了简单易用的驱动程序。 更棒的是，由于每个系统的 API 保持不变，所以在这些存储选项之间切换是非常简单的。</p>
+<p>Laravel 提供了一个强大的文件系统抽象，这要感谢 Frank de Jonge 的 <a href="https://github.com/thephpleague/flysystem">Flysystem</a> PHP 包。Laravel 的 Flysystem 集成提供了 简单的驱动来处理本地文件系统、SFTP 和 Amazon S3。更棒的是，在你的本地开发机器和生产服务器之间切换这些存储选项是非常简单的，因为每个系统的 API 都是一样的。</p>
 <p><a name="configuration"></a></p>
 <h2 id="配置">配置</h2>
-<p>Laravel 文件系统的配置文件位于 <code>config/filesystems.php</code>。在这个文件中你可以配置所有的「磁盘」。每个磁盘代表特定的存储驱动及存储位置。每种支持的驱动程序的示例配置都包含在配置文件中。因此，只需要修改配置即可应用你的存储偏好和凭据。</p>
-<p><code>local</code> 驱动用于操作本地服务器的文件，而 <code>s3</code> 驱动用于操作在 Amazon S3 云存储服务上的文件。</p>
+<p>Laravel 的文件系统配置文件位于 <code>config/filesystems.php</code>。 在这个文件中，你可以配置你所有的文件系统「磁盘」。每个磁盘代表一个特定的存储驱动器和存储位置。 每种支持的驱动器的配置示例都包含在配置文件中, 因此你可以修改配置以反映你的存储偏好和证书。</p>
+<p><code>local</code> 驱动用于与运行Laravel应用程序的服务器上存储的文件进行交互，而 <code>s3</code> 驱动用于写入 Amazon 的 S3 云存储服务。</p>
 <blockquote>
-<p>技巧：你可以配置任意数量的磁盘，甚至可以添加多个使用相同驱动的磁盘。</p>
+<p><strong>注意</strong>
+你可以配置任意数量的磁盘，甚至可以添加多个使用相同驱动的磁盘。</p>
 </blockquote>
 <p><a name="the-local-driver"></a></p>
 <h3 id="本地驱动">本地驱动</h3>
-<p>使用 <code>local</code> 驱动时，所有文件操作都与 <code>filesystems</code> 配置文件中定义的 <code>root</code> 目录相关。 默认情况下，此值设置为 <code>storage/app</code> 目录。因此，以下方法会把文件存储在 <code>storage/app/example.txt</code> 中：</p>
+<p>使用  <code>local</code> 驱动时，所有文件操作都与 <code>filesystems</code> 配置文件中定义的 <code>root</code> 目录相关。 默认情况下，此值设置为 <code>storage/app</code> 目录。因此，以下方法会把文件存储在 <code>storage/app/example.txt</code>中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 Storage::disk(<span class="string token">'local'</span>)-&gt;put(<span class="string token">'example.txt'</span>, <span class="string token">'Contents'</span>);
 </code></pre>
 <p><a name="the-public-disk"></a></p>
 <h3 id="公共磁盘">公共磁盘</h3>
-<p>在 <code>filesystems</code> 配置文件中定义的 <code>public</code> 磁盘适用于要公开访问的文件。默认情况下， <code>public</code> 磁盘使用 <code>local</code> 驱动，并且将这些文件存储在 <code>storage/app/public</code> 目录下。</p>
-<p>为了让它们能通过网络访问，你需要创建从 <code>public/storage</code> 到 <code>storage/app/public</code> 的符号链接。这种方式能把可公开访问文件都保留在同一个目录下，以便在使用零停机时间部署系统如 <a href="https://envoyer.io">Envoyer</a> 的时候，就可以轻松地在不同的部署之间共享这些文件。</p>
+<p>在 <code>filesystems</code> 配置文件中定义的 <code>public</code> 磁盘适用于要公开访问的文件。默认情况下， <code>public</code> 磁盘使用 <code>local</code> 驱动，并且将这些文件存储在 <code>storage/app/public</code>目录下。</p>
+<p>要使这些文件可从 web 访问，应创建从 <code>public/storage</code> 到 <code>storage/app/public</code>的符号链接。这种方式能把可公开访问文件都保留在同一个目录下，以便在使用零停机时间部署系统如 <a href="https://envoyer.io">Envoyer</a> 的时候，就可以轻松地在不同的部署之间共享这些文件。</p>
 <p>你可以使用 Artisan 命令 <code>storage:link</code> 来创建符号链接：</p>
 <pre><code class="language-shell">php artisan storage:link
 </code></pre>
@@ -80,26 +87,26 @@ Storage::disk(<span class="string token">'local'</span>)-&gt;put(<span class="st
 ],
 </code></pre>
 <p><a name="driver-prerequisites"></a></p>
-<h3 id="驱动要求">驱动要求</h3>
+<h3 id="驱动先决要求">驱动先决要求</h3>
 <p><a name="s3-driver-configuration"></a></p>
 <h4 id="s3-驱动配置">S3 驱动配置</h4>
-<p>在使用 S3 驱动之前，你需要通过 Composer 安装相应的软件包：</p>
-<pre><code class="language-shell">composer <span class="keyword token">require</span> -W league/flysystem-aws-s3-v3 <span class="string token">"^3.0"</span>
+<p>在使用 S3 驱动之前，你需要通过 Composer 包管理器安装 Flysystem S3 软件包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-aws-s3-v3 <span class="string token">"^3.0"</span>
 </code></pre>
-<p>S3 驱动配置信息位于 <code>config/filesystems.php</code> 配置文件中。该文件包含 S3 驱动程序的示例配置数组。你可以自由使用你自己的 S3 配置和凭证修改此配置数组。为了方便起见，这些环境变量与 AWS CLI 使用的命名约定一致。</p>
+<p>S3 驱动配置信息位于你的 <code>config/filesystems.php</code> 配置文件中。该文件包含一个 S3 驱动的示例配置数组。你可以自由使用自己的 S3 配置和凭证修改此数组。为方便起见，这些环境变量与 AWS CLI 使用的命名约定相匹配。</p>
 <p><a name="ftp-driver-configuration"></a></p>
 <h4 id="ftp-驱动配置">FTP 驱动配置</h4>
-<p>在使用 FTP 驱动之前，你需要通过 Composer 安装相应的软件包：</p>
+<p>在使用 FTP 驱动之前，你需要通过 Composer 包管理器安装 Flysystem FTP 包：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-ftp <span class="string token">"^3.0"</span>
 </code></pre>
-<p>Laravel 的文件系统能很好的适配 FTP，不过 FTP 的配置示例并没有被包含在框架默认的 <code>filesystems.php</code> 配置文件中。如果你需要配置 FTP 文件系统，你可以参考下方的例子：</p>
+<p>Laravel 的 Flysystem 能与 FTP 很好的适配；然而，框架的默认 <code>filesystems.php</code> 配置文件中并未包含示例配置。如果你需要配置 FTP 文件系统，可以使用下面的配置示例：</p>
 <pre><code><span class="string token">'ftp'</span> =&gt; [
     <span class="string token">'driver'</span> =&gt; <span class="string token">'ftp'</span>,
     <span class="string token">'host'</span> =&gt; env(<span class="string token">'FTP_HOST'</span>),
     <span class="string token">'username'</span> =&gt; env(<span class="string token">'FTP_USERNAME'</span>),
     <span class="string token">'password'</span> =&gt; env(<span class="string token">'FTP_PASSWORD'</span>),
 
-    <span class="comment token">// 可选的 FTP 设置</span>
+    <span class="comment token">// 可选的 FTP 设置...</span>
     <span class="comment token">// 'port' =&gt; env('FTP_PORT', 21),</span>
     <span class="comment token">// 'root' =&gt; env('FTP_ROOT'),</span>
     <span class="comment token">// 'passive' =&gt; true,</span>
@@ -109,47 +116,137 @@ Storage::disk(<span class="string token">'local'</span>)-&gt;put(<span class="st
 </code></pre>
 <p><a name="sftp-driver-configuration"></a></p>
 <h4 id="sftp-驱动配置">SFTP 驱动配置</h4>
-<p>在使用 SFTP 驱动之前，你需要通过 Composer 安装相应的软件包：</p>
+<p>在使用 SFTP 驱动之前，你需要通过 Composer 包管理器安装 Flysystem SFTP 软件包。</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-sftp-v3 <span class="string token">"^3.0"</span>
 </code></pre>
-<p>Laravel 的文件系统能很好的适配 SFTP，不过 SFTP 的配置示例并没有被包含在框架默认的 <code>filesystems.php</code> 配置文件中。如果你需要配置 SFTP 文件系统，你可以参考下方的例子：</p>
+<p>Laravel 的 Flysystem 能与 SFTP 很好的适配；然而，框架默认的 <code>filesystems.php</code> 配置文件中并未包含示例配置。如果你需要配置 SFTP 文件系统，可以使用下面的配置示例：</p>
 <pre><code><span class="string token">'sftp'</span> =&gt; [
     <span class="string token">'driver'</span> =&gt; <span class="string token">'sftp'</span>,
     <span class="string token">'host'</span> =&gt; env(<span class="string token">'SFTP_HOST'</span>),
 
-    <span class="comment token">// 基于基础的身份验证设置...</span>
+    <span class="comment token">// 基本认证的设置...</span>
     <span class="string token">'username'</span> =&gt; env(<span class="string token">'SFTP_USERNAME'</span>),
     <span class="string token">'password'</span> =&gt; env(<span class="string token">'SFTP_PASSWORD'</span>),
 
-    <span class="comment token">// 使用加密密码进行基于 SSH 密钥的身份验证的设置...</span>
+    <span class="comment token">// 基于SSH密钥的认证与加密密码的设置...</span>
     <span class="string token">'privateKey'</span> =&gt; env(<span class="string token">'SFTP_PRIVATE_KEY'</span>),
-    <span class="string token">'password'</span> =&gt; env(<span class="string token">'SFTP_PASSWORD'</span>),
+    <span class="string token">'passphrase'</span> =&gt; env(<span class="string token">'SFTP_PASSPHRASE'</span>),
 
-    <span class="comment token">// 可选的 SFTP 设置</span>
+    <span class="comment token">// 可选的SFTP设置...</span>
+    <span class="comment token">// 'hostFingerprint' =&gt; env('SFTP_HOST_FINGERPRINT'),</span>
+    <span class="comment token">// 'maxTries' =&gt; 4,</span>
+    <span class="comment token">// 'passphrase' =&gt; env('SFTP_PASSPHRASE'),</span>
     <span class="comment token">// 'port' =&gt; env('SFTP_PORT', 22),</span>
     <span class="comment token">// 'root' =&gt; env('SFTP_ROOT', ''),</span>
     <span class="comment token">// 'timeout' =&gt; 30,</span>
+    <span class="comment token">// 'useAgent' =&gt; true,</span>
+],
+</code></pre>
+<h3 id="驱动先决条件">驱动先决条件</h3>
+<p><a name="s3-driver-configuration"></a></p>
+<h4 id="s3-驱动配置-1">S3 驱动配置</h4>
+<p>在使用 S3 驱动之前，你需要通过 Composer 安装 Flysystem S3 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-aws-s3-v3 <span class="string token">"^3.0"</span>
+</code></pre>
+<p>S3 驱动配置信息位于你的 <code>config/filesystems.php</code> 配置文件中。 此文件包含 S3 驱动的示例配置数组。 你可以使用自己的 S3 配置和凭据自由修改此数组。 为方便起见，这些环境变量与 AWS CLI 使用的命名约定相匹配。</p>
+<p><a name="ftp-driver-configuration"></a></p>
+<h4 id="ftp-驱动配置-1">FTP 驱动配置</h4>
+<p>在使用 FTP 驱动之前，你需要通过 Composer 安装 Flysystem FTP 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-ftp <span class="string token">"^3.0"</span>
+</code></pre>
+<p>Laravel 的 Flysystem 集成与 FTP 配合得很好； 但是，框架的默认 <code>filesystems.php</code> 配置文件中不包含示例配置。 如果需要配置 FTP 文件系统，可以使用下面的配置示例：</p>
+<pre><code><span class="string token">'ftp'</span> =&gt; [
+    <span class="string token">'driver'</span> =&gt; <span class="string token">'ftp'</span>,
+    <span class="string token">'host'</span> =&gt; env(<span class="string token">'FTP_HOST'</span>),
+    <span class="string token">'username'</span> =&gt; env(<span class="string token">'FTP_USERNAME'</span>),
+    <span class="string token">'password'</span> =&gt; env(<span class="string token">'FTP_PASSWORD'</span>),
+
+    <span class="comment token">// 可选的 FTP 设置...</span>
+    <span class="comment token">// 'port' =&gt; env('FTP_PORT', 21),</span>
+    <span class="comment token">// 'root' =&gt; env('FTP_ROOT'),</span>
+    <span class="comment token">// 'passive' =&gt; true,</span>
+    <span class="comment token">// 'ssl' =&gt; true,</span>
+    <span class="comment token">// 'timeout' =&gt; 30,</span>
+],
+</code></pre>
+<p><a name="sftp-driver-configuration"></a></p>
+<h4 id="sftp-驱动配置-1">SFTP 驱动配置</h4>
+<p>在使用 SFTP 驱动之前，你需要通过 Composer 安装 Flysystem SFTP 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-sftp-v3 <span class="string token">"^3.0"</span>
+</code></pre>
+<p>Laravel 的 Flysystem 集成与 SFTP 配合得很好； 但是，框架的默认 <code>filesystems.php</code> 配置文件中不包含示例配置。 如果你需要配置 SFTP 文件系统，可以使用下面的配置示例：</p>
+<pre><code><span class="string token">'sftp'</span> =&gt; [
+    <span class="string token">'driver'</span> =&gt; <span class="string token">'sftp'</span>,
+    <span class="string token">'host'</span> =&gt; env(<span class="string token">'SFTP_HOST'</span>),
+
+    <span class="comment token">// 基本身份验证设置...</span>
+    <span class="string token">'username'</span> =&gt; env(<span class="string token">'SFTP_USERNAME'</span>),
+    <span class="string token">'password'</span> =&gt; env(<span class="string token">'SFTP_PASSWORD'</span>),
+
+    <span class="comment token">// 基于SSH密钥的加密密码认证设置…</span>
+    <span class="string token">'privateKey'</span> =&gt; env(<span class="string token">'SFTP_PRIVATE_KEY'</span>),
+    <span class="string token">'passphrase'</span> =&gt; env(<span class="string token">'SFTP_PASSPHRASE'</span>),
+
+    <span class="comment token">// 可选的 SFTP 设置...</span>
+    <span class="comment token">// 'hostFingerprint' =&gt; env('SFTP_HOST_FINGERPRINT'),</span>
+    <span class="comment token">// 'maxTries' =&gt; 4,</span>
+    <span class="comment token">// 'passphrase' =&gt; env('SFTP_PASSPHRASE'),</span>
+    <span class="comment token">// 'port' =&gt; env('SFTP_PORT', 22),</span>
+    <span class="comment token">// 'root' =&gt; env('SFTP_ROOT', ''),</span>
+    <span class="comment token">// 'timeout' =&gt; 30,</span>
+    <span class="comment token">// 'useAgent' =&gt; true,</span>
+],
+</code></pre>
+<p><a name="scoped-and-read-only-filesystems"></a></p>
+<h3 id="分区和只读文件系统">分区和只读文件系统</h3>
+<p>分区磁盘允许你定义一个文件系统，其中所有的路径都自动带有给定的路径前缀。在创建一个分区文件系统磁盘之前，你需要通过 Composer 包管理器安装一个额外的 Flysystem 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-path-prefixing <span class="string token">"^3.0"</span>
+</code></pre>
+<p>你可以通过定义一个使用 <code>scoped</code> 驱动的磁盘来创建任何现有文件系统磁盘的路径分区实例。例如，你可以创建一个磁盘，它将你现有的 <code>s3</code> 磁盘限定在特定的路径前缀上，然后使用你的分区磁盘进行的每个文件操作都将使用指定的前缀：</p>
+<pre><code class="language-php">'s3-videos' =&gt; [
+    'driver' =&gt; 'scoped',
+    'disk' =&gt; 's3',
+    'prefix' =&gt; 'path/to/videos',
+],
+</code></pre>
+<p>「只读」磁盘允许你创建不允许写入操作的文件系统磁盘。在使用 <code>read-only</code> 配置选项之前，你需要通过 Composer 包管理器安装一个额外的 Flysystem 包：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> league/flysystem-read-only <span class="string token">"^3.0"</span>
+</code></pre>
+<p>接下来，你可以在一个或多个磁盘的配置数组中包含 <code>read-only</code> 配置选项：</p>
+<pre><code class="language-php"><span class="string token">'s3-videos'</span> =&gt; [
+    <span class="string token">'driver'</span> =&gt; <span class="string token">'s3'</span>,
+    <span class="comment token">// ...</span>
+    <span class="string token">'read-only'</span> =&gt; <span class="keyword token">true</span>,
 ],
 </code></pre>
 <p><a name="amazon-s3-compatible-filesystems"></a></p>
 <h3 id="amazon-s3-兼容文件系统">Amazon S3 兼容文件系统</h3>
-<p>默认情况下，应用程序的 <code>filesystems</code> 配置文件包含 <code>s3</code> 磁盘的磁盘配置。除了使用此磁盘与 Amazon S3 交互外，你还可以使用它与任何 S3 兼容的文件存储服务进行交互，例如 <a href="https://github.com/minio/minio">MinIO</a> 或 <a href="https://www.digitalocean.com/products/spaces/">DigitalOcean Spaces</a>。</p>
-<p>通常，在更新磁盘的凭据以匹配你计划使用的服务的凭据后，你只需要更新 <code>url</code> 配置选项的值。此选项的值通常通过 <code>AWS_ENDPOINT</code> 环境变量定义：</p>
+<p>默认情况下，你的应用程序的 <code>filesystems</code> 配置文件包含一个 <code>s3</code> 磁盘的磁盘配置。除了使用此磁盘与 Amazon S3 交互外，你还可以使用它与任何兼容 S3 的文件存储服务（如 <a href="https://github.com/minio/minio">MinIO</a> 或 <a href="https://www.digitalocean.com/products/spaces/">DigitalOcean Spaces</a>）进行交互。</p>
+<p>通常，在更新磁盘凭据以匹配你计划使用的服务的凭据后，你只需要更新  <code>endpoint</code> 配置选项的值。此选项的值通常通过 <code>AWS_ENDPOINT</code> 环境变量定义：</p>
 <pre><code>'endpoint' =&gt; env('AWS_ENDPOINT', 'https://minio:9000'),
 </code></pre>
+<p><a name="minio"></a></p>
+<h4 id="minio">MinIO</h4>
+<p>为了让 Laravel 的 Flysystem 集成在使用 MinIO 时生成正确的 URL，你应该定义 <code>AWS_URL</code> 环境变量，使其与你的应用程序的本地 URL 匹配，并在 URL 路径中包含存储桶名称：</p>
+<pre><code class="language-ini">AWS_URL=http:<span class="comment token">//localhost:9000/local</span>
+</code></pre>
+<blockquote>
+<p><strong>警告</strong>
+当使用 MinIO 时，不支持通过 <code>temporaryUrl</code> 方法生成临时存储 URL。</p>
+</blockquote>
 <p><a name="obtaining-disk-instances"></a></p>
 <h2 id="获取磁盘实例">获取磁盘实例</h2>
-<p><code>Storage</code> Facade 可用于与所有已配置的磁盘进行交互。例如，你可以使用 Facade 中的 <code>put</code> 方法将头像存储到默认磁盘。如果你使用 <code>Storage</code> Facade 时并没有使用 <code>disk</code> 方法，那么所有的方法调用将会自动传递给默认的磁盘：</p>
+<p><code>Storage</code> Facade 可用于与所有已配置的磁盘进行交互。例如，你可以使用 Facade 中的 <code>put</code> 方法将头像存储到默认磁盘。如果你在未先调用 <code>disk</code> 方法的情况下调用 <code>Storage</code> Facade 中的方法，则该方法将自动传递给默认磁盘：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 Storage::put(<span class="string token">'avatars/1'</span>, <span class="variable token">$content</span>);
 </code></pre>
-<p>如果应用要与多个磁盘进行交互，可使用 <code>Storage</code> Facade 中的 <code>disk</code> 方法对特定磁盘上的文件进行操作：</p>
+<p>如果你的应用与多个磁盘进行交互，可使用 <code>Storage</code> Facade 中的 <code>disk</code> 方法对特定磁盘上的文件进行操作：</p>
 <pre><code>Storage::disk(<span class="string token">'s3'</span>)-&gt;put(<span class="string token">'avatars/1'</span>, <span class="variable token">$content</span>);
 </code></pre>
 <p><a name="on-demand-disks"></a></p>
 <h3 id="按需配置磁盘">按需配置磁盘</h3>
-<p>有时你可能希望在运行时使用给定配置创建磁盘，而该配置实际上不存在于应用程序的「文件系统」配置文件中。为此，你可以将配置数组传递给 <code>Storage</code> 门面的 <code>build</code> 方法：</p>
+<p>有时你可能希望在运行时使用给定配置创建磁盘，而无需在应用程序的 <code>filesystems</code> 配置文件中实际存在该配置。为了实现这一点，你可以将配置数组传递给 <code>Storage</code> Facade 的 <code>build</code> 方法：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 <span class="variable token">$disk</span> = Storage::build([
@@ -161,47 +258,58 @@ Storage::put(<span class="string token">'avatars/1'</span>, <span class="variabl
 </code></pre>
 <p><a name="retrieving-files"></a></p>
 <h2 id="检索文件">检索文件</h2>
-<p><code>get</code> 方法可以用于获取文件的内容，此方法返回该文件的原始字符串内容。切记，所有文件路径的指定都应该相对于该磁盘所配置的「root」目录：</p>
+<p><code>get</code> 方法可用于检索文件的内容。该方法将返回文件的原始字符串内容。切记，所有文件路径的指定都应该相对于该磁盘所配置的「root」目录：</p>
 <pre><code><span class="variable token">$contents</span> = Storage::get(<span class="string token">'file.jpg'</span>);
 </code></pre>
-<p><code>exists</code> 方法可以用来判断磁盘上是否存在指定的文件：</p>
+<p><code>exists</code> 方法可以用来判断一个文件是否存在于磁盘上：</p>
 <pre><code><span class="keyword token">if</span> (Storage::disk(<span class="string token">'s3'</span>)-&gt;exists(<span class="string token">'file.jpg'</span>)) {
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p><code>missing</code> 方法可以用来判断磁盘上是否缺少指定的文件：</p>
+<p><code>missing</code> 方法可以用来判断一个文件是否缺失于磁盘上：</p>
 <pre><code><span class="keyword token">if</span> (Storage::disk(<span class="string token">'s3'</span>)-&gt;missing(<span class="string token">'file.jpg'</span>)) {
     <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="downloading-files"></a></p>
 <h3 id="下载文件">下载文件</h3>
-<p><code>download</code> 方法可用于生成响应，该响应强制用户的浏览器在给定路径下下载文件。<code>download</code> 方法接受文件名作为该方法的第二个参数，它将确定下载文件的用户看到的文件名。最后，你可以将 HTTP 标头数组作为该方法的第三个参数传递：</p>
+<p><code>download</code> 方法可以用来生成一个响应，强制用户的浏览器下载给定路径的文件。<code>download</code> 方法接受一个文件名作为方法的第二个参数，这将决定用户下载文件时看到的文件名。最后，你可以传递一个 HTTP 头部的数组作为方法的第三个参数：</p>
 <pre><code><span class="keyword token">return</span> Storage::download(<span class="string token">'file.jpg'</span>);
 
 <span class="keyword token">return</span> Storage::download(<span class="string token">'file.jpg'</span>, <span class="variable token">$name</span>, <span class="variable token">$headers</span>);
 </code></pre>
 <p><a name="file-urls"></a></p>
-<h3 id="文件地址">文件地址</h3>
-<p>你可以使用 <code>url</code> 方法来获取给定文件的 url。如果你使用的是 <code>local</code> 驱动程序，这通常会将 <code>/storage</code> 添加到给定的路径，并返回文件的相对 URL。如果你使用的是 <code>s3</code> 驱动程序，则会返回完全限定的远程URL：</p>
+<h3 id="文件-url">文件 URL</h3>
+<p>你可以使用 <code>url</code> 方法来获取给定文件的 URL。如果你使用的是<code>local</code> 驱动，这通常只会在给定路径前加上 <code>/storage</code>，并返回一个相对 URL 到文件。如果你使用的是 <code>s3</code> 驱动，将返回完全限定的远程 URL：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 <span class="variable token">$url</span> = Storage::url(<span class="string token">'file.jpg'</span>);
 </code></pre>
-<p>当使用 <code>local</code> 驱动程序时，所有应该公开访问的文件应该放在 <code>storage/app/public</code> 目录下。此外，你应该在 <code>public/storage</code> 处<a href="#the-public-disk">创建一个符号链接</a>，它指向 <code>storage/app/public</code> 目录。</p>
+<p>当使用 <code>local</code> 驱动时，所有应该公开访问的文件都应放置在 <code>storage/app/public</code> 目录中。此外，你应该在 <code>public/storage</code> 处 <a href="#the-public-disk">创建一个符号连接</a> 指向 <code>storage/app/public</code> 目录。</p>
 <blockquote>
-<p>注意：当使用 <code>local</code> 驱动时， <code>url</code> 的返回值不是 url 编码的。因此，我们建议总是使用可以创建有效 url 的名称来存储文件。</p>
+<p><strong>警告</strong>
+当使用 <code>local</code> 驱动时，url 的返回值不是 URL 编码的。因此，我们建议始终使用能够创建有效 URL 的名称存储文件。</p>
 </blockquote>
+<p><a name="url-host-customization"></a></p>
+<h4 id="定制-url-的-host">定制 URL 的 Host</h4>
+<p>如果你想预定义使用 <code>Storage</code> Facade 生成的 URL 的 Host，则可以在磁盘的配置数组中添加一个 <code>url</code> 选项：</p>
+<pre><code>'public' =&gt; [
+    'driver' =&gt; 'local',
+    'root' =&gt; storage_path('app/public'),
+    'url' =&gt; env('APP_URL').'/storage',
+    'visibility' =&gt; 'public',
+],
+</code></pre>
 <p><a name="temporary-urls"></a></p>
-<h4 id="临时地址">临时地址</h4>
-<p>使用 <code>temporaryUrl</code> 方法，你可以为使用 <code>s3</code> 驱动程序存储的文件创建临时 URL 。此方法接受一个路径和一个 <code>DateTime</code> 实例，指定 URL 何时应过期：</p>
+<h3 id="临时-url">临时 URL</h3>
+<p>使用 <code>temporaryUrl</code> 方法，你可以为使用 <code>s3</code> 驱动存储的文件创建临时 URL。此方法接受一个路径和一个 <code>DateTime</code> 实例，指定 URL 的过期时间：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 <span class="variable token">$url</span> = Storage::temporaryUrl(
     <span class="string token">'file.jpg'</span>, now()-&gt;addMinutes(<span class="number token">5</span>)
 );
 </code></pre>
-<p>如果需要指定其他 <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGET.html#RESTObjectGET-requests">S3 请求参数</a> ,你可以将请求参数数组作为第三个参数传递给 <code>temporaryUrl</code> 方法：</p>
+<p>如果你需要指定额外的 <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGET.html#RESTObjectGET-requests">S3 请求参数</a>，你可以将请求参数数组作为第三个参数传递给<code>temporaryUrl</code> 方法。</p>
 <pre><code><span class="variable token">$url</span> = Storage::temporaryUrl(
     <span class="string token">'file.jpg'</span>,
     now()-&gt;addMinutes(<span class="number token">5</span>),
@@ -211,11 +319,12 @@ Storage::put(<span class="string token">'avatars/1'</span>, <span class="variabl
     ]
 );
 </code></pre>
-<p>如果你需要自定义如何为特定存储磁盘创建临时 URL，可以使用 <code>buildTemporaryUrlsUsing</code> 方法。例如，如果你有一个控制器允许你下载通过通常不支持临时 URL 的磁盘存储的文件，这可能会很有用。通常，应该从服务提供者的 <code>boot</code> 方法调用此方法：</p>
+<p>如果你需要为一个特定的存储磁盘定制临时 URL 的创建方式，可以使用 <code>buildTemporaryUrlsUsing</code> 方法。例如，如果你有一个控制器允许你通过不支持临时 URL 的磁盘下载存储的文件，这可能很有用。通常，此方法应从服务提供者的 <code>boot</code> 方法中调用：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Providers;
 
+<span class="keyword token">use</span> DateTime;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 <span class="keyword token">use</span> Illuminate\Support\Facades\URL;
 <span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
@@ -223,25 +332,25 @@ Storage::put(<span class="string token">'avatars/1'</span>, <span class="variabl
 <span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
 {
     <span class="comment token">/**
-     * Bootstrap any application services.
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 启动任何应用程序服务。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
     {
-        Storage::disk(<span class="string token">'local'</span>)-&gt;buildTemporaryUrlsUsing(<span class="keyword token">function</span> (<span class="variable token">$path</span>, <span class="variable token">$expiration</span>, <span class="variable token">$options</span>) {
-            <span class="keyword token">return</span> URL::temporarySignedRoute(
-                <span class="string token">'files.download'</span>,
-                <span class="variable token">$expiration</span>,
-                array_merge(<span class="variable token">$options</span>, [<span class="string token">'path'</span> =&gt; <span class="variable token">$path</span>])
-            );
-        });
+        Storage::disk(<span class="string token">'local'</span>)-&gt;buildTemporaryUrlsUsing(
+            <span class="keyword token">function</span> (string <span class="variable token">$path</span>, DateTime <span class="variable token">$expiration</span>, <span class="keyword token">array</span> <span class="variable token">$options</span>) {
+                <span class="keyword token">return</span> URL::temporarySignedRoute(
+                    <span class="string token">'files.download'</span>,
+                    <span class="variable token">$expiration</span>,
+                    array_merge(<span class="variable token">$options</span>, [<span class="string token">'path'</span> =&gt; <span class="variable token">$path</span>])
+                );
+            }
+        );
     }
 }
 </code></pre>
 <p><a name="url-host-customization"></a></p>
-<h4 id="定制路径的-host">定制路径的 Host</h4>
-<p>如果要为使用 <code>Storage</code> Facade 生成的 url 预定义 Host，可以向磁盘的配置数组中添加 <code>url</code> 选项：</p>
+<h4 id="url-host-自定义">URL Host 自定义</h4>
+<p>如果你想为使用 <code>Storage</code> Facade 生成的 URL 预定义 Host，可以将 <code>url</code> 选项添加到磁盘的配置数组：</p>
 <pre><code>'public' =&gt; [
     'driver' =&gt; 'local',
     'root' =&gt; storage_path('app/public'),
@@ -249,9 +358,23 @@ Storage::put(<span class="string token">'avatars/1'</span>, <span class="variabl
     'visibility' =&gt; 'public',
 ],
 </code></pre>
+<p><a name="temporary-upload-urls"></a></p>
+<h4 id="临时上传-url">临时上传 URL</h4>
+<blockquote>
+<p><strong>警告</strong>
+生成临时上传 URL 的能力仅由 <code>s3</code> 驱动支持。</p>
+</blockquote>
+<p>如果你需要生成一个临时 URL，可以直接从客户端应用程序上传文件，你可以使用 <code>temporaryUploadUrl</code> 方法。此方法接受一个路径和一个 <code>DateTime</code> 实例，指定 URL 应该在何时过期。<code>temporaryUploadUrl</code> 方法返回一个关联数组，可以解构为上传 URL 和应该包含在上传请求中的头部：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
+
+[<span class="string token">'url'</span> =&gt; <span class="variable token">$url</span>, <span class="string token">'headers'</span> =&gt; <span class="variable token">$headers</span>] = Storage::temporaryUploadUrl(
+    <span class="string token">'file.jpg'</span>, now()-&gt;addMinutes(<span class="number token">5</span>)
+);
+</code></pre>
+<p>此方法主要用于无服务器环境，需要客户端应用程序直接将文件上传到云存储系统（如 Amazon S3）。</p>
 <p><a name="file-metadata"></a></p>
-<h3 id="文件-metadata-信息">文件 Metadata 信息</h3>
-<p>除了读写文件，Laravel 还可以提供有关文件自身的信息。例如，<code>size</code> 方法可用于获取文件的大小(以字节为单位)：</p>
+<h3 id="文件元数据">文件元数据</h3>
+<p>除了读写文件，Laravel 还可以提供有关文件本身的信息。例如，<code>size</code> 方法可用于获取文件大小（以字节为单位）：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 <span class="variable token">$size</span> = Storage::size(<span class="string token">'file.jpg'</span>);
@@ -259,55 +382,72 @@ Storage::put(<span class="string token">'avatars/1'</span>, <span class="variabl
 <p><code>lastModified</code> 方法返回上次修改文件时的时间戳：</p>
 <pre><code><span class="variable token">$time</span> = Storage::lastModified(<span class="string token">'file.jpg'</span>);
 </code></pre>
+<p>可以通过 <code>mimeType</code> 方法获取给定文件的 MIME 类型：</p>
+<pre><code><span class="variable token">$mime</span> = Storage::mimeType(<span class="string token">'file.jpg'</span>)
+</code></pre>
 <p><a name="file-paths"></a></p>
 <h4 id="文件路径">文件路径</h4>
-<p>可以使用 <code>path</code> 方法获取给定文件的路径。如果你使用的是 <code>local</code> 驱动程序，这将返回文件的绝对路径。如果你使用的是 <code>s3</code> 驱动程序，此方法将返回 s3 bucket 中文件的相对路径：</p>
+<p>你可以使用 <code>path</code> 方法获取给定文件的路径。如果你使用的是 <code>local</code> 驱动，这将返回文件的绝对路径。如果你使用的是 <code>s3</code> 驱动，此方法将返回 S3 存储桶中文件的相对路径：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 <span class="variable token">$path</span> = Storage::path(<span class="string token">'file.jpg'</span>);
 </code></pre>
 <p><a name="storing-files"></a></p>
-<h2 id="储存文件">储存文件</h2>
-<p>可以使用 <code>put</code> 方法将文件内容存储在磁盘上。你还可以将 PHP <code>resource</code> 传递给 <code>put</code> 方法，该方法将使用 Flysystem 的底层流支持。请记住，应相对于为磁盘配置的根目录指定所有文件路径：</p>
+<h2 id="保存文件">保存文件</h2>
+<p>可以使用 <code>put</code> 方法将文件内容存储在磁盘上。你还可以将 PHP <code>resource</code> 传递给 <code>put</code> 方法，该方法将使用 Flysystem 的底层流支持。请记住，应相对于为磁盘配置的「根」目录指定所有文件路径：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 Storage::put(<span class="string token">'file.jpg'</span>, <span class="variable token">$contents</span>);
 
 Storage::put(<span class="string token">'file.jpg'</span>, <span class="variable token">$resource</span>);
 </code></pre>
-<p><a name="automatic-streaming"></a></p>
-<h4 id="自动流存储">自动流存储</h4>
-<p>将文件流式传输到存储可显著减少内存使用。如果希望 Laravel 自动管理将给定文件流式传输到存储位置，可以使用 <code>putFile</code> 或 <code>putFileAs</code> 方法。此方法接受 <code>Illuminate\Http\File</code> 或 <code>Illuminate\Http\UploadedFile</code> 实例，并自动将文件流式传输到所需位置：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Http\File;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
-
-<span class="comment token">// 自动生成一个唯一文件名 ...</span>
-<span class="variable token">$path</span> = Storage::putFile(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>));
-
-<span class="comment token">// 手动指定文件名 ...</span>
-<span class="variable token">$path</span> = Storage::putFileAs(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>), <span class="string token">'photo.jpg'</span>);
+<p><a name="failed-writes"></a></p>
+<h4 id="写入失败">写入失败</h4>
+<p>如果 <code>put</code> 方法（或其他「写入」操作）无法将文件写入磁盘，将返回 <code>false</code>。</p>
+<pre><code><span class="keyword token">if</span> (! Storage::put(<span class="string token">'file.jpg'</span>, <span class="variable token">$contents</span>)) {
+    <span class="comment token">// 该文件无法写入磁盘...</span>
+}
 </code></pre>
-<p>关于 <code>putFile</code> 方法，有一些重要的事情需要注意。那就是，我们只指定了一个目录名，而没有指定文件名。默认情况下，<code>putFile</code> 方法将生成一个唯一的 ID 作为文件名。文件的扩展名将通过检查文件的 MIME 类型来确定。<code>putFile</code> 方法将返回文件的路径，以便你可以将路径（包括生成的文件名）存储在数据库中。</p>
-<p><code>putFile</code> 和 <code>putFileAs</code> 方法还接受一个参数来指定存储文件的 「可见性」。如果你将文件存储在云磁盘（如 Amazon S3）上，并且希望通过生成的 URL 公开访问该文件，则这一点特别有用：</p>
-<pre><code>Storage::putFile(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>), <span class="string token">'public'</span>);
+<p>你可以在你的文件系统磁盘的配置数组中定义 <code>throw</code> 选项。当这个选项被定义为 <code>true</code> 时，「写入」的方法如 <code>put</code> 将在写入操作失败时抛出一个 <code>League\Flysystem\UnableToWriteFile</code> 的实例。</p>
+<pre><code><span class="string token">'public'</span> =&gt; [
+    <span class="string token">'driver'</span> =&gt; <span class="string token">'local'</span>,
+    <span class="comment token">// ...</span>
+    <span class="string token">'throw'</span> =&gt; <span class="keyword token">true</span>,
+],
 </code></pre>
 <p><a name="prepending-appending-to-files"></a></p>
-<h4 id="追加内容到文件开头或结尾">追加内容到文件开头或结尾</h4>
-<p> <code>prepend</code> 和 <code>append</code> 方法允许你将内容写入文件的开头或结尾：</p>
+<h3 id="追加内容到文件开头或结尾">追加内容到文件开头或结尾</h3>
+<p><code>prepend</code> 和 <code>append</code> 方法允许你将内容写入文件的开头或结尾：</p>
 <pre><code>Storage::prepend(&#39;file.log&#39;, &#39;Prepended Text&#39;);
 
 Storage::append(&#39;file.log&#39;, &#39;Appended Text&#39;);
 </code></pre>
 <p><a name="copying-moving-files"></a></p>
-<h4 id="复制--移动文件">复制 / 移动文件</h4>
+<h3 id="复制--移动文件">复制 / 移动文件</h3>
 <p><code>copy</code> 方法可用于将现有文件复制到磁盘上的新位置，而 <code>move</code> 方法可用于重命名现有文件或将其移动到新位置：</p>
 <pre><code>Storage::copy(&#39;old/file.jpg&#39;, &#39;new/file.jpg&#39;);
 
 Storage::move(&#39;old/file.jpg&#39;, &#39;new/file.jpg&#39;);
 </code></pre>
+<p><a name="automatic-streaming"></a></p>
+<h3 id="自动流式传输">自动流式传输</h3>
+<p>将文件流式传输到存储位置可显著减少内存使用量。如果你希望 Laravel 自动管理将给定文件流式传输到你的存储位置，你可以使用 <code>putFile</code> 或 <code>putFileAs</code> 方法。此方法接受一个 <code>Illuminate\Http\File</code> 或 <code>Illuminate\Http\UploadedFile</code> 实例，并自动将文件流式传输到你所需的位置：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\File;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
+
+<span class="comment token">// 为文件名自动生成一个唯一的 ID...</span>
+<span class="variable token">$path</span> = Storage::putFile(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>));
+
+<span class="comment token">// 手动指定一个文件名...</span>
+<span class="variable token">$path</span> = Storage::putFileAs(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>), <span class="string token">'photo.jpg'</span>);
+</code></pre>
+<p>关于 putFile 方法有几点重要的注意事项。注意，我们只指定了目录名称而不是文件名。默认情况下，<code>putFile</code> 方法将生成一个唯一的 ID 作为文件名。文件的扩展名将通过检查文件的 MIME 类型来确定。文件的路径将由 <code>putFile</code> 方法返回，因此你可以将路径（包括生成的文件名）存储在数据库中。</p>
+<p><code>putFile</code> 和 <code>putFileAs</code> 方法还接受一个参数来指定存储文件的「可见性」。如果你将文件存储在云盘（如 Amazon S3）上，并希望文件通过生成的 URL 公开访问，这一点特别有用：</p>
+<pre><code>Storage::putFile(<span class="string token">'photos'</span>, <span class="keyword token">new</span> File(<span class="string token">'/path/to/photo'</span>), <span class="string token">'public'</span>);
+</code></pre>
 <p><a name="file-uploads"></a></p>
 <h3 id="文件上传">文件上传</h3>
-<p>在 web 应用程序中，存储文件最常见的用例之一是存储用户上传的文件，如照片和文档。Laravel 使得在上传的文件实例上使用 <code>store</code> 方法存储上传的文件变得非常容易。可以在要存储的上传文件上调用 <code>store</code> 方法：</p>
+<p>在网络应用程序中，存储文件的最常见用例之一是存储用户上传的文件，如照片和文档。Laravel 使用上传文件实例上的 <code>store</code> 方法非常容易地存储上传的文件。使用你希望存储上传文件的路径调用 <code>store</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
@@ -318,12 +458,9 @@ Storage::move(&#39;old/file.jpg&#39;, &#39;new/file.jpg&#39;);
 <span class="keyword token">class</span> UserAvatarController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 更新用户头像
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 更新用户的头像。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> update(Request <span class="variable token">$request</span>): string
     {
         <span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;store(<span class="string token">'avatars'</span>);
 
@@ -331,33 +468,34 @@ Storage::move(&#39;old/file.jpg&#39;, &#39;new/file.jpg&#39;);
     }
 }
 </code></pre>
-<p>关于这个例子，有一些重要的事情需要注意。那就是，我们只指定了一个目录名，而不是文件名。默认情况下，<code>store</code> 方法将生成一个唯一的 ID 作为文件名。文件的扩展名将通过检查文件的 MIME 类型来确定。文件的路径将由 <code>store</code> 方法返回，因此你可以将路径（包括生成的文件名）存储在数据库中。</p>
-<p>你还可以调用 <code>Storage</code> facade上的 <code>putFile</code> 方法来执行与上述示例相同的文件存储操作：</p>
+<p>关于这个例子有几点重要的注意事项。注意，我们只指定了目录名称而不是文件名。默认情况下，<code>store</code> 方法将生成一个唯一的 ID 作为文件名。文件的扩展名将通过检查文件的 MIME 类型来确定。文件的路径将由 <code>store</code> 方法返回，因此你可以将路径（包括生成的文件名）存储在数据库中。</p>
+<p>你也可以在 <code>Storage</code> Facade 上调用 <code>putFile</code> 方法来执行与上面示例相同的文件存储操作：</p>
 <pre><code><span class="variable token">$path</span> = Storage::putFile(<span class="string token">'avatars'</span>, <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>));
 </code></pre>
 <p><a name="specifying-a-file-name"></a></p>
 <h4 id="指定一个文件名">指定一个文件名</h4>
-<p>如果不希望文件名自动分配给存储的文件，可以使用 <code>storeAs</code> 方法，该方法接收路径、文件名和（可选）磁盘作为参数：</p>
+<p>如果你不希望文件名被自动分配给你存储的文件，你可以使用 <code>storeAs</code> 方法，该方法接收路径、文件名和（可选的）磁盘作为其参数：</p>
 <pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;storeAs(
     <span class="string token">'avatars'</span>, <span class="variable token">$request</span>-&gt;user()-&gt;id
 );
 </code></pre>
-<p>你还可以在 <code>Storage</code> facade 上使用 <code>putFileAs</code> 方法，该方法将执行与上述示例相同的文件存储操作：</p>
+<p>你也可以在 <code>Storage</code> Facade 使用 <code>putFileAs</code> 方法，它将执行与上面示例相同的文件存储操作：</p>
 <pre><code><span class="variable token">$path</span> = Storage::putFileAs(
     <span class="string token">'avatars'</span>, <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>), <span class="variable token">$request</span>-&gt;user()-&gt;id
 );
 </code></pre>
 <blockquote>
-<p>注意：无法打印和无效的 unicode 字符将自动从文件路径中删除。因此，您可能希望在将文件路径传递给Laravel的文件存储方法之前对其进行清理。使用&#39;League\Flysystem\Util:：normalizePath&#39;方法规范化文件路径。</p>
+<p><strong>警告</strong>
+不可打印和无效的 Unicode 字符将自动从文件路径中删除。因此，你可能希望在将文件路径传递给 Laravel 的文件存储方法之前对其进行清理。文件路径使用 <code>League\Flysystem\WhitespacePathNormalizer::normalizePath</code> 方法进行规范化。</p>
 </blockquote>
 <p><a name="specifying-a-disk"></a></p>
 <h4 id="指定一个磁盘">指定一个磁盘</h4>
-<p>默认情况下，此上载文件的 <code>store</code> 方法将使用默认磁盘。如果要指定另一个磁盘，请将磁盘名作为第二个参数传递给 <code>store</code> 方法：</p>
+<p>默认情况下，此上传文件的 <code>store</code> 方法将使用你的默认磁盘。如果你想指定另一个磁盘，将磁盘名称作为第二个参数传递给 <code>store</code> 方法：</p>
 <pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;store(
     <span class="string token">'avatars/'</span>.<span class="variable token">$request</span>-&gt;user()-&gt;id, <span class="string token">'s3'</span>
 );
 </code></pre>
-<p>如果使用的是 <code>storeAs</code> 方法，则可以将磁盘名作为第三个参数传递给该方法：</p>
+<p>如果你正在使用 <code>storeAs</code> 方法，你可以将磁盘名称作为第三个参数传递给该方法：</p>
 <pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;storeAs(
     <span class="string token">'avatars'</span>,
     <span class="variable token">$request</span>-&gt;user()-&gt;id,
@@ -365,33 +503,33 @@ Storage::move(&#39;old/file.jpg&#39;, &#39;new/file.jpg&#39;);
 );
 </code></pre>
 <p><a name="other-uploaded-file-information"></a></p>
-<h4 id="其他上传文件信息">其他上传文件信息</h4>
-<p>如果你想获取上传文件的原始名称和扩展名，可以使用 <code>getClientOriginalName</code> 和 <code>getClientOriginalExtension</code> 方法：</p>
+<h4 id="其他上传文件的信息">其他上传文件的信息</h4>
+<p>如果您想获取上传文件的原始名称和扩展名，可以使用 <code>getClientOriginalName</code> 和 <code>getClientOriginalExtension</code> 方法来实现：</p>
 <pre><code><span class="variable token">$file</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>);
 
 <span class="variable token">$name</span> = <span class="variable token">$file</span>-&gt;getClientOriginalName();
 <span class="variable token">$extension</span> = <span class="variable token">$file</span>-&gt;getClientOriginalExtension();
 </code></pre>
-<p>但是，请记住，<code>getClientOriginalName</code> 和 <code>getClientOriginalExtension</code> 方法被认为是不安全的，因为文件名和扩展名可能被恶意用户篡改。出于这个原因，你应该更喜欢 <code>hashName</code> 和 <code>extension</code> 方法来获取给定文件上传的名称和扩展名：</p>
+<p>然而，请记住，<code>getClientOriginalName</code> 和 <code>getClientOriginalExtension</code> 方法被认为是不安全的，因为文件名和扩展名可能被恶意用户篡改。因此，你通常应该更喜欢使用 <code>hashName</code> 和 <code>extension</code> 方法来获取给定文件上传的名称和扩展名：</p>
 <pre><code><span class="variable token">$file</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>);
 
-<span class="variable token">$name</span> = <span class="variable token">$file</span>-&gt;hashName(); <span class="comment token">// 生成一个唯一的随机名称...</span>
-<span class="variable token">$extension</span> = <span class="variable token">$file</span>-&gt;extension(); <span class="comment token">// 根据文件的 MIME 类型确定文件的扩展名...</span>
+<span class="variable token">$name</span> = <span class="variable token">$file</span>-&gt;hashName(); <span class="comment token">// 生成一个唯一的、随机的名字...</span>
+<span class="variable token">$extension</span> = <span class="variable token">$file</span>-&gt;extension(); <span class="comment token">// 根据文件的 MIME 类型来确定文件的扩展名...</span>
 </code></pre>
 <p><a name="file-visibility"></a></p>
-<h3 id="文件的可见性">文件的可见性</h3>
-<p>在 Laravel 继承的文件系统中，「可见性」是一个针对多平台的权限的抽象概念。文件可以定义为 <code>public</code> 或 <code>private</code> 。当文件被定义为 <code>public</code> 时，意味着其他人可以访问之。例如，当您使用 S3 驱动的时候，你可以检索声明为 <code>public</code> 的文件的 URL 。</p>
-<p>在使用 <code>put</code> 方法的时候，你可以设置文件的可见性：</p>
+<h3 id="文件可见性">文件可见性</h3>
+<p>在 Laravel 的 Flysystem 集成中，「visibility」 是跨多个平台的文件权限的抽象。文件可以被声明为 <code>public</code> 或 <code>private</code>。当一个文件被声明为 <code>public</code> 时，你表示该文件通常应该被其他人访问。例如，在使用 S3 驱动程序时，你可以检索 <code>public</code> 文件的 URL。</p>
+<p>你可以通过 <code>put</code> 方法在写入文件时设置可见性：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 Storage::put(<span class="string token">'file.jpg'</span>, <span class="variable token">$contents</span>, <span class="string token">'public'</span>);
 </code></pre>
-<p>你可以使用 <code>getVisibility</code> 和 <code>setVisibility</code> 方法对现有文件的可见性进行检索和设置：</p>
+<p>如果文件已经被存储，可以通过 <code>getVisibility</code> 和 <code>setVisibility</code> 方法检索和设置其可见性：</p>
 <pre><code><span class="variable token">$visibility</span> = Storage::getVisibility(<span class="string token">'file.jpg'</span>);
 
 Storage::setVisibility(<span class="string token">'file.jpg'</span>, <span class="string token">'public'</span>);
 </code></pre>
-<p>当和上传文件交互的时候，你可以使用 <code>storePublicly</code> 和 <code>storePubliclyAs</code> 方法来将文件的可见性设置为 <code>public</code> 并存储之：</p>
+<p>在与上传文件交互时，你可以使用 <code>storePublicly</code> 和 <code>storePubliclyAs</code> 方法将上传文件存储为 <code>public</code> 可见性</p>
 <pre><code><span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;storePublicly(<span class="string token">'avatars'</span>, <span class="string token">'s3'</span>);
 
 <span class="variable token">$path</span> = <span class="variable token">$request</span>-&gt;file(<span class="string token">'avatar'</span>)-&gt;storePubliclyAs(
@@ -401,8 +539,8 @@ Storage::setVisibility(<span class="string token">'file.jpg'</span>, <span class
 );
 </code></pre>
 <p><a name="local-files-and-visibility"></a></p>
-<h4 id="本地文件--可见性">本地文件 &amp; 可见性</h4>
-<p>当使用 <code>local</code> 驱动程序时，<code>public</code> <a href="#file-visibility">文件的可见性</a> 转换文件和目录的权限 为 <code>0755</code> 的 <code>0644</code> 权限。 你可以在应用程序的 <code>filesystems</code> 配置文件中修改权限配置：</p>
+<h4 id="本地文件和可见性">本地文件和可见性</h4>
+<p>当使用 <code>local</code> 驱动时，<code>public</code><a href="#file-visibility">可见性</a>转换为目录的 <code>0755</code> 权限和文件的 <code>0644</code> 权限。你可以在你的应用程序的 <code>filesystems</code> 配置文件中修改权限映射：</p>
 <pre><code>'local' =&gt; [
     'driver' =&gt; 'local',
     'root' =&gt; storage_path('app'),
@@ -427,7 +565,7 @@ Storage::delete(<span class="string token">'file.jpg'</span>);
 
 Storage::delete([<span class="string token">'file.jpg'</span>, <span class="string token">'file2.jpg'</span>]);
 </code></pre>
-<p>如果有必要，你可以指定删除的文件的磁盘：</p>
+<p>如果需要，你可以指定应从哪个磁盘删除文件。</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 
 Storage::disk(<span class="string token">'s3'</span>)-&gt;delete(<span class="string token">'path/file.jpg'</span>);
@@ -451,26 +589,68 @@ Storage::disk(<span class="string token">'s3'</span>)-&gt;delete(<span class="st
 <span class="variable token">$directories</span> = Storage::allDirectories(<span class="variable token">$directory</span>);
 </code></pre>
 <p><a name="create-a-directory"></a></p>
-<h4 id="创建一个目录">创建一个目录</h4>
-<p><code>makeDirectory</code> 方法可递归的创建指定的目录：</p>
+<h4 id="创建目录">创建目录</h4>
+<p><code>makeDirectory</code> 方法可递归的创建指定的目录：</p>
 <pre><code>Storage::makeDirectory(<span class="variable token">$directory</span>);
 </code></pre>
 <p><a name="delete-a-directory"></a></p>
 <h4 id="删除一个目录">删除一个目录</h4>
-<p>最后，<code>deleteDirectory</code> 方法可用于删除一个目录及其下所有的文件：</p>
+<p>最后，<code>deleteDirectory</code> 方法可用于删除一个目录及其下所有的文件：</p>
 <pre><code>Storage::deleteDirectory(<span class="variable token">$directory</span>);
 </code></pre>
+<p><a name="testing"></a></p>
+<h2 id="测试">测试</h2>
+<p>The <code>Storage</code> facade&#39;s <code>fake</code> method allows you to easily generate a fake disk that, combined with the file generation utilities of the <code>Illuminate\Http\UploadedFile</code> class, greatly simplifies the testing of file uploads. For example:</p>
+<p><code>Storage</code> 门面类的 <code>fake</code> 方法可以轻松创建一个虚拟磁盘，与<code>Illuminate\Http\UploadedFile</code> 类配合使用，大大简化了文件的上传测试。例如：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> Tests\Feature;
+
+<span class="keyword token">use</span> Illuminate\Http\UploadedFile;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
+<span class="keyword token">use</span> Tests\TestCase;
+
+<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
+{
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_albums_can_be_uploaded(): void
+    {
+        Storage::fake(<span class="string token">'photos'</span>);
+
+        <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;json(<span class="string token">'POST'</span>, <span class="string token">'/photos'</span>, [
+            UploadedFile::fake()-&gt;image(<span class="string token">'photo1.jpg'</span>),
+            UploadedFile::fake()-&gt;image(<span class="string token">'photo2.jpg'</span>)
+        ]);
+
+        <span class="comment token">// 断言存储了一个或多个文件。</span>
+        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertExists(<span class="string token">'photo1.jpg'</span>);
+        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertExists([<span class="string token">'photo1.jpg'</span>, <span class="string token">'photo2.jpg'</span>]);
+
+        <span class="comment token">// 断言一个或多个文件未存储。</span>
+        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertMissing(<span class="string token">'missing.jpg'</span>);
+        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertMissing([<span class="string token">'missing.jpg'</span>, <span class="string token">'non-existing.jpg'</span>]);
+
+        <span class="comment token">// 断言给定目录为空。</span>
+        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertDirectoryEmpty(<span class="string token">'/wallpapers'</span>);
+    }
+}
+</code></pre>
+<p>默认情况下，<code>fake</code> 方法将删除临时目录中的所有文件。如果你想保留这些文件，你可以使用 &quot;persistentFake&quot; 方法代替。有关测试文件上传的更多信息，您可以查阅 <a href="/docs/laravel/10.x/http-tests#testing-file-uploads">HTTP 测试文档的文件上传</a>.</p>
+<blockquote>
+<p><strong>警告</strong>
+<code>image</code> 方法需要 <a href="https://www.php.net/manual/en/book.image.php">GD 扩展</a> .</p>
+</blockquote>
 <p><a name="custom-filesystems"></a></p>
 <h2 id="自定义文件系统">自定义文件系统</h2>
 <p>Laravel 内置的文件系统提供了一些开箱即用的驱动；当然，它不仅仅是这些，它还提供了与其他存储系统的适配器。通过这些适配器，你可以在你的 Laravel 应用中创建自定义驱动。</p>
 <p>要安装自定义文件系统，你可能需要一个文件系统适配器。让我们将社区维护的 Dropbox 适配器添加到项目中：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> spatie/flysystem-dropbox
 </code></pre>
-<p>接下来，你可以创建一个诸如 <code>DropboxServiceProvider</code> 这样的 <a href="providers.html">服务提供者</a> 。在提供者的 <code>boot</code> 方法中，你可以使用 <code>Storage</code> 门面的 <code>extend</code> 方法来定义一个自定义驱动：</p>
+<p>接下来，你可以在 <a href="/docs/laravel/10.x/providers">服务提供者</a> 中注册一个带有 <code>boot</code> 方法的驱动。在提供者的 <code>boot</code> 方法中，你可以使用 <code>Storage</code> 门面的 <code>extend</code> 方法来定义一个自定义驱动：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Providers;
 
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 <span class="keyword token">use</span> Illuminate\Filesystem\FilesystemAdapter;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
 <span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
@@ -482,22 +662,18 @@ Storage::disk(<span class="string token">'s3'</span>)-&gt;delete(<span class="st
 {
     <span class="comment token">/**
      * 注册任意应用程序服务。
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> register()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
     {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     }
 
     <span class="comment token">/**
      * 引导任何应用程序服务。
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
     {
-        Storage::extend(<span class="string token">'dropbox'</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>, <span class="variable token">$config</span>) {
+        Storage::extend(<span class="string token">'dropbox'</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>, <span class="keyword token">array</span> <span class="variable token">$config</span>) {
             <span class="variable token">$adapter</span> = <span class="keyword token">new</span> DropboxAdapter(<span class="keyword token">new</span> DropboxClient(
                 <span class="variable token">$config</span>[<span class="string token">'authorization_token'</span>]
             ));
