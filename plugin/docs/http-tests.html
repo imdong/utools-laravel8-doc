@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -19,8 +19,8 @@
 <body>
     <div class="markdown-body"><h1 id="http-测试">HTTP 测试</h1>
 <ul>
-<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
-<li><a href="#%E5%88%9B%E5%BB%BA%E8%AF%B7%E6%B1%82">创建请求</a><ul>
+<li><a href="#introduction">简介</a></li>
+<li><a href="#making-requests">创建请求</a><ul>
 <li><a href="#customizing-request-headers">自定义请求头</a></li>
 <li><a href="#cookies">Cookies</a></li>
 <li><a href="#session-and-authentication">会话 / 认证</a></li>
@@ -38,8 +38,9 @@
 </ul>
 </li>
 <li><a href="#available-assertions">可用断言</a><ul>
-<li><a href="#response-assertions">回应断言</a></li>
+<li><a href="#response-assertions">响应断言</a></li>
 <li><a href="#authentication-assertions">身份验证断言</a></li>
+<li><a href="#validation-assertions">验证断言</a></li>
 </ul>
 </li>
 </ul>
@@ -57,11 +58,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 基本的测试示例.
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_basic_request()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_basic_request(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
 
@@ -69,10 +68,10 @@
     }
 }
 </code></pre>
-<p><code>get</code>方法向应用程序发出<code>Get</code>请求，而<code>assertStatus</code>方法则断言返回的响应应该具有给定的 HTTP 状态代码。除了这个简单的断言之外，Laravel 还包含各种用于检查响应头、内容、JSON 结构等的断言。</p>
+<p><code>get</code> 方法向应用程序发出 <code>Get</code> 请求，而 <code>assertStatus</code> 方法则断言返回的响应应该具有给定的 HTTP 状态代码。除了这个简单的断言之外，Laravel 还包含各种用于检查响应头、内容、JSON 结构等的断言。</p>
 <p><a name="making-requests"></a></p>
 <h2 id="创建请求">创建请求</h2>
-<p>要向应用程序发出请求，可以在测试中调用<code>get</code>、<code>post</code>、<code>put</code>、<code>patch</code>或<code>delete</code>方法。这些方法实际上不会向应用程序发出“真正的”HTTP 请求。相反，整个网络请求是在内部模拟的。</p>
+<p>要向应用程序发出请求，可以在测试中调用<code>get</code>、<code>post</code>、<code>put</code>、<code>patch</code>或<code>delete</code>方法。这些方法实际上不会向应用程序发出「真正的」HTTP 请求。相反，整个网络请求是在内部模拟的。</p>
 <p>测试请求方法不返回<code>Illuminate\Http\Response</code>实例，而是返回<code>Illuminate\Testing\TestResponse</code>实例，该实例提供<a href="##available-assertions">各种有用的断言</a>,允许你检查应用程序的响应：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
@@ -85,11 +84,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 基本的测试示例.
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_basic_request()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_basic_request(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
 
@@ -99,7 +96,8 @@
 </code></pre>
 <p>通常，你的每个测试应该只向你的应用发出一个请求。如果在单个测试方法中执行多个请求，则可能会出现意外行为。</p>
 <blockquote>
-<p>技巧：为了方便起见，运行测试时会自动禁用 CSRF 中间件。</p>
+<p><strong>技巧</strong>
+为了方便起见，运行测试时会自动禁用 CSRF 中间件。</p>
 </blockquote>
 <p><a name="customizing-request-headers"></a></p>
 <h3 id="自定义请求头">自定义请求头</h3>
@@ -113,11 +111,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 一个基本的功能测试示例
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_headers()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_headers(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;withHeaders([
             <span class="string token">'X-Header'</span> =&gt; <span class="string token">'Value'</span>,
@@ -138,7 +134,7 @@
 
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_cookies()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_cookies(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;withCookie(<span class="string token">'color'</span>, <span class="string token">'blue'</span>)-&gt;get(<span class="string token">'/'</span>);
 
@@ -150,7 +146,7 @@
 }
 </code></pre>
 <p><a name="session-and-authentication"></a></p>
-<h3 id="session--authentication">Session / Authentication</h3>
+<h3 id="会话-session--认证-authentication">会话 (Session) / 认证 (Authentication)</h3>
 <p>Laravel 提供了几个可在 HTTP 测试时使用 Session 的辅助函数。首先，你需要传递一个数组给 <code>withSession</code> 方法来设置 session 数据。这样在应用程序的测试请求发送之前，就会先去给数据加载 session：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
@@ -160,13 +156,13 @@
 
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_the_session()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_interacting_with_the_session(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;withSession([<span class="string token">'banned'</span> =&gt; <span class="keyword token">false</span>])-&gt;get(<span class="string token">'/'</span>);
     }
 }
 </code></pre>
-<p>Laravel 的 session 通常用于维护当前已验证用户的状态。因此，<code>actingAs</code> 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如，我们可以使用 <a href="database-testing.html#writing-factories">工厂模式</a> 生成并验证用户：</p>
+<p>Laravel 的 session 通常用于维护当前已验证用户的状态。因此，<code>actingAs</code> 方法提供了一种将给定用户作为当前用户进行身份验证的便捷方法。例如，我们可以使用一个<a href="/docs/laravel/10.x/eloquent-factories">工厂模式</a>来生成和认证一个用户：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
@@ -176,7 +172,7 @@
 
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_an_action_that_requires_authentication()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_an_action_that_requires_authentication(): void
     {
         <span class="variable token">$user</span> = User::factory()-&gt;create();
 
@@ -186,7 +182,7 @@
     }
 }
 </code></pre>
-<p>你也可以通过传递看守器名称作为 <code>actingAs</code> 方法的第二参数以指定用户通过哪种看守器来认证：</p>
+<p>你也可以通过传递看守器名称作为 <code>actingAs</code> 方法的第二参数以指定用户通过哪种看守器来认证。提供给 <code>actingAs</code> 方法的防护也将成为测试期间的默认防护。</p>
 <pre><code><span class="variable token">$this</span>-&gt;actingAs(<span class="variable token">$user</span>, <span class="string token">'web'</span>)
 </code></pre>
 <p><a name="debugging-responses"></a></p>
@@ -201,11 +197,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 一个最基础的测试例子
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_test()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_test(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
 
@@ -227,11 +221,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 基本功能测试例子
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_test()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_basic_test(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
 
@@ -263,11 +255,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 基本功能测试示例
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_making_an_api_request()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_making_an_api_request(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;postJson(<span class="string token">'/api/user'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Sally'</span>]);
 
@@ -283,7 +273,8 @@
 <pre><code><span class="variable token">$this</span>-&gt;assertTrue(<span class="variable token">$response</span>[<span class="string token">'created'</span>]);
 </code></pre>
 <blockquote>
-<p>技巧：<code>assertJson</code> 方法将响应转换为数组，并利用 <code>PHPUnit::assertArraySubset</code> 验证给定数组是否存在于应用程序返回的 JSON 响应中。因此，如果 JSON 响应中还有其他属性，则只要存在给定的片段，此测试仍将通过。</p>
+<p><strong>技巧</strong>
+<code>assertJson</code> 方法将响应转换为数组，并利用 <code>PHPUnit::assertArraySubset</code> 验证给定数组是否存在于应用程序返回的 JSON 响应中。因此，如果 JSON 响应中还有其他属性，则只要存在给定的片段，此测试仍将通过。</p>
 </blockquote>
 <p><a name="verifying-exact-match"></a></p>
 <h4 id="验证-json-完全匹配">验证 JSON 完全匹配</h4>
@@ -297,11 +288,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 一个基本的功能测试示例。
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_asserting_an_exact_json_match()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_asserting_an_exact_json_match(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;postJson(<span class="string token">'/user'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Sally'</span>]);
 
@@ -325,11 +314,9 @@
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
     <span class="comment token">/**
-     * 一个基本的功能测试示例。
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 基本功能测试示例。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_asserting_a_json_paths_value()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_asserting_a_json_paths_value(): void
     {
         <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;postJson(<span class="string token">'/user'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Sally'</span>]);
 
@@ -339,16 +326,18 @@
     }
 }
 </code></pre>
+<p><code>assertJsonPath</code> 方法也接受一个闭包，可以用来动态地确定断言是否应该通过。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertJsonPath(<span class="string token">'team.owner.name'</span>, fn (string <span class="variable token">$name</span>) =&gt; strlen(<span class="variable token">$name</span>) &gt;= <span class="number token">3</span>);
+</code></pre>
 <p><a name="fluent-json-testing"></a></p>
 <h3 id="json-流式测试">JSON 流式测试</h3>
-<p>Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 响应。首先，将闭包传递给 <code>assertJson</code> 方法。这个闭包将使用 <code>Illuminate\Testing\Fluent\AssertableJson</code> 的实例调用，该实例可用于对应用程序返回的 JSON 进行断言。 <code>where</code> 方法可用于对 JSON 的特定属性进行断言，而 <code>missing</code> 方法可用于断言 JSON 中缺少特定属性：
-    use Illuminate\Testing\Fluent\AssertableJson;</p>
-<pre><code><span class="comment token">/**
- * 一个基本的功能测试示例。
- *
- *<span class="phpdoc token"> @return</span> void
+<p>Laravel 还提供了一种漂亮的方式来流畅地测试应用程序的 JSON 响应。首先，将闭包传递给 <code>assertJson</code> 方法。这个闭包将使用 <code>Illuminate\Testing\Fluent\AssertableJson</code> 的实例调用，该实例可用于对应用程序返回的 JSON 进行断言。 <code>where</code> 方法可用于对 JSON 的特定属性进行断言，而 <code>missing</code> 方法可用于断言 JSON 中缺少特定属性：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Testing\Fluent\AssertableJson;
+
+<span class="comment token">/**
+ * 基本功能测试示例。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_fluent_json()
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_fluent_json(): void
 {
     <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;getJson(<span class="string token">'/users/1'</span>);
 
@@ -356,14 +345,17 @@
         -&gt;assertJson(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
             <span class="variable token">$json</span>-&gt;where(<span class="string token">'id'</span>, <span class="number token">1</span>)
                  -&gt;where(<span class="string token">'name'</span>, <span class="string token">'Victoria Faith'</span>)
+                 -&gt;where(<span class="string token">'email'</span>, fn (string <span class="variable token">$email</span>) =&gt; str(<span class="variable token">$email</span>)-&gt;is(<span class="string token">'victoria@gmail.com'</span>))
+                 -&gt;whereNot(<span class="string token">'status'</span>, <span class="string token">'pending'</span>)
                  -&gt;missing(<span class="string token">'password'</span>)
                  -&gt;etc()
         );
 }
 </code></pre>
 <h4 id="了解-etc-方法">了解 <code>etc</code> 方法</h4>
-<p>在上面的示例中，你可能已经注意到我们在断言链的末尾调用了 <code>etc</code> 方法。该方法通知 Laravel 在 JSON 对象上可能存在其他属性。如果未使用 <code>etc</code> 方法，则如果 JSON 对象上存在你未对其进行断言的其他属性，则测试将失败。</p>
-<p>此行为背后的目的是通过强制你明确对属性做出断言或通过 <code>etc</code> 方法明确允许其他属性来保护你避免无意中在 JSON 响应中暴露敏感信息。</p>
+<p>在上面的例子中, 你可能已经注意到我们在断言链的末端调用了 <code>etc</code> 方法. 这个方法通知Laravel，在JSON对象上可能还有其他的属性存在。如果没有使用 <code>etc</code> 方法, 如果你没有对JSON对象的其他属性进行断言, 测试将失败.</p>
+<p>这种行为背后的意图是保护你不会在你的 JSON 响应中无意地暴露敏感信息，因为它迫使你明确地对该属性进行断言或通过 <code>etc</code> 方法明确地允许额外的属性。</p>
+<p>然而，你应该知道，在你的断言链中不包括 <code>etc</code> 方法并不能确保额外的属性不会被添加到嵌套在 JSON 对象中的数组。<code>etc</code> 方法只能确保在调用 <code>etc</code> 方法的嵌套层中不存在额外的属性。</p>
 <p><a name="asserting-json-attribute-presence-and-absence"></a></p>
 <h4 id="断言属性存在不存在">断言属性存在/不存在</h4>
 <p>要断言属性存在或不存在，可以使用 <code>has</code> 和 <code>missing</code> 方法：</p>
@@ -374,8 +366,8 @@
 </code></pre>
 <p>此外，<code>hasAll</code> 和 <code>missingAll</code> 方法允许同时断言多个属性的存在或不存在：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertJson(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
-    <span class="variable token">$json</span>-&gt;hasAll(<span class="string token">'status'</span>, <span class="string token">'data'</span>)
-         -&gt;missingAll(<span class="string token">'message'</span>, <span class="string token">'code'</span>)
+    <span class="variable token">$json</span>-&gt;hasAll([<span class="string token">'status'</span>, <span class="string token">'data'</span>])
+         -&gt;missingAll([<span class="string token">'message'</span>, <span class="string token">'code'</span>])
 );
 </code></pre>
 <p>你可以使用 <code>hasAny</code> 方法来确定是否存在给定属性列表中的至少一个：</p>
@@ -395,9 +387,10 @@
 <pre><code><span class="variable token">$response</span>
     -&gt;assertJson(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
         <span class="variable token">$json</span>-&gt;has(<span class="number token">3</span>)
-             -&gt;first(fn (<span class="variable token">$json</span>) =&gt;
+             -&gt;first(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
                 <span class="variable token">$json</span>-&gt;where(<span class="string token">'id'</span>, <span class="number token">1</span>)
                      -&gt;where(<span class="string token">'name'</span>, <span class="string token">'Victoria Faith'</span>)
+                     -&gt;where(<span class="string token">'email'</span>, fn (string <span class="variable token">$email</span>) =&gt; str(<span class="variable token">$email</span>)-&gt;is(<span class="string token">'victoria@gmail.com'</span>))
                      -&gt;missing(<span class="string token">'password'</span>)
                      -&gt;etc()
              )
@@ -418,9 +411,10 @@
     -&gt;assertJson(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
         <span class="variable token">$json</span>-&gt;has(<span class="string token">'meta'</span>)
              -&gt;has(<span class="string token">'users'</span>, <span class="number token">3</span>)
-             -&gt;has(<span class="string token">'users.0'</span>, fn (<span class="variable token">$json</span>) =&gt;
+             -&gt;has(<span class="string token">'users.0'</span>, fn (AssertableJson <span class="variable token">$json</span>) =&gt;
                 <span class="variable token">$json</span>-&gt;where(<span class="string token">'id'</span>, <span class="number token">1</span>)
                      -&gt;where(<span class="string token">'name'</span>, <span class="string token">'Victoria Faith'</span>)
+                     -&gt;where(<span class="string token">'email'</span>, fn (string <span class="variable token">$email</span>) =&gt; str(<span class="variable token">$email</span>)-&gt;is(<span class="string token">'victoria@gmail.com'</span>))
                      -&gt;missing(<span class="string token">'password'</span>)
                      -&gt;etc()
              )
@@ -430,9 +424,10 @@
 <pre><code><span class="variable token">$response</span>
     -&gt;assertJson(fn (AssertableJson <span class="variable token">$json</span>) =&gt;
         <span class="variable token">$json</span>-&gt;has(<span class="string token">'meta'</span>)
-             -&gt;has(<span class="string token">'users'</span>, <span class="number token">3</span>, fn (<span class="variable token">$json</span>) =&gt;
+             -&gt;has(<span class="string token">'users'</span>, <span class="number token">3</span>, fn (AssertableJson <span class="variable token">$json</span>) =&gt;
                 <span class="variable token">$json</span>-&gt;where(<span class="string token">'id'</span>, <span class="number token">1</span>)
                      -&gt;where(<span class="string token">'name'</span>, <span class="string token">'Victoria Faith'</span>)
+                     -&gt;where(<span class="string token">'email'</span>, fn (string <span class="variable token">$email</span>) =&gt; str(<span class="variable token">$email</span>)-&gt;is(<span class="string token">'victoria@gmail.com'</span>))
                      -&gt;missing(<span class="string token">'password'</span>)
                      -&gt;etc()
              )
@@ -471,7 +466,7 @@
 
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_avatars_can_be_uploaded()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_avatars_can_be_uploaded(): void
     {
         Storage::fake(<span class="string token">'avatars'</span>);
 
@@ -494,7 +489,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="fake-file-customization"></a></p>
 <h4 id="虚拟文件定制">虚拟文件定制</h4>
-<p>在使用 <code>fake</code> 方法创建文件时，你可以指定图像的宽高以及大小，从而更好的验证测试规则：</p>
+<p>当使用 <code>UploadedFile</code> 类提供的 <code>fake</code> 方法创建文件时，你可以指定图片的宽度、高度和大小（以千字节为单位），以便更好地测试你的应用程序的验证规则。</p>
 <pre><code>UploadedFile::fake()-&gt;image(<span class="string token">'avatar.jpg'</span>, <span class="variable token">$width</span>, <span class="variable token">$height</span>)-&gt;size(<span class="number token">100</span>);
 </code></pre>
 <p>除创建图像外，你也可以用 <code>create</code> 方法创建其他类型的文件：</p>
@@ -516,7 +511,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 
 <span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_welcome_view_can_be_rendered()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_a_welcome_view_can_be_rendered(): void
     {
         <span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;view(<span class="string token">'welcome'</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]);
 
@@ -530,7 +525,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="sharing-errors"></a></p>
 <h4 id="共享错误">共享错误</h4>
-<p>一些视图可能依赖于 Laravel 提供的 <a href="validation.html#quick-displaying-the-validation-errors">全局错误包</a> 中共享的错误。要在错误包中生成错误消息，可以使用 <code>withViewErrors</code> 方法：</p>
+<p>一些视图可能依赖于 Laravel 提供的 <a href="/docs/laravel/10.x/validation#quick-displaying-the-validation-errors">全局错误包</a> 中共享的错误。要在错误包中生成错误消息，可以使用 <code>withViewErrors</code> 方法：</p>
 <pre><code><span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;withViewErrors([
     <span class="string token">'name'</span> =&gt; [<span class="string token">'Please provide a valid name.'</span>]
 ])-&gt;view(<span class="string token">'form'</span>);
@@ -539,7 +534,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="rendering-blade-and-components"></a></p>
 <h3 id="渲染模板--组件">渲染模板 &amp; 组件</h3>
-<p>必要的话，你可以使用 <code>blade</code> 方法来计算和呈现原始的 <a href="blade.html">Blade</a> 字符串。与 <code>view</code> 方法一样，<code>blade</code> 方法返回的是 <code>Illuminate\Testing\TestView</code> 的实例：</p>
+<p>必要的话，你可以使用 <code>blade</code> 方法来计算和呈现原始的 <a href="/docs/laravel/10.x/blade">Blade</a> 字符串。与 <code>view</code> 方法一样，<code>blade</code> 方法返回的是 <code>Illuminate\Testing\TestView</code> 的实例：</p>
 <pre><code><span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;blade(
     <span class="string token">'&lt;x-component :name="$name" /&gt;'</span>,
     [<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]
@@ -547,7 +542,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 
 <span class="variable token">$view</span>-&gt;assertSee(<span class="string token">'Taylor'</span>);
 </code></pre>
-<p>你可以使用 <code>component</code> 方法来评估和渲染 <a href="blade.html#components">Blade 组件</a>。类似于 <code>view</code> 方法，<code>component</code> 方法返回一个 <code>Illuminate\Testing\TestView</code> 的实例：</p>
+<p>你可以使用 <code>component</code> 方法来评估和渲染 <a href="/docs/laravel/10.x/blade#components">Blade 组件</a>。类似于 <code>view</code> 方法，<code>component</code> 方法返回一个 <code>Illuminate\Testing\TestView</code> 的实例：</p>
 <pre><code><span class="variable token">$view</span> = <span class="variable token">$this</span>-&gt;component(Profile::<span class="keyword token">class</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]);
 
 <span class="variable token">$view</span>-&gt;assertSee(<span class="string token">'Taylor'</span>);
@@ -556,15 +551,17 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <h2 id="可用断言">可用断言</h2>
 <p><a name="response-assertions"></a></p>
 <h3 id="响应断言">响应断言</h3>
-<p>Laravel 的 <code>Illuminate \ Testing \ TestResponse</code> 类提供了各种自定义断言方法，你可以在测试应用程序时使用它们。可以在由 <code>json</code>、<code>get</code>、<code>post</code>、<code>put</code> 和 <code>delete</code> 方法返回的响应上访问这些断言：</p>
+<p>Laravel 的 <code>Illuminate\Testing\TestResponse</code> 类提供了各种自定义断言方法，你可以在测试应用程序时使用它们。可以在由 <code>json</code>、<code>get</code>、<code>post</code>、<code>put</code> 和 <code>delete</code> 方法返回的响应上访问这些断言：</p>
 <style>
     .collection-method-list > p {
-        column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+        columns: 14.4em 2; -moz-columns: 14.4em 2; -webkit-columns: 14.4em 2;
     }
 
     .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
@@ -585,20 +582,26 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <a href="#assert-json">assertJson</a>
 <a href="#assert-json-count">assertJsonCount</a>
 <a href="#assert-json-fragment">assertJsonFragment</a>
+<a href="#assert-json-is-array">assertJsonIsArray</a>
+<a href="#assert-json-is-object">assertJsonIsObject</a>
 <a href="#assert-json-missing">assertJsonMissing</a>
 <a href="#assert-json-missing-exact">assertJsonMissingExact</a>
 <a href="#assert-json-missing-validation-errors">assertJsonMissingValidationErrors</a>
 <a href="#assert-json-path">assertJsonPath</a>
+<a href="#assert-json-missing-path">assertJsonMissingPath</a>
 <a href="#assert-json-structure">assertJsonStructure</a>
 <a href="#assert-json-validation-errors">assertJsonValidationErrors</a>
 <a href="#assert-json-validation-error-for">assertJsonValidationErrorFor</a>
 <a href="#assert-location">assertLocation</a>
+<a href="#assert-content">assertContent</a>
 <a href="#assert-no-content">assertNoContent</a>
+<a href="#assert-streamed-content">assertStreamedContent</a>
 <a href="#assert-not-found">assertNotFound</a>
 <a href="#assert-ok">assertOk</a>
 <a href="#assert-plain-cookie">assertPlainCookie</a>
 <a href="#assert-redirect">assertRedirect</a>
 <a href="#assert-redirect-contains">assertRedirectContains</a>
+<a href="#assert-redirect-to-route">assertRedirectToRoute</a>
 <a href="#assert-redirect-to-signed-route">assertRedirectToSignedRoute</a>
 <a href="#assert-see">assertSee</a>
 <a href="#assert-see-in-order">assertSeeInOrder</a>
@@ -612,7 +615,6 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <a href="#assert-session-has-no-errors">assertSessionHasNoErrors</a>
 <a href="#assert-session-doesnt-have-errors">assertSessionDoesntHaveErrors</a>
 <a href="#assert-session-missing">assertSessionMissing</a>
-<a href="#assert-similar-json">assertSimilarJson</a>
 <a href="#assert-status">assertStatus</a>
 <a href="#assert-successful">assertSuccessful</a>
 <a href="#assert-unauthorized">assertUnauthorized</a>
@@ -714,6 +716,16 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 
 <span class="variable token">$response</span>-&gt;assertJsonFragment([<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor Otwell'</span>]);
 </code></pre>
+<p><a name="assert-json-is-array"></a></p>
+<h4 id="assertjsonisarray">assertJsonIsArray</h4>
+<p>断言响应的 JSON 是一个数组。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertJsonIsArray();
+</code></pre>
+<p><a name="assert-json-is-object"></a></p>
+<h4 id="assertjsonisobject">assertJsonIsObject</h4>
+<p>断言响应的 JSON 是一个对象。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertJsonIsObject();
+</code></pre>
 <p><a name="assert-json-missing"></a></p>
 <h4 id="assertjsonmissing">assertJsonMissing</h4>
 <p>断言响应未包含给定的 JSON 片段：</p>
@@ -730,7 +742,8 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonMissingValidationErrors(<span class="variable token">$keys</span>);
 </code></pre>
 <blockquote>
-<p>提示：更通用的 <a href="#assert-valid">assertValid</a> 方法可用于断言响应没有以 JSON 形式返回的验证错误<strong>并且</strong>没有错误被闪现到会话存储中。</p>
+<p><strong>提示</strong>
+更通用的 <a href="#assert-valid">assertValid</a> 方法可用于断言响应没有以 JSON 形式返回的验证错误<strong>并且</strong>没有错误被闪现到会话存储中。</p>
 </blockquote>
 <p><a name="assert-json-path"></a></p>
 <h4 id="assertjsonpath">assertJsonPath</h4>
@@ -738,7 +751,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonPath(<span class="variable token">$path</span>, <span class="variable token">$expectedValue</span>);
 </code></pre>
 <p>例如，如果你的应用程序返回的 JSON 响应包含以下数据：</p>
-<pre><code class="language-js">{
+<pre><code class="language-json">{
     &quot;user&quot;: {
         &quot;name&quot;: &quot;Steve Schoger&quot;
     }
@@ -747,13 +760,28 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>你可以断言 <code>user</code> 对象的 <code>name</code> 属性匹配给定值，如下所示：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonPath(<span class="string token">'user.name'</span>, <span class="string token">'Steve Schoger'</span>);
 </code></pre>
+<p><a name="assert-json-missing-path"></a></p>
+<h4 id="assertjsonmissingpath">assertJsonMissingPath</h4>
+<p>断言响应具有给定的 JSON 结构：</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertJsonMissingPath(<span class="variable token">$path</span>);
+</code></pre>
+<p>例如，如果你的应用程序返回的 JSON 响应包含以下数据：</p>
+<pre><code class="language-json">{
+    &quot;user&quot;: {
+        &quot;name&quot;: &quot;Steve Schoger&quot;
+    }
+}
+</code></pre>
+<p>你可以断言它不包含 <code>user</code> 对象的 <code>email</code> 属性。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertJsonMissingPath(<span class="string token">'user.email'</span>);
+</code></pre>
 <p><a name="assert-json-structure"></a></p>
 <h4 id="assertjsonstructure">assertJsonStructure</h4>
 <p>断言响应具有给定的 JSON 结构：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonStructure(<span class="keyword token">array</span> <span class="variable token">$structure</span>);
 </code></pre>
 <p>例如，如果你的应用程序返回的 JSON 响应包含以下数据：</p>
-<pre><code class="language-js">{
+<pre><code class="language-json">{
     &quot;user&quot;: {
         &quot;name&quot;: &quot;Steve Schoger&quot;
     }
@@ -767,7 +795,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 ]);
 </code></pre>
 <p>有时，你的应用程序返回的 JSON 响应可能包含对象数组：</p>
-<pre><code class="language-js">{
+<pre><code class="language-json">{
     &quot;user&quot;: [
         {
             &quot;name&quot;: &quot;Steve Schoger&quot;,
@@ -799,7 +827,8 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertJsonValidationErrors(<span class="keyword token">array</span> <span class="variable token">$data</span>, <span class="variable token">$responseKey</span> = <span class="string token">'errors'</span>);
 </code></pre>
 <blockquote>
-<p>技巧：更通用的 <a href="#assert-invalid">assertInvalid</a> 方法可用于断言响应具有以 JSON 形式返回的验证错误<strong>或</strong>错误已闪存到会话存储。</p>
+<p><strong>技巧</strong>
+更通用的 <a href="#assert-invalid">assertInvalid</a> 方法可用于断言响应具有以 JSON 形式返回的验证错误<strong>或</strong>错误已闪存到会话存储。</p>
 </blockquote>
 <p><a name="assert-json-validation-error-for"></a></p>
 <h4 id="assertjsonvalidationerrorfor">assertJsonValidationErrorFor</h4>
@@ -811,10 +840,20 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言响应在 <code>Location</code> 头部中具有给定的 URI 值：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertLocation(<span class="variable token">$uri</span>);
 </code></pre>
+<p><a name="assert-content"></a></p>
+<h4 id="assertcontent">assertContent</h4>
+<p>断言给定的字符串与响应内容匹配。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertContent(<span class="variable token">$value</span>);
+</code></pre>
 <p><a name="assert-no-content"></a></p>
 <h4 id="assertnocontent">assertNoContent</h4>
 <p>断言响应具有给定的 HTTP 状态码且没有内容：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertNoContent(<span class="variable token">$status</span> = <span class="number token">204</span>);
+</code></pre>
+<p><a name="assert-streamed-content"></a></p>
+<h4 id="assertstreamedcontent">assertStreamedContent</h4>
+<p>断言给定的字符串与流式响应的内容相匹配。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertStreamedContent(<span class="variable token">$value</span>);
 </code></pre>
 <p><a name="assert-not-found"></a></p>
 <h4 id="assertnotfound">assertNotFound</h4>
@@ -841,19 +880,24 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言响应是否重定向到包含给定字符串的 URI：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertRedirectContains(<span class="variable token">$string</span>);
 </code></pre>
+<p><a name="assert-redirect-to-route"></a></p>
+<h4 id="assertredirecttoroute">assertRedirectToRoute</h4>
+<p>断言响应是对给定的<a href="/docs/laravel/10.x/routing#named-routes">命名路由</a>的重定向。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertRedirectToRoute(<span class="variable token">$name</span> = <span class="keyword token">null</span>, <span class="variable token">$parameters</span> = []);
+</code></pre>
 <p><a name="assert-redirect-to-signed-route"></a></p>
 <h4 id="assertredirecttosignedroute">assertRedirectToSignedRoute</h4>
-<p>断言响应是对给定签名路由的重定向：</p>
+<p>断言响应是对给定<a href="/docs/laravel/10.x/urls#signed-urls">签名路由</a>的重定向：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertRedirectToSignedRoute(<span class="variable token">$name</span> = <span class="keyword token">null</span>, <span class="variable token">$parameters</span> = []);
 </code></pre>
 <p><a name="assert-see"></a></p>
 <h4 id="assertsee">assertSee</h4>
-<p>断言给定的字符串包含在响应中。除非传递第二个参数 <code>false</code> ，否则此断言将给定字符串进行转义后匹配：</p>
+<p>断言给定的字符串包含在响应中。除非传递第二个参数 <code>false</code>，否则此断言将给定字符串进行转义后匹配：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSee(<span class="variable token">$value</span>, <span class="variable token">$escaped</span> = <span class="keyword token">true</span>);
 </code></pre>
 <p><a name="assert-see-in-order"></a></p>
 <h4 id="assertseeinorder">assertSeeInOrder</h4>
-<p>断言给定的字符串按顺序包含在响应中。除非传递第二个参数 <code>false</code> ，否则此断言将给定字符串进行转义后匹配：</p>
+<p>断言给定的字符串按顺序包含在响应中。除非传递第二个参数 <code>false</code>，否则此断言将给定字符串进行转义后匹配：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSeeInOrder(<span class="keyword token">array</span> <span class="variable token">$values</span>, <span class="variable token">$escaped</span> = <span class="keyword token">true</span>);
 </code></pre>
 <p><a name="assert-see-text"></a></p>
@@ -863,7 +907,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 </code></pre>
 <p><a name="assert-see-text-in-order"></a></p>
 <h4 id="assertseetextinorder">assertSeeTextInOrder</h4>
-<p>断言给定的字符串按顺序包含在响应的文本中。除非传递第二个参数 <code>false</code> ，否则此断言将给定字符串进行转义后匹配。在做出断言之前，响应内容将被传递到 PHP 的 <code>strip_tags</code> 函数：</p>
+<p>断言给定的字符串按顺序包含在响应的文本中。除非传递第二个参数 <code>false</code>，否则此断言将给定字符串进行转义后匹配。在做出断言之前，响应内容将被传递到 PHP 的 <code>strip_tags</code> 函数：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSeeTextInOrder(<span class="keyword token">array</span> <span class="variable token">$values</span>, <span class="variable token">$escaped</span> = <span class="keyword token">true</span>);
 </code></pre>
 <p><a name="assert-session-has"></a></p>
@@ -872,7 +916,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHas(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
 <p>如果需要，可以提供一个闭包作为 <code>assertSessionHas</code> 方法的第二个参数。如果闭包返回 <code>true</code>，则断言将通过：</p>
-<pre><code><span class="variable token">$response</span>-&gt;assertSessionHas(<span class="variable token">$key</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+<pre><code><span class="variable token">$response</span>-&gt;assertSessionHas(<span class="variable token">$key</span>, <span class="keyword token">function</span> (User <span class="variable token">$value</span>) {
     <span class="keyword token">return</span> <span class="variable token">$value</span>-&gt;name === <span class="string token">'Taylor Otwell'</span>;
 });
 </code></pre>
@@ -882,7 +926,7 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasInput(<span class="variable token">$key</span>, <span class="variable token">$value</span> = <span class="keyword token">null</span>);
 </code></pre>
 <p>如果需要，可以提供一个闭包作为 <code>assertSessionHasInput</code> 方法的第二个参数。如果闭包返回 <code>true</code>，则断言将通过：</p>
-<pre><code><span class="variable token">$response</span>-&gt;assertSessionHasInput(<span class="variable token">$key</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+<pre><code><span class="variable token">$response</span>-&gt;assertSessionHasInput(<span class="variable token">$key</span>, <span class="keyword token">function</span> (string <span class="variable token">$value</span>) {
     <span class="keyword token">return</span> Crypt::decryptString(<span class="variable token">$value</span>) === <span class="string token">'secret'</span>;
 });
 </code></pre>
@@ -912,9 +956,13 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
     <span class="string token">'name'</span> =&gt; <span class="string token">'The given name was invalid.'</span>
 ]);
 </code></pre>
+<blockquote>
+<p><strong>注意</strong>
+更加通用的 <a href="#assert-invalid">assertInvalid</a> 方法可以用来断言一个响应有验证错误，以JSON形式返回，<strong>或</strong> 将错误被闪存到会话存储中。</p>
+</blockquote>
 <p><a name="assert-session-has-errors-in"></a></p>
 <h4 id="assertsessionhaserrorsin">assertSessionHasErrorsIn</h4>
-<p>断言会话在特定的 <a href="validation.html#named-error-bags">错误包</a> 中包含给定 <code>$keys</code> 的错误。如果 <code>$keys</code> 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）：</p>
+<p>断言会话在特定的<a href="/docs/laravel/10.x/validation#named-error-bags">错误包</a>中包含给定 <code>$keys</code> 的错误。如果 <code>$keys</code> 是一个关联数组，则断言该 session 在错误包内包含每个字段（键）的特定错误消息（值）：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionHasErrorsIn(<span class="variable token">$errorBag</span>, <span class="variable token">$keys</span> = [], <span class="variable token">$format</span> = <span class="keyword token">null</span>);
 </code></pre>
 <p><a name="assert-session-has-no-errors"></a></p>
@@ -927,6 +975,10 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <p>断言会话对给定键没有验证错误：</p>
 <pre><code><span class="variable token">$response</span>-&gt;assertSessionDoesntHaveErrors(<span class="variable token">$keys</span> = [], <span class="variable token">$format</span> = <span class="keyword token">null</span>, <span class="variable token">$errorBag</span> = <span class="string token">'default'</span>);
 </code></pre>
+<blockquote>
+<p><strong>注意</strong>
+更加通用的 <a href="#assert-valid">assertValid</a> 方法可以用来断言一个响应没有以JSON形式返回的验证错误，<strong>同时</strong> 不会将错误被闪存到会话存储中。</p>
+</blockquote>
 <p><a name="assert-session-missing"></a></p>
 <h4 id="assertsessionmissing">assertSessionMissing</h4>
 <p>断言 session 中缺少指定的 $key：</p>
@@ -1029,6 +1081,29 @@ Storage::disk(<span class="string token">'avatars'</span>)-&gt;assertMissing(<sp
 <h4 id="assertauthenticatedas">assertAuthenticatedAs</h4>
 <p>断言特定用户已通过身份验证：</p>
 <pre><code><span class="variable token">$this</span>-&gt;assertAuthenticatedAs(<span class="variable token">$user</span>, <span class="variable token">$guard</span> = <span class="keyword token">null</span>);
+</code></pre>
+<p><a name="validation-assertions"></a></p>
+<h2 id="验证断言">验证断言</h2>
+<p>Laravel 提供了两个主要的验证相关的断言，你可以用它来确保在你的请求中提供的数据是有效或无效的。</p>
+<p><a name="validation-assert-valid"></a></p>
+<h4 id="assertvalid-1">assertValid</h4>
+<p>断言响应对于给定的键没有验证错误。该方法可用于断言响应中的验证错误是以 JSON 结构返回的，或者验证错误已经闪现到会话中。</p>
+<pre><code><span class="comment token">// 断言没有验证错误存在...</span>
+<span class="variable token">$response</span>-&gt;assertValid();
+
+<span class="comment token">//断言给定的键没有验证错误...</span>
+<span class="variable token">$response</span>-&gt;assertValid([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
+</code></pre>
+<p><a name="validation-assert-invalid"></a></p>
+<h4 id="assertinvalid-1">assertInvalid</h4>
+<p>断言响应对给定的键有验证错误。这个方法可用于断言响应中的验证错误是以 JSON 结构返回的，或者验证错误已经被闪现到会话中。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertInvalid([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
+</code></pre>
+<p>你也可以断言一个给定的键有一个特定的验证错误信息。当这样做时，你可以提供整个消息或只提供消息的一小部分。</p>
+<pre><code><span class="variable token">$response</span>-&gt;assertInvalid([
+    <span class="string token">'name'</span> =&gt; <span class="string token">'The name field is required.'</span>,
+    <span class="string token">'email'</span> =&gt; <span class="string token">'valid email address'</span>,
+]);
 </code></pre>
 </div>
     <blockquote style="font-size: 0.9em;">
