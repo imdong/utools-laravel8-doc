@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div class="markdown-body"><h1 id="http-客户端">HTTP 客户端</h1>
+    <div class="markdown-body"><h1 id="http-client">HTTP Client</h1>
 <ul>
 <li><a href="#introduction">简介</a></li>
 <li><a href="#making-requests">创建请求</a><ul>
@@ -27,6 +27,7 @@
 <li><a href="#timeout">超时</a></li>
 <li><a href="#retries">重试</a></li>
 <li><a href="#error-handling">错误处理</a></li>
+<li><a href="#guzzle-middleware">Guzzle 中间件</a></li>
 <li><a href="#guzzle-options">Guzzle 选项</a></li>
 </ul>
 </li>
@@ -35,6 +36,7 @@
 <li><a href="#testing">测试</a><ul>
 <li><a href="#faking-responses">模拟响应</a></li>
 <li><a href="#inspecting-requests">注入请求</a></li>
+<li><a href="#preventing-stray-requests">防止意外请求</a></li>
 </ul>
 </li>
 <li><a href="#events">事件</a></li>
@@ -47,28 +49,54 @@
 </code></pre>
 <p><a name="making-requests"></a></p>
 <h2 id="创建请求">创建请求</h2>
-<p>你可以使用 <code>Http</code> Facade 提供的 <code>head</code>, <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>，以及 <code>delete</code> 方法来创建请求。首先，让我们先看一下如何发出一个基础的 <code>GET</code> 请求：</p>
+<p>你可以使用 <code>Http</code> Facade 提供的 <code>head</code>, <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>，以及 <code>delete</code> 方法来创建请求。首先，让我们先看一下如何发出一个基础的 GET 请求：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
 <span class="variable token">$response</span> = Http::get(<span class="string token">'http://example.com'</span>);
 </code></pre>
-<p><code>get</code> 方法返回一个 <code>Illuminate\Http\Client\Response</code>的实例，该实例提供了大量的方法来检查请求的响应：</p>
+<p><code>get</code> 方法返回一个 <code>Illuminate\Http\Client\Response</code> 的实例，该实例提供了大量的方法来检查请求的响应：</p>
 <pre><code><span class="variable token">$response</span>-&gt;body() : string;
-<span class="variable token">$response</span>-&gt;json(<span class="variable token">$key</span> = <span class="keyword token">null</span>) : <span class="keyword token">array</span>|mixed;
+<span class="variable token">$response</span>-&gt;json(<span class="variable token">$key</span> = <span class="keyword token">null</span>, <span class="variable token">$default</span> = <span class="keyword token">null</span>) : <span class="keyword token">array</span>|mixed;
 <span class="variable token">$response</span>-&gt;object() : object;
 <span class="variable token">$response</span>-&gt;collect(<span class="variable token">$key</span> = <span class="keyword token">null</span>) : Illuminate\Support\Collection;
 <span class="variable token">$response</span>-&gt;status() : int;
-<span class="variable token">$response</span>-&gt;ok() : bool;
 <span class="variable token">$response</span>-&gt;successful() : bool;
 <span class="variable token">$response</span>-&gt;redirect(): bool;
 <span class="variable token">$response</span>-&gt;failed() : bool;
-<span class="variable token">$response</span>-&gt;serverError() : bool;
 <span class="variable token">$response</span>-&gt;clientError() : bool;
 <span class="variable token">$response</span>-&gt;header(<span class="variable token">$header</span>) : string;
 <span class="variable token">$response</span>-&gt;headers() : <span class="keyword token">array</span>;
 </code></pre>
 <p><code>Illuminate\Http\Client\Response</code> 对象同样实现了 PHP 的 <code>ArrayAccess</code> 接口，这代表着你可以直接访问响应的 JSON 数据：</p>
 <pre><code><span class="keyword token">return</span> Http::get(<span class="string token">'http://example.com/users/1'</span>)[<span class="string token">'name'</span>];
+</code></pre>
+<p>除了上面列出的响应方法之外，还可以使用以下方法来确定响应是否具有相映的状态码：</p>
+<pre><code><span class="variable token">$response</span>-&gt;ok() : bool;                  <span class="comment token">// 200 OK</span>
+<span class="variable token">$response</span>-&gt;created() : bool;             <span class="comment token">// 201 Created</span>
+<span class="variable token">$response</span>-&gt;accepted() : bool;            <span class="comment token">// 202 Accepted</span>
+<span class="variable token">$response</span>-&gt;noContent() : bool;           <span class="comment token">// 204 No Content</span>
+<span class="variable token">$response</span>-&gt;movedPermanently() : bool;    <span class="comment token">// 301 Moved Permanently</span>
+<span class="variable token">$response</span>-&gt;found() : bool;               <span class="comment token">// 302 Found</span>
+<span class="variable token">$response</span>-&gt;badRequest() : bool;          <span class="comment token">// 400 Bad Request</span>
+<span class="variable token">$response</span>-&gt;unauthorized() : bool;        <span class="comment token">// 401 Unauthorized</span>
+<span class="variable token">$response</span>-&gt;paymentRequired() : bool;     <span class="comment token">// 402 Payment Required</span>
+<span class="variable token">$response</span>-&gt;forbidden() : bool;           <span class="comment token">// 403 Forbidden</span>
+<span class="variable token">$response</span>-&gt;notFound() : bool;            <span class="comment token">// 404 Not Found</span>
+<span class="variable token">$response</span>-&gt;requestTimeout() : bool;      <span class="comment token">// 408 Request Timeout</span>
+<span class="variable token">$response</span>-&gt;conflict() : bool;            <span class="comment token">// 409 Conflict</span>
+<span class="variable token">$response</span>-&gt;unprocessableEntity() : bool; <span class="comment token">// 422 Unprocessable Entity</span>
+<span class="variable token">$response</span>-&gt;tooManyRequests() : bool;     <span class="comment token">// 429 Too Many Requests</span>
+<span class="variable token">$response</span>-&gt;serverError() : bool;         <span class="comment token">// 500 Internal Server Error</span>
+</code></pre>
+<p><a name="uri-templates"></a></p>
+<h4 id="uri-模版">URI 模版</h4>
+<p>HTTP客户端还允许你使用 <a href="https://www.rfc-editor.org/rfc/rfc6570">URI 模板规范</a> 构造请求URL. 要定义URI查询参数，你可以使用 <code>withUrlParameters</code> 方法：</p>
+<pre><code>Http::withUrlParameters([
+    'endpoint' =&gt; 'https://laravel.com',
+    'page' =&gt; 'docs',
+    'version' =&gt; '9.x',
+    'topic' =&gt; 'validation',
+])-&gt;get('{+endpoint}/{page}/{version}/{topic}');
 </code></pre>
 <p><a name="dumping-requests"></a></p>
 <h4 id="打印请求信息">打印请求信息</h4>
@@ -87,7 +115,7 @@
 </code></pre>
 <p><a name="get-request-query-parameters"></a></p>
 <h4 id="get-请求查询参数">GET 请求查询参数</h4>
-<p>在创建 <code>GET</code> 请求时，你可以通过直接向 URL 添加查询字符串 或是 将键值对作为第二个参数传递给 <code>get</code> 方法：</p>
+<p>在创建 <code>GET</code> 请求时，你可以通过直接向 URL 添加查询字符串或是将键值对作为第二个参数传递给 <code>get</code> 方法：</p>
 <pre><code><span class="variable token">$response</span> = Http::get(<span class="string token">'http://example.com/users'</span>, [
     <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>,
     <span class="string token">'page'</span> =&gt; <span class="number token">1</span>,
@@ -124,7 +152,7 @@
 </code></pre>
 <p><a name="headers"></a></p>
 <h3 id="请求头">请求头</h3>
-<p>你可以通过 <code>withHeaders</code> 方法添加请求头。该 <code>withHeaders</code> 方法接受一个数组格式的键 / 值对：</p>
+<p>你可以通过 <code>withHeaders</code> 方法添加请求头。该 <code>withHeaders</code> 方法接受一个数组格式的键 / 值对：</p>
 <pre><code><span class="variable token">$response</span> = Http::withHeaders([
     <span class="string token">'X-First'</span> =&gt; <span class="string token">'foo'</span>,
     <span class="string token">'X-Second'</span> =&gt; <span class="string token">'bar'</span>
@@ -132,99 +160,169 @@
     <span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>,
 ]);
 </code></pre>
-<p>您可以使用 <code>accept</code> 方法指定应用程序响应您的请求所需的内容类型：</p>
+<p>你可以使用 <code>accept</code> 方法指定应用程序响应你的请求所需的内容类型：</p>
 <pre><code><span class="variable token">$response</span> = Http::accept(<span class="string token">'application/json'</span>)-&gt;get(<span class="string token">'http://example.com/users'</span>);
 </code></pre>
-<p>为方便起见，您可以使用 <code>acceptJson</code> 方法快速指定应用程序需要 <code>application/json</code> 内容类型来响应您的请求：</p>
+<p>为方便起见，你可以使用 <code>acceptJson</code> 方法快速指定应用程序需要 <code>application/json</code> 内容类型来响应你的请求：</p>
 <pre><code><span class="variable token">$response</span> = Http::acceptJson()-&gt;get(<span class="string token">'http://example.com/users'</span>);
 </code></pre>
 <p><a name="authentication"></a></p>
 <h3 id="认证">认证</h3>
-<p>你可以使用 <code>withBasicAuth</code> 和 <code>withDigestAuth</code> 方法来分别指定使用 Basic 或是 Digest 认证方式：</p>
+<p>你可以使用 <code>withBasicAuth</code> 和 <code>withDigestAuth</code> 方法来分别指定使用 Basic 或是 Digest 认证方式：</p>
 <pre><code><span class="comment token">// Basic 认证方式...</span>
-<span class="variable token">$response</span> = Http::withBasicAuth(<span class="string token">'taylor@laravel.com'</span>, <span class="string token">'secret'</span>)-&gt;post(...);
+<span class="variable token">$response</span> = Http::withBasicAuth(<span class="string token">'taylor@laravel.com'</span>, <span class="string token">'secret'</span>)-&gt;post(<span class="comment token">/* ... */</span>);
 
 <span class="comment token">// Digest 认证方式...</span>
-<span class="variable token">$response</span> = Http::withDigestAuth(<span class="string token">'taylor@laravel.com'</span>, <span class="string token">'secret'</span>)-&gt;post(...);
+<span class="variable token">$response</span> = Http::withDigestAuth(<span class="string token">'taylor@laravel.com'</span>, <span class="string token">'secret'</span>)-&gt;post(<span class="comment token">/* ... */</span>);
 </code></pre>
 <p><a name="bearer-tokens"></a></p>
 <h4 id="bearer-令牌">Bearer 令牌</h4>
-<p>如果你想要为你的请求快速添加 <code>Authorization</code> Token 令牌请求头，你可以使用 <code>withToken</code>  方法：</p>
-<pre><code><span class="variable token">$response</span> = Http::withToken(<span class="string token">'token'</span>)-&gt;post(...);
+<p>如果你想要为你的请求快速添加 <code>Authorization</code> Token 令牌请求头，你可以使用 <code>withToken</code> 方法：</p>
+<pre><code><span class="variable token">$response</span> = Http::withToken(<span class="string token">'token'</span>)-&gt;post(<span class="comment token">/* ... */</span>);
 </code></pre>
 <p><a name="timeout"></a></p>
 <h3 id="超时">超时</h3>
-<p>该 <code>timeout</code> 方法用于指定响应的最大等待秒数：</p>
-<pre><code><span class="variable token">$response</span> = Http::timeout(<span class="number token">3</span>)-&gt;get(...);
+<p>该 <code>timeout</code> 方法用于指定响应的最大等待秒数：</p>
+<pre><code><span class="variable token">$response</span> = Http::timeout(<span class="number token">3</span>)-&gt;get(<span class="comment token">/* ... */</span>);
 </code></pre>
-<p>如果响应时间超过了指定的超时时间，将会抛出 <code>Illuminate\Http\Client\ConnectionException</code> 异常。</p>
-<p>您可以尝试使用 <code>connectTimeout</code> 方法指定连接到服务器时等待的最大秒数：</p>
-<pre><code><span class="variable token">$response</span> = Http::connectTimeout(<span class="number token">3</span>)-&gt;get(...);
+<p>如果响应时间超过了指定的超时时间，将会抛出 <code>Illuminate\Http\Client\ConnectionException</code> 异常。</p>
+<p>你可以尝试使用 <code>connectTimeout</code> 方法指定连接到服务器时等待的最大秒数：</p>
+<pre><code><span class="variable token">$response</span> = Http::connectTimeout(<span class="number token">3</span>)-&gt;get(<span class="comment token">/* ... */</span>);
 </code></pre>
 <p><a name="retries"></a></p>
 <h3 id="重试">重试</h3>
-<p>如果你希望 HTTP 客户端在发生客户端或服务端错误时自动进行重试，你可以使用 <code>retry</code> 方法。该<code>retry</code> 方法接受两个参数：重新尝试次数以及重试间隔（毫秒）：</p>
-<pre><code><span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>)-&gt;post(...);
+<p>如果你希望 HTTP 客户端在发生客户端或服务端错误时自动进行重试，你可以使用 retry 方法。该 retry 方法接受两个参数：重新尝试次数以及重试间隔（毫秒）：</p>
+<pre><code><span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>)-&gt;post(<span class="comment token">/* ... */</span>);
 </code></pre>
-<p>如果需要，您可以将第三个参数传递给该 <code>retry</code> 方法。第三个参数应该是一个可调用的，用于确定是否应该实际尝试重试。例如，您可能希望仅在初始请求遇到以下情况时重试请求 <code>ConnectionException</code>：</p>
-<pre><code><span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>, <span class="keyword token">function</span> (<span class="variable token">$exception</span>) {
+<p>如果需要，你可以将第三个参数传递给该 <code>retry</code> 方法。第三个参数应该是一个可调用的，用于确定是否应该实际尝试重试。例如，你可能希望仅在初始请求遇到以下情况时重试请求 <code>ConnectionException</code>：</p>
+<pre><code><span class="keyword token">use</span> <span class="keyword token">Exception</span>;
+<span class="keyword token">use</span> Illuminate\Http\Client\PendingRequest;
+
+<span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>, <span class="keyword token">function</span> (<span class="keyword token">Exception</span> <span class="variable token">$exception</span>, PendingRequest <span class="variable token">$request</span>) {
     <span class="keyword token">return</span> <span class="variable token">$exception</span> instanceof ConnectionException;
-})-&gt;post(...);
+})-&gt;post(<span class="comment token">/* ... */</span>);
 </code></pre>
-<p>如果所有的请求都失败了， <code>Illuminate\Http\Client\RequestException</code> 异常将会被抛出。如果您想禁用此行为，您可以提供 <code>throw</code> 一个值为 <code>false</code> 的参数。禁用时，客户端收到的最后一个响应将在尝试所有重试后返回：</p>
-<pre><code><span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>, <span class="keyword token">throw</span>: <span class="keyword token">false</span>)-&gt;post(...);
+<p>如果请求失败，你可以在新请求之前更改请求。你可以通过修改 <code>retry</code> 方法的第三个请求参数来实现这一点。例如，当请求返回身份验证错误，则可以使用新的授权令牌重试请求：</p>
+<pre><code><span class="keyword token">use</span> <span class="keyword token">Exception</span>;
+<span class="keyword token">use</span> Illuminate\Http\Client\PendingRequest;
+
+<span class="variable token">$response</span> = Http::withToken(<span class="variable token">$this</span>-&gt;getToken())-&gt;retry(<span class="number token">2</span>, <span class="number token">0</span>, <span class="keyword token">function</span> (<span class="keyword token">Exception</span> <span class="variable token">$exception</span>, PendingRequest <span class="variable token">$request</span>) {
+    <span class="keyword token">if</span> (! <span class="variable token">$exception</span> instanceof RequestException || <span class="variable token">$exception</span>-&gt;response-&gt;status() !== <span class="number token">401</span>) {
+        <span class="keyword token">return</span> <span class="keyword token">false</span>;
+    }
+
+    <span class="variable token">$request</span>-&gt;withToken(<span class="variable token">$this</span>-&gt;getNewToken());
+
+    <span class="keyword token">return</span> <span class="keyword token">true</span>;
+})-&gt;post(<span class="comment token">/* ... */</span>);
 </code></pre>
+<p>所有请求都失败时，将会抛出一个<code>Illuminate\Http\Client\RequestException</code>实例。如果不想抛出错误，你需要设置请求方法的<code>throw</code>参数为<code>false</code>。禁止后，当所有的请求都尝试完成后，最后一个响应将会return回来：</p>
+<pre><code><span class="variable token">$response</span> = Http::retry(<span class="number token">3</span>, <span class="number token">100</span>, <span class="keyword token">throw</span>: <span class="keyword token">false</span>)-&gt;post(<span class="comment token">/* ... */</span>);
+</code></pre>
+<blockquote>
+<p><strong>注意</strong><br>如果所有的请求都因为连接问题失败， 即使 <code>throw</code>属性设置为<code>false</code>，<code>Illuminate\Http\Client\ConnectionException</code>错误依旧会被抛出。</p>
+</blockquote>
 <p><a name="error-handling"></a></p>
 <h3 id="错误处理">错误处理</h3>
-<p>跟 Guzzle 的默认行为不同，Laravel HTTP 客户端并不会在客户端或服务端错误时抛出异常（<code>400</code> 及 <code>500</code> 状态码）。你可以通过 <code>successful</code>、 <code>clientError</code> 或是 <code>serverError</code> 方法来判断是否发生错误：</p>
-<pre><code><span class="comment token">// 如果状态码在 200 - 300之间</span>
+<p>与 Guzzle 的默认处理方式不同，Laravel 的 HTTP 客户端在客户端或者服务端出现4xx或者5xx错误时并不会抛出错误。你应该通过<code>successful</code>、 <code>clientError</code>或 <code>serverError</code>方法来校验返回的响应是否有错误信息:</p>
+<pre><code><span class="comment token">// 判断状态码是否是 2xx</span>
 <span class="variable token">$response</span>-&gt;successful();
 
-<span class="comment token">// 如果状态码 大于 400...</span>
+<span class="comment token">// 判断错误码是否是 4xx或5xx</span>
 <span class="variable token">$response</span>-&gt;failed();
 
-<span class="comment token">// 如果状态码是 400 级别的错误...</span>
+<span class="comment token">// 判断错误码是4xx</span>
 <span class="variable token">$response</span>-&gt;clientError();
 
-<span class="comment token">// 如果状态码是 500 级别的错误...</span>
+<span class="comment token">// 判断错误码是5xx</span>
 <span class="variable token">$response</span>-&gt;serverError();
 
-<span class="comment token">// 如果出现客户端或服务器错误，请立即执行给定的回调...</span>
+<span class="comment token">// 如果出现客户端或服务器错误，则执行给定的回调</span>
 <span class="variable token">$response</span>-&gt;onError(callable <span class="variable token">$callback</span>);
 </code></pre>
 <p><a name="throwing-exceptions"></a></p>
-<h4 id="抛出异常">抛出异常</h4>
-<p>如果你希望请求在发生客户端或服务端错误时抛出 <code>Illuminate\Http\Client\RequestException</code> 异常，你可以在请求实例上调用 <code>throw</code> 或 <code>throwIf</code> 方法：</p>
-<pre><code><span class="variable token">$response</span> = Http::post(...);
+<h4 id="主动抛出错误">主动抛出错误</h4>
+<p>如果你想在收到的响应是客户端或者服务端错误时抛出一个<code>Illuminate\Http\Client\RequestException</code>实例，你可以使用<code>throw</code> 或 <code>throwIf</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Response;
 
-<span class="comment token">// 在客户端或服务端错误发生时抛出异常...</span>
+<span class="variable token">$response</span> = Http::post(<span class="comment token">/* ... */</span>);
+
+<span class="comment token">// 当收到服务端或客户端错误时抛出</span>
 <span class="variable token">$response</span>-&gt;<span class="keyword token">throw</span>();
 
-<span class="comment token">// 如果发生错误且给定条件为true，则引发异常...</span>
+<span class="comment token">// 当满足condition条件是抛出错误</span>
 <span class="variable token">$response</span>-&gt;throwIf(<span class="variable token">$condition</span>);
+
+<span class="comment token">// 当给定的闭包执行结果是true时抛出错误</span>
+<span class="variable token">$response</span>-&gt;throwIf(fn (Response <span class="variable token">$response</span>) =&gt; <span class="keyword token">true</span>);
+
+<span class="comment token">// 当给定条件是false是抛出错误</span>
+<span class="variable token">$response</span>-&gt;throwUnless(<span class="variable token">$condition</span>);
+
+<span class="comment token">// 当给定的闭包执行结果是false时抛出错误</span>
+<span class="variable token">$response</span>-&gt;throwUnless(fn (Response <span class="variable token">$response</span>) =&gt; <span class="keyword token">false</span>);
+
+<span class="comment token">// 当收到的状态码是403时抛出错误</span>
+<span class="variable token">$response</span>-&gt;throwIfStatus(<span class="number token">403</span>);
+
+<span class="comment token">// 当收到的状态码不是200时抛出错误</span>
+<span class="variable token">$response</span>-&gt;throwUnlessStatus(<span class="number token">200</span>);
 
 <span class="keyword token">return</span> <span class="variable token">$response</span>[<span class="string token">'user'</span>][<span class="string token">'id'</span>];
 </code></pre>
-<p>该 <code>Illuminate\Http\Client\RequestException</code> 实例拥有一个 <code>$response</code> 公共属性，该属性允许你检查返回的响应。</p>
-<p>如果没有发生错误， <code>throw</code> 该方法返回响应实例，允许您将其他操作链接到该 <code>throw</code> 方法：</p>
-<pre><code><span class="keyword token">return</span> Http::post(...)-&gt;<span class="keyword token">throw</span>()-&gt;json();
+<p><code>Illuminate\Http\Client\RequestException</code> 实例拥有一个  <code>$response</code> 公共属性，该属性允许你检查返回的响应。</p>
+<p>如果没有发生错误，<code>throw</code> 方法返回响应实例，你可以将其他操作链接到 <code>throw</code> 方法：</p>
+<pre><code><span class="keyword token">return</span> Http::post(<span class="comment token">/* ... */</span>)-&gt;<span class="keyword token">throw</span>()-&gt;json();
 </code></pre>
 <p>如果你希望在抛出异常前进行一些操作，你可以向 <code>throw</code> 方法传递一个闭包。异常将会在闭包执行完成后自动抛出，你不必在闭包内手动抛出异常：</p>
-<pre><code><span class="keyword token">return</span> Http::post(...)-&gt;<span class="keyword token">throw</span>(<span class="keyword token">function</span> (<span class="variable token">$response</span>, <span class="variable token">$e</span>) {
-    <span class="comment token">//</span>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Response;
+<span class="keyword token">use</span> Illuminate\Http\Client\RequestException;
+
+<span class="keyword token">return</span> Http::post(<span class="comment token">/* ... */</span>)-&gt;<span class="keyword token">throw</span>(<span class="keyword token">function</span> (Response <span class="variable token">$response</span>, RequestException <span class="variable token">$e</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;json();
+</code></pre>
+<p><a name="guzzle-middleware"></a></p>
+<h3 id="guzzle-中间件">Guzzle 中间件</h3>
+<p>由于 Laravel 的 HTTP 客户端是由 Guzzle 提供支持的, 你可以利用 <a href="https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html">Guzzle 中间件</a> 来操作发出的请求或检查传入的响应。要操作发出的请求，需要通过 <code>withMiddleware</code> 方法和 Guzzle 的 <code>mapRequest</code> 中间件工厂注册一个 Guzzle 中间件：</p>
+<pre><code><span class="keyword token">use</span> GuzzleHttp\Middleware;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Http;
+<span class="keyword token">use</span> Psr\Http\Message\RequestInterface;
+
+<span class="variable token">$response</span> = Http::withMiddleware(
+    Middleware::mapRequest(<span class="keyword token">function</span> (RequestInterface <span class="variable token">$request</span>) {
+        <span class="variable token">$request</span> = <span class="variable token">$request</span>-&gt;withHeader(<span class="string token">'X-Example'</span>, <span class="string token">'Value'</span>);
+        
+        <span class="keyword token">return</span> <span class="variable token">$request</span>;
+    })
+)-&gt;get(<span class="string token">'http://example.com'</span>);
+</code></pre>
+<p>同样地，你可以通过 <code>withMiddleware</code> 方法结合 Guzzle 的 <code>mapResponse</code> 中间件工厂注册一个中间件来检查传入的 HTTP 响应：</p>
+<pre><code><span class="keyword token">use</span> GuzzleHttp\Middleware;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Http;
+<span class="keyword token">use</span> Psr\Http\Message\ResponseInterface;
+
+<span class="variable token">$response</span> = Http::withMiddleware(
+    Middleware::mapResponse(<span class="keyword token">function</span> (ResponseInterface <span class="variable token">$response</span>) {
+        <span class="variable token">$header</span> = <span class="variable token">$response</span>-&gt;getHeader(<span class="string token">'X-Example'</span>);
+
+        <span class="comment token">// ...</span>
+        
+        <span class="keyword token">return</span> <span class="variable token">$response</span>;
+    })
+)-&gt;get(<span class="string token">'http://example.com'</span>);
 </code></pre>
 <p><a name="guzzle-options"></a></p>
 <h3 id="guzzle-选项">Guzzle 选项</h3>
-<p>你可以使用 <code>withOptions</code> 方法来指定额外的 <a href="http://docs.guzzlephp.org/en/stable/request-options.html">Guzzle 请求配置</a> 。该 <code>withOptions</code> 方法接受数组形式的键 / 值对：</p>
+<p>你可以使用 <code>withOptions</code> 方法来指定额外的 <a href="http://docs.guzzlephp.org/en/stable/request-options.html">Guzzle 请求配置</a>。<code>withOptions</code> 方法接受数组形式的键 / 值对：</p>
 <pre><code><span class="variable token">$response</span> = Http::withOptions([
     <span class="string token">'debug'</span> =&gt; <span class="keyword token">true</span>,
 ])-&gt;get(<span class="string token">'http://example.com/users'</span>);
 </code></pre>
 <p><a name="concurrent-requests"></a></p>
 <h2 id="并发请求">并发请求</h2>
-<p>有时，您可能希望同时发出多个 HTTP 请求。换句话说，您希望同时分派多个请求，而不是按顺序发出请求。当与慢速 HTTP API 交互时，这可以显着提高性能。</p>
-<p>值得庆幸的是，您可以使用该 <code>pool</code> 方法完成此操作。该 <code>pool</code> 方法接受一个接收 <code>Illuminate\Http\Client\Pool</code> 实例的闭包，允许您轻松地将请求添加到请求池以进行调度：</p>
+<p>有时，你可能希望同时发出多个 HTTP 请求。换句话说，你希望同时分派多个请求，而不是按顺序发出请求。当与慢速 HTTP API 交互时，这可以显着提高性能。</p>
+<p>值得庆幸的是，你可以使用该 <code>pool</code> 方法完成此操作。<code>pool</code> 方法接受一个接收 <code>Illuminate\Http\Client\Pool</code> 实例的闭包，能让你轻松地将请求添加到请求池以进行调度：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Pool;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
@@ -238,7 +336,7 @@
        <span class="variable token">$responses</span>[<span class="number token">1</span>]-&gt;ok() &amp;&amp;
        <span class="variable token">$responses</span>[<span class="number token">2</span>]-&gt;ok();
 </code></pre>
-<p>如您所见，可以根据添加到池中的顺序访问每个响应实例。如果您愿意，您可以使用该 <code>as</code> 方法命名请求，该方法允许您按名称访问相应的响应：</p>
+<p>如你所见，每个响应实例可以按照添加到池中的顺序来访问。你可以使用 <code>as</code> 方法命名请求，该方法能让你按名称访问相应的响应：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Pool;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
@@ -251,16 +349,14 @@
 <span class="keyword token">return</span> <span class="variable token">$responses</span>[<span class="string token">'first'</span>]-&gt;ok();
 </code></pre>
 <p><a name="macros"></a></p>
-<h2 id="macros">Macros</h2>
-<p>Laravel HTTP 客户端允许您定义「macros」，它可以作为一种流畅的、富有表现力的机制，在与整个应用程序中的服务交互时配置常见的请求路径和标头。首先，您可以在应用程序的 <code>App\Providers\AppServiceProvider</code> 类的 <code>boot</code> 方法中定义 <code>macro</code> ：</p>
-<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Http;
+<h2 id="宏">宏</h2>
+<p>Laravel HTTP客户端允许你定义「宏」（macros），这可以作为一种流畅、表达力强的机制，在与应用程序中的服务交互时配置常见的请求路径和标头。要开始使用，你可以在应用程序的 <code>App\Providers\AppServiceProvider</code> 类的 <code>boot</code> 方法中定义宏：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
 <span class="comment token">/**
- * 引导任何应用程序服务。
- *
- *<span class="phpdoc token"> @return</span> void
+ * 引导应用程序服务。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Http::macro(<span class="string token">'github'</span>, <span class="keyword token">function</span> () {
         <span class="keyword token">return</span> Http::withHeaders([
@@ -269,79 +365,96 @@
     });
 }
 </code></pre>
-<p>配置好宏后，您可以从应用程序中的任何位置调用它，以创建具有指定配置的待处理请求：</p>
-<pre><code class="language-php"><span class="variable token">$response</span> = Http::github()-&gt;get(<span class="string token">'/'</span>);
+<p>一旦你配置了宏，你可以在应用程序的任何地方调用它，以使用指定的配置创建一个挂起的请求：</p>
+<pre><code><span class="variable token">$response</span> = Http::github()-&gt;get(<span class="string token">'/'</span>);
 </code></pre>
 <p><a name="testing"></a></p>
 <h2 id="测试">测试</h2>
-<p>许多 Laravel 服务都提供了帮助您轻松且富有表现力地编写测试的功能，Laravel 的 HTTP 包装器也不例外。 <code>Http</code> 门面的 <code>fake</code> 方法允许您指示 HTTP 客户端在发出请求时返回存根/虚拟响应。</p>
+<p>许多 Laravel 服务提供功能来帮助你轻松、表达性地编写测试，而 Laravel 的 HTTP 客户端也不例外。<code>Http</code> 门面的 <code>fake</code> 方法允许你指示 HTTP 客户端在发出请求时返回存根/虚拟响应。</p>
 <p><a name="faking-responses"></a></p>
 <h3 id="伪造响应">伪造响应</h3>
-<p>例如，要指示HTTP客户端为每个请求返回空的<code>200</code>状态码响应，您可以调用不带参数的<code>fake</code>方法：</p>
+<p>例如，要指示 HTTP 客户端在每个请求中返回空的 <code>200</code> 状态码响应，你可以调用 <code>fake</code> 方法而不传递参数：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
 Http::fake();
 
-<span class="variable token">$response</span> = Http::post(...);
+<span class="variable token">$response</span> = Http::post(<span class="comment token">/* ... */</span>);
 </code></pre>
 <p><a name="faking-specific-urls"></a></p>
-<h4 id="伪造特定url">伪造特定URL</h4>
-<p>或者，您也可以将数组传递给<code>fake</code>方法。
-数组的键应该表示您希望伪造的URL模式及其相关响应。
-字符<code>*‘可以用作通配符。 对未被伪造的URL发出的任何请求都将实际执行。 您可以使用</code>Http<code>外观的</code>response`方法为这些端点构造存根/假响应：</p>
+<h4 id="伪造特定的url">伪造特定的URL</h4>
+<p>另外，你可以向 <code>fake</code> 方法传递一个数组。该数组的键应该代表你想要伪造的 URL 模式及其关联的响应。<code>*</code> 字符可以用作通配符。任何请求到未伪造的 URL 的请求将会被实际执行。你可以使用 <code>Http</code> 门面的 <code>response</code> 方法来构建这些端点的存根/虚拟响应：</p>
 <pre><code>Http::fake([
-    <span class="comment token">// 为 GitHub 端点存根 JSON 响应...</span>
+    <span class="comment token">// 为 GitHub 端点存根一个 JSON 响应...</span>
     <span class="string token">'github.com/*'</span> =&gt; Http::response([<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>], <span class="number token">200</span>, <span class="variable token">$headers</span>),
 
-    <span class="comment token">// 为 Google 端点存根字符串响应...</span>
+    <span class="comment token">// 为 Google 端点存根一个字符串响应...</span>
     <span class="string token">'google.com/*'</span> =&gt; Http::response(<span class="string token">'Hello World'</span>, <span class="number token">200</span>, <span class="variable token">$headers</span>),
 ]);
 </code></pre>
 <p>如果你想指定一个后备 URL 模式来存根所有不匹配的 URL，你可以使用单个 <code>*</code> 字符：</p>
 <pre><code>Http::fake([
-    <span class="comment token">// 为 GitHub 端点存根 JSON 响应...</span>
+    <span class="comment token">// 为 GitHub 端点存根 JSON 响应……</span>
     <span class="string token">'github.com/*'</span> =&gt; Http::response([<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>], <span class="number token">200</span>, [<span class="string token">'Headers'</span>]),
 
-    <span class="comment token">// 为所有其他端点存根字符串响应...</span>
+    <span class="comment token">// 为其他所有端点存根字符串响应……</span>
     <span class="string token">'*'</span> =&gt; Http::response(<span class="string token">'Hello World'</span>, <span class="number token">200</span>, [<span class="string token">'Headers'</span>]),
 ]);
 </code></pre>
 <p><a name="faking-response-sequences"></a></p>
 <h4 id="伪造响应序列">伪造响应序列</h4>
-<p>有时您可能需要指定单个 URL 应按特定顺序返回一系列虚假响应。您可以使用 <code>Http::sequence</code> 方法来构建响应来完成此操作：</p>
+<p>有时候，你可能需要为单个 URL 指定其一系列的伪造响应的返回顺序。你可以使用 <code>Http::sequence</code> 方法来构建响应，以实现这个功能：</p>
 <pre><code>Http::fake([
-    <span class="comment token">// 为 GitHub 端点存根一系列响应...</span>
+    <span class="comment token">// 存根 GitHub端点的一系列响应……</span>
     <span class="string token">'github.com/*'</span> =&gt; Http::sequence()
                             -&gt;push(<span class="string token">'Hello World'</span>, <span class="number token">200</span>)
                             -&gt;push([<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>], <span class="number token">200</span>)
                             -&gt;pushStatus(<span class="number token">404</span>),
 ]);
 </code></pre>
-<p>当一个响应序列中的所有响应都被消费完后，任何进一步的请求都会导致响应序列抛出异常。如果您想指定在序列为空时应返回的默认响应，您可以使用 <code>whenEmpty</code> 方法：</p>
+<p>当响应序列中的所有响应都被消费完后，后续的任何请求都将导致相应序列抛出一个异常。如果你想要在响应序列为空时指定一个默认的响应，则可以使用 <code>whenEmpty</code> 方法：</p>
 <pre><code>Http::fake([
-    <span class="comment token">// 为 GitHub 端点存根一系列响应...</span>
+    <span class="comment token">// 为 GitHub 端点存根一系列响应</span>
     <span class="string token">'github.com/*'</span> =&gt; Http::sequence()
                             -&gt;push(<span class="string token">'Hello World'</span>, <span class="number token">200</span>)
                             -&gt;push([<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>], <span class="number token">200</span>)
                             -&gt;whenEmpty(Http::response()),
 ]);
 </code></pre>
-<p>如果您想伪造一系列响应，但不需要指定应该伪造的特定 URL 模式，您可以使用 <code>Http::fakeSequence</code> 方法：</p>
+<p>如果你想要伪造一个响应序列，但你又期望在伪造的时候无需指定一个特定的 URL 匹配模式，那么你可以使用 <code>Http::fakeSequence</code> 方法：</p>
 <pre><code>Http::fakeSequence()
         -&gt;push('Hello World', 200)
         -&gt;whenEmpty(Http::response());
 </code></pre>
 <p><a name="fake-callback"></a></p>
 <h4 id="fake-回调">Fake 回调</h4>
-<p>如果您需要更复杂的逻辑来确定为某些端点返回什么响应，您可以将闭包传递给 <code>fake</code> 方法。 这个闭包将接收一个 <code>Illuminate\Http\Client\Request</code> 的实例并且应该返回一个响应实例。 在您的闭包中，您可以执行任何必要的逻辑来确定要返回的响应类型：</p>
-<pre><code>Http::fake(<span class="keyword token">function</span> (<span class="variable token">$request</span>) {
+<p>如果你需要更为复杂的逻辑来确定某些端点返回什么响应，你需要传递一个闭包给 <code>fake</code> 方法。这个闭包应该接受一个 <code>Illuminate\Http\Client\Request</code> 实例且返回一个响应实例。在闭包中你可以执行任何必要的逻辑来确定要返回的响应类型：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Request;
+
+Http::fake(<span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
     <span class="keyword token">return</span> Http::response(<span class="string token">'Hello World'</span>, <span class="number token">200</span>);
 });
 </code></pre>
+<p><a name="preventing-stray-requests"></a></p>
+<h3 id="避免「流浪的」请求（确保请求总是伪造的）">避免「流浪的」请求（确保请求总是伪造的）</h3>
+<p>如果你想确保通过 HTTP 客户端发送的所有请求在整个单独的测试或完整的测试套件中都是伪造的，那么你可以调用 <code>preventStrayRequests</code> 方法。在调用该方法后，如果一个请求没有与之相匹配的伪造的响应，则将会抛出一个异常而不是发起一个真实的请求：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Http;
+
+Http::preventStrayRequests();
+
+Http::fake([
+    <span class="string token">'github.com/*'</span> =&gt; Http::response(<span class="string token">'ok'</span>),
+]);
+
+<span class="comment token">// 将会返回 OK 响应……</span>
+Http::get(<span class="string token">'https://github.com/laravel/framework'</span>);
+
+<span class="comment token">// 抛出一个异常……</span>
+Http::get(<span class="string token">'https://laravel.com'</span>);
+</code></pre>
 <p><a name="inspecting-requests"></a></p>
 <h3 id="检查请求">检查请求</h3>
-<p>在伪造响应时，您可能偶尔希望检查客户端收到的请求，以确保您的应用程序正在发送正确的数据或标头。您可以在调用 <code>Http::fake</code> 后调用 <code>Http::assertSent</code> 方法来完成此操作。</p>
-<p><code>assertSent</code> 方法接受一个闭包，该闭包将接收一个 <code>Illuminate\Http\Client\Request</code> 实例，并应返回一个布尔值，指示请求是否符合您的期望。为了使测试通过，必须至少发出一个符合给定期望的请求：</p>
+<p>在伪造响应时，你可能希望检查客户端收到的请求，以确保你的应用程序发出了正确的数据和标头。你可以在调用 <code>Http::fake</code> 方法后调用 <code>Http::assertSent</code> 方法来实现这个功能。</p>
+<p><code>assertSent</code> 方法接受一个闭包，该闭包应当接收一个 <code>Illuminate\Http\Client\Request</code> 实例且返回一个布尔值，该布尔值指示请求是否符合预期。为了使得测试通过，必须至少发出一个符合给定预期的请求：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
@@ -361,7 +474,7 @@ Http::assertSent(<span class="keyword token">function</span> (Request <span clas
            <span class="variable token">$request</span>[<span class="string token">'role'</span>] == <span class="string token">'Developer'</span>;
 });
 </code></pre>
-<p>如果需要，您可以使用 <code>assertNotSent</code> 方法断言未发送特定请求：</p>
+<p>如果有需要，你可以使用 <code>assertNotSent</code> 方法来断言未发出指定的请求：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Http;
 
@@ -376,20 +489,52 @@ Http::assertNotSent(<span class="keyword token">function</span> (Request <span c
     <span class="keyword token">return</span> <span class="variable token">$request</span>-&gt;url() === <span class="string token">'http://example.com/posts'</span>;
 });
 </code></pre>
-<p>您可以使用 <code>assertSentCount</code> 方法来断言在测试期间“发送”了多少请求：</p>
+<p>你可以使用 <code>assertSentCount</code> 方法来断言在测试过程中发出的请求数量：</p>
 <pre><code>Http::fake();
 
 Http::assertSentCount(5);
 </code></pre>
-<p>或者，您可以使用 <code>assertNothingSent</code> 方法断言在测试期间没有发送任何请求：</p>
+<p>或者，你也可以使用 <code>assertNothingSent</code> 方法来断言在测试过程中没有发出任何请求：</p>
 <pre><code>Http::fake();
 
 Http::assertNothingSent();
 </code></pre>
+<p><a name="recording-requests-and-responses"></a></p>
+<h4 id="记录请求和响应">记录请求和响应</h4>
+<p>你可以使用 <code>recorded</code> 方法来收集所有的请求及其对应的响应。<code>recorded</code> 方法返回一个数组集合，其中包含了 <code>Illuminate\Http\Client\Request</code> 实例和 <code>Illuminate\Http\Client\Response</code> 实例：</p>
+<pre><code>Http::fake([
+    <span class="string token">'https://laravel.com'</span> =&gt; Http::response(status: <span class="number token">500</span>),
+    <span class="string token">'https://nova.laravel.com/'</span> =&gt; Http::response(),
+]);
+
+Http::get(<span class="string token">'https://laravel.com'</span>);
+Http::get(<span class="string token">'https://nova.laravel.com/'</span>);
+
+<span class="variable token">$recorded</span> = Http::recorded();
+
+[<span class="variable token">$request</span>, <span class="variable token">$response</span>] = <span class="variable token">$recorded</span>[<span class="number token">0</span>];
+</code></pre>
+<p>此外，<code>recorded</code> 函数也接受一个闭包，该闭包接受一个 <code>Illuminate\Http\Client\Request</code> 和 <code>Illuminate\Http\Client\Response</code> 实例，该闭包可以用来按照你的期望来过滤请求和响应：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Http\Client\Request;
+<span class="keyword token">use</span> Illuminate\Http\Client\Response;
+
+Http::fake([
+    <span class="string token">'https://laravel.com'</span> =&gt; Http::response(status: <span class="number token">500</span>),
+    <span class="string token">'https://nova.laravel.com/'</span> =&gt; Http::response(),
+]);
+
+Http::get(<span class="string token">'https://laravel.com'</span>);
+Http::get(<span class="string token">'https://nova.laravel.com/'</span>);
+
+<span class="variable token">$recorded</span> = Http::recorded(<span class="keyword token">function</span> (Request <span class="variable token">$request</span>, Response <span class="variable token">$response</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$request</span>-&gt;url() !== <span class="string token">'https://laravel.com'</span> &amp;&amp;
+           <span class="variable token">$response</span>-&gt;successful();
+});
+</code></pre>
 <p><a name="events"></a></p>
 <h2 id="事件">事件</h2>
-<p>Laravel 在发送 HTTP 请求的过程中会触发三个事件。 <code>RequestSending</code> 事件在发送请求之前触发，而 <code>ResponseReceived</code> 事件在收到给定请求的响应后触发。 如果没有收到给定请求的响应，则会触发 <code>ConnectionFailed</code> 事件。</p>
-<p><code>RequestSending</code> 和 <code>ConnectionFailed</code> 事件都包含一个公共的 <code>$request</code> 属性，您可以使用它来检查 <code>Illuminate\Http\Client\Request</code> 实例。 同样，<code>ResponseReceived</code>事件包含一个<code>$request</code>属性以及一个<code>$response</code>属性，可用于检查<code>Illuminate\Http\Client\Response</code>实例。 你可以在你的 App\Providers\EventServiceProvider 服务提供者中为这个事件注册事件监听器：</p>
+<p>Laravel 在发出 HTTP 请求的过程中将会触发三个事件。在发送请求前将会触发 <code>RequestSending</code> 事件，在接收到了指定请求对应的响应时将会触发 <code>ResponseReceived</code> 事件。如果没有收到指定请求对应的响应则会触发 <code>ConnectionFailed</code> 事件。</p>
+<p><code>RequestSending</code> 和 <code>ConnectionFailed</code> 事件都包含一个公共的 <code>$request</code> 属性，你可以使用它来检查 <code>Illuminate\Http\Client\Request</code> 实例。 同样，<code>ResponseReceived</code> 事件包含一个 <code>$request</code> 属性以及一个 <code>$response</code> 属性，可用于检查 <code>Illuminate\Http\Client\Response</code> 实例。 你可以在你的 <code>App\Providers\EventServiceProvider</code> 服务提供者中为这个事件注册事件监听器：</p>
 <pre><code><span class="comment token">/**
  * 应用程序的事件侦听器映射。
  *
