@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -25,37 +25,20 @@
 <li><a href="#facade-spies">Facade Spies</a></li>
 </ul>
 </li>
-<li><a href="#bus-fake">任务模拟</a><ul>
-<li><a href="#bus-job-chains">任务链</a></li>
-<li><a href="#job-batches">批量任务</a></li>
-</ul>
-</li>
-<li><a href="#event-fake">事件模拟</a><ul>
-<li><a href="#scoped-event-fakes">Scoped 事件模拟</a></li>
-</ul>
-</li>
-<li><a href="#http-fake">HTTP 模拟</a></li>
-<li><a href="#mail-fake">邮件模拟</a></li>
-<li><a href="#notification-fake">通知模拟</a></li>
-<li><a href="#queue-fake">队列模拟</a><ul>
-<li><a href="#job-chains">任务链</a></li>
-</ul>
-</li>
-<li><a href="#storage-fake">存储模拟</a></li>
-<li><a href="#interacting-with-time">时间交互</a></li>
+<li><a href="#interacting-with-time">设置时间</a></li>
 </ul>
 <p><a name="introduction"></a></p>
-<h2 id="简介">简介</h2>
+<h2 id="介绍">介绍</h2>
 <p>在 Laravel 应用程序测试中，你可能希望「模拟」应用程序的某些功能的行为，从而避免该部分在测试中真正执行。例如：在控制器执行过程中会触发事件，您可能希望模拟事件监听器，从而避免该事件在测试时真正执行。这允许你在仅测试控制器 HTTP 响应的情况时，而不必担心触发事件，因为事件侦听器可以在它们自己的测试用例中进行测试。</p>
-<p>Laravel 针对事件、任务和 Facades 的模拟，提供了开箱即用的辅助函数。这些函数基于 Mocker 封装而成，使用非常方便，无需手动调用复杂的 Mockery 函数。</p>
+<p>Laravel 针对事件、任务和 Facades 的模拟，提供了开箱即用的辅助函数。这些函数基于 <code>Mockery</code> 封装而成，使用非常方便，无需手动调用复杂的 <code>Mockery</code> 函数。</p>
 <p><a name="mocking-objects"></a></p>
 <h2 id="模拟对象">模拟对象</h2>
-<p>当模拟一个对象将通过 Laravel 的 <a href="container.html">服务容器</a> 注入到应用中时，你将需要将模拟实例作为 <code>instance</code> 绑定到容器中。这将告诉容器使用对象的模拟实例，而不是构造对象的真身：</p>
+<p>当模拟一个对象将通过 Laravel 的 <a href="/docs/laravel/10.x/container">服务容器</a> 注入到应用中时，你将需要将模拟实例作为 <code>instance</code> 绑定到容器中。这将告诉容器使用对象的模拟实例，而不是构造对象的本身：</p>
 <pre><code><span class="keyword token">use</span> App\Service;
 <span class="keyword token">use</span> Mockery;
 <span class="keyword token">use</span> Mockery\MockInterface;
 
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_something_can_be_mocked()
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_something_can_be_mocked(): void
 {
     <span class="variable token">$this</span>-&gt;instance(
         Service::<span class="keyword token">class</span>,
@@ -65,7 +48,7 @@
     );
 }
 </code></pre>
-<p>为了让以上过程更加便捷，你可以使用 Laravel 的基本测试用例类提供 <code>mock</code> 方法：</p>
+<p>为了让以上过程更便捷，你可以使用 Laravel 的基本测试用例类提供的 <code>mock</code> 方法。例如，下面的例子跟上面的例子的执行效果是一样的：</p>
 <pre><code><span class="keyword token">use</span> App\Service;
 <span class="keyword token">use</span> Mockery\MockInterface;
 
@@ -81,7 +64,7 @@
     <span class="variable token">$mock</span>-&gt;shouldReceive(<span class="string token">'process'</span>)-&gt;once();
 });
 </code></pre>
-<p>同样，如果你想侦查一个对象，Laravel 的基本测试用例类提供了一个便捷的 <a href="http://docs.mockery.io/en/latest/reference/spies.html">spy</a> 方法作为 <code>Mockery::spy</code> 的替代方法,但是，spy会记录spy与被测试代码之间的任何交互，从而允许您在执行代码后做出断言：</p>
+<p>同样，如果你想 <a href="http://docs.mockery.io/en/latest/reference/spies.html">监控</a> 一个对象，Laravel 的基本测试用例类提供了一个便捷的 <code>spy</code> 方法作为 <code>Mockery::spy</code> 的替代方法。<code>spies</code> 与模拟类似。但是，<code>spies</code> 会记录 <code>spy</code> 与被测试代码之间的所有交互，从而允许您在执行代码后做出断言：</p>
 <pre><code><span class="keyword token">use</span> App\Service;
 
 <span class="variable token">$spy</span> = <span class="variable token">$this</span>-&gt;spy(Service::<span class="keyword token">class</span>);
@@ -91,8 +74,8 @@
 <span class="variable token">$spy</span>-&gt;shouldHaveReceived(<span class="string token">'process'</span>);
 </code></pre>
 <p><a name="mocking-facades"></a></p>
-<h2 id="facades模拟">Facades模拟</h2>
-<p>与传统静态方法调用不同的是，<a href="facades.html">facades</a> (including <a href="facades.html#real-time-facades">real-time facades</a>) 也可以被模拟。相较传统的静态方法而言，它具有很大的优势，即便你使用依赖注入，可测试性不逊半分。在测试中，你可能想在控制器中模拟对 Laravel Facade 的调用。比如下面控制器中的行为：</p>
+<h2 id="facades-模拟">Facades 模拟</h2>
+<p>与传统静态方法调用不同的是，<a href="/docs/laravel/10.x/facades">facades</a> (包含的 <a href="/docs/laravel/10.x/facades#real-time-facades">real-time facades</a>) 也可以被模拟。相较传统的静态方法而言，它具有很大的优势，同时提供了与传统依赖注入相同的可测试性。在测试中，你可能想在控制器中模拟对 Laravel Facade 的调用。比如下面控制器中的行为：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
@@ -102,31 +85,29 @@
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 显示该应用程序的所有用户的列表.
-     *
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 显示该应用程序的所有用户的列表。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> index()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> index(): <span class="keyword token">array</span>
     {
         <span class="variable token">$value</span> = Cache::get(<span class="string token">'key'</span>);
 
-        <span class="comment token">//</span>
+        <span class="keyword token">return</span> [
+            <span class="comment token">// ...</span>
+        ];
     }
 }
 </code></pre>
-<p>我们可以使用 <code>shouldReceive</code> 方法模拟对 <code>Cache</code> Facade 的调用，该方法将返回一个 <a href="https://github.com/padraic/mockery">Mockery</a> 模拟的实例。由于 Facades 实际上是由 Laravel <a href="container.html">服务容器</a> 解析和管理的，因此它们比传统的静态类具有更好的可测试性。例如，让我们模拟对 <code>Cache</code> Facade 的 <code>get</code> 方法的调用：</p>
+<p>我们可以使用 <code>shouldReceive</code> 方法模拟对 <code>Cache</code> Facade 的调用，该方法将返回一个 <a href="https://github.com/padraic/mockery">Mockery</a> 模拟的实例。由于 Facades 实际上是由 Laravel <a href="/docs/laravel/10.x/container">服务容器</a> 解析和管理的，因此它们比传统的静态类具有更好的可测试性。例如，让我们模拟对 <code>Cache</code> Facade 的 <code>get</code> 方法的调用：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Tests\Feature;
 
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Cache;
 <span class="keyword token">use</span> Tests\TestCase;
 
 <span class="keyword token">class</span> UserControllerTest <span class="keyword token">extends</span> TestCase
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> testGetIndex()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_get_index(): void
     {
         Cache::shouldReceive(<span class="string token">'get'</span>)
                     -&gt;once()
@@ -140,14 +121,15 @@
 }
 </code></pre>
 <blockquote>
-<p>注意：你不应该模拟 <code>Request</code> facade。相反，在运行测试时将您想要的输入传递到 <a href="http-tests.html">HTTP 测试方法</a> 中，例如 <code>get</code> 和 <code>post</code>。同样，不要模拟 <code>Config</code> facade，而是在测试中调用 <code>Config::set</code> 方法。</p>
+<p><strong>注意</strong>
+你不应该模拟 <code>Request</code> facade。相反，在运行测试时将你想要的输入传递到 <a href="/docs/laravel/10.x/http-tests">HTTP 测试方法</a> 中，例如 <code>get</code> 和 <code>post</code> 方法。同样也不要模拟 <code>Config</code> facade，而是在测试中调用 <code>Config::set</code> 方法。</p>
 </blockquote>
 <p><a name="facade-spies"></a></p>
 <h3 id="facade-spies">Facade Spies</h3>
-<p>如果你想 <a href="http://docs.mockery.io/en/latest/reference/spies.html">spy</a> 一个 facade，你可以在相应的 facade 上调用 <code>spy</code> 方法。spy 类似于模拟；但是，spy 记录 spy 和被测试代码之间的所有交互，允许你在代码执行后做出断言：</p>
+<p>如果你想 <a href="http://docs.mockery.io/en/latest/reference/spies.html">监控</a> 一个 facade，你可以在相应的 facade 上调用 <code>spy</code> 方法。<code>spies</code> 类似于 <code>mocks</code>；但是，<code>spies</code> 会记录 <code>spy</code> 和被测试代码之间的所有交互，允许你在代码执行后做出断言：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Cache;
 
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_values_are_be_stored_in_cache()
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_values_are_be_stored_in_cache(): void
 {
     Cache::spy();
 
@@ -158,411 +140,14 @@
     Cache::shouldHaveReceived(<span class="string token">'put'</span>)-&gt;once()-&gt;with(<span class="string token">'name'</span>, <span class="string token">'Taylor'</span>, <span class="number token">10</span>);
 }
 </code></pre>
-<p><a name="bus-fake"></a></p>
-<h2 id="bus-fake">Bus Fake</h2>
-<p>在测试分发任务的代码时，您通常希望断言已分发给定任务，但实际不进入队列或执行任务。这是因为任务的执行通常可以在单独的测试类中进行测试。</p>
-<p>您可以使用 <code>Bus</code> facade 的 <code>fake</code> 方法来防止将任务分发到队列。然后，在执行测试代码后，您可以使用 <code>assertDispatched</code> 和 <code>assertNotDispatched</code> 方法检查应用试图分发的任务：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Jobs\ShipOrder;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Bus;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_shipped()
-    {
-        Bus::fake();
-
-        <span class="comment token">// 执行订单发货……</span>
-
-        <span class="comment token">// 断言任务被分发……</span>
-        Bus::assertDispatched(ShipOrder::<span class="keyword token">class</span>);
-
-        <span class="comment token">// 断言任务没有被分发</span>
-        Bus::assertNotDispatched(AnotherJob::<span class="keyword token">class</span>);
-    }
-}
-</code></pre>
-<p>您可以将闭包传递给 <code>assertDispatched</code> 或 <code>assertNotDispatched</code> 方法，以断言已分发的任务通过了给定的「真实性测试」。如果至少分发了一个通过给定真实性测试的任务，则断言将成功。例如，您可能希望声明已为特定订单分发任务：</p>
-<pre><code>Bus::assertDispatched(<span class="keyword token">function</span> (ShipOrder <span class="variable token">$job</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$job</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-});
-</code></pre>
-<p><a name="bus-job-chains"></a></p>
-<h3 id="任务链">任务链</h3>
-<p><code>Bus</code> facade 的 <code>assertChained</code> 方法可用于断言 <a href="queues.html#job-chaining">任务链</a> 已被调度。 <code>assertChained</code> 方法接受一个链式任务数组作为它的第一个参数：</p>
-<pre><code><span class="keyword token">use</span> App\Jobs\RecordShipment;
-<span class="keyword token">use</span> App\Jobs\ShipOrder;
-<span class="keyword token">use</span> App\Jobs\UpdateInventory;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Bus;
-
-Bus::assertChained([
-    ShipOrder::<span class="keyword token">class</span>,
-    RecordShipment::<span class="keyword token">class</span>,
-    UpdateInventory::<span class="keyword token">class</span>
-]);
-</code></pre>
-<p>如上例所示，链式任务的数组可是任务类名的数组。但是，您也可以提供实际任务实例的数组。执行此操作时，Laravel 将确保任务实例属于同一类，并且具有与应用分发的任务链相同的属性值：</p>
-<pre><code>Bus::assertChained([
-    <span class="keyword token">new</span> ShipOrder,
-    <span class="keyword token">new</span> RecordShipment,
-    <span class="keyword token">new</span> UpdateInventory,
-]);
-</code></pre>
-<p><a name="job-batches"></a></p>
-<h3 id="任务批处理">任务批处理</h3>
-<p><code>Bus</code> facade 的 <code>assertBatched</code> 方法可以用来断言 <a href="queues.html#job-batches">批量任务</a> 被分发。提供给 <code>assertBatched</code> 方法的闭包接收一个 <code>Illuminate\Bus\PendingBatch</code> 的实例，它可用于检查批处理中的任务：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Bus\PendingBatch;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Bus;
-
-Bus::assertBatched(<span class="keyword token">function</span> (PendingBatch <span class="variable token">$batch</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$batch</span>-&gt;name == <span class="string token">'import-csv'</span> &amp;&amp;
-           <span class="variable token">$batch</span>-&gt;jobs-&gt;count() === <span class="number token">10</span>;
-});
-</code></pre>
-<p><a name="event-fake"></a></p>
-<h2 id="事件模拟">事件模拟</h2>
-<p>在测试分发事件的代码时，您可能希望指示 Laravel 不要执行事件的监听器。 使用 <code>Event</code> facade 的 <code>fake</code> 方法可以阻止监听器执行，执行测试代码后使用 <code>assertDispatched</code> 、<code>assertNotDispatched</code> 和 <code>assertNothingDispatched</code> 方法断言应用分发了哪些事件：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Events\OrderFailedToShip;
-<span class="keyword token">use</span> App\Events\OrderShipped;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="comment token">/**
-     * 测试订单发货
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_shipped()
-    {
-        Event::fake();
-
-        <span class="comment token">// 指定订单发货……</span>
-
-        <span class="comment token">// 断言事件被分发……</span>
-        Event::assertDispatched(OrderShipped::<span class="keyword token">class</span>);
-
-        <span class="comment token">// 断言事件被分发了两次……</span>
-        Event::assertDispatched(OrderShipped::<span class="keyword token">class</span>, <span class="number token">2</span>);
-
-        <span class="comment token">// 断言事件未被分发……</span>
-        Event::assertNotDispatched(OrderFailedToShip::<span class="keyword token">class</span>);
-
-        <span class="comment token">// 断言没有任务事件被分发……</span>
-        Event::assertNothingDispatched();
-    }
-}
-</code></pre>
-<p>您可以将闭包传递给 <code>assertDispatched</code> 或 <code>assertNotDispatched</code> 方法，以断言已分发的事件通过了给定的「真实性测试」。如果至少分发了一个通过给定真实性测试的事件，则断言将成功</p>
-<pre><code>Event::assertDispatched(<span class="keyword token">function</span> (OrderShipped <span class="variable token">$event</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$event</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-});
-</code></pre>
-<blockquote>
-<p>注意：调用 <code>Event::fake()</code> 后不会执行事件监听器。所以，如果你的测试用到了依赖于事件的模型工厂，例如，在模型的 <code>creating</code> 事件中创建 UUID ，那么你应该在使用模型工厂   <strong>之后</strong> 调用 <code>Event::fake()</code>。</p>
-</blockquote>
-<p><a name="faking-a-subset-of-events"></a></p>
-<h4 id="模拟事件的子集">模拟事件的子集</h4>
-<p>如果你只想为特定的一组事件模拟事件监听器，你可以将它们传递给 <code>fake</code> 或 <code>fakeFor</code> 方法：</p>
-<pre><code><span class="comment token">/**
- * 测试订单流程。
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_processed()
-{
-    Event::fake([
-        OrderCreated::<span class="keyword token">class</span>,
-    ]);
-
-    <span class="variable token">$order</span> = Order::factory()-&gt;create();
-
-    Event::assertDispatched(OrderCreated::<span class="keyword token">class</span>);
-
-    <span class="comment token">// 其他事件照常分发……</span>
-    <span class="variable token">$order</span>-&gt;update([...]);
-}
-</code></pre>
-<p><a name="scoped-event-fakes"></a></p>
-<h3 id="scoped-事件模拟">Scoped 事件模拟</h3>
-<p>如果你只想为部分测试模拟事件监听，则可以使用 <code>fakeFor</code> 方法：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Events\OrderCreated;
-<span class="keyword token">use</span> App\Models\Order;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="comment token">/**
-     * 测试订单流程。
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_processed()
-    {
-        <span class="variable token">$order</span> = Event::fakeFor(<span class="keyword token">function</span> () {
-            <span class="variable token">$order</span> = Order::factory()-&gt;create();
-
-            Event::assertDispatched(OrderCreated::<span class="keyword token">class</span>);
-
-            <span class="keyword token">return</span> <span class="variable token">$order</span>;
-        });
-
-        <span class="comment token">// 事件照常分发，且观察者将运行 ...</span>
-        <span class="variable token">$order</span>-&gt;update([...]);
-    }
-}
-</code></pre>
-<p><a name="http-fake"></a></p>
-<h2 id="http-模拟">HTTP 模拟</h2>
-<p><code>Http</code> facade 的 <code>fake</code> 方法允许您指示 HTTP 客户端在发出请求时返回虚拟响应。有关伪造发出 HTTP 请求的更多信息，请参阅 <a href="http-client.html#testing">HTTP客户端测试文档</a>。</p>
-<p><a name="mail-fake"></a></p>
-<h2 id="邮件模拟">邮件模拟</h2>
-<p>您可以使用 <code>Mail</code> facade 的 <code>fake</code> 方法阻止邮件发送。通常，发送邮件与实际测试的代码无关。一般只要断言发送了给定的邮件就足够了。</p>
-<p>调用 <code>Mail</code> facade 的 <code>fake</code> 方法后，您可以断言 <a href="Mail.html">mailables</a> 被指示发送给用户，甚至检查 mailables 收到的数据：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Mail\OrderShipped;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Mail;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_shipped()
-    {
-        Mail::fake();
-
-        <span class="comment token">// 执行订单发货……</span>
-
-        <span class="comment token">// 断言没有发送任何邮件……</span>
-        Mail::assertNothingSent();
-
-        <span class="comment token">// 断言发送了邮件……</span>
-        Mail::assertSent(OrderShipped::<span class="keyword token">class</span>);
-
-        <span class="comment token">// 断言邮件发送了两遍……</span>
-        Mail::assertSent(OrderShipped::<span class="keyword token">class</span>, <span class="number token">2</span>);
-
-        <span class="comment token">// 断言邮件未发送……</span>
-        Mail::assertNotSent(AnotherMailable::<span class="keyword token">class</span>);
-    }
-}
-</code></pre>
-<p>如果你用后台任务执行邮件发送队列，你应该使用 <code>assertQueued</code> 代替 <code>assertSent</code>：</p>
-<pre><code>Mail::assertQueued(OrderShipped::<span class="keyword token">class</span>);
-
-Mail::assertNotQueued(OrderShipped::<span class="keyword token">class</span>);
-
-Mail::assertNothingQueued();
-</code></pre>
-<p>你可以将闭包传递给 <code>assertSent</code>, <code>assertNotSent</code>, <code>assertQueued</code> 或 <code>assertNotQueued</code> 方法，以断言发送的邮件通过了给定的 「真实性测试」。如果至少发送了一封通过给定真实性测试的邮件，则断言将成功：</p>
-<pre><code>Mail::assertSent(<span class="keyword token">function</span> (OrderShipped <span class="variable token">$mail</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$mail</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-});
-</code></pre>
-<p>调用 <code>Mail</code> facade 的断言方法时, 所提供的闭包接受的 mailable 实例公开了检查 mailable   的收件人的实用方法：</p>
-<pre><code>Mail::assertSent(OrderShipped::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$mail</span>) <span class="keyword token">use</span> (<span class="variable token">$user</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$mail</span>-&gt;hasTo(<span class="variable token">$user</span>-&gt;email) &amp;&amp;
-           <span class="variable token">$mail</span>-&gt;hasCc(<span class="string token">'...'</span>) &amp;&amp;
-           <span class="variable token">$mail</span>-&gt;hasBcc(<span class="string token">'...'</span>);
-});
-</code></pre>
-<p>你可能已经注意到，有两种方法可以断言邮件没有被发送：<code>assertNotSent</code> 和 <code>assertNotQueued</code>。有时你可能希望断言没有邮件被发送 <strong>或</strong> 存入队列。为了达到这个目的，你可以使用<code>assertNothingOutgoing</code>和<code>assertNotOutgoing</code>方法。</p>
-<pre><code>Mail::assertNothingOutgoing();
-
-Mail::assertNotOutgoing(<span class="keyword token">function</span> (OrderShipped <span class="variable token">$mail</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$mail</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-});
-</code></pre>
-<p><a name="notification-fake"></a></p>
-<h2 id="通知模拟">通知模拟</h2>
-<p>你可以使用 <code>Notification</code> facade 的 <code>fake</code>方法来阻止发送通知。通常，发送通知与实际测试的代码无关。一般，只要断言 Laravel 发送给定的通知就足够了。</p>
-<p>调用了 <code>Notification</code> facade 的 <code>fake</code> 方法之后，你可以断言 <a href="notifications.html">通知</a> 被发送给用户， 甚至可以检查 notifications 收到的数据：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Notifications\OrderShipped;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Notification;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_shipped()
-    {
-        Notification::fake();
-
-        <span class="comment token">// 执行订单发货……</span>
-
-        <span class="comment token">// 断言没有发送任何通知……</span>
-        Notification::assertNothingSent();
-
-        <span class="comment token">// 断言通知被发送给指定用户……</span>
-        Notification::assertSentTo(
-            [<span class="variable token">$user</span>], OrderShipped::<span class="keyword token">class</span>
-        );
-
-        <span class="comment token">// 断言通知未发送……</span>
-        Notification::assertNotSentTo(
-            [<span class="variable token">$user</span>], AnotherNotification::<span class="keyword token">class</span>
-        );
-    }
-}
-</code></pre>
-<p>您可以将闭包传递给 <code>assertSentTo</code> 或 <code>assertNotSentTo</code> 方法，以断言发送的通知通过了给定的 「真实性测试」。如果至少发送了一个通过给定真实性测试的通知，则断言将成功：</p>
-<pre><code>Notification::assertSentTo(
-    <span class="variable token">$user</span>,
-    <span class="keyword token">function</span> (OrderShipped <span class="variable token">$notification</span>, <span class="variable token">$channels</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-        <span class="keyword token">return</span> <span class="variable token">$notification</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-    }
-);
-</code></pre>
-<p><a name="on-demand-notifications"></a></p>
-<h4 id="按需通知">按需通知</h4>
-<p>如果您正在测试发送 <a href="notifications.html#on-demand-notifications">按需通知</a>，则您需要断言通知已发送到 <code>Illuminate\Notifications\AnonymousNotifiable</code> 实例：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Notifications\AnonymousNotifiable;
-
-Notification::assertSentTo(
-    <span class="keyword token">new</span> AnonymousNotifiable, OrderShipped::<span class="keyword token">class</span>
-);
-</code></pre>
-<p>通过将闭包作为第三个参数传递给通知断言方法，您可以确定是否已将按需通知发送到正确的「路由」地址：</p>
-<pre><code>Notification::assertSentTo(
-    <span class="keyword token">new</span> AnonymousNotifiable,
-    OrderShipped::<span class="keyword token">class</span>,
-    <span class="keyword token">function</span> (<span class="variable token">$notification</span>, <span class="variable token">$channels</span>, <span class="variable token">$notifiable</span>) <span class="keyword token">use</span> (<span class="variable token">$user</span>) {
-        <span class="keyword token">return</span> <span class="variable token">$notifiable</span>-&gt;routes[<span class="string token">'mail'</span>] === <span class="variable token">$user</span>-&gt;email;
-    }
-);
-</code></pre>
-<p><a name="queue-fake"></a></p>
-<h2 id="队列模拟">队列模拟</h2>
-<p>可以使用 <code>Queue</code> facade 的 <code>fake</code> 方法来防止任务被推送到队列中。通常，只要断言将给定的任务推送到队列就足够了，因为队列任务本身可以在另一个测试类中进行测试。</p>
-<p>调用 <code>Queue</code> facade 的 <code>fake</code> 方法后，您可以断言应用试图将任务推送到队列：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> App\Jobs\AnotherJob;
-<span class="keyword token">use</span> App\Jobs\FinalJob;
-<span class="keyword token">use</span> App\Jobs\ShipOrder;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Queue;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_orders_can_be_shipped()
-    {
-        Queue::fake();
-
-        <span class="comment token">// 执行订单发货……</span>
-
-        <span class="comment token">// 断言没有任务被推送……</span>
-        Queue::assertNothingPushed();
-
-        <span class="comment token">// 断言任务被推送到指定队列……</span>
-        Queue::assertPushedOn(<span class="string token">'queue-name'</span>, ShipOrder::<span class="keyword token">class</span>);
-
-        <span class="comment token">//  断言任务被推送了两次……</span>
-        Queue::assertPushed(ShipOrder::<span class="keyword token">class</span>, <span class="number token">2</span>);
-
-        <span class="comment token">// 断言任务未被推送……</span>
-        Queue::assertNotPushed(AnotherJob::<span class="keyword token">class</span>);
-    }
-}
-</code></pre>
-<p>您可以将闭包传递给 <code>assertPushed</code> 或 <code>assertNotPushed</code> 方法，以断言推送的任务通过了给定的 「真实性测试」。如果至少推送了一个通过给定真实性测试的任务，则断言将成功：</p>
-<pre><code>Queue::assertPushed(<span class="keyword token">function</span> (ShipOrder <span class="variable token">$job</span>) <span class="keyword token">use</span> (<span class="variable token">$order</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$job</span>-&gt;order-&gt;id === <span class="variable token">$order</span>-&gt;id;
-});
-</code></pre>
-<p><a name="job-chains"></a></p>
-<h3 id="任务链-1">任务链</h3>
-<p><code>Queue</code> facade 的 <code>assertPushedWithChain</code> 和 <code>assertPushedWithoutChain</code> 方法可用于检查推送任务的任务链。 <code>assertPushedWithChain</code> 方法接受主任务作为第一个参数，接受链式任务数组作为第二个参数：</p>
-<pre><code><span class="keyword token">use</span> App\Jobs\RecordShipment;
-<span class="keyword token">use</span> App\Jobs\ShipOrder;
-<span class="keyword token">use</span> App\Jobs\UpdateInventory;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Queue;
-
-Queue::assertPushedWithChain(ShipOrder::<span class="keyword token">class</span>, [
-    RecordShipment::<span class="keyword token">class</span>,
-    UpdateInventory::<span class="keyword token">class</span>
-]);
-</code></pre>
-<p>如上例所示，链式任务的数组可能是任务类名的数组。但是，您也可以提供实际任务实例的数组。执行此操作时，Laravel 将确保任务实例属于同一类，并且具有应用调度的任务链的相同属性值：</p>
-<pre><code>Queue::assertPushedWithChain(ShipOrder::<span class="keyword token">class</span>, [
-    <span class="keyword token">new</span> RecordShipment,
-    <span class="keyword token">new</span> UpdateInventory,
-]);
-</code></pre>
-<p>您可以使用 <code>assertPushedWithoutChain</code> 方法断言在没有任务链的情况下推送任务：</p>
-<pre><code>Queue::assertPushedWithoutChain(ShipOrder::<span class="keyword token">class</span>);
-</code></pre>
-<p><a name="storage-fake"></a></p>
-<h2 id="存储模拟">存储模拟</h2>
-<p>你可以使用 <code>Storage</code> Facade 的 <code>fake</code> 方法，轻松的生成一个模拟磁盘，结合 <code>Illuminate\Http\UploadedFile</code> 类的文件生成工具，极大的简化了文件上传测试。例如：</p>
-<pre><code><span class="preprocessor token">&lt;?php</span>
-
-<span class="keyword token">namespace</span> Tests\Feature;
-
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\RefreshDatabase;
-<span class="keyword token">use</span> Illuminate\Foundation\Testing\WithoutMiddleware;
-<span class="keyword token">use</span> Illuminate\Http\UploadedFile;
-<span class="keyword token">use</span> Illuminate\Support\Facades\Storage;
-<span class="keyword token">use</span> Tests\TestCase;
-
-<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
-{
-    <span class="keyword token">public</span> <span class="keyword token">function</span> test_albums_can_be_uploaded()
-    {
-        Storage::fake(<span class="string token">'photos'</span>);
-
-        <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;json(<span class="string token">'POST'</span>, <span class="string token">'/photos'</span>, [
-            UploadedFile::fake()-&gt;image(<span class="string token">'photo1.jpg'</span>),
-            UploadedFile::fake()-&gt;image(<span class="string token">'photo2.jpg'</span>)
-        ]);
-
-        <span class="comment token">// 断言一个或多个文件已存储……</span>
-        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertExists(<span class="string token">'photo1.jpg'</span>);
-        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertExists([<span class="string token">'photo1.jpg'</span>, <span class="string token">'photo2.jpg'</span>]);
-
-        <span class="comment token">//  断言一个或多个文件未存储……</span>
-        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertMissing(<span class="string token">'missing.jpg'</span>);
-        Storage::disk(<span class="string token">'photos'</span>)-&gt;assertMissing([<span class="string token">'missing.jpg'</span>, <span class="string token">'non-existing.jpg'</span>]);
-    }
-}
-</code></pre>
-<p>有关测试文件上传的更多信息，您可以参考 <a href="http-tests.html#testing-file-uploads">HTTP测试文档的文件上传信息</a>。</p>
-<blockquote>
-<p>技巧：默认情况下，<code>fake</code> 方法将删除临时目录下所有文件。如果你想保留这些文件，你可以使用 「persistentFake」。</p>
-</blockquote>
 <p><a name="interacting-with-time"></a></p>
-<h2 id="时间交互">时间交互</h2>
-<p>测试时，有时可能需要修改诸如 <code>now</code> 或 <code>Illuminate\Support\Carbon::now()</code> 之类的助手返回的时间。 值得庆幸的是，Laravel 的基本功能测试类包括一些帮助程序，可让您操纵当前时间：</p>
-<pre><code><span class="keyword token">public</span> <span class="keyword token">function</span> testTimeCanBeManipulated()
+<h2 id="设置时间">设置时间</h2>
+<p>当我们测试时，有时可能需要修改诸如 <code>now</code> 或 <code>Illuminate\Support\Carbon::now()</code> 之类的助手函数返回的时间。 Laravel 的基本功能测试类包中包含了一些助手函数，可以让你设置当前时间：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Carbon;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_time_can_be_manipulated(): void
 {
-    <span class="comment token">// 调至未来……</span>
+    <span class="comment token">// 设置未来的时间...</span>
     <span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;milliseconds();
     <span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;seconds();
     <span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;minutes();
@@ -571,14 +156,48 @@ Queue::assertPushedWithChain(ShipOrder::<span class="keyword token">class</span>
     <span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;weeks();
     <span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;years();
 
-    <span class="comment token">// 调至过去……</span>
+    <span class="comment token">// 设置过去的时间...</span>
     <span class="variable token">$this</span>-&gt;travel(-<span class="number token">5</span>)-&gt;hours();
 
-    <span class="comment token">// 调至一个明确的时间……</span>
+    <span class="comment token">// 设置一个确切的时间...</span>
     <span class="variable token">$this</span>-&gt;travelTo(now()-&gt;subHours(<span class="number token">6</span>));
 
-    <span class="comment token">// 返回现在……</span>
+    <span class="comment token">// 返回现在的时间...</span>
     <span class="variable token">$this</span>-&gt;travelBack();
+}
+</code></pre>
+<p>你还可以为各种设置时间方法写一个闭包。闭包将在指定的时间被冻结调用。一旦闭包执行完毕，时间将恢复正常:</p>
+<pre><code><span class="variable token">$this</span>-&gt;travel(<span class="number token">5</span>)-&gt;days(<span class="keyword token">function</span> () {
+    <span class="comment token">// 在5天之后测试...</span>
+});
+
+<span class="variable token">$this</span>-&gt;travelTo(now()-&gt;subDays(<span class="number token">10</span>), <span class="keyword token">function</span> () {
+    <span class="comment token">// 在指定的时间测试...</span>
+});
+</code></pre>
+<p><code>freezeTime</code> 方法可用于冻结当前时间。与之类似地，<code>freezeSecond</code> 方法也可以秒为单位冻结当前时间：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Carbon;
+
+<span class="comment token">// 冻结时间并在完成后恢复正常时间...</span>
+<span class="variable token">$this</span>-&gt;freezeTime(<span class="keyword token">function</span> (Carbon <span class="variable token">$time</span>) {
+    <span class="comment token">// ...</span>
+});
+
+<span class="comment token">// 冻结以秒为单位的时间并在完成后恢复正常时间...</span>
+<span class="variable token">$this</span>-&gt;freezeSecond(<span class="keyword token">function</span> (Carbon <span class="variable token">$time</span>) {
+    <span class="comment token">// ...</span>
+})
+</code></pre>
+<p>正如你期望的一样，上面讨论的所有方法都主要用于测试对时间敏感的应用程序的行为，比如锁定论坛上不活跃的帖子:</p>
+<pre><code><span class="keyword token">use</span> App\Models\Thread;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_forum_threads_lock_after_one_week_of_inactivity()
+{
+    <span class="variable token">$thread</span> = Thread::factory()-&gt;create();
+    
+    <span class="variable token">$this</span>-&gt;travel(<span class="number token">1</span>)-&gt;week();
+    
+    <span class="variable token">$this</span>-&gt;assertTrue(<span class="variable token">$thread</span>-&gt;isLockedByInactivity());
 }
 </code></pre>
 </div>
