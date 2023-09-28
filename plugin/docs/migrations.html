@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -17,7 +17,7 @@
 </head>
 
 <body>
-    <div class="markdown-body"><h1 id="数据库：迁移">数据库：迁移</h1>
+    <div class="markdown-body"><h1 id="数据库-迁移">数据库: 迁移</h1>
 <ul>
 <li><a href="#introduction">介绍</a></li>
 <li><a href="#generating-migrations">生成迁移</a><ul>
@@ -40,6 +40,7 @@
 <li><a href="#available-column-types">可用的字段类型</a></li>
 <li><a href="#column-modifiers">字段修饰符</a></li>
 <li><a href="#modifying-columns">修改字段</a></li>
+<li><a href="#renaming-columns">重命名字段</a></li>
 <li><a href="#dropping-columns">删除字段</a></li>
 </ul>
 </li>
@@ -54,17 +55,17 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p>迁移就像是数据库的版本控制，让你的团队能够轻松地去定义和共享程序的数据库结构。迁移通常配合 Laravel 的结构生成器，可以轻松生成应用程序的数据库结构。如果团队中有成员在他的本地数据库环境中手动的添加了某个字段，那么你将会面对如何解决数据库迁移的问题。</p>
-<p> Laravel 9 <code>Schema</code> <a href="facades.html">facade</a> 提供了数据库相关的支持，可以在所有 Laravel 支持的数据库管理系统中创建和操作表。</p>
+<p>迁移就像数据库的版本控制，允许你的团队定义和共享应用程序的数据库架构定义。 如果你曾经不得不告诉团队成员在从代码控制中拉取更新后手动添加字段到他们的本地数据库，那么你就遇到了数据库迁移解决的问题。</p>
+<p>Laravel <code>Schema</code> <a href="/docs/laravel/10.x/facades">facade</a> 为所有 Laravel 支持的数据库系统的创建和操作表提供了不依赖于数据库的支持。通常情况下，迁移会使用 facade 来创建和修改数据表和字段。</p>
 <p><a name="generating-migrations"></a></p>
 <h2 id="生成迁移">生成迁移</h2>
-<p>你可以使用 <code>make:migration</code> <a href="artisan.html">Artisan command</a> 生成数据库迁移。新的迁移将放在你的 <code>database/migrations</code> 目录每个迁移文件名都包含一个时间戳，允许 Laravel 确定迁移的顺序：</p>
+<p>你可以使用 <code>make:migration</code> <a href="/docs/laravel/10.x/artisan">Artisan 命令</a> 来生成数据库迁移。新的迁移文件将放在你的 <code>database/migrations</code> 目录下。每个迁移文件名都包含一个时间戳来使 Laravel 确定迁移的顺序：</p>
 <pre><code class="language-shell">php artisan make:migration create_flights_table
 </code></pre>
-<p>Laravel 会根据迁移文件的名称确定表的名称已经是否在前一种创建新的数据表。</p>
+<p>Laravel 将使用迁移文件的名称来猜测表名以及迁移是否会创建一个新表。如果 Laravel 能够从迁移文件的名称中确定表的名称，它将在生成的迁移文件中预填入指定的表，或者，你也可以直接在迁移文件中手动指定表名。</p>
 <p>如果要为生成的迁移指定自定义路径，你可以在执行 <code>make:migration</code> 命令时使用 <code>--path</code> 选项。给定的路径应该相对于应用程序的基本路径。</p>
 <blockquote>
-<p>技巧：可以使用 <a href="artisan.html#stub-customization">stub publishing</a> 自定义发布。</p>
+<p><strong>技巧</strong><br>可以使用 <a href="/docs/laravel/10.x/artisanmd#stub-customization">stub publishing</a> 自定义发布。</p>
 </blockquote>
 <p><a name="squashing-migrations"></a></p>
 <h3 id="整合迁移">整合迁移</h3>
@@ -75,9 +76,13 @@
 php artisan schema:dump --prune
 </code></pre>
 <p>执行此命令时，Laravel 将向应用程序的 <code>database/schema</code> 目录写入一个「schema」文件。现在，当你尝试迁移数据库而没有执行其他迁移时，Laravel 将首先执行模式文件的 SQL 语句。在执行数据库结构文件的语句之后，Laravel 将执行不属于数据库结构的剩余的所有迁移。</p>
+<p>如果你的应用程序的测试使用的数据库连接与你在本地开发过程中通常使用的不同，你应该确保你已经使用该数据库连接转储了一个 schema 文件，以便你的测试能够建立你的数据库。你可能希望在切换（dump）你在本地开发过程中通常使用的数据库连接之后再做这件事。</p>
+<pre><code class="language-shell">php artisan schema:dump
+php artisan schema:dump --database=testing --prune
+</code></pre>
 <p>你应该将数据库模式文件提交给源代码管理，以便团队中的其他新开发人员可以快速创建应用程序的初始数据库结构。</p>
 <blockquote>
-<p>注意：整合迁移仅适用于 MySQL、PostgreSQL 和 SQLite 数据库，并使用数据库命令行的客户端。另外，数据库结构不能还原到内存中的 SQLite 数据库。</p>
+<p><strong>注意</strong><br>整合迁移仅适用于 MySQL、PostgreSQL 和 SQLite 数据库，并使用数据库命令行的客户端。另外，数据库结构不能还原到内存中的 SQLite 数据库。</p>
 </blockquote>
 <p><a name="migration-structure"></a></p>
 <h2 id="迁移结构">迁移结构</h2>
@@ -92,11 +97,9 @@ php artisan schema:dump --prune
 <span class="keyword token">return</span> <span class="keyword token">new</span> <span class="keyword token">class</span> <span class="keyword token">extends</span> Migration
 {
     <span class="comment token">/**
-     * 运行迁移程序
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 执行迁移
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> up()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> up(): void
     {
         Schema::create(<span class="string token">'flights'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
             <span class="variable token">$table</span>-&gt;id();
@@ -108,10 +111,8 @@ php artisan schema:dump --prune
 
     <span class="comment token">/**
      * 回滚迁移
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> down()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> down(): void
     {
         Schema::drop(<span class="string token">'flights'</span>);
     }
@@ -121,7 +122,7 @@ php artisan schema:dump --prune
 <h4 id="设置迁移连接">设置迁移连接</h4>
 <p>如果你的迁移将与应用程序默认数据库连接以外的数据库连接进行交互，你应该设置迁移的 <code>$connection</code> 属性：</p>
 <pre><code><span class="comment token">/**
- * 迁移应使用的数据库连接。
+ * The database connection that should be used by the migration.
  *
  *<span class="phpdoc token"> @var</span> string
  */</span>
@@ -129,12 +130,10 @@ php artisan schema:dump --prune
 
 <span class="comment token">/**
  * 执行迁移
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> up()
+<span class="keyword token">public</span> <span class="keyword token">function</span> up(): void
 {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="running-migrations"></a></p>
@@ -145,6 +144,17 @@ php artisan schema:dump --prune
 <p>如果你想查看目前已经执行了哪些迁移，可以使用 <code>migrate:status</code> Artisan 命令：</p>
 <pre><code class="language-shell">php artisan migrate:status
 </code></pre>
+<p>如果你希望在不实际运行迁移的情况下看到将被执行的SQL语句，你可以在 <code>migrate</code> 命令中提供 <code>--pretend</code> 选项。</p>
+<pre><code class="language-shell">php artisan migrate --pretend
+</code></pre>
+<h4 id="在隔离的环境中执行迁移">在隔离的环境中执行迁移</h4>
+<p>如果你在多个服务器上部署你的应用程序，并在部署过程中运行迁移，你可能不希望两个服务器同时尝试迁移数据库。为了避免这种情况，你可以在调用 <code>migrate</code> 命令时使用 <code>isolated</code> 选项。</p>
+<p>当提供 <code>isolated</code> 选项时, Laravel 将使用你的应用程序缓存驱动获得一个原子锁，然后再尝试运行你的迁移。所有其他试图运行 <code>migrate</code> 命令的尝试在锁被持有时都不会执行; 然而, 命令仍然会以成功的退出状态码退出:</p>
+<pre><code class="language-shell">php artisan migrate --isolated
+</code></pre>
+<blockquote>
+<p><strong>注意</strong><br>要使用这个功能，你的应用程序必须使用 <code>memcached</code> / <code>redis</code> / <code>dynamodb</code> / <code>database</code> / <code>file</code>  或 <code>array</code> 缓存驱动作为你应用程序的默认缓存驱动。此外，所有的服务器必须与同一个中央缓存服务器进行通信。</p>
+</blockquote>
 <p><a name="forcing-migrations-to-run-in-production"></a></p>
 <h4 id="在生产环境中执行强制迁移">在生产环境中执行强制迁移</h4>
 <p>有些迁移操作是破坏性的，这意味着它们可能会导致数据丢失。为了防止你对生产数据库运行这些命令，在执行这些命令之前，系统将提示你进行确认。如果要在运行强制命令的时候去掉提示，需要加上 <code>--force</code> 标志：</p>
@@ -157,6 +167,9 @@ php artisan schema:dump --prune
 </code></pre>
 <p>通过向 <code>rollback</code> 命令加上 <code>step</code> 参数，可以回滚指定数量的迁移。例如，以下命令将回滚最后五个迁移：</p>
 <pre><code class="language-shell">php artisan migrate:rollback --step=5
+</code></pre>
+<p>你可以通过向 <code>rollback</code> 命令提供 <code>batch</code> 选项来回滚特定的批次迁移，其中 <code>batch</code> 选项对应于应用程序中 <code>migrations</code> 数据库表中的一个批次值。例如，下面的命令将回滚第三批中的所有迁移。</p>
+<pre><code class="language-shell">php artisan migrate:rollback --batch=3
 </code></pre>
 <p>命令 <code>migrate:reset</code> 会回滚应用已运行过的所有迁移：</p>
 <pre><code class="language-shell">php artisan migrate:reset
@@ -180,7 +193,7 @@ php artisan migrate:refresh --seed
 php artisan migrate:fresh --seed
 </code></pre>
 <blockquote>
-<p>注意：该命令 <code>migrate:fresh</code> 在删去所有数据表的过程中，会无视它们的前缀。如果数据库涉及到其它应用，使用该命令须十分小心。</p>
+<p><strong>注意</strong><br>该命令 <code>migrate:fresh</code> 在删去所有数据表的过程中，会无视它们的前缀。如果数据库涉及到其它应用，使用该命令须十分小心。</p>
 </blockquote>
 <p><a name="tables"></a></p>
 <h2 id="数据表">数据表</h2>
@@ -272,7 +285,7 @@ Schema::dropIfExists(&#39;users&#39;);
 <p>在重命名表之前，应该确认表的所有外键约束在迁移文件中有一个显式的名称，而不是让 Laravel 去指定。否则，外键约束名称将引用旧表名。</p>
 <p><a name="columns"></a></p>
 <h2 id="字段">字段</h2>
-<p><a name="创建字段"></a></p>
+<p><a name="creating-columns"></a></p>
 <h3 id="创建字段">创建字段</h3>
 <p>门面 <code>Schema</code> 的 <code>table</code> 方法可用于更新表。与 <code>create</code> 方法一样， <code>table</code> 方法接受两个参数：表名和一个闭包，该闭包接收一个 <code>illumb\Database\Schema\Blueprint</code> 实例，可以使用该实例向表中添加列：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Database\Schema\Blueprint;
@@ -284,7 +297,30 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 </code></pre>
 <p><a name="可用的字段类型"></a></p>
 <h3 id="可用的字段类型">可用的字段类型</h3>
-<p><code>Illuminate\Database\Schema\Blueprint</code> 提供了多种方法，用来创建表中对应类型的列。下面列出了所有可用的方法：</p>
+<p>Schema 构建器 <code>Illuminate\Database\Schema\Blueprint</code> 提供了多种方法，用来创建表中对应类型的列。下面列出了所有可用的方法：</p>
+<style>
+    .collection-method-list > p {
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
+    }
+
+    .collection-method-list a {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .collection-method code {
+        font-size: 14px;
+    }
+
+    .collection-method:not(.first-collection-method) {
+        margin-top: 50px;
+    }
+</style>
+
+<div class="collection-method-list" markdown="1">
+
 <p><a href="#column-method-bigIncrements">bigIncrements</a>
 <a href="#column-method-bigInteger">bigInteger</a>
 <a href="#column-method-binary">binary</a>
@@ -299,13 +335,14 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <a href="#column-method-float">float</a>
 <a href="#column-method-foreignId">foreignId</a>
 <a href="#column-method-foreignIdFor">foreignIdFor</a>
+<a href="#column-method-foreignUlid">foreignUlid</a>
 <a href="#column-method-foreignUuid">foreignUuid</a>
 <a href="#column-method-geometryCollection">geometryCollection</a>
 <a href="#column-method-geometry">geometry</a>
 <a href="#column-method-id">id</a>
 <a href="#column-method-increments">increments</a>
 <a href="#column-method-integer">integer</a>
-<a href="https://learnku.commigrations/12248.html#column-method-ipAddress">ipAddress</a>
+<a href="#column-method-ipAddress">ipAddress</a>
 <a href="#column-method-json">json</a>
 <a href="#column-method-jsonb">jsonb</a>
 <a href="#column-method-lineString">lineString</a>
@@ -313,13 +350,14 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <a href="#column-method-macAddress">macAddress</a>
 <a href="#column-method-mediumIncrements">mediumIncrements</a>
 <a href="#column-method-mediumInteger">mediumInteger</a>
-<a href="8#column-method-mediumText">mediumText</a>
+<a href="#column-method-mediumText">mediumText</a>
 <a href="#column-method-morphs">morphs</a>
 <a href="#column-method-multiLineString">multiLineString</a>
 <a href="#column-method-multiPoint">multiPoint</a>
 <a href="#column-method-multiPolygon">multiPolygon</a>
 <a href="#column-method-nullableMorphs">nullableMorphs</a>
 <a href="#column-method-nullableTimestamps">nullableTimestamps</a>
+<a href="#column-method-nullableUlidMorphs">nullableUlidMorphs</a>
 <a href="#column-method-nullableUuidMorphs">nullableUuidMorphs</a>
 <a href="#column-method-point">point</a>
 <a href="#column-method-polygon">polygon</a>
@@ -332,7 +370,7 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <a href="#column-method-string">string</a>
 <a href="#column-method-text">text</a>
 <a href="#column-method-timeTz">timeTz</a>
-<a href="https://learnku.commigrations/12248.html#column-method-time">time</a>
+<a href="#column-method-time">time</a>
 <a href="#column-method-timestampTz">timestampTz</a>
 <a href="#column-method-timestamp">timestamp</a>
 <a href="#column-method-timestampsTz">timestampsTz</a>
@@ -346,328 +384,353 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <a href="#column-method-unsignedMediumInteger">unsignedMediumInteger</a>
 <a href="#column-method-unsignedSmallInteger">unsignedSmallInteger</a>
 <a href="#column-method-unsignedTinyInteger">unsignedTinyInteger</a>
+<a href="#column-method-ulidMorphs">ulidMorphs</a>
 <a href="#column-method-uuidMorphs">uuidMorphs</a>
+<a href="#column-method-ulid">ulid</a>
 <a href="#column-method-uuid">uuid</a>
 <a href="#column-method-year">year</a></p>
+</div>
+
 <p><a name="column-method-bigIncrements"></a></p>
-<h4 id="bigincrements"><code>bigIncrements()</code></h4>
+<h4 id="bigincrements-collection-method-first-collection-method"><code>bigIncrements()</code> {.collection-method .first-collection-method}</h4>
 <p><code>bigIncrements</code> 方法用于在数据表中创建一个自增的 <code>UNSIGNED BIGINT</code> 类型（主键）的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;bigIncrements(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-bigInteger"></a></p>
-<h4 id="biginteger"><code>bigInteger()</code></h4>
+<h4 id="biginteger-collection-method"><code>bigInteger()</code> {.collection-method}</h4>
 <p><code>bigInteger</code> 方法用于在数据表中创建一个 <code>BIGINT</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;bigInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-binary"></a></p>
-<h4 id="binary"><code>binary()</code></h4>
+<h4 id="binary-collection-method"><code>binary()</code> {.collection-method}</h4>
 <p><code>binary</code> 方法用于在数据表中创建一个 <code>BLOB</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;binary(<span class="string token">'photo'</span>);
 </code></pre>
 <p><a name="column-method-boolean"></a></p>
-<h4 id="boolean"><code>boolean()</code></h4>
+<h4 id="boolean-collection-method"><code>boolean()</code> {.collection-method}</h4>
 <p><code>boolean</code> 方法用于在数据表中创建一个 <code>BOOLEAN</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;boolean(<span class="string token">'confirmed'</span>);
 </code></pre>
 <p><a name="column-method-char"></a></p>
-<h4 id="char"><code>char()</code></h4>
+<h4 id="char-collection-method"><code>char()</code> {.collection-method}</h4>
 <p><code>char</code> 方法用于在数据表中创建一个 <code>CHAR</code> 类型的列，长度由参数指定：</p>
 <pre><code><span class="variable token">$table</span>-&gt;char(<span class="string token">'name'</span>, <span class="number token">100</span>);
 </code></pre>
 <p><a name="column-method-dateTimeTz"></a></p>
-<h4 id="datetimetz"><code>dateTimeTz()</code></h4>
+<h4 id="datetimetz-collection-method"><code>dateTimeTz()</code> {.collection-method}</h4>
 <p><code>dateTimeTz</code> 方法用于在数据表中创建一个 <code>DATETIME</code> 类型（附有 timezone）的列，可选参数为精度的总位数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;dateTimeTz(<span class="string token">'created_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-dateTime"></a></p>
-<h4 id="datetime"><code>dateTime()</code></h4>
+<h4 id="datetime-collection-method"><code>dateTime()</code> {.collection-method}</h4>
 <p><code>dateTime</code> 方法用于在数据表中创建一个 <code>DATETIME</code> 类型的列，可选参数为精度的总位数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;dateTime(<span class="string token">'created_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-date"></a></p>
-<h4 id="date"><code>date()</code></h4>
+<h4 id="date-collection-method"><code>date()</code> {.collection-method}</h4>
 <p><code>date</code> 方法用于在数据表中创建一个 <code>DATE</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;date(<span class="string token">'created_at'</span>);
 </code></pre>
 <p><a name="column-method-decimal"></a></p>
-<h4 id="decimal"><code>decimal()</code></h4>
+<h4 id="decimal-collection-method"><code>decimal()</code> {.collection-method}</h4>
 <p><code>decimal</code> 方法用于在数据表中创建一个 <code>DECIMAL</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;decimal(<span class="string token">'amount'</span>, <span class="variable token">$precision</span> = <span class="number token">8</span>, <span class="variable token">$scale</span> = <span class="number token">2</span>);
 </code></pre>
 <p><a name="column-method-double"></a></p>
-<h4 id="double"><code>double()</code></h4>
+<h4 id="double-collection-method"><code>double()</code> {.collection-method}</h4>
 <p><code>double</code> 方法用于在数据表中创建一个 <code>DOUBLE</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;double(<span class="string token">'amount'</span>, <span class="number token">8</span>, <span class="number token">2</span>);
 </code></pre>
 <p><a name="column-method-enum"></a></p>
-<h4 id="enum"><code>enum()</code></h4>
+<h4 id="enum-collection-method"><code>enum()</code> {.collection-method}</h4>
 <p><code>enum</code> 方法用于在数据表中创建一个 <code>ENUM</code> 类型的列，合法的值列表由参数指定：</p>
 <pre><code><span class="variable token">$table</span>-&gt;enum(<span class="string token">'difficulty'</span>, [<span class="string token">'easy'</span>, <span class="string token">'hard'</span>]);
 </code></pre>
 <p><a name="column-method-float"></a></p>
-<h4 id="float"><code>float()</code></h4>
+<h4 id="float-collection-method"><code>float()</code> {.collection-method}</h4>
 <p> <code>float</code> 方法用于在数据表中创建一个 <code>FLOAT</code> 类型的列，可选参数分别为有效字数总位数、小数部分总位数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;float(<span class="string token">'amount'</span>, <span class="number token">8</span>, <span class="number token">2</span>);
 </code></pre>
 <p><a name="column-method-foreignId"></a></p>
-<h4 id="foreignid"><code>foreignId()</code></h4>
+<h4 id="foreignid-collection-method"><code>foreignId()</code> {.collection-method}</h4>
 <p><code>foreignId</code> 方法是 <code>unsignedBigInteger</code> 的别名：</p>
 <pre><code><span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>);
 </code></pre>
 <p><a name="column-method-foreignIdFor"></a></p>
-<h4 id="foreignidfor"><code>foreignIdFor()</code></h4>
+<h4 id="foreignidfor-collection-method"><code>foreignIdFor()</code> {.collection-method}</h4>
 <p><code>foreignIdFor</code> 方法为给定模型类添加了 <code>{column}_id UNSIGNED BIGINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;foreignIdFor(User::<span class="keyword token">class</span>);
 </code></pre>
+<p><a name="column-method-foreignUlid"></a></p>
+<h4 id="foreignulid-collection-method"><code>foreignUlid()</code> {.collection-method}</h4>
+<p><code>foreignUlid</code> 方法创建一个 <code>ULID</code> 等效列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;foreignUlid(<span class="string token">'user_id'</span>);
+</code></pre>
 <p><a name="column-method-foreignUuid"></a></p>
-<h4 id="foreignuuid"><code>foreignUuid()</code></h4>
+<h4 id="foreignuuid-collection-method"><code>foreignUuid()</code> {.collection-method}</h4>
 <p><code>foreignUuid</code> 方法创建一个 <code>UUID</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;foreignUuid(<span class="string token">'user_id'</span>);
 </code></pre>
 <p><a name="column-method-geometryCollection"></a></p>
-<h4 id="geometrycollection"><code>geometryCollection()</code></h4>
+<h4 id="geometrycollection-collection-method"><code>geometryCollection()</code> {.collection-method}</h4>
 <p><code>geometryCollection</code> 方法相当于 <code>GEOMETRYCOLLECTION</code> :</p>
 <pre><code><span class="variable token">$table</span>-&gt;geometryCollection(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-geometry"></a></p>
-<h4 id="geometry"><code>geometry()</code></h4>
+<h4 id="geometry-collection-method"><code>geometry()</code> {.collection-method}</h4>
 <p><code>geometry</code> 方法相当于 <code>GEOMETRY</code> :</p>
 <pre><code><span class="variable token">$table</span>-&gt;geometry(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-id"></a></p>
-<h4 id="id"><code>id()</code></h4>
+<h4 id="id-collection-method"><code>id()</code> {.collection-method}</h4>
 <p> <code>id</code> 方法是<code>bigIncrements</code> 的别名。默认情况下，该方法将创建一个 <code>id</code> 列; 但是，如果要为列指定不同的名称，则可以传递列名：</p>
 <pre><code><span class="variable token">$table</span>-&gt;id();
 </code></pre>
 <p><a name="column-method-increments"></a></p>
-<h4 id="increments"><code>increments()</code></h4>
+<h4 id="increments-collection-method"><code>increments()</code> {.collection-method}</h4>
 <p><code>increments</code> 方法创建一个自动递增相当于 <code>UNSIGNED INTEGER</code> 的列作为主键：</p>
 <pre><code><span class="variable token">$table</span>-&gt;increments(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-integer"></a></p>
-<h4 id="integer"><code>integer()</code></h4>
+<h4 id="integer-collection-method"><code>integer()</code> {.collection-method}</h4>
 <p><code>integer</code> 方法相当于 <code>INTEGER</code> ：</p>
 <pre><code><span class="variable token">$table</span>-&gt;integer(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-ipAddress"></a></p>
-<h4 id="ipaddress"><code>ipAddress()</code></h4>
+<h4 id="ipaddress-collection-method"><code>ipAddress()</code> {.collection-method}</h4>
 <p><code>ipAddress</code> 方法相当于 <code>VARCHAR</code> ：</p>
 <pre><code><span class="variable token">$table</span>-&gt;ipAddress(<span class="string token">'visitor'</span>);
 </code></pre>
 <p><a name="column-method-json"></a></p>
-<h4 id="json"><code>json()</code></h4>
+<h4 id="json-collection-method"><code>json()</code> {.collection-method}</h4>
 <p><code>json</code> 方法相当于 <code>JSON</code>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;json(<span class="string token">'options'</span>);
 </code></pre>
 <p><a name="column-method-jsonb"></a></p>
-<h4 id="jsonb"><code>jsonb()</code></h4>
+<h4 id="jsonb-collection-method"><code>jsonb()</code> {.collection-method}</h4>
 <p><code>jsonb</code> 方法相当于 <code>JSONB</code>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;jsonb(<span class="string token">'options'</span>);
 </code></pre>
 <p><a name="column-method-lineString"></a></p>
-<h4 id="linestring"><code>lineString()</code></h4>
+<h4 id="linestring-collection-method"><code>lineString()</code> {.collection-method}</h4>
 <p> <code>lineString</code> 方法相当于 <code>LINESTRING</code>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;lineString(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-longText"></a></p>
-<h4 id="longtext"><code>longText()</code></h4>
+<h4 id="longtext-collection-method"><code>longText()</code> {.collection-method}</h4>
 <p> <code>longText</code> 方法相当于 <code>LONGTEXT</code>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;longText(<span class="string token">'description'</span>);
 </code></pre>
 <p><a name="column-method-macAddress"></a></p>
-<h4 id="macaddress"><code>macAddress()</code></h4>
+<h4 id="macaddress-collection-method"><code>macAddress()</code> {.collection-method}</h4>
 <p><code>macAddress</code> 方法创建一个用于保存 MAC 地址的列。一些数据库系统（如 PostgreSQL），为这种类型的数据提供了专用的类型。其他数据库系统相当于使用字符串类型：</p>
 <pre><code><span class="variable token">$table</span>-&gt;macAddress(<span class="string token">'device'</span>);
 </code></pre>
 <p><a name="column-method-mediumIncrements"></a></p>
-<h4 id="mediumincrements"><code>mediumIncrements()</code></h4>
+<h4 id="mediumincrements-collection-method"><code>mediumIncrements()</code> {.collection-method}</h4>
 <p> <code>mediumIncrements</code> 方法用于创建一个 <code>UNSIGNED MEDIUMINT</code> 类型的自动递增的列作为主键：</p>
 <pre><code><span class="variable token">$table</span>-&gt;mediumIncrements(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-mediumInteger"></a></p>
-<h4 id="mediuminteger"><code>mediumInteger()</code></h4>
+<h4 id="mediuminteger-collection-method"><code>mediumInteger()</code> {.collection-method}</h4>
 <p> <code>mediumInteger</code> 方法用于创建一个 <code>MEDIUMINT</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;mediumInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-mediumText"></a></p>
-<h4 id="mediumtext"><code>mediumText()</code></h4>
+<h4 id="mediumtext-collection-method"><code>mediumText()</code> {.collection-method}</h4>
 <p><code>mediumText</code> 方法用于创建一个 <code>MEDIUMTEXT</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;mediumText(<span class="string token">'description'</span>);
 </code></pre>
 <p><a name="column-method-morphs"></a></p>
-<h4 id="morphs"><code>morphs()</code></h4>
+<h4 id="morphs-collection-method"><code>morphs()</code> {.collection-method}</h4>
 <p> <code>morphs</code> 方法用于快速创建一个名称为 <code>{column}_id</code> ，类型为 <code>UNSIGNED BIGINT</code> 的列和一个名称为 <code>{column}_type</code> ，类型为 <code>VARCHAR</code> 的列。</p>
-<p>这个方法在定义<a href="eloquent-relationships.html">多态关联</a>所需的列时使用。在下面的例子中， <code>taggable_id</code> 和 <code>taggable_type</code> 这两个列会被创建：</p>
+<p>这个方法在定义<a href="/docs/laravel/10.x/eloquent-relationships">多态关联</a>所需的列时使用。在下面的例子中， <code>taggable_id</code> 和 <code>taggable_type</code> 这两个列会被创建：</p>
 <pre><code><span class="variable token">$table</span>-&gt;morphs(<span class="string token">'taggable'</span>);
 </code></pre>
 <p><a name="column-method-multiLineString"></a></p>
-<h4 id="multilinestring"><code>multiLineString()</code></h4>
+<h4 id="multilinestring-collection-method"><code>multiLineString()</code> {.collection-method}</h4>
 <p> <code>multiLineString</code> 方法用于创建一个 <code>MULTILINESTRING</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;multiLineString(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-multiPoint"></a></p>
-<h4 id="multipoint"><code>multiPoint()</code></h4>
+<h4 id="multipoint-collection-method"><code>multiPoint()</code> {.collection-method}</h4>
 <p> <code>multiPoint</code> 方法用于创建一个 <code>MULTIPOINT</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;multiPoint(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-multiPolygon"></a></p>
-<h4 id="multipolygon"><code>multiPolygon()</code></h4>
+<h4 id="multipolygon-collection-method"><code>multiPolygon()</code> {.collection-method}</h4>
 <p> <code>multiPolygon</code> 方法用于创建一个 <code>MULTIPOLYGON</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;multiPolygon(<span class="string token">'positions'</span>);
 </code></pre>
 <p><a name="column-method-nullableTimestamps"></a></p>
-<h4 id="nullabletimestamps"><code>nullableTimestamps()</code></h4>
+<h4 id="nullabletimestamps-collection-method"><code>nullableTimestamps()</code> {.collection-method}</h4>
 <p>这个方法和 <a href="#column-method-timestamps">timestamps</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
 <pre><code><span class="variable token">$table</span>-&gt;nullableTimestamps(<span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-nullableMorphs"></a></p>
-<h4 id="nullablemorphs"><code>nullableMorphs()</code></h4>
+<h4 id="nullablemorphs-collection-method"><code>nullableMorphs()</code> {.collection-method}</h4>
 <p>这个方法和 <a href="#column-method-morphs">morphs</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
 <pre><code><span class="variable token">$table</span>-&gt;nullableMorphs(<span class="string token">'taggable'</span>);
 </code></pre>
+<p><a name="column-method-nullableUlidMorphs"></a></p>
+<h4 id="nullableulidmorphs-collection-method"><code>nullableUlidMorphs()</code> {.collection-method}</h4>
+<p>这个方法和 <a href="#column-method-ulidMorphs">ulidMorphs</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code>。</p>
+<pre><code><span class="variable token">$table</span>-&gt;nullableUlidMorphs(<span class="string token">'taggable'</span>);
+</code></pre>
 <p><a name="column-method-nullableUuidMorphs"></a></p>
-<h4 id="nullableuuidmorphs"><code>nullableUuidMorphs()</code></h4>
+<h4 id="nullableuuidmorphs-collection-method"><code>nullableUuidMorphs()</code> {.collection-method}</h4>
 <p>这个方法和 <a href="#column-method-uuidMorphs">uuidMorphs</a> 方法类似；需要注意的是此方法创建的列是 <code>nullable</code> 的：</p>
 <pre><code><span class="variable token">$table</span>-&gt;nullableUuidMorphs(<span class="string token">'taggable'</span>);
 </code></pre>
 <p><a name="column-method-point"></a></p>
-<h4 id="point"><code>point()</code></h4>
+<h4 id="point-collection-method"><code>point()</code> {.collection-method}</h4>
 <p><code>point</code> 方法相当于 <code>POINT</code>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;point(<span class="string token">'position'</span>);
 </code></pre>
 <p><a name="column-method-polygon"></a></p>
-<h4 id="polygon"><code>polygon()</code></h4>
-<p><code>polygon</code> 方法相当于 <code>POLYGON</code>：</p>
+<h4 id="polygon-collection-method"><code>polygon()</code> {.collection-method}</h4>
+<p>The <code>polygon</code> method creates a <code>POLYGON</code> equivalent column:</p>
 <pre><code><span class="variable token">$table</span>-&gt;polygon(<span class="string token">'position'</span>);
 </code></pre>
 <p><a name="column-method-rememberToken"></a></p>
-<h4 id="remembertoken"><code>rememberToken()</code></h4>
-<p>添加一个允许空值的 VARCHAR (100) 类型的 <code>remember_token</code> 字段，用于存储 <a href="authentication.html#remembering-users">记住用户</a>：</p>
+<h4 id="remembertoken-collection-method"><code>rememberToken()</code> {.collection-method}</h4>
+<p>添加一个允许空值的 <code>VARCHAR (100)</code> 类型的 <code>remember_token</code> 字段，用于存储 <a href="/docs/laravel/10.x/authentication#remembering-users">记住用户</a>：</p>
 <pre><code><span class="variable token">$table</span>-&gt;rememberToken();
 </code></pre>
 <p><a name="column-method-set"></a></p>
-<h4 id="set"><code>set()</code></h4>
+<h4 id="set-collection-method"><code>set()</code> {.collection-method}</h4>
 <p><code>set</code> 方法使用给定的有效值列表创建一个 <code>SET</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;set(<span class="string token">'flavors'</span>, [<span class="string token">'strawberry'</span>, <span class="string token">'vanilla'</span>]);
 </code></pre>
 <p><a name="column-method-smallIncrements"></a></p>
-<h4 id="smallincrements"><code>smallIncrements()</code></h4>
+<h4 id="smallincrements-collection-method"><code>smallIncrements()</code> {.collection-method}</h4>
 <p><code>smallIncrements</code> 方法创建一个自动递增的 <code>UNSIGNED SMALLINT</code> 等效列作为主键：</p>
 <pre><code><span class="variable token">$table</span>-&gt;smallIncrements(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-smallInteger"></a></p>
-<h4 id="smallinteger"><code>smallInteger()</code></h4>
+<h4 id="smallinteger-collection-method"><code>smallInteger()</code> {.collection-method}</h4>
 <p><code>smallInteger</code> 方法创建一个 <code>SMALLINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;smallInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-softDeletesTz"></a></p>
-<h4 id="softdeletestz"><code>softDeletesTz()</code></h4>
+<h4 id="softdeletestz-collection-method"><code>softDeletesTz()</code> {.collection-method}</h4>
 <p><code>softDeletesTz</code> 方法添加了一个可为空的 <code>deleted_at</code> <code>TIMESTAMP</code>（带时区）等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的“软删除”功能所需的 <code>deleted_at</code> 时间戳：</p>
 <pre><code><span class="variable token">$table</span>-&gt;softDeletesTz(<span class="variable token">$column</span> = <span class="string token">'deleted_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-softDeletes"></a></p>
-<h4 id="softdeletes"><code>softDeletes()</code></h4>
+<h4 id="softdeletes-collection-method"><code>softDeletes()</code> {.collection-method}</h4>
 <p><code>softDeletes</code> 方法添加了一个可为空的 <code>deleted_at</code> <code>TIMESTAMP</code> 等效列，具有可选精度（总位数）。此列旨在存储 Eloquent 的「软删除」功能所需的 <code>deleted_at</code> 时间戳，相当于为软删除添加一个可空的 <code>deleted_at</code> 字段：</p>
 <pre><code><span class="variable token">$table</span>-&gt;softDeletes(<span class="variable token">$column</span> = <span class="string token">'deleted_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-string"></a></p>
-<h4 id="string"><code>string()</code></h4>
+<h4 id="string-collection-method"><code>string()</code> {.collection-method}</h4>
 <p><code>string</code> 方法创建一个给定长度的 <code>VARCHAR</code> 等效列，相当于指定长度的 VARCHAR：</p>
 <pre><code><span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">100</span>);
 </code></pre>
 <p><a name="column-method-text"></a></p>
-<h4 id="text"><code>text()</code></h4>
+<h4 id="text-collection-method"><code>text()</code> {.collection-method}</h4>
 <p><code>text</code> 方法创建一个 <code>TEXT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;text(<span class="string token">'description'</span>);
 </code></pre>
 <p><a name="column-method-timeTz"></a></p>
-<h4 id="timetz"><code>timeTz()</code></h4>
+<h4 id="timetz-collection-method"><code>timeTz()</code> {.collection-method}</h4>
 <p><code>timeTz</code> 方法创建一个具有可选精度（总位数）的 <code>TIME</code>（带时区）等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;timeTz(<span class="string token">'sunrise'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-time"></a></p>
-<h4 id="time"><code>time()</code></h4>
+<h4 id="time-collection-method"><code>time()</code> {.collection-method}</h4>
 <p><code>time</code> 方法创建一个具有可选精度（总位数）的 <code>TIME</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;time(<span class="string token">'sunrise'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-timestampTz"></a></p>
-<h4 id="timestamptz"><code>timestampTz()</code></h4>
+<h4 id="timestamptz-collection-method"><code>timestampTz()</code> {.collection-method}</h4>
 <p><code>timestampTz</code> 方法创建一个具有可选精度（总位数）的 <code>TIMESTAMP</code>（带时区）等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;timestampTz(<span class="string token">'added_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-timestamp"></a></p>
-<h4 id="timestamp"><code>timestamp()</code></h4>
+<h4 id="timestamp-collection-method"><code>timestamp()</code> {.collection-method}</h4>
 <p><code>timestamp</code> 方法创建一个具有可选精度（总位数）的 <code>TIMESTAMP</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;timestamp(<span class="string token">'added_at'</span>, <span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-timestampsTz"></a></p>
-<h4 id="timestampstz"><code>timestampsTz()</code></h4>
+<h4 id="timestampstz-collection-method"><code>timestampsTz()</code> {.collection-method}</h4>
 <p><code>timestampsTz</code> 方法创建 <code>created_at</code> 和 <code>updated_at</code> <code>TIMESTAMP</code>（带时区）等效列，具有可选精度（总位数）：</p>
 <pre><code><span class="variable token">$table</span>-&gt;timestampsTz(<span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-timestamps"></a></p>
-<h4 id="timestamps"><code>timestamps()</code></h4>
+<h4 id="timestamps-collection-method"><code>timestamps()</code> {.collection-method}</h4>
 <p><code>timestamps</code> 方法创建具有可选精度（总位数）的 <code>created_at</code> 和 <code>updated_at</code> <code>TIMESTAMP</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;timestamps(<span class="variable token">$precision</span> = <span class="number token">0</span>);
 </code></pre>
 <p><a name="column-method-tinyIncrements"></a></p>
-<h4 id="tinyincrements"><code>tinyIncrements()</code></h4>
+<h4 id="tinyincrements-collection-method"><code>tinyIncrements()</code> {.collection-method}</h4>
 <p><code>tinyIncrements</code> 方法创建一个自动递增的 <code>UNSIGNED TINYINT</code> 等效列作为主键：</p>
 <pre><code><span class="variable token">$table</span>-&gt;tinyIncrements(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-tinyInteger"></a></p>
-<h4 id="tinyinteger"><code>tinyInteger()</code></h4>
+<h4 id="tinyinteger-collection-method"><code>tinyInteger()</code> {.collection-method}</h4>
 <p><code>tinyInteger</code> 方法用于创建一个 <code>TINYINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;tinyInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-tinyText"></a></p>
-<h4 id="tinytext"><code>tinyText()</code></h4>
+<h4 id="tinytext-collection-method"><code>tinyText()</code> {.collection-method}</h4>
 <p><code>tinyText</code> 方法用于创建一个 <code>TINYTEXT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;tinyText(<span class="string token">'notes'</span>);
 </code></pre>
 <p><a name="column-method-unsignedBigInteger"></a></p>
-<h4 id="unsignedbiginteger"><code>unsignedBigInteger()</code></h4>
+<h4 id="unsignedbiginteger-collection-method"><code>unsignedBigInteger()</code> {.collection-method}</h4>
 <p><code>unsignedBigInteger</code> 方法用于创建一个 <code>UNSIGNED BIGINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedBigInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-unsignedDecimal"></a></p>
-<h4 id="unsigneddecimal"><code>unsignedDecimal()</code></h4>
+<h4 id="unsigneddecimal-collection-method"><code>unsignedDecimal()</code> {.collection-method}</h4>
 <p><code>unsignedDecimal</code> 方法用于创建一个 <code>UNSIGNED DECIMAL</code> 等效列，具有可选的精度（总位数）和小数位数（小数位数）：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedDecimal(<span class="string token">'amount'</span>, <span class="variable token">$precision</span> = <span class="number token">8</span>, <span class="variable token">$scale</span> = <span class="number token">2</span>);
 </code></pre>
 <p><a name="column-method-unsignedInteger"></a></p>
-<h4 id="unsignedinteger"><code>unsignedInteger()</code></h4>
+<h4 id="unsignedinteger-collection-method"><code>unsignedInteger()</code> {.collection-method}</h4>
 <p><code>unsignedInteger</code> 方法用于创建一个 <code>UNSIGNED INTEGER</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-unsignedMediumInteger"></a></p>
-<h4 id="unsignedmediuminteger"><code>unsignedMediumInteger()</code></h4>
+<h4 id="unsignedmediuminteger-collection-method"><code>unsignedMediumInteger()</code> {.collection-method}</h4>
 <p><code>unsignedMediumInteger</code> 方法用于创建一个 <code>UNSIGNED MEDIUMINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedMediumInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-unsignedSmallInteger"></a></p>
-<h4 id="unsignedsmallinteger"><code>unsignedSmallInteger()</code></h4>
+<h4 id="unsignedsmallinteger-collection-method"><code>unsignedSmallInteger()</code> {.collection-method}</h4>
 <p><code>unsignedSmallInteger</code> 方法用于创建一个 <code>UNSIGNED SMALLINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedSmallInteger(<span class="string token">'votes'</span>);
 </code></pre>
 <p><a name="column-method-unsignedTinyInteger"></a></p>
-<h4 id="unsignedtinyinteger"><code>unsignedTinyInteger()</code></h4>
+<h4 id="unsignedtinyinteger-collection-method"><code>unsignedTinyInteger()</code> {.collection-method}</h4>
 <p><code>unsignedTinyInteger</code> 方法用于创建一个 <code>UNSIGNED TINYINT</code> 等效列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;unsignedTinyInteger(<span class="string token">'votes'</span>);
 </code></pre>
+<p><a name="column-method-ulidMorphs"></a></p>
+<h4 id="ulidmorphs-collection-method"><code>ulidMorphs()</code> {.collection-method}</h4>
+<p><code>ulidMorphs</code> 方法用于快速创建一个名称为 <code>{column}_id</code> ，类型为 <code>CHAR(26)</code> 的列和一个名称为 <code>{column}_type</code> ，类型为  <code>VARCHAR</code> 的列。</p>
+<p>这个方法用于定义使用 UUID 标识符的<a href="/docs/laravel/10.x/eloquent-relationships">多态关联</a>所需的列时使用。在下面的例子中，<code>taggable_id</code> 和 <code>taggable_type</code> 这两个列将会被创建：</p>
+<pre><code><span class="variable token">$table</span>-&gt;ulidMorphs(<span class="string token">'taggable'</span>);
+</code></pre>
 <p><a name="column-method-uuidMorphs"></a></p>
-<h4 id="uuidmorphs"><code>uuidMorphs()</code></h4>
+<h4 id="uuidmorphs-collection-method"><code>uuidMorphs()</code> {.collection-method}</h4>
 <p><code>uuidMorphs</code> 方法用于快速创建一个名称为 <code>{column}_id</code> ，类型为 <code>CHAR(36)</code> 的列和一个名称为 <code>{column}_type</code> ，类型为  <code>VARCHAR</code> 的列。</p>
-<p>这个方法用于定义使用 UUID 标识符的<a href="eloquent-relationships.html">多态关联</a>所需的列时使用。在下面的例子中，<code>taggable_id</code> 和 <code>taggable_type</code> 这两个列将会被创建：</p>
+<p>这个方法用于定义使用 UUID 标识符的<a href="/docs/laravel/10.x/eloquent-relationships">多态关联</a>所需的列时使用。在下面的例子中，<code>taggable_id</code> 和 <code>taggable_type</code> 这两个列将会被创建：</p>
 <pre><code><span class="variable token">$table</span>-&gt;uuidMorphs(<span class="string token">'taggable'</span>);
 </code></pre>
+<p><a name="column-method-ulid"></a></p>
+<h4 id="ulid-collection-method"><code>ulid()</code> {.collection-method}</h4>
+<p><code>ulid</code> 方法用于创建一个 <code>ULID</code> 类型的列：</p>
+<pre><code><span class="variable token">$table</span>-&gt;ulid(<span class="string token">'id'</span>);
+</code></pre>
 <p><a name="column-method-uuid"></a></p>
-<h4 id="uuid"><code>uuid()</code></h4>
+<h4 id="uuid-collection-method"><code>uuid()</code> {.collection-method}</h4>
 <p><code>uuid</code> 方法用于创建一个 <code>UUID</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;uuid(<span class="string token">'id'</span>);
 </code></pre>
 <p><a name="column-method-year"></a></p>
-<h4 id="year"><code>year()</code></h4>
+<h4 id="year-collection-method"><code>year()</code> {.collection-method}</h4>
 <p><code>year</code> 方法用于创建一个 <code>YEAR</code> 类型的列：</p>
 <pre><code><span class="variable token">$table</span>-&gt;year(<span class="string token">'birth_year'</span>);
 </code></pre>
@@ -776,10 +839,8 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 {
     <span class="comment token">/**
      * 运行迁移
-     *
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> up()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> up(): void
     {
         Schema::create(<span class="string token">'flights'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
             <span class="variable token">$table</span>-&gt;id();
@@ -790,12 +851,12 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 };
 </code></pre>
 <blockquote>
-<p>注意：支持哪些默认值的表示方式取决于你的数据库驱动、数据库版本、还有字段类型。请参考合适的文档使用。还有一点要注意的是，使用数据库特定函数，可能会将你绑牢到特定的数据库驱动上。</p>
+<p><strong>注意</strong><br>支持哪些默认值的表示方式取决于你的数据库驱动、数据库版本、还有字段类型。请参考合适的文档使用。还有一点要注意的是，使用数据库特定函数，可能会将你绑牢到特定的数据库驱动上。</p>
 </blockquote>
 <p><a name="column-order"></a></p>
 <h4 id="字段顺序">字段顺序</h4>
 <p>使用 MySQL 数据库时，可以使用 <code>after</code> 方法在模式中的现有列后添加列：</p>
-<pre><code><span class="variable token">$table</span>-&gt;after(<span class="string token">'password'</span>, <span class="keyword token">function</span> (<span class="variable token">$table</span>) {
+<pre><code><span class="variable token">$table</span>-&gt;after(<span class="string token">'password'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
     <span class="variable token">$table</span>-&gt;string(<span class="string token">'address_line1'</span>);
     <span class="variable token">$table</span>-&gt;string(<span class="string token">'address_line2'</span>);
     <span class="variable token">$table</span>-&gt;string(<span class="string token">'city'</span>);
@@ -803,9 +864,19 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 </code></pre>
 <p><a name="modifying-columns"></a></p>
 <h3 id="修改字段">修改字段</h3>
-<p><a name="先决条件"></a></p>
-<h4 id="先决条件">先决条件</h4>
-<p>在修饰字段之前，请确保你已经通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包。Doctrine DBAL 库用于确定字段的当前状态，并创建对该字段进行指定调整所需的 SQL 查询：</p>
+<p><code>change</code> 方法可以将现有的字段类型修改为新的类型或修改属性。比如，你可能想增加 <code>string</code> 字段的长度，可以使用 <code>change</code> 方法把 <code>name</code> 字段的长度从 25 增加到 50。所以，我们可以简单的更新字段属性然后调用  <code>change</code> 方法：</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">50</span>)-&gt;change();
+});
+</code></pre>
+<p>当修改一个列时，你必须明确包括所有你想在列定义上保留的修改器 —— 任何缺失的属性都将被丢弃。例如，为了保留 <code>unsigned</code>、<code>default</code> 和 <code>comment</code>  属性，你必须在修改列时明确每个属性的修改。</p>
+<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
+    <span class="variable token">$table</span>-&gt;integer(<span class="string token">'votes'</span>)-&gt;unsigned()-&gt;<span class="keyword token">default</span>(<span class="number token">1</span>)-&gt;comment(<span class="string token">'my comment'</span>)-&gt;change();
+});
+</code></pre>
+<p><a name="modifying-columns-on-sqlite"></a></p>
+<h4 id="在-sqlite-上修改列">在 SQLite 上修改列</h4>
+<p>如果应用程序使用的是 SQLite 数据库，请确保你已经通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包。Doctrine DBAL 库用于确定字段的当前状态，并创建对该字段进行指定调整所需的 SQL 查询：</p>
 <pre><code>composer <span class="keyword token">require</span> doctrine/dbal
 </code></pre>
 <p>如果你打算修改 <code>timestamp</code> 方法来创建列，你还需要将以下配置添加到应用程序的<code>config/database.php</code>配置文件中：</p>
@@ -818,36 +889,30 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 ],
 </code></pre>
 <blockquote>
-<p>注意：如果你的应用程序使用 Microsoft SQL 驱动，请确保你已经安装了<code>doctrine/dbal:^3.0</code>。</p>
-</blockquote>
-<p><a name="更新字段属性"></a></p>
-<h4 id="更新字段属性">更新字段属性</h4>
-<p><code>change</code> 方法可以将现有的字段类型修改为新的类型或修改属性。比如，你可能想增加 <code>string</code> 字段的长度，可以使用 <code>change</code> 方法把 <code>name</code> 字段的长度从 25 增加到 50。所以，我们可以简单的更新字段属性然后调用  <code>change</code> 方法：</p>
-<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
-    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">50</span>)-&gt;change();
-});
-</code></pre>
-<p>我们同样可以使用 <code>nullable</code> 将字段修改为允许为空：</p>
-<pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
-    <span class="variable token">$table</span>-&gt;string(<span class="string token">'name'</span>, <span class="number token">50</span>)-&gt;nullable()-&gt;change();
-});
-</code></pre>
-<blockquote>
-<p>注意：只有以下字段类型能被「修改」: <code>bigInteger</code>, <code>binary</code>, <code>boolean</code>, <code>char</code>, <code>date</code>, <code>dateTime</code>, <code>dateTimeTz</code>, <code>decimal</code>, <code>integer</code>, <code>json</code>, <code>longText</code>, <code>mediumText</code>, <code>smallInteger</code>, <code>string</code>, <code>text</code>, <code>time</code>, <code>unsignedBigInteger</code>, <code>unsignedInteger</code>, <code>unsignedSmallInteger</code>, 和 <code>uuid</code>.   要修改 <code>timestamp</code> 字段类型， <a href="#prerequisites">Doctrine 类型必须被注册</a>。</p>
+<p><strong>注意</strong><br>当使用 <code>doctrine/dbal</code> 包时，你可以修改以下列类型：<code>bigInteger</code>、<code>binary</code>、<code>boolean</code>、<code>char</code>、<code>date</code>、<code>dateTime</code>、<code>dateTimeTz</code>、<code>decimal</code>、<code>double</code>、<code>integer</code>、<code>json</code>、<code>longText</code>、<code>mediumText</code>、<code>smallInteger</code>、<code>string</code>、<code>text</code>、<code>time</code>、<code>tinyText</code>、<code>unsignedBigInteger</code>、<code>unsignedInteger</code>、<code>unsignedSmallInteger</code>、<code>ulid</code>、和 <code>uuid</code>。</p>
 </blockquote>
 <p><a name="renaming-columns"></a></p>
 <h4 id="重命名字段">重命名字段</h4>
-<p>可以使用结构生成器上的 <code>renameColumn</code> 方法来重命名字段。在重命名字段前，请确保你已经通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包：</p>
+<p>要重命名一个列，你可以使用模式构建器提供的 <code>renameColumn</code> 方法：</p>
 <pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
     <span class="variable token">$table</span>-&gt;renameColumn(<span class="string token">'from'</span>, <span class="string token">'to'</span>);
 });
 </code></pre>
-<blockquote>
-<p>注意：当前不支持 <code>enum</code> 类型的字段重命名。</p>
-</blockquote>
+<p><a name="renaming-columns-on-legacy-databases"></a></p>
+<h4 id="在较低版本数据库上重命名列">在较低版本数据库上重命名列</h4>
+<p>如果你运行的数据库低于以下版本，你应该确保在重命名列之前通过 Composer 软件包管理器安装了 <code>doctrine/dbal</code> 库。</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>MySQL &lt; <code>8.0.3</code></li>
+<li>MariaDB &lt; <code>10.5.2</code></li>
+<li>SQLite &lt; <code>3.25.0</code></li>
+</ul>
+</div>
+
 <p><a name="dropping-columns"></a></p>
 <h3 id="删除字段">删除字段</h3>
-<p>你可以使用结构生成器上的 <code>dropColumn</code> 方法来删除字段。如果你的应用程序使用的是 SQLite 数据库，你必须在调用<code>dropColumn</code>方法之前通过 Composer 包管理器安装了 <code>doctrine/dbal</code> 包：</p>
+<p>要删除一个列，你可以使用 <code>dropColumn</code> 方法。</p>
 <pre><code>Schema::table(<span class="string token">'users'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
     <span class="variable token">$table</span>-&gt;dropColumn(<span class="string token">'votes'</span>);
 });
@@ -857,9 +922,9 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
     <span class="variable token">$table</span>-&gt;dropColumn([<span class="string token">'votes'</span>, <span class="string token">'avatar'</span>, <span class="string token">'location'</span>]);
 });
 </code></pre>
-<blockquote>
-<p>注意：使用 SQLite 数据库时不支持在单个迁移中 <strong>删除</strong> 或 <strong>修改</strong> 多个字段。</p>
-</blockquote>
+<p><a name="dropping-columns-on-legacy-databases"></a></p>
+<h4 id="在较低版本的数据库中删除列的内容">在较低版本的数据库中删除列的内容</h4>
+<p>如果你运行的 SQLite 版本在 <code>3.35.0</code> 之前，你必须通过 Composer  软件包管理器安装 <code>doctrine/dbal</code> 包，然后才能使用 <code>dropColumn</code> 方法。不支持在使用该包时在一次迁移中删除或修改多个列。</p>
 <p><a name="available-command-aliases"></a></p>
 <h4 id="可用的命令别名">可用的命令别名</h4>
 <p>Laravel 提供了几种常用的删除相关列的便捷方法。如下表所示：</p>
@@ -962,10 +1027,8 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 
 <span class="comment token">/**
  * 引导任何应用程序「全局配置」
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Schema::defaultStringLength(<span class="number token">191</span>);
 }
@@ -976,6 +1039,9 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <p>若要重命名索引，你需要调用 <code>renameIndex</code> 方法。此方法接受当前索引名称作为其第一个参数，并将所需名称作为其第二个参数：</p>
 <pre><code><span class="variable token">$table</span>-&gt;renameIndex(<span class="string token">'from'</span>, <span class="string token">'to'</span>)
 </code></pre>
+<blockquote>
+<p><strong>注意</strong><br>如果你的应用程序使用的是 SQLite 数据库，你必须通过 Composer 软件包管理器安装 <code>doctrine/dbal</code> 包，然后才能使用 <code>renameIndex</code> 方法。</p>
+</blockquote>
 <p><a name="dropping-indexes"></a></p>
 <h3 id="删除索引">删除索引</h3>
 <p>若要删除索引，则必须指定索引的名称。Laravel 默认会自动将数据表名称、索引的字段名及索引类型简单地连接在一起作为名称。举例如下：</p>
@@ -999,6 +1065,10 @@ Schema::table(<span class="string token">'users'</span>, <span class="keyword to
 <td>从「geo」表中删除基本索引</td>
 </tr>
 <tr>
+<td><code>$table-&gt;dropFullText(&#39;posts_body_fulltext&#39;);</code></td>
+<td>从「post」表中删除一个全文索引</td>
+</tr>
+<tr>
 <td><code>$table-&gt;dropSpatialIndex(&#39;geo_location_spatialindex&#39;);</code></td>
 <td>从「geo」表中删除空间索引（不支持 SQLite）</td>
 </tr>
@@ -1020,7 +1090,7 @@ Schema::table(<span class="string token">'posts'</span>, <span class="keyword to
     <span class="variable token">$table</span>-&gt;foreign(<span class="string token">'user_id'</span>)-&gt;references(<span class="string token">'id'</span>)-&gt;on(<span class="string token">'users'</span>);
 });
 </code></pre>
-<p>由于这种外键约束的定义方式过于繁复，Laravel 额外提供了更简洁的方法，基于约定来提供更好的开发人员体验。上面的示例还可以这么写：</p>
+<p>由于这种外键约束的定义方式过于繁复，Laravel 额外提供了更简洁的方法，基于约定来提供更好的开发人员体验。当使用 <code>foreignId</code> 方法来创建列时，上面的示例还可以这么写：</p>
 <pre><code>Schema::table(<span class="string token">'posts'</span>, <span class="keyword token">function</span> (Blueprint <span class="variable token">$table</span>) {
     <span class="variable token">$table</span>-&gt;foreignId(<span class="string token">'user_id'</span>)-&gt;constrained();
 });
@@ -1046,11 +1116,11 @@ Schema::table(<span class="string token">'posts'</span>, <span class="keyword to
 </thead>
 <tbody><tr>
 <td><code>$table-&gt;cascadeOnUpdate();</code></td>
-<td>更新应该级联。</td>
+<td>更新应该级联</td>
 </tr>
 <tr>
 <td><code>$table-&gt;restrictOnUpdate();</code></td>
-<td>应该限制更新。</td>
+<td>应该限制更新</td>
 </tr>
 <tr>
 <td><code>$table-&gt;cascadeOnDelete();</code></td>
@@ -1084,13 +1154,17 @@ Schema::table(<span class="string token">'posts'</span>, <span class="keyword to
 <pre><code>Schema::enableForeignKeyConstraints();
 
 Schema::disableForeignKeyConstraints();
+
+Schema::withoutForeignKeyConstraints(<span class="keyword token">function</span> () {
+    <span class="comment token">// 闭包中禁用的约束…</span>
+});
 </code></pre>
 <blockquote>
-<p>注意：SQLite 默认禁用外键约束。使用 SQLite 时，请确保在数据库配置中<a href="database.html#configuration">启用外键支持</a> 然后再尝试在迁移中创建它们。另外，SQLite 只在创建表时支持外键，并且<a href="https://www.sqlite.org/omitted.html">将在修改表时不会支持</a>。</p>
+<p>注意：SQLite 默认禁用外键约束。使用 SQLite 时，请确保在数据库配置中<a href="/docs/laravel/10.x/databasemd#configuration">启用外键支持</a> 然后再尝试在迁移中创建它们。另外，SQLite 只在创建表时支持外键，并且<a href="https://www.sqlite.org/omitted.html">将在修改表时不会支持</a>。</p>
 </blockquote>
 <p><a name="事件"></a></p>
 <h2 id="事件">事件</h2>
-<p>为方便起见，每个迁移操作都会派发一个 <a href="events.html">事件</a>。以下所有事件都扩展了基础 <code>Illuminate\Database\Events\MigrationEvent</code> 类：</p>
+<p>为方便起见，每个迁移操作都会派发一个 <a href="/docs/laravel/10.x/events">事件</a>。以下所有事件都扩展了基础 <code>Illuminate\Database\Events\MigrationEvent</code> 类：</p>
 <table>
 <thead>
 <tr>
