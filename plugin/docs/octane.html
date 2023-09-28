@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -19,7 +19,7 @@
 <body>
     <div class="markdown-body"><h1 id="laravel-octane">Laravel Octane</h1>
 <ul>
-<li><a href="#introduction">介绍</a></li>
+<li><a href="#introduction">简介</a></li>
 <li><a href="#installation">安装</a></li>
 <li><a href="#server-prerequisites">服务器先决条件</a><ul>
 <li><a href="#roadrunner">RoadRunner</a></li>
@@ -28,11 +28,11 @@
 </li>
 <li><a href="#serving-your-application">为应用程序提供服务</a><ul>
 <li><a href="#serving-your-application-via-https">通过 HTTPS 服务应用程序</a></li>
-<li><a href="#serving-your-application-via-nginx">通过 NGINX 提供服务</a></li>
-<li><a href="#watching-for-file-changes">监听文件更改</a></li>
-<li><a href="#specifying-the-worker-count">指定工作程序数量</a></li>
+<li><a href="#serving-your-application-via-nginx">通过 Nginx 提供服务</a></li>
+<li><a href="#watching-for-file-changes">监听文件修改</a></li>
+<li><a href="#specifying-the-worker-count">指定 Worker 数量</a></li>
 <li><a href="#specifying-the-max-request-count">指定最大请求数量</a></li>
-<li><a href="#reloading-the-workers">重载 workers</a></li>
+<li><a href="#reloading-the-workers">重载 Workers</a></li>
 <li><a href="#stopping-the-server">停止服务</a></li>
 </ul>
 </li>
@@ -44,13 +44,13 @@
 </li>
 <li><a href="#managing-memory-leaks">管理内存泄漏</a></li>
 <li><a href="#concurrent-tasks">并发任务</a></li>
-<li><a href="#ticks-and-intervals">刻度和间隔</a></li>
+<li><a href="#ticks-and-intervals">计时与间隔</a></li>
 <li><a href="#the-octane-cache">Octane 缓存</a></li>
 <li><a href="#tables">表</a></li>
 </ul>
 <p><a name="introduction"></a></p>
-<h2 id="介绍">介绍</h2>
-<p><a href="https://github.com/laravel/octane">Laravel Octane</a> 通过使用高性能应用程序服务器为您的应用程序提供服务来增强您的应用程序的性能，包括 <a href="https://swoole.co.uk">Open Swoole</a>，<a href="https://github.com/swoole/swoole-src">Swoole</a>，和 <a href="https://roadrunner.dev">RoadRunner</a>。Octane 启动您的应用程序一次，将其保存在内存中，然后以极快的速度向它提供请求。</p>
+<h2 id="简介">简介</h2>
+<p><a href="https://github.com/laravel/octane">Laravel Octane</a> 通过使用高性能应用程序服务器为您的应用程序提供服务来增强您的应用程序的性能，包括 <a href="https://openswoole.com/">Open Swoole</a>，<a href="https://github.com/swoole/swoole-src">Swoole</a>，和 <a href="https://roadrunner.dev">RoadRunner</a>。Octane 启动您的应用程序一次，将其保存在内存中，然后以极快的速度向它提供请求。</p>
 <p><a name="installation"></a></p>
 <h2 id="安装">安装</h2>
 <p>Octane 可以通过 Composer 包管理器安装：</p>
@@ -62,49 +62,57 @@
 <p><a name="server-prerequisites"></a></p>
 <h2 id="服务器先决条件">服务器先决条件</h2>
 <blockquote>
-<p>注意：Laravel Octane 需要 <a href="https://php.net/releases/">PHP 8.0+</a>.</p>
+<p><strong>注意</strong>
+Laravel Octane 需要 <a href="https://php.net/releases/">PHP 8.1+</a>.</p>
 </blockquote>
 <p><a name="roadrunner"></a></p>
 <h3 id="roadrunner">RoadRunner</h3>
 <p><a href="https://roadrunner.dev">RoadRunner</a> 由使用 Go 构建的 RoadRunner 二进制文件提供支持。当您第一次启动基于 RoadRunner 的 Octane 服务器时，Octane 将为您提供下载和安装 RoadRunner 二进制文件。</p>
 <p><a name="roadrunner-via-laravel-sail"></a></p>
-<h4 id="通过-laravel-sail-安装-roadrunner">通过 Laravel Sail 安装 RoadRunner</h4>
-<p>如果你打算使用 <a href="sail.html">Laravel Sail</a> 开发你的应用程序，你应该运行以下命令来安装 Octane 和 RoadRunner：</p>
+<h4 id="通过-laravel-sail-使用-roadrunner">通过 Laravel Sail 使用 RoadRunner</h4>
+<p>如果你打算使用 <a href="/docs/laravel/10.x/sail">Laravel Sail</a> 开发应用，你应该运行如下命令安装 Octane 和 RoadRunner:</p>
 <pre><code class="language-shell">./vendor/bin/sail up
 
 ./vendor/bin/sail composer <span class="keyword token">require</span> laravel/octane spiral/roadrunner
 </code></pre>
-<p>接下来应启动 Sail shell 并使用 <code>rr</code> 可执行文件来检查基于 Linux 的最新版本的 RoadRunner 二进制文件：</p>
+<p>接下来，你应该启动一个 Sail Shell，并运行 <code>rr</code> 可执行文件检索基于 Linux 的最新版 RoadRunner 二进制文件：</p>
 <pre><code class="language-shell">./vendor/bin/sail shell
 
 <span class="comment token"># Within the Sail shell...</span>
 ./vendor/bin/rr get-binary
 </code></pre>
-<p>安装 RoadRunner 二进制文件后可退出 Sail shell 会话。接下来需要调整 Sail 使用的 <code>supervisor.conf</code> 文件以保持应用运行。首先，执行 <code>sail:publish</code> Artisan 命令：</p>
+<p>安装完 RoadRunner 二进制文件后，你可以退出 Sail Shell 会话。然后，需要调整 Sail 用来保持应用运行的 <code>supervisor.conf</code> 文件。首先，请执行 <code>sail:publish</code> Artisan 命令：</p>
 <pre><code class="language-shell">./vendor/bin/sail artisan sail:publish
 </code></pre>
-<p>接下来，更新应用程序的 <code>docker/supervisord.conf</code> 文件的 <code>command</code> 指令，以便 Sail 使用 Octane 作为服务器为你的应用提供服务：</p>
-<pre><code class="language-ini">command=/usr/bin/php -d variables_order=EGPCS /<span class="keyword token">var</span>/www/html/artisan octane:start --server=roadrunner --host=<span class="number token">0.0</span>.<span class="number token">0.0</span> --rpc-port=<span class="number token">6001</span> --port=<span class="number token">8000</span>
+<p>接着，更新应用 <code>docker/supervisord.confd</code> 文件中的 <code>command</code> 指令，这样 Sail 就可以使用 Octane 作为服务器，而非 PHP 开发服务器，运行服务了：</p>
+<pre><code class="language-ini">command=/usr/bin/php -d variables_order=EGPCS /<span class="keyword token">var</span>/www/html/artisan octane:start --server=roadrunner --host=<span class="number token">0.0</span>.<span class="number token">0.0</span> --rpc-port=<span class="number token">6001</span> --port=<span class="number token">80</span>
 </code></pre>
-<p>最后，确保 <code>rr</code> 二进制文件是可执行的并重新构建 Sail 镜像：</p>
+<p>最后，请确保 <code>rr</code> 二进制文件是可执行的并重新构建 Sail 镜像：</p>
 <pre><code class="language-shell">chmod +x ./rr
 
 ./vendor/bin/sail build --no-cache
 </code></pre>
 <p><a name="swoole"></a></p>
 <h3 id="swoole">Swoole</h3>
-<p>如果你打算使用 Swoole 应用服务器来配合 Laravel Octane，你必须安装 Swoole PHP 扩展。通常可以通过 PECL 完成：</p>
+<p>如果你打算使用 Swoole 服务器来运行 Laravel Octane 应用，你必须安装 Swoole PHP 组件。通常可以通过 PECL 安装：</p>
 <pre><code class="language-shell">pecl install swoole
 </code></pre>
+<p><a name="openswoole"></a></p>
+<h4 id="open-swoole">Open Swoole</h4>
+<p>如果你想要使用 Open Swoole 服务器运行 Laravel Octane 应用，你必须安装 Open Swoole PHP 扩展。通常可以通过 PECL 完成安装：</p>
+<pre><code class="language-shell">pecl install openswoole
+</code></pre>
+<p>通过 Open Swoole 使用 Laravel Octane，可以获得 Swoole 提供的相同功能，如并发任务，计时和间隔。</p>
 <p><a name="swoole-via-laravel-sail"></a></p>
 <h4 id="通过-laravel-sail-使用-swoole">通过 Laravel Sail 使用 Swoole</h4>
 <blockquote>
-<p>注意：在通过 Sail 提供 Octane 应用程序之前，请确保你使用的是最新版本的 Laravel Sail 并在应用程序的根目录中执行 <code>./vendor/bin/sail build --no-cache</code>。</p>
+<p><strong>注意</strong>
+在通过 Sail 提供 Octane 应用程序之前，请确保你使用的是最新版本的 Laravel Sail 并在应用程序的根目录中执行 <code>./vendor/bin/sail build --no-cache</code>。</p>
 </blockquote>
-<p>你可以使用 <a href="sail.html">Laravel Sail</a> （Laravel 基于 Docker 的官方开发环境）开发基于 Swoole 的 Octane 应用程序。Laravel Sail 默认包含 Swoole 扩展。但是，你仍然需要调整 Sail 使用的 <code>supervisor.conf</code> 文件以保持应用运行。首先，执行 <code>sail:publish</code> Artisan 命令：</p>
+<p>你可以使用 Laravel 的官方 Docker 开发环境 <a href="/docs/laravel/10.x/sail">Laravel Sail</a> 开发基于 Swoole 的 Octane 应用程序。 Laravel Sail 默认包含 Swoole 扩展。但是，你仍然需要调整 Sail 使用的 <code>supervisor.conf</code> 件以保持应用运行。首先，执行 <code>sail:publish</code> Artisan 命令：</p>
 <pre><code class="language-shell">./vendor/bin/sail artisan sail:publish
 </code></pre>
-<p>接下来，更新应用程序的 <code>docker/supervisord.conf</code> 文件的 <code>command</code> 指令，以便 Sail 使用 Octane 替代 PHP 开发服务器：</p>
+<p>接下来，更新应用程序的 <code>docker/supervisord.conf</code> 文件的 <code>command</code> 指令，使得 Sail 使用 Octane 替代 PHP 开发服务器：</p>
 <pre><code class="language-ini">command=/usr/bin/php -d variables_order=EGPCS /<span class="keyword token">var</span>/www/html/artisan octane:start --server=swoole --host=<span class="number token">0.0</span>.<span class="number token">0.0</span> --port=<span class="number token">80</span>
 </code></pre>
 <p>最后，构建你的 Sail 镜像：</p>
@@ -112,29 +120,30 @@
 </code></pre>
 <p><a name="swoole-configuration"></a></p>
 <h4 id="swoole-配置">Swoole 配置</h4>
-<p>Swoole 支持一些额外的配置选项，如果需要，你可以将它们添加到您的 <code>octane</code> 配置文件中。因为它们很少需要修改，所以这些选项不包含在默认配置文件中：</p>
+<p>Swoole 支持一些额外的配置选项，如果需要，你可以将它们添加到你的 <code>octane</code> 配置文件中。因为它们很少需要修改，所以这些选项不包含在默认配置文件中：</p>
 <pre><code class="language-php">'swoole' =&gt; [
     'options' =&gt; [
         'log_file' =&gt; storage_path('logs/swoole_http.log'),
         'package_max_length' =&gt; 10 * 1024 * 1024,
     ],
-];
+],
 </code></pre>
 <p><a name="serving-your-application"></a></p>
-<h2 id="启用服务">启用服务</h2>
-<p>Octane 服务器可以通过 <code>octane:start</code> Artisan 命令启动。此命令将使用由应用程序的 <code>octane</code> 配置文件的 <code>server</code> 配置选项指定的服务器：</p>
+<h2 id="为应用程序提供服务">为应用程序提供服务</h2>
+<p>Octane 服务器可以通过 <code>octane:start</code>  Artisan 命令启动。此命令将使用由应用程序的 <code>octane</code> 配置文件的 <code>server</code> 配置选项指定的服务器：</p>
 <pre><code class="language-shell">php artisan octane:start
 </code></pre>
-<p>Octane 将在 8000 端口上启动服务器（可配置），因此你可以在 Web 浏览器中通过 <code>http://localhost:8000</code> 访问你的应用程序。</p>
+<p>默认情况下，Octane 将在 8000 端口上启动服务器（可配置），因此你可以在 Web 浏览器中通过 <code>http://localhost:8000</code> 访问你的应用程序。</p>
 <p><a name="serving-your-application-via-https"></a></p>
 <h3 id="通过-https-为应用程序提供服务">通过 HTTPS 为应用程序提供服务</h3>
-<p>默认情况下，通过 Octane 运行的应用程序会生成以 <code>http://</code> 为前缀的链接。当使用 HTTPS 时，可将在应用的<code>config/octane.php</code> 配置文件中使用的 <code>OCTANE_HTTPS</code> 环境变量设置为 <code>true</code>。当此配置值设置为 <code>true</code> 时，Octane 将指示 Laravel 在所有生成的链接前加上 <code>https://</code>：</p>
+<p>默认情况下，通过 Octane 运行的应用程序会生成以 <code>http://</code> 为前缀的链接。当使用 HTTPS 时，可将在应用的 <code>config/octane.php</code> 配置文件中使用的 <code>OCTANE_HTTPS</code> 环境变量设置为 <code>true</code>。当此配置值设置为 <code>true</code> 时，Octane 将指示 Laravel 在所有生成的链接前加上 <code>https://</code>：</p>
 <pre><code class="language-php"><span class="string token">'https'</span> =&gt; env(<span class="string token">'OCTANE_HTTPS'</span>, <span class="keyword token">false</span>),
 </code></pre>
 <p><a name="serving-your-application-via-nginx"></a></p>
 <h3 id="通过-nginx-为应用提供服务">通过 Nginx 为应用提供服务</h3>
 <blockquote>
-<p>提示：如果你还没有准备好管理自己的服务器配置，或者不习惯配置运行健壮的 Laravel Octane 应用所需的所有各种服务，请查看 <a href="https://forge.laravel.com">Laravel Forge</a>。</p>
+<p><strong>提示</strong>
+如果你还没有准备好管理自己的服务器配置，或者不习惯配置运行健壮的 Laravel Octane 应用所需的所有各种服务，请查看 <a href="https://forge.laravel.com">Laravel Forge</a>。</p>
 </blockquote>
 <p>在生产环境中，你应该在传统 Web 服务器（例如 Nginx 或 Apache）之后为 Octane 应用提供服务。 这样做将允许 Web 服务器为你的静态资源（例如图片和样式表）提供服务，并管理 SSL 证书。</p>
 <p>在下面的 Nginx 配置示例文件中，Nginx 将向在端口 8000 上运行的 Octane 服务器提供站点的静态资源和代理请求：</p>
@@ -191,25 +200,25 @@ server {
 }
 </code></pre>
 <p><a name="watching-for-file-changes"></a></p>
-<h3 id="监视文件修改">监视文件修改</h3>
-<p>由于应用在 Octane 服务启动时已经加载到内存中了，因此代码修改后不会起作用。例如，<code>routes/web.php</code> 文件增加路由，在服务重启之前，都不会生效。为了方便，可以使用 <code>--watch</code> 标识来让 Octane 在应用中任何文件修改时都能够自动重启：</p>
+<h3 id="监视文件更改">监视文件更改</h3>
+<p>由于 Octane 服务器启动时应用程序被加载到内存中一次，因此对应用程序文件的任何更改都不会在您刷新浏览器时反映出来。例如，添加到 <code>routes/web.php</code> 文件的路由定义在服务器重新启动之前不会反映出来。为了方便起见，你可以使用 <code>--watch</code> 标志指示 Octane 在应用程序中的任何文件更改时自动重新启动服务器：</p>
 <pre><code class="language-shell">php artisan octane:start --watch
 </code></pre>
-<p>使用该功能之前，必须保证本地开发环境安装了 <a href="https://nodejs.org">Node</a> 。并且在项目库中安装 <a href="https://github.com/paulmillr/chokidar">Chokidar</a> 文件监视库：</p>
+<p>在使用此功能之前，您应该确保在本地开发环境中安装了 <a href="https://nodejs.org/">Node</a>。此外，你还应该在项目中安装 <a href="https://github.com/paulmillr/chokidar">Chokidar</a> 文件监视库：</p>
 <pre><code class="language-shell">npm install --save-dev chokidar
 </code></pre>
-<p>你可以使用应用程序的 <code>config/octane.php</code> 配置文件中的 <code>watch</code> 配置选项配置应监视的目录和文件。</p>
+<p>你可以使用应用程序的 <code>config/octane.php</code> 配置文件中的 <code>watch</code> 配置选项来配置应该被监视的目录和文件。</p>
 <p><a name="specifying-the-worker-count"></a></p>
-<h3 id="指定线程数">指定线程数</h3>
-<p>默认，Octane 会对机器的每个 CPU 核心启动一个应用线程。这些线程将处理进入应用的 HTTP 请求。你可以通过 <code>octane:start</code> 命令的 <code>--workers</code> 参数手动设置线程数：</p>
+<h3 id="指定工作进程数">指定工作进程数</h3>
+<p>默认情况下，Octane 会为机器提供的每个 CPU 核心启动一个应用程序请求工作进程。这些工作进程将用于在进入应用程序时服务传入的 HTTP 请求。你可以使用 <code>--workers</code> 选项手动指定要启动的工作进程数量，当调用 <code>octane:start</code> 命令时：</p>
 <pre><code class="language-shell">php artisan octane:start --workers=4
 </code></pre>
-<p>如果是使用 Swoole 服务，可以设置 <a href="#concurrent-tasks">「任务线程」</a> 数量：</p>
+<p>如果你使用 Swoole 应用程序服务器，则还可以指定要启动的任务工作进程数量：</p>
 <pre><code class="language-shell">php artisan octane:start --workers=4 --task-workers=6
 </code></pre>
 <p><a name="specifying-the-max-request-count"></a></p>
-<h3 id="指定最大请求计数">指定最大请求计数</h3>
-<p>为了防止内存泄漏，Octane 可在处理了给定数量的请求后优雅地重新启动 worker。要指示 Octane 执行此操作，你可以使用 <code>--max-requests</code> 选项：</p>
+<h3 id="指定最大请求数量">指定最大请求数量</h3>
+<p>为了防止内存泄漏，Octane 在处理完 500 个请求后会优雅地重新启动任何 worker。要调整这个数字，你可以使用 <code>--max-requests</code> 选项：</p>
 <pre><code class="language-shell">php artisan octane:start --max-requests=250
 </code></pre>
 <p><a name="reloading-the-workers"></a></p>
@@ -219,7 +228,7 @@ server {
 </code></pre>
 <p><a name="stopping-the-server"></a></p>
 <h3 id="停止服务器">停止服务器</h3>
-<p>你可以使用 <code>octane:stop</code> Artisan 命令停止 Octane 服务器：</p>
+<p>你可以使用  <code>octane:stop</code> Artisan 命令停止 Octane 服务器：</p>
 <pre><code class="language-shell">php artisan octane:stop
 </code></pre>
 <p><a name="checking-the-server-status"></a></p>
@@ -229,32 +238,32 @@ server {
 </code></pre>
 <p><a name="dependency-injection-and-octane"></a></p>
 <h2 id="依赖注入和-octane">依赖注入和 Octane</h2>
-<p>由于 Octane 会引导你的应用程序一次并在服务请求时将其保存在内存中，因此在构建应用程序时应考虑一些注意事项。例如，应用程序服务提供者的 <code>register</code> 和 <code>boot</code> 方法只会在 request worker 初始启动时执行一次。在后续请求中，将重用相同的应用程序实例。</p>
-<p>鉴于这个机制，在将应用服务容器或请求注入任何对象的构造函数时应特别小心。该对象需支持容器的陈旧版本用以对后续请求的支持。</p>
-<p>Octane 将自动处理在请求之间重置框架状态。但是，Octane 并不总是知道如何重置由你的应用创建的全局状态。因此，你应该了解如何以一种对 Octane 友好的方式构建你的应用。下面，我们将讨论在使用 Octane 时可能导致问题的常见情况。</p>
+<p>由于 Octane 只启动你的应用程序一次，并在服务请求时将其保留在内存中，所以在构建你的应用程序时，你应该考虑一些注意事项。例如，你的应用程序的服务提供者的 <code>register</code> 和 <code>boot</code> 方法将只在 request worker 最初启动时执行一次。在随后的请求中，将重用相同的应用程序实例。</p>
+<p>鉴于这个机制，在将应用服务容器或请求注入任何对象的构造函数时应特别小心。这样一来，该对象在随后的请求中就可能有一个稳定版本的容器或请求。</p>
+<p>Octane 会在两次请求之间自动处理重置任何第一方框架的状态。然而，Octane 并不总是知道如何重置由你的应用程序创建的全局状态。因此，你应该知道如何以一种对 Octane 友好的方式来构建你的应用程序。下面，我们将讨论在使用 Octane 时可能引起问题的最常见情况。</p>
 <p><a name="container-injection"></a></p>
 <h3 id="容器注入">容器注入</h3>
-<p>一般来说，你应该避免将应用服务容器或 HTTP 请求实例注入到其他对象的构造函数中。例如，以下绑定将整个应用程序服务容器注入到绑定为单例的对象中：</p>
+<p>通常来说，你应该避免将应用服务容器或 HTTP 请求实例注入到其他对象的构造函数中。例如，下面的绑定将整个应用服务容器注入到绑定为单例的对象中：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
 <span class="comment token">/**
- * 注册应用服务。
- *
- *<span class="phpdoc token"> @return</span> void
+ * Register any application services.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+<span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
 {
-    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
         <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>);
     });
 }
 </code></pre>
-<p>在此示例中，如果在应用程序启动过程中解析了 <code>Service</code> 实例，则容器将被注入到服务中，并且该容器将在后续请求中由 <code>Service</code> 实例持有。这 <strong>可能</strong> 对于你的特定应用程序来说不是问题；但是，它可能导致容器意外丢失在引导周期后期或后续请求中添加的绑定。</p>
-<p>作为解决方法，可以停止将绑定注册为单例，或者将容器解析器闭包注入到始终解析当前容器实例的服务中：</p>
+<p>在这个例子中，如果在应用程序引导过程中解析 <code>Service</code> 实例，容器将被注入到该服务中，并且该容器将在后续的请求中保留。这对于你的特定应用程序<strong>可能</strong>不是一个问题，但是它可能会导致容器意外地缺少后来在引导过程中添加的绑定或后续请求中添加的绑定。</p>
+<p>为了解决这个问题，你可以停止将绑定注册为单例，或者你可以将一个容器解析器闭包注入到服务中，该闭包总是解析当前的容器实例：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
 <span class="keyword token">use</span> Illuminate\Container\Container;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
-<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>);
 });
 
@@ -262,33 +271,33 @@ server {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(fn () =&gt; Container::getInstance());
 });
 </code></pre>
-<p>全局 <code>app</code> 助手和 <code>Container::getInstance()</code> 方法会一直返回应用容器的最新版本。</p>
+<p>全局的 <code>app</code> 辅助函数和 <code>Container::getInstance()</code> 方法将始终返回应用程序容器的最新版本。</p>
 <p><a name="request-injection"></a></p>
 <h3 id="请求注入">请求注入</h3>
-<p>通常，你应该避免在其他对象的构造器中注入应用服务容器或 HTTP 请求实例。例如，下面将一整个请求实例作为单例绑定到一个对象上：</p>
+<p>通常来说，你应该避免将应用服务容器或 HTTP 请求实例注入到其他对象的构造函数中。例如，下面的绑定将整个请求实例注入到绑定为单例的对象中：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
 <span class="comment token">/**
- * 注册应用服务。
- *
- *<span class="phpdoc token"> @return</span> void
+ * Register any application services.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+<span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
 {
-    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
         <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>[<span class="string token">'request'</span>]);
     });
 }
 </code></pre>
-<p>例子中，如果 <code>Service</code> 实例在应用启动时生成，HTTP 请求会注入到这个服务中，随后请求中的相同请求都会被 <code>Service</code> 实例处理。这样，全部的 headers ，输入，和查询数据，以及其他数据都会不正确的。</p>
-<p>想要解决此问题，就需要停止单例绑定，或者将请求处理程序注入到一个始终生成当前请求实例的服务中。又或者，最推荐的方法是将对象需要的请求信息作为传参：</p>
+<p>在这个例子中，如果在应用程序启动过程中解析 <code>Service</code> 实例，则会将 HTTP 请求注入到服务中，并且相同的请求将由 <code>Service</code> 实例保持在后续请求中。因此，所有标头、输入和查询字符串数据以及所有其他请求数据都将不正确。</p>
+<p>为了解决这个问题，你可以停止将绑定注册为单例，或者你可以将请求解析器闭包注入到服务中，该闭包始终解析当前请求实例。或者，最推荐的方法是在运行时将对象所需的特定请求信息传递给对象的方法之一：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
-<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>[<span class="string token">'request'</span>]);
 });
 
-<span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+<span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(fn () =&gt; <span class="variable token">$app</span>[<span class="string token">'request'</span>]);
 });
 
@@ -296,33 +305,34 @@ server {
 
 <span class="variable token">$service</span>-&gt;method(<span class="variable token">$request</span>-&gt;input(<span class="string token">'name'</span>));
 </code></pre>
-<p>全局 <code>request</code> 助手始终返回当前处理的请求，因此可以安全地使用。</p>
+<p>全局的 <code>request</code> 帮助函数将始终返回应用程序当前处理的请求，因此可以在应用程序中安全使用它。</p>
 <blockquote>
-<p>提示：控制器方法中或者路由闭包中，依然可以使用 <code>Illuminate\Http\Request</code> 作为类型提示。</p>
+<p><strong>警告</strong>
+在控制器方法和路由闭包中类型提示 Illuminate\Http\Request 实例是可以接受的。</p>
 </blockquote>
 <p><a name="configuration-repository-injection"></a></p>
-<h3 id="配置仓库注入">配置仓库注入</h3>
-<p>通常，应该避免将配置仓库实例注入到其他对象的构造器中。例如，下面的绑定将配置仓库作为单例注入到对象中：</p>
+<h3 id="配置库注入">配置库注入</h3>
+<p>一般来说，你应该避免将配置库实例注入到其他对象的构造函数中。例如，以下绑定将配置库注入到绑定为单例的对象中：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
 <span class="comment token">/**
- * 注册程序服务
- *
- *<span class="phpdoc token"> @return</span> void
+ * Register any application services.
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+<span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
 {
-    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+    <span class="variable token">$this</span>-&gt;app-&gt;singleton(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
         <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>-&gt;make(<span class="string token">'config'</span>));
     });
 }
 </code></pre>
-<p>例子中，如果请求中的配置值改变了，服务将无法获取新值，因为它依赖原始的仓库实例。</p>
-<p>如要解决，应该停止单例绑定，或者将配置仓库注入到一个类中：</p>
+<p>在这个示例中，如果在请求之间的配置值更改了，那么这个服务将无法访问新的值，因为它依赖于原始存储库实例。</p>
+<p>作为解决方法，你可以停止将绑定注册为单例，或者将配置存储库解析器闭包注入到类中：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
 <span class="keyword token">use</span> Illuminate\Container\Container;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
 
-<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (<span class="variable token">$app</span>) {
+<span class="variable token">$this</span>-&gt;app-&gt;bind(Service::<span class="keyword token">class</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(<span class="variable token">$app</span>-&gt;make(<span class="string token">'config'</span>));
 });
 
@@ -330,34 +340,34 @@ server {
     <span class="keyword token">return</span> <span class="keyword token">new</span> Service(fn () =&gt; Container::getInstance()-&gt;make(<span class="string token">'config'</span>));
 });
 </code></pre>
-<p>全局 <code>config</code> 始终返回配置仓库的最新版本 ，可以安全地使用它。</p>
+<p>全局 <code>config</code> 将始终返回配置存储库的最新版本，因此在应用程序中使用是安全的。</p>
 <p><a name="managing-memory-leaks"></a></p>
 <h3 id="管理内存泄漏">管理内存泄漏</h3>
-<p>记住， 在请求中，Octane 将应用维护在内存中；因此，向静态数组中添加数据，可能会造成内存泄漏。例如，下面的控制器存在内存泄漏，因为每个请求持续向静态数组 <code>$data</code> 中添加数据：</p>
+<p>请记住，Octane 在请求之间保留应用程序，因此将数据添加到静态维护的数组中将导致内存泄漏。例如，以下控制器具有内存泄漏，因为对应用程序的每个请求将继续向静态的 <code>$data</code> 数组添加数据：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Service;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 <span class="keyword token">use</span> Illuminate\Support\Str;
 
 <span class="comment token">/**
- * 处理列表请求
- *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
- *<span class="phpdoc token"> @return</span> void
+ * 处理传入的请求。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>): <span class="keyword token">array</span>
 {
     Service::<span class="variable token">$data</span>[] = Str::random(<span class="number token">10</span>);
 
-    <span class="comment token">// ...</span>
+    <span class="keyword token">return</span> [
+        <span class="comment token">// ...</span>
+    ];
 }
 </code></pre>
-<p>开发应用时，需要特别注意尽量避免造成这些类型的内存泄漏。本地开发时时刻监控内存使用情况，从而确保不会造成新的内存泄漏。</p>
+<p>在构建应用程序时，你应特别注意避免创建此类内存泄漏。建议在本地开发期间监视应用程序的内存使用情况，以确保您不会在应用程序中引入新的内存泄漏。</p>
 <p><a name="concurrent-tasks"></a></p>
-<h2 id="并行任务">并行任务</h2>
+<h2 id="并发任务">并发任务</h2>
 <blockquote>
-<p>注意：这个功能仅支持 <a href="#swoole">Swoole</a>.</p>
+<p><strong>警告</strong>
+此功能需要 <a href="#swoole">Swoole</a>。</p>
 </blockquote>
-<p>Swoole 允许并行执行一些轻量化的后台任务。 这可以通过 Octane 的 <code>concurrently</code> 方法实现。可以将这个方法与 PHP 数组解构结合来接收每个操作的结果：</p>
+<p>当使用 Swoole 时，你可以通过轻量级的后台任务并发执行操作。你可以使用 Octane 的 <code>concurrently</code> 方法实现此目的。你可以将此方法与 PHP 数组解构结合使用，以检索每个操作的结果：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\User;
 <span class="keyword token">use</span> App\Server;
 <span class="keyword token">use</span> Laravel\Octane\Facades\Octane;
@@ -367,20 +377,22 @@ server {
     fn () =&gt; Server::all(),
 ]);
 </code></pre>
-<p>Octane 利用 Swoole 的 “task workers” 处理并行任务，在与传入请求完全不同的进程中执行。并行任务可用的执行者的数量由 <code>octane:start</code> 命令的 <code>--task-workers</code> 参数决定：</p>
+<p>由 Octane 处理的并发任务利用 Swoole 的 「task workers」 并在与传入请求完全不同的进程中执行。可用于处理并发任务的工作程序的数量由 <code>octane:start</code> 命令的 <code>--task-workers</code> 指令确定：</p>
 <pre><code class="language-shell">php artisan octane:start --workers=4 --task-workers=6
 </code></pre>
+<p>在调用 <code>concurrently</code> 方法时，你应该不要提供超过 1024 个任务，因为 Swoole 任务系统强制执行此限制。</p>
 <p><a name="ticks-and-intervals"></a></p>
-<h2 id="计时与间隔">计时与间隔</h2>
+<h2 id="刻度和间隔">刻度和间隔</h2>
 <blockquote>
-<p>注意：此功能仅支持 <a href="#swoole">Swoole</a>.</p>
+<p><strong>警告</strong>
+此功能需要 <a href="#swoole">Swoole</a>.</p>
 </blockquote>
-<p>Swoole 中，“计时”操作能够按指定的秒数间隔执行。<code>tick</code> 方法可以注册 “计时” 回调操作。<code>tick</code> 方法的第一个参数代表计时器的名称，第二个参数代表指定间隔执行的回调。</p>
-<p>例子中，注册了一个每 10 秒执行一次的闭包。通常，<code>tick</code> 方法应该在应用服务提供者的 <code>boot</code> 方法中调用：</p>
+<p>当使用 Swoole 时，你可以注册定期执行的 「tick」 操作。你可以通过 <code>tick</code> 方法注册 「tick」 回调函数。提供给 <code>tick</code> 方法的第一个参数应该是一个字符串，表示定时器的名称。第二个参数应该是在指定间隔内调用的可调用对象。</p>
+<p>在此示例中，我们将注册一个闭包，每 10 秒调用一次。通常，<code>tick</code> 方法应该在你应用程序的任何服务提供程序的 <code>boot</code> 方法中调用：</p>
 <pre><code class="language-php">Octane::tick('simple-ticker', fn () =&gt; ray('Ticking...'))
         -&gt;seconds(10);
 </code></pre>
-<p>使用 <code>immediate</code> 方法指示 Octane 在启动服务时立即调用 tick 回调，此后每 N 秒调用一次：</p>
+<p>使用 <code>immediate</code> 方法，你可以指示 Octane 在 Octane 服务器初始启动时立即调用 tick 回调，并在 N 秒后每次调用：</p>
 <pre><code class="language-php">Octane::tick('simple-ticker', fn () =&gt; ray('Ticking...'))
         -&gt;seconds(10)
         -&gt;immediate();
@@ -388,30 +400,33 @@ server {
 <p><a name="the-octane-cache"></a></p>
 <h2 id="octane-缓存">Octane 缓存</h2>
 <blockquote>
-<p>注意：此功能仅支持 <a href="#swoole">Swoole</a>.</p>
+<p><strong>警告</strong>
+此功能需要 <a href="#swoole">Swoole</a>.</p>
 </blockquote>
-<p>使用 Swoole 时，你可以利用 Octane 缓存驱动程序，它提供高达每秒 200 万次操作的读取和写入速度。因此，对于需要从其缓存层获得极高读/写速度的应用程序，此缓存驱动程序是绝佳选择。</p>
-<p>此缓存驱动程序由 <a href="https://www.swoole.co.uk/docs/modules/swoole-table">Swoole tables</a> 提供支持。 服务器上的所有 Workers 都可以使用缓存中存储的所有数据。但是，当服务器重新启动时，缓存的数据将被刷新：</p>
+<p>使用 Swoole 时，你可以利用 Octane 缓存驱动程序，该驱动程序提供每秒高达 200 万次的读写速度。因此，这个缓存驱动程序是需要从缓存层中获得极高读写速度的应用程序的绝佳选择。</p>
+<p>该缓存驱动程序由 <a href="https://www.swoole.co.uk/docs/modules/swoole-table">Swoole tables</a> 驱动。缓存中的所有数据可供服务器上的所有工作进程访问。但是，当服务器重新启动时，缓存数据将被清除：</p>
 <pre><code class="language-php">Cache::store('octane')-&gt;put('framework', 'Laravel', 30);
 </code></pre>
 <blockquote>
-<p>技巧：Octane 缓存中允许的最大条目数可以在应用程序的 <code>octane</code> 配置文件中定义。</p>
+<p><strong>注意</strong>
+Octane 缓存中允许的最大条目数可以在您的应用程序的 octane 配置文件中定义。</p>
 </blockquote>
 <p><a name="cache-intervals"></a></p>
 <h3 id="缓存间隔">缓存间隔</h3>
-<p>除了 Laravel 缓存系统提供的常见方法之外，Octane 缓存驱动程序还具有基于间隔的缓存。这些缓存会在指定的时间间隔自动刷新，并且应该在你的应用程序服务提供商之一的<code>boot</code>方法中注册。例如，以下缓存将每五秒刷新一次：</p>
+<p>除了 Laravel 缓存系统提供的典型方法外，Octane 缓存驱动程序还提供了基于间隔的缓存。这些缓存会在指定的间隔自动刷新，并应在一个应用程序服务提供程序的 <code>boot</code> 方法中注册。例如，以下缓存将每五秒刷新一次：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Str;
 
 Cache::store(<span class="string token">'octane'</span>)-&gt;interval(<span class="string token">'random'</span>, <span class="keyword token">function</span> () {
     <span class="keyword token">return</span> Str::random(<span class="number token">10</span>);
-}, seconds: <span class="number token">5</span>)
+}, seconds: <span class="number token">5</span>);
 </code></pre>
 <p><a name="tables"></a></p>
-<h2 id="表">表</h2>
+<h2 id="表格">表格</h2>
 <blockquote>
-<p>注意：此功能仅支持 <a href="#swoole">Swoole</a>.</p>
+<p><strong>警告</strong>
+此功能需要 <a href="#swoole">Swoole</a>.</p>
 </blockquote>
-<p>使用 Swoole 时，你可以定义自己的任意 <a href="https://www.swoole.co.uk/docs/modules/swoole-table">Swoole tables</a> 并与之交互。 Swoole table 提供了极高的性能吞吐量，服务器上的所有 Workers 都可以访问这些表中的数据。但是，当服务器重新启动时，其中的数据将丢失。</p>
+<p>使用 Swoole 时，你可以定义和与自己的任意 <a href="https://www.swoole.co.uk/docs/modules/swoole-table">Swoole tables</a> 进行交互。Swoole tables 提供极高的性能吞吐量，并且可以通过服务器上的所有工作进程访问其中的数据。但是，当它们内部的数据在服务器重新启动时将被丢失。</p>
 <p>表在应用 <code>octane</code> 配置文件 <code>tables</code> 数组配置中设定。最大运行 1000 行的示例表已经配置。像下面这样，字符串行支持的最大长度在列类型后面设置：</p>
 <pre><code class="language-php">'tables' =&gt; [
     'example:1000' =&gt; [
@@ -431,7 +446,8 @@ Octane::table(<span class="string token">'example'</span>)-&gt;set(<span class="
 <span class="keyword token">return</span> Octane::table(<span class="string token">'example'</span>)-&gt;get(<span class="string token">'uuid'</span>);
 </code></pre>
 <blockquote>
-<p>注意：Swoole table 支持的列类型有： <code>string</code> ，<code>int</code> 和 <code>float</code> 。</p>
+<p><strong>注意</strong>
+Swoole table 支持的列类型有： <code>string</code> ，<code>int</code> 和 <code>float</code> 。</p>
 </blockquote>
 </div>
     <blockquote style="font-size: 0.9em;">
