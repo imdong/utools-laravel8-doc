@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -33,30 +33,30 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p>中间件提供了一种方便的机制来检查和过滤进入应用程序的 HTTP 请求。 例如，Laravel 包含一个中间件，用于验证您的应用程序的用户是否经过身份验证。 如果用户未通过身份验证，中间件会将用户重定向到应用程序的登录屏幕。 但是，如果用户通过了身份验证，中间件将允许请求进一步进入应用程序。</p>
-<p>除了身份验证之外，还可以编写其他中间件来执行各种任务。例如，日志中间件可能会将所有传入请求记录到您的应用程序。Laravel 框架中包含了几个中间件，包括用于身份验证和 CSRF 保护的中间件。 所有这些中间件都位于 <code>app/Http/Middleware</code> 目录中。</p>
+<p>中间件提供了一种方便的机制来检查和过滤进入应用程序的 HTTP 请求。例如，Laravel 包含一个中间件，用于验证应用程序的用户是否经过身份验证。如果用户未通过身份验证，中间件会将用户重定向到应用程序的登录屏幕。 但是，如果用户通过了身份验证，中间件将允许请求进一步进入应用程序。</p>
+<p>除了身份验证之外，还可以编写其他中间件来执行各种任务。例如，日志中间件可能会将所有传入请求记录到你的应用程序。Laravel 框架中包含了几个中间件，包括用于身份验证和 CSRF 保护的中间件。所有这些中间件都位于 <code>app/Http/Middleware</code> 目录中。</p>
 <p><a name="defining-middleware"></a></p>
 <h2 id="定义中间件">定义中间件</h2>
-<p>要创建新的中间件，请使用 <code>make:middleware</code> Artisan 命令：</p>
+<p>要创建新的中间件，请使用 <code>make:middleware</code> Artisan 命令：</p>
 <pre><code class="language-shell">php artisan make:middleware EnsureTokenIsValid
 </code></pre>
-<p>此命令将在您的 <code>app/Http/Middleware</code> 目录中放置一个新的 <code>EnsureTokenIsValid</code> 类。在这个中间件中，如果提供的 <code>token</code> 输入匹配指定的值，我们将只允许访问路由。否则，我们会将用户重定向回 <code>home</code> URI：</p>
+<p>此命令将在你的 <code>app/Http/Middleware</code> 目录中放置一个新的 <code>EnsureTokenIsValid</code> 类。在这个中间件中，如果提供的 <code>token</code> 输入匹配指定的值，我们将只允许访问路由。否则，我们会将用户重定向回 <code>home</code> URI：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Middleware;
 
 <span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
 
 <span class="keyword token">class</span> EnsureTokenIsValid
 {
     <span class="comment token">/**
-     * Handle an incoming request.
+     * 处理传入请求。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @param</span>  \Closure  $next
-     *<span class="phpdoc token"> @return</span> mixed
+     *<span class="phpdoc token"> @param</span>  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>): Response
     {
         <span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;input(<span class="string token">'token'</span>) !== <span class="string token">'my-secret-token'</span>) {
             <span class="keyword token">return</span> redirect(<span class="string token">'home'</span>);
@@ -66,24 +66,26 @@
     }
 }
 </code></pre>
-<p>如您所见，如果给定的 <code>token</code> 与我们的秘密令牌不匹配，中间件将向客户端返回 HTTP 重定向； 否则，请求将被进一步传递到应用程序中。要将请求更深入地传递到应用程序中（允许中间件「通过」），您应该使用 <code>$request</code> 调用 <code>$next</code> 回调。</p>
-<p>最好将中间件设想为一系列「层」HTTP 请求在到达您的应用程序之前必须通过。每一层都可以检查请求，甚至完全拒绝它。</p>
+<p>如你所见，如果给定的 <code>token</code> 与我们的秘密令牌不匹配，中间件将向客户端返回 HTTP 重定向； 否则，请求将被进一步传递到应用程序中。要将请求更深入地传递到应用程序中（允许中间件「通过」），你应该使用 <code>$request</code> 调用 <code>$next</code> 回调。</p>
+<p>最好将中间件设想为一系列「层」HTTP 请求在到达你的应用程序之前必须通过。每一层都可以检查请求，甚至完全拒绝它。</p>
 <blockquote>
-<p>技巧：所有中间件都通过 <a href="container.html">服务容器</a> 解析，因此您可以在中间件的构造函数中键入提示您需要的任何依赖项。</p>
+<p>技巧：所有中间件都通过 <a href="/docs/laravel/10.x/container">服务容器</a> 解析，因此你可以在中间件的构造函数中键入提示你需要的任何依赖项。</p>
 </blockquote>
 <p><a name="before-after-middleware"></a>
 <a name="middleware-and-responses"></a></p>
 <h4 id="中间件和响应">中间件和响应</h4>
-<p>当然，中间件可以在将请求更深入地传递到应用程序之前或之后执行任务。 例如，以下中间件将在应用程序处理请求之前<strong>执行一些任务</strong>：</p>
+<p>当然，中间件可以在将请求更深入地传递到应用程序之前或之后执行任务。例如，以下中间件将在应用程序处理__请求之前__执行一些任务：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Middleware;
 
 <span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
 
 <span class="keyword token">class</span> BeforeMiddleware
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>): Response
     {
         <span class="comment token">// 执行操作</span>
 
@@ -91,16 +93,18 @@
     }
 }
 </code></pre>
-<p>但是，此中间件将在<strong>请求由应用程序处理后</strong>执行其任务：</p>
+<p>但是，此中间件将在应用程序处理__请求之后__执行其任务：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Middleware;
 
 <span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
 
 <span class="keyword token">class</span> AfterMiddleware
 {
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>): Response
     {
         <span class="variable token">$response</span> = <span class="variable token">$next</span>(<span class="variable token">$request</span>);
 
@@ -114,13 +118,25 @@
 <h2 id="注册中间件">注册中间件</h2>
 <p><a name="global-middleware"></a></p>
 <h3 id="全局中间件">全局中间件</h3>
-<p>如果您希望在对应用程序的每个 HTTP 请求期间运行中间件，请在 <code>app/Http/Kernel.php</code> 类的 <code>$middleware</code> 属性中列出中间件类。</p>
+<p>如果你希望在对应用程序的每个 HTTP 请求期间运行中间件，请在 <code>app/Http/Kernel.php</code> 类的 <code>$middleware</code> 属性中列出中间件类。</p>
 <p><a name="assigning-middleware-to-routes"></a></p>
 <h3 id="将中间件分配给路由">将中间件分配给路由</h3>
-<p>如果您想将中间件分配给特定的路由，您应该首先在应用程序的 <code>app/Http/Kernel.php</code> 文件中为中间件分配一个键。默认情况下，该类的 <code>$routeMiddleware</code> 属性包含 Laravel 中包含的中间件的条目。 您可以将自己的中间件添加到此列表中，并为其分配您选择的键：</p>
-<pre><code><span class="comment token">// 在 App\Http\Kernel 类中...</span>
+<p>如果要将中间件分配给特定路由，可以在定义路由时调用 <code>middleware</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Middleware\Authenticate;
 
-<span class="keyword token">protected</span> <span class="variable token">$routeMiddleware</span> = [
+Route::get(<span class="string token">'/profile'</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// ...</span>
+})-&gt;middleware(Authenticate::<span class="keyword token">class</span>);
+</code></pre>
+<p>通过向 <code>middleware</code> 方法传递一组中间件名称，可以为路由分配多个中间件：</p>
+<pre><code>Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
+    <span class="comment token">// ...</span>
+})-&gt;middleware([First::<span class="keyword token">class</span>, Second::<span class="keyword token">class</span>]);
+</code></pre>
+<p>为了方便起见，可以在应用程序的<code>app/Http/Kernel.php</code>文件中为中间件分配别名。默认情况下，此类的 <code>$middlewareAliases</code> 属性包含Laravel中包含的中间件的条目。你可以将自己的中间件添加到此列表中，并为其分配选择的别名：</p>
+<pre><code><span class="comment token">// 在App\Http\Kernel类中。。。</span>
+
+<span class="keyword token">protected</span> <span class="variable token">$middlewareAliases</span> = [
     <span class="string token">'auth'</span> =&gt; \App\Http\Middleware\Authenticate::<span class="keyword token">class</span>,
     <span class="string token">'auth.basic'</span> =&gt; \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::<span class="keyword token">class</span>,
     <span class="string token">'bindings'</span> =&gt; \Illuminate\Routing\Middleware\SubstituteBindings::<span class="keyword token">class</span>,
@@ -132,52 +148,40 @@
     <span class="string token">'verified'</span> =&gt; \Illuminate\Auth\Middleware\EnsureEmailIsVerified::<span class="keyword token">class</span>,
 ];
 </code></pre>
-<p>一旦在 HTTP 内核中定义了中间件，您就可以使用 <code>middleware</code> 方法将中间件分配给路由：</p>
+<p>一旦在HTTP内核中定义了中间件别名，就可以在将中间件分配给路由时使用该别名：</p>
 <pre><code>Route::get(<span class="string token">'/profile'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 })-&gt;middleware(<span class="string token">'auth'</span>);
-</code></pre>
-<p>您可以通过将一组中间件名称传递给 <code>middleware</code> 方法来为路由分配多个中间件：</p>
-<pre><code>Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
-})-&gt;middleware([<span class="string token">'first'</span>, <span class="string token">'second'</span>]);
-</code></pre>
-<p>分配中间件时，您还可以传递完全限定的类名：</p>
-<pre><code><span class="keyword token">use</span> App\Http\Middleware\EnsureTokenIsValid;
-
-Route::get(<span class="string token">'/profile'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
-})-&gt;middleware(EnsureTokenIsValid::<span class="keyword token">class</span>);
 </code></pre>
 <p><a name="excluding-middleware"></a></p>
 <h4 id="排除中间件">排除中间件</h4>
-<p>将中间件分配给一组路由时，您可能偶尔需要阻止将中间件应用于组内的单个路由。您可以使用 <code>withoutMiddleware</code> 方法完成此操作：</p>
+<p>当将中间件分配给一组路由时，可能偶尔需要防止中间件应用于组内的单个路由。可以使用 <code>withoutMiddleware</code> 方法完成此操作：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Middleware\EnsureTokenIsValid;
 
 Route::middleware([EnsureTokenIsValid::<span class="keyword token">class</span>])-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     });
 
     Route::get(<span class="string token">'/profile'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     })-&gt;withoutMiddleware([EnsureTokenIsValid::<span class="keyword token">class</span>]);
 });
 </code></pre>
-<p>您还可以从整个 <a href="routing.html#route-groups">组</a> 路由定义中排除一组给定的中间件：</p>
+<p>还可以从整个 <a href="/docs/laravel/10.x/routing#route-groups">组</a> 路由定义中排除一组给定的中间件：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Middleware\EnsureTokenIsValid;
 
 Route::withoutMiddleware([EnsureTokenIsValid::<span class="keyword token">class</span>])-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/profile'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     });
 });
 </code></pre>
-<p><code>withoutMiddleware</code> 方法只能移除路由中间件，不适用于<a href="#global-middleware">全局中间件</a>。</p>
+<p>「withoutMiddleware」方法只能删除路由中间件，不适用于 <a href="#global-middleware">全局中间件</a>。</p>
 <p><a name="middleware-groups"></a></p>
 <h3 id="中间件组">中间件组</h3>
-<p>有时您可能希望将多个中间件组合在一个键下，以使它们更容易分配给路由。您可以使用 HTTP 内核的 <code>$middlewareGroups</code> 属性来完成此操作。</p>
-<p>开箱即用，Laravel 带有 <code>web</code> 和 <code>api</code> 中间件组，其中包含您可能希望应用于 Web 和 API 路由的常见中间件。请记住，这些中间件组会由应用程序的 <code>App\Providers\RouteServiceProvider</code> 服务提供者自动应用于相应的 <code>web</code> 和 <code>api</code> 路由文件中的路由：</p>
+<p>有时，你可能希望将多个中间件组合在一个键下，以使它们更容易分配给路由。你可以使用 HTTP 内核的 <code>$middlewareGroups</code> 属性来完成此操作。</p>
+<p>Laravel 包括预定义 带有 <code>web</code> 和 <code>api</code> 中间件组，其中包含你可能希望应用于 Web 和 API 路由的常见中间件。请记住，这些中间件组会由应用程序的 <code>App\Providers\RouteServiceProvider</code> 服务提供者自动应用于相应的 <code>web</code> 和 <code>api</code> 路由文件中的路由：</p>
 <pre><code><span class="comment token">/**
  * 应用程序的路由中间件组。
  *
@@ -188,76 +192,75 @@ Route::withoutMiddleware([EnsureTokenIsValid::<span class="keyword token">class<
         \App\Http\Middleware\EncryptCookies::<span class="keyword token">class</span>,
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::<span class="keyword token">class</span>,
         \Illuminate\Session\Middleware\StartSession::<span class="keyword token">class</span>,
-        <span class="comment token">// \Illuminate\Session\Middleware\AuthenticateSession::class,</span>
         \Illuminate\View\Middleware\ShareErrorsFromSession::<span class="keyword token">class</span>,
         \App\Http\Middleware\VerifyCsrfToken::<span class="keyword token">class</span>,
         \Illuminate\Routing\Middleware\SubstituteBindings::<span class="keyword token">class</span>,
     ],
 
     <span class="string token">'api'</span> =&gt; [
-        <span class="string token">'throttle:api'</span>,
+        \Illuminate\Routing\Middleware\ThrottleRequests::<span class="keyword token">class</span>.<span class="string token">':api'</span>,
         \Illuminate\Routing\Middleware\SubstituteBindings::<span class="keyword token">class</span>,
     ],
 ];
 </code></pre>
-<p>可以使用与单个中间件相同的语法将中间件组分配给路由和控制器操作。同样，中间件组使一次将许多中间件分配给路由更加方便：</p>
+<p>中间件组可以使用与单个中间件相同的语法分配给路由和控制器动作。同理，中间件组使一次将多个中间件分配给一个路由更加方便：</p>
 <pre><code>Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 })-&gt;middleware(<span class="string token">'web'</span>);
 
 Route::middleware([<span class="string token">'web'</span>])-&gt;group(<span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <blockquote>
-<p>技巧：开箱即用，<code>web</code> 和 <code>api</code> 中间件组会通过 <code>App\Providers\RouteServiceProvider</code> 自动应用于应用程序对应的 <code>routes/web.php</code> 和 <code>routes/api.php</code> 文件。</p>
+<p>技巧：开箱即用，<code>web</code> 和 <code>api</code> 中间件组会通过  <code>App\Providers\RouteServiceProvider</code> 自动应用于应用程序对应的 <code>routes/web.php</code> 和 <code>routes/api.php</code> 文件。</p>
 </blockquote>
 <p><a name="sorting-middleware"></a></p>
 <h3 id="排序中间件">排序中间件</h3>
-<p>很少，您可能需要您的中间件按特定顺序执行，但在将它们分配给路由时无法控制它们的顺序。 在这种情况下，您可以使用 <code>app/Http/Kernel.php</code> 文件的 <code>$middlewarePriority</code> 属性指定中间件优先级。默认情况下，您的 HTTP 内核中可能不存在此属性。如果它不存在，您可以在下面复制其默认定义：</p>
+<p>在特定情况下，可能需要中间件以特定的顺序执行，但当它们被分配到路由时，是无法控制它们的顺序的。在这种情况下，可以使用到 <code>app/Http/Kernel.php</code> 文件的 <code>$middlewarePriority</code> 属性指定中间件优先级。默认情况下，HTTP内核中可能不存在此属性。如果它不存在，你可以复制下面的默认定义：</p>
 <pre><code><span class="comment token">/**
  * 中间件的优先级排序列表。
  *
- * 这会强制非全局中间件始终按给定顺序排列。
+ * 这迫使非全局中间件始终处于给定的顺序。
  *
  *<span class="phpdoc token"> @var</span> string[]
  */</span>
 <span class="keyword token">protected</span> <span class="variable token">$middlewarePriority</span> = [
+    \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::<span class="keyword token">class</span>,
     \Illuminate\Cookie\Middleware\EncryptCookies::<span class="keyword token">class</span>,
     \Illuminate\Session\Middleware\StartSession::<span class="keyword token">class</span>,
     \Illuminate\View\Middleware\ShareErrorsFromSession::<span class="keyword token">class</span>,
     \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::<span class="keyword token">class</span>,
     \Illuminate\Routing\Middleware\ThrottleRequests::<span class="keyword token">class</span>,
     \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::<span class="keyword token">class</span>,
-    \Illuminate\Session\Middleware\AuthenticateSession::<span class="keyword token">class</span>,
+    \Illuminate\Contracts\Session\Middleware\AuthenticatesSessions::<span class="keyword token">class</span>,
     \Illuminate\Routing\Middleware\SubstituteBindings::<span class="keyword token">class</span>,
     \Illuminate\Auth\Middleware\Authorize::<span class="keyword token">class</span>,
 ];
 </code></pre>
 <p><a name="middleware-parameters"></a></p>
 <h2 id="中间件参数">中间件参数</h2>
-<p>中间件也可以接收额外的参数。例如，如果您的应用程序需要在执行给定操作之前验证经过身份验证的用户是否具有给定的「角色」，您可以创建一个 <code>EnsureUserHasRole</code> 中间件，该中间件接收角色名称作为附加参数。</p>
-<p>额外的中间件参数将在 <code>$next</code> 参数之后传递给中间件：</p>
+<p>中间件也可以接收额外的参数。例如，如果你的应用程序需要在执行给定操作之前验证经过身份验证的用户是否具有给定的「角色」，你可以创建一个 <code>EnsureUserHasRole</code> 中间件，该中间件接收角色名称作为附加参数。</p>
+<p>额外的中间件参数将在 <code>$next</code> 参数之后传递给中间件：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Middleware;
 
 <span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
 
 <span class="keyword token">class</span> EnsureUserHasRole
 {
     <span class="comment token">/**
-     * 处理传入的请求。
+     * 处理传入请求。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @param</span>  \Closure  $next
-     *<span class="phpdoc token"> @param</span>  string  $role
-     *<span class="phpdoc token"> @return</span> mixed
+     *<span class="phpdoc token"> @param</span>  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>, <span class="variable token">$role</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>, string <span class="variable token">$role</span>): Response
     {
         <span class="keyword token">if</span> (! <span class="variable token">$request</span>-&gt;user()-&gt;hasRole(<span class="variable token">$role</span>)) {
-            <span class="comment token">// 重定向...</span>
+            <span class="comment token">// 重定向。。。</span>
         }
 
         <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
@@ -265,63 +268,57 @@ Route::middleware([<span class="string token">'web'</span>])-&gt;group(<span cla
 
 }
 </code></pre>
-<p>在定义路由时，可以指定中间件参数，方法是使用 <code>:</code> 分隔中间件名称和参数。多个参数应以逗号分隔：</p>
-<pre><code>Route::put(<span class="string token">'/post/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">//</span>
+<p>在定义路由时，可以指定中间件参数，方法是使用 <code>:</code> 分隔中间件名称和参数。多个参数应以逗号分隔：</p>
+<pre><code>Route::put(<span class="string token">'/post/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;middleware(<span class="string token">'role:editor'</span>);
 </code></pre>
 <p><a name="terminable-middleware"></a></p>
 <h2 id="可终止的中间件">可终止的中间件</h2>
-<p>有时，在将 HTTP 响应发送到浏览器之后，中间件可能需要做一些工作。如果您在中间件上定义了一个 <code>terminate</code> 方法，并且您的 Web 服务器使用 FastCGI，则在将响应发送到浏览器后会自动调用 <code>terminate</code> 方法：</p>
+<p>部分情况下，在将 HTTP 响应发送到浏览器之后，中间件可能需要做一些工作。如果你在中间件上定义了一个 <code>terminate</code> 方法，并且你的 Web 服务器使用 FastCGI，则在将响应发送到浏览器后会自动调用 <code>terminate</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Illuminate\Session\Middleware;
 
 <span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
 
 <span class="keyword token">class</span> TerminatingMiddleware
 {
     <span class="comment token">/**
      * 处理传入的请求。
      *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @param</span>  \Closure  $next
-     *<span class="phpdoc token"> @return</span> mixed
+     *<span class="phpdoc token"> @param</span>  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>): Response
     {
         <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
     }
 
     <span class="comment token">/**
      * 在响应发送到浏览器后处理任务。
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Response  $response
-     *<span class="phpdoc token"> @return</span> void
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> terminate(<span class="variable token">$request</span>, <span class="variable token">$response</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> terminate(Request <span class="variable token">$request</span>, Response <span class="variable token">$response</span>): void
     {
         <span class="comment token">// ...</span>
     }
 }
 </code></pre>
-<p><code>terminate</code> 方法应该同时接收请求和响应。一旦你定义了一个可终止的中间件，你应该将它添加到 <code>app/Http/Kernel.php</code> 文件中的路由或全局中间件列表中。</p>
-<p>当在中间件上调用 <code>terminate</code> 方法时，Laravel 会从 <a href="container.html">服务容器</a> 解析一个新的中间件实例。如果您想在调用 <code>handle</code> 和 <code>terminate</code> 方法时使用相同的中间件实例，请使用容器的 <code>singleton</code> 方法向容器注册中间件。 通常这应该在你的 AppServiceProvider 的 register 方法中完成：</p>
+<p><code>terminate</code> 方法应该同时接收请求和响应。一旦你定义了一个可终止的中间件，你应该将它添加到 <code>app/Http/Kernel.php</code> 文件中的路由或全局中间件列表中。</p>
+<p>当在中间件上调用 <code>terminate</code> 方法时，Laravel 会从 <a href="/docs/laravel/10.x/container">服务容器</a> 解析一个新的中间件实例。如果你想在调用 <code>handle</code> 和 <code>terminate</code> 方法时使用相同的中间件实例，请使用容器的 <code>singleton</code> 方法向容器注册中间件。 通常这应该在你的 <code>AppServiceProvider</code> 的 <code>register</code> 方法中完成：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Middleware\TerminatingMiddleware;
 
 <span class="comment token">/**
  * 注册任何应用程序服务。
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> register()
+<span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
 {
     <span class="variable token">$this</span>-&gt;app-&gt;singleton(TerminatingMiddleware::<span class="keyword token">class</span>);
 }
 </code></pre>
-<p><a name="before-after-middleware"></a>
-<a name="middleware-and-responses"></a></p>
+<p><a name="前后中间件"></a>
+<a name="中间件和响应"></a></p>
 </div>
     <blockquote style="font-size: 0.9em;">
         本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
