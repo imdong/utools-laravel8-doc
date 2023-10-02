@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -26,7 +26,7 @@
 <li><a href="#phpredis">phpredis</a></li>
 </ul>
 </li>
-<li><a href="#interacting-with-redis">与 Redis 交互</a><ul>
+<li><a href="#interacting-with-redis">与Redis交互</a><ul>
 <li><a href="#transactions">事务</a></li>
 <li><a href="#pipelining-commands">管道命令</a></li>
 </ul>
@@ -35,15 +35,14 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p><a href="https://redis.io">Redis</a> 是一个开源的，高级键值对存储数据库。 包含的数据类型有 <a href="https://redis.io/topics/data-types#strings">字符串</a>, <a href="https://redis.io/topics/data-types#hashes">hash</a>, <a href="https://redis.io/topics/data-types#lists">列表</a>, <a href="https://redis.io/topics/data-types#sets">集合</a>, 和 <a href="https://redis.io/topics/data-types#sorted-sets">有序集合</a>.</p>
-<p>在将 Redis 与 Laravel 一起使用前，我们鼓励你通过 PECL 安装并使用  <a href="https://github.com/phpredis/phpredis">PhpRedis</a> 尽管扩展安装起来更复杂，但对于大量使用 Redis 的应用程序可能会产生更好的性能。</p>
-<p>如果你正在使用 <a href="sail.html">Laravel Sail</a>, 这个扩展已经实现安装好在你的 Docker 容器中了。</p>
-<p>如果你不能安装 PHPRedis 扩展，你或许可以使用 composer 安装 <code>predis/predis</code> 包。Predis 是一个完全用 PHP 编写的 Redis 客户端，不需要任何额外的扩展：</p>
+<p><a href="https://redis.io">Redis</a> 是一个开源的, 高级键值对存储数据库。 保护的数据库类型有 <a href="https://redis.io/topics/data-types#strings">字符串</a>, <a href="https://redis.io/topics/data-types#hashes">hash</a>, <a href="https://redis.io/topics/data-types#lists">列表</a>, <a href="https://redis.io/topics/data-types#sets">集合</a> 和 <a href="https://redis.io/topics/data-types#sorted-sets">有序集合</a>。</p>
+<p>在将 Redis 与 Laravel 一起使用前，我们鼓励你通过 PECL 安装并使用 <a href="https://github.com/phpredis/phpredis">PhpRedis</a> ，尽管扩展安装起来更复杂，但对于大量使用 Redis 的应用程序可能会带来更好的性能。如果你使用 <a href="/docs/laravel/10.x/sail">Laravel Sail</a>, 这个扩展已经事先在你的 Docker 容器中安装完成。</p>
+<p>如果你不能安装 PHPRedis 扩展，你或许可以使用 composer 安装 predis/predis 包。Predis 是一个完全用 PHP 编写的 Redis 客户端，不需要任何额外的扩展：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> predis/predis
 </code></pre>
 <p><a name="configuration"></a></p>
 <h2 id="配置">配置</h2>
-<p>在你的应用中配置 Redis 信息，你要在 <code>config/database.php</code> 文件中进行配置。在该文件中，你将看到一个 <code>Redis</code> 数组包含了你的 Redis 配置信息。</p>
+<p>在你的应用中配置 Redis 信息，你要在 <code>config/database.php</code> 文件中进行配置。在该文件中，你将看到一个 <code>Redis</code> 数组包含了你的 Redis 配置信息。</p>
 <pre><code>'redis' =&gt; [
 
     'client' =&gt; env('REDIS_CLIENT', 'phpredis'),
@@ -64,7 +63,7 @@
 
 ],
 </code></pre>
-<p>在你的配置文件里定义的每个 Redis 服务器，除了用 URL 来表示的 Redis 连接，都必需要指定名称  、 host （主机）和 port （端口）字段：</p>
+<p>在你的配置文件里定义的每个 Redis 服务器，除了用 URL 来表示的 Redis 连接，都必需要指定名称 、 host （主机）和 port （端口）字段：</p>
 <pre><code>'redis' =&gt; [
 
     'client' =&gt; env('REDIS_CLIENT', 'phpredis'),
@@ -81,7 +80,7 @@
 </code></pre>
 <p><a name="configuring-the-connection-scheme"></a></p>
 <h4 id="配置连接方案">配置连接方案</h4>
-<p>默认情况下，Redis 客户端使用<code>tcp</code>方案连接Redis服务器。另外，你也可以在你的 Redis 服务配置数组中指定一个<code>scheme</code>配置项，来使用 TLS/SSL 加密：</p>
+<p>默认情况下，Redis 客户端使用 <code>tcp</code> 方案连接 Redis 服务器。另外，你也可以在你的 Redis 服务配置数组中指定一个 <code>scheme</code> 配置项，来使用 TLS/SSL 加密：</p>
 <pre><code>'redis' =&gt; [
 
     'client' =&gt; env('REDIS_CLIENT', 'phpredis'),
@@ -98,24 +97,26 @@
 </code></pre>
 <p><a name="clusters"></a></p>
 <h3 id="集群">集群</h3>
-<p>如果你的应用使用 Redis 集群，你应该在 Redis 配置文件中用<code>clusters</code>键来定义集群。这个配置键默认没有，所以你需要在<code>config/database.php</code>配置文件中手动创建：</p>
+<p>如果你的应用使用 Redis 集群，你应该在 Redis 配置文件中用 <code>clusters</code> 键来定义集群。这个配置键默认没有，所以你需要在 <code>config/database.php</code> 配置文件中手动创建：</p>
 <pre><code>'redis' =&gt; [
 
-'client' =&gt; env('REDIS_CLIENT', 'phpredis'),
+    'client' =&gt; env('REDIS_CLIENT', 'phpredis'),
 
-'clusters' =&gt; [
-    'default' =&gt; [
-        [
-            'host' =&gt; env('REDIS_HOST', 'localhost'),
-            'password' =&gt; env('REDIS_PASSWORD'),
-            'port' =&gt; env('REDIS_PORT', 6379),
-            'database' =&gt; 0,
+    'clusters' =&gt; [
+        'default' =&gt; [
+            [
+                'host' =&gt; env('REDIS_HOST', 'localhost'),
+                'password' =&gt; env('REDIS_PASSWORD'),
+                'port' =&gt; env('REDIS_PORT', 6379),
+                'database' =&gt; 0,
+            ],
         ],
     ],
+
 ],
 </code></pre>
 <p>默认情况下，集群可以在节点上实现客户端分片，允许你实现节点池以及创建大量可用内存。这里要注意，客户端共享不会处理失败的情况；因此，这个功能主要适用于从另一个主数据库获取的缓存数据。
-如果要使用 Redis 原生集群，需要把<code>config/database.php</code>配置文件下的<code>options.cluster</code>配置项的值设置为<code>redis</code>：</p>
+如果要使用 Redis 原生集群，需要把 <code>config/database.php</code> 配置文件下的 <code>options.cluster</code> 配置项的值设置为 <code>redis</code> ：</p>
 <pre><code><span class="string token">'redis'</span> =&gt; [
 
     <span class="string token">'client'</span> =&gt; env(<span class="string token">'REDIS_CLIENT'</span>, <span class="string token">'phpredis'</span>),
@@ -132,15 +133,15 @@
 </code></pre>
 <p><a name="predis"></a></p>
 <h3 id="predis">Predis</h3>
-<p>要使用 Predis 扩展去连接 Redis， 请确保环境变量 <code>REDIS_CLIENT</code> 的值为 <code>predis</code>：</p>
+<p>要使用 Predis 扩展去连接 Redis， 请确保环境变量 <code>REDIS_CLIENT</code> 的值为 <code>predis</code> ：</p>
 <pre><code><span class="string token">'redis'</span> =&gt; [
 
     <span class="string token">'client'</span> =&gt; env(<span class="string token">'REDIS_CLIENT'</span>, <span class="string token">'predis'</span>),
 
-    <span class="comment token">// 重设 Redis 配置项...</span>
+    <span class="comment token">// ...</span>
 ],
 </code></pre>
-<p>除默认的 <code>host</code>，<code>port</code>，<code>database</code> 和 <code>password</code> 这些服务配置选项外， Predis 还支持为每个 Redis 服务器定义其它的 <a href="https://github.com/nrk/predis/wiki/Connection-Parameters">连接参数</a>。如果要使用这些额外的配置项，可以在 <code>config/database.php</code> 配置文件中将任意选项添加到 Redis 服务器配置内：</p>
+<p>除默认的 <code>host</code> ，<code>port</code> ，<code>database</code> 和 <code>password</code> 这些服务配置选项外， Predis 还支持为每个 Redis 服务器定义其它的 <a href="https://github.com/nrk/predis/wiki/Connection-Parameters">连接参数</a>。如果要使用这些额外的配置项，可以在 config/database.php 配置文件中将任意选项添加到 Redis 服务器配置内：</p>
 <pre><code>'default' =&gt; [
     'host' =&gt; env('REDIS_HOST', 'localhost'),
     'password' =&gt; env('REDIS_PASSWORD'),
@@ -151,7 +152,11 @@
 </code></pre>
 <p><a name="the-redis-facade-alias"></a></p>
 <h4 id="redis-facade-别名">Redis Facade 别名</h4>
-<p>Laravel 的 <code>config/app.php</code> 配置文件包含了 <code>aliases</code> 数组，该数组可用于定义通过框架注册的所有类别名。方便起见，Laravel 提供了一份包含了所有 <a href="facades.html">facade</a> 的别名入口；不过，<code>Redis</code> 别名不能在这里使用，因为这与 phpredis 扩展提供的 <code>Redis</code> 类名冲突。如果正在使用 Predis 客户端并确实想要用这个别名，你可以在 <code>config/app.php</code> 配置文件中取消对此别名的注释。</p>
+<p>Laravel 的 <code>config/app.php</code> 配置文件包含了 <code>aliases</code> 数组，该数组可用于定义通过框架注册的所有类别名。方便起见，Laravel 提供了一份包含了所有 facade 的别名入口；不过，<code>Redis</code> 别名不能在这里使用，因为这与 phpredis 扩展提供的 <code>Redis</code> 类名冲突。如果正在使用 <code>Predis</code> 客户端并确实想要用这个别名，你可以在 <code>config/app.php</code> 配置文件中取消对此别名的注释。</p>
+<pre><code><span class="string token">'aliases'</span> =&gt; Facade::defaultAliases()-&gt;merge([
+    <span class="string token">'Redis'</span> =&gt; Illuminate\Support\Facades\Redis::<span class="keyword token">class</span>,
+])-&gt;toArray(),
+</code></pre>
 <p><a name="phpredis"></a></p>
 <h3 id="phpredis">phpredis</h3>
 <p>Laravel 默认使用 phpredis 扩展与 Redis 通信。Laravel 用于与 Redis 通信的客户端由 <code>redis.client</code> 配置项决定，这个配置通常为环境变量 <code>REDIS_CLIENT</code> 的值：</p>
@@ -162,7 +167,7 @@
     <span class="comment token">// 重设 Redis 配置项...</span>
 ],
 </code></pre>
-<p>除默认的 <code>scheme</code>, <code>host</code>, <code>port</code>, <code>database</code> 和 <code>password</code> 的服务器配置选项外，phpredis 还支持以下额外的连接参数：<code>name</code>, <code>persistent</code>, <code>persistent_id</code>, <code>prefix</code>, <code>read_timeout</code>, <code>retry_interval</code>, <code>timeout</code> 和 <code>context</code>。 您可以在 <code>config/database.php</code> 配置文件中将任意选项添加到 Redis 服务器配置内：</p>
+<p>除默认的 <code>scheme</code> , <code>host</code> , <code>port </code>, <code>database</code> 和 <code>password</code> 的服务器配置选项外，<code>phpredis</code> 还支持以下额外的连接参数：<code>name</code> , <code>persistent </code>, <code>persistent_id </code>, <code>prefix </code>, <code>read_timeout </code>, <code>retry_interval </code>, <code>timeout</code> 和 <code>context </code>。 你可以在 <code>config/database.php</code> 配置文件中将任意选项添加到 Redis 服务器配置内：</p>
 <pre><code><span class="string token">'default'</span> =&gt; [
     <span class="string token">'host'</span> =&gt; env(<span class="string token">'REDIS_HOST'</span>, <span class="string token">'localhost'</span>),
     <span class="string token">'password'</span> =&gt; env(<span class="string token">'REDIS_PASSWORD'</span>),
@@ -190,27 +195,25 @@
     <span class="comment token">// 重设 Redis 配置项...</span>
 ],
 </code></pre>
-<p>当前支持的序列化算法包括： <code>Redis::SERIALIZER_NONE</code> （默认）,  <code>Redis::SERIALIZER_PHP</code>, <code>Redis::SERIALIZER_JSON</code>, <code>Redis::SERIALIZER_IGBINARY</code> 和 <code>Redis::SERIALIZER_MSGPACK</code> 。</p>
-<p>支持的压缩算法包括： <code>Redis::COMPRESSION_NONE</code> （默认）,  <code>Redis::COMPRESSION_LZF</code>, <code>Redis::COMPRESSION_ZSTD</code> 和 <code>Redis::COMPRESSION_LZ4</code> 。</p>
+<p>当前支持的序列化算法包括： <code>Redis::SERIALIZER_NONE</code> （默认）, <code>Redis::SERIALIZER_PHP</code> , <code>Redis::SERIALIZER_JSON</code> , <code>Redis::SERIALIZER_IGBINARY</code> 和 <code>Redis::SERIALIZER_MSGPACK</code> 。</p>
+<p>支持的压缩算法包括： <code>Redis::COMPRESSION_NONE</code> （默认）, <code>Redis::COMPRESSION_LZF</code> , <code>Redis::COMPRESSION_ZSTD</code> 和 <code>Redis::COMPRESSION_LZ4</code> 。</p>
 <p><a name="interacting-with-redis"></a></p>
 <h2 id="与-redis-交互">与 Redis 交互</h2>
-<p>你可以通过调用 <code>Redis</code> <a href="/docs/laravel/8.5/facades">facade</a> 上的各种方法来与 Redis 进行交互。 <code>Redis</code> facade 支持动态方法，所以你可以在 facade 上调用各种 <a href="https://redis.io/commands">Redis 命令</a> ，这些命令将直接传递给 Redis 。在本例中，我们将调用 <code>Redis</code> facade 的 <code>get</code> 方法，来调用 Redis <code>GET</code> 方法：</p>
+<p>你可以通过调用 <code>Redis</code> <a href="/docs/laravel/10.x/facades">facade</a> 上的各种方法来与Redis进行交互。 <code>Redis</code> facade 支持动态方法，所以你可以在facade上调用各种 <a href="https://redis.io/commands">Redis 命令</a> ,这些命令将直接传递给 Redis 。 在本例中，我们将调用 <code>Redis</code> facade 的 <code>get</code> 方法，来调用 Redis <code>GET</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
 <span class="keyword token">use</span> App\Http\Controllers\Controller;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Redis;
+<span class="keyword token">use</span> Illuminate\View\View;
 
 <span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
      * 显示给定用户的配置文件
-     *
-     *<span class="phpdoc token"> @param</span>  int  $id
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> show(<span class="variable token">$id</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> show(string <span class="variable token">$id</span>): View
     {
         <span class="keyword token">return</span> view(<span class="string token">'user.profile'</span>, [
             <span class="string token">'user'</span> =&gt; Redis::get(<span class="string token">'user:profile:'</span>.<span class="variable token">$id</span>)
@@ -238,21 +241,22 @@ Redis::set(<span class="string token">'name'</span>, <span class="string token">
 </code></pre>
 <p><a name="transactions"></a></p>
 <h3 id="事务">事务</h3>
-<p><code>Redis</code> facade 上的 <code>transaction</code> 方法对 Redis 原生的 <code>MULTI</code> 和 <code>EXEC</code> 命令进行了封装。 <code>transaction</code> 方法接受一个闭包作为其唯一参数。这个闭包将接收一个 Redis 连接实例，并可能向这个实例发出想要的任何命令。闭包中发出的所有Redis命令都将在单个原子性事务中执行：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Redis;
+<p><code>Redis</code> facade 上的 <code>transaction</code> 方法对 Redis 原生的 <code>MULTI</code> 和 <code>EXEC</code> 命令进行了封装。 <code>transaction</code> 方法接受一个闭包作为其唯一参数。这个闭包将接收一个 Redis 连接实例，并可能向这个实例发出想要的任何命令。闭包中发出的所有 Redis 命令都将在单个原子性事务中执行：</p>
+<pre><code><span class="keyword token">use</span> Redis;
+<span class="keyword token">use</span> Illuminate\Support\Facades;
 
-Redis::transaction(<span class="keyword token">function</span> (<span class="variable token">$redis</span>) {
+Facades\Redis::transaction(<span class="keyword token">function</span> (Redis <span class="variable token">$redis</span>) {
     <span class="variable token">$redis</span>-&gt;incr(<span class="string token">'user_visits'</span>, <span class="number token">1</span>);
     <span class="variable token">$redis</span>-&gt;incr(<span class="string token">'total_visits'</span>, <span class="number token">1</span>);
 });
 </code></pre>
 <blockquote>
-<p>注意：定义一个 Redis 事务时，你不能从 Redis 连接中获取任何值。请记住，事务是作为单个原子性操作执行的，在整个闭包执行完其命令之前，不会执行该操作。</p>
+<p><strong>注意</strong><br>定义一个 Redis 事务时，你不能从 Redis 连接中获取任何值。请记住，事务是作为单个原子性操作执行的，在整个闭包执行完其命令之前，不会执行该操作。</p>
 </blockquote>
 <h4 id="lua-脚本">Lua 脚本</h4>
-<p><code>eval</code> 方法提供了另外一种原子性执行多条 Redis 命令的方式。但是，<code>eval</code> 方法的好处是能够在操作期间与 Redis 键值交互并检查它们。 Redis 脚本是用 <a href="https://www.lua.org">Lua 编程语言</a> 编写的。
-<code>eval</code> 方法一开始可能有点令人劝退，所以我们将用一个基本示例来明确它的使用方法。 <code>eval</code> 方法需要几个参数。第一，在方法中传递一个 Lua 脚本（作为一个字符串）。第二，在方法中传递脚本交互中用到的键的数量（作为一个整数）。第三，在方法中传递所有键名。最后，你可以传递一些脚本中用到的其他参数。</p>
-<p>在本例中，我们要对第一个计数器进行递增，检查它的新值，如果该计数器的值大于5，那么递增第二个计数器。最终，我们将返回第一个计数器的值：</p>
+<p><code>eval</code> 方法提供了另外一种原子性执行多条 Redis 命令的方式。但是，<code>eval</code> 方法的好处是能够在操作期间与 Redis 键值交互并检查它们。 Redis 脚本是用 <a href="https://www.lua.org/">Lua 编程语言</a> 编写的。</p>
+<p><code>eval</code> 方法一开始可能有点令人劝退，所以我们将用一个基本示例来明确它的使用方法。 <code>eval</code> 方法需要几个参数。第一，在方法中传递一个 Lua 脚本（作为一个字符串）。第二，在方法中传递脚本交互中用到的键的数量（作为一个整数）。第三，在方法中传递所有键名。最后，你可以传递一些脚本中用到的其他参数。</p>
+<p>在本例中，我们要对第一个计数器进行递增，检查它的新值，如果该计数器的值大于 5，那么递增第二个计数器。最终，我们将返回第一个计数器的值：</p>
 <pre><code><span class="variable token">$value</span> = Redis::<span class="keyword token">eval</span>(&lt;&lt;&lt;<span class="string token">'LUA'</span>
     local counter = redis.call(<span class="string token">"incr"</span>, KEYS[<span class="number token">1</span>])
 
@@ -264,14 +268,15 @@ Redis::transaction(<span class="keyword token">function</span> (<span class="var
 LUA, <span class="number token">2</span>, <span class="string token">'first-counter'</span>, <span class="string token">'second-counter'</span>);
 </code></pre>
 <blockquote>
-<p>注意：请参考 <a href="https://redis.io/commands/eval">Redis 文档</a> 更多关于 Redis 脚本的信息。</p>
+<p><strong>注意</strong><br>请参考 <a href="https://redis.io/commands/eval">Redis 文档</a> 更多关于 Redis 脚本的信息。</p>
 </blockquote>
 <p><a name="pipelining-commands"></a></p>
 <h3 id="管道命令">管道命令</h3>
 <p>当你需要执行很多个 Redis 命令时，你可以使用 <code>pipeline</code> 方法一次性提交所有命令，而不需要每条命令都与 Redis 服务器建立一次网络连接。 <code>pipeline</code> 方法只接受一个参数：接收一个 Redis 实例的闭包。你可以将所有命令发给这个 Redis 实例，它们将同时发送到 Redis 服务器，以减少到服务器的网络访问。这些命令仍然会按照发出的顺序执行：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Redis;
+<pre><code><span class="keyword token">use</span> Redis;
+<span class="keyword token">use</span> Illuminate\Support\Facades;
 
-Redis::pipeline(<span class="keyword token">function</span> (<span class="variable token">$pipe</span>) {
+Facades\Redis::pipeline(<span class="keyword token">function</span> (Redis <span class="variable token">$pipe</span>) {
     <span class="keyword token">for</span> (<span class="variable token">$i</span> = <span class="number token">0</span>; <span class="variable token">$i</span> &lt; <span class="number token">1000</span>; <span class="variable token">$i</span>++) {
         <span class="variable token">$pipe</span>-&gt;set(<span class="string token">"key:$i"</span>, <span class="variable token">$i</span>);
     }
@@ -279,8 +284,8 @@ Redis::pipeline(<span class="keyword token">function</span> (<span class="variab
 </code></pre>
 <p><a name="pubsub"></a></p>
 <h2 id="发布--订阅">发布 / 订阅</h2>
-<p>Laravel 为 Redis 的 <code>publish</code> 和 <code>subscribe</code> 命令提供了方便的接口。你可以用这些 Redis 命令监听指定「频道」上的消息。你也可以从一个应用程序发消息给另一个应用程序，哪怕它是用其它编程语言开发的，让应用程序和进程之间能够轻松进行通信。
-首先，用 <code>subscribe</code> 方法设置一个频道监听器。我们将这个方法调用放到一个 <a href="/docs/laravel/8.5/artisan">Artisan 命令</a> 中，因为调用 <code>subscribe</code> 方法会启动一个常驻进程：</p>
+<p>Laravel 为 Redis 的 <code>publish</code> 和 <code>subscribe</code> 命令提供了方便的接口。你可以用这些 Redis 命令监听指定「频道」上的消息。你也可以从一个应用程序发消息给另一个应用程序，哪怕它是用其它编程语言开发的，让应用程序和进程之间能够轻松进行通信。</p>
+<p>首先，用 <code>subscribe</code> 方法设置一个频道监听器。我们将这个方法调用放到一个 <a href="/docs/laravel/10.x/artisan">Artisan 命令</a> 中，因为调用 <code>subscribe</code> 方法会启动一个常驻进程：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Console\Commands;
@@ -306,12 +311,10 @@ Redis::pipeline(<span class="keyword token">function</span> (<span class="variab
 
     <span class="comment token">/**
      * 执行控制台命令
-     *
-     *<span class="phpdoc token"> @return</span> mixed
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> handle()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(): void
     {
-        Redis::subscribe([<span class="string token">'test-channel'</span>], <span class="keyword token">function</span> (<span class="variable token">$message</span>) {
+        Redis::subscribe([<span class="string token">'test-channel'</span>], <span class="keyword token">function</span> (string <span class="variable token">$message</span>) {
             <span class="keyword token">echo</span> <span class="variable token">$message</span>;
         });
     }
@@ -331,11 +334,11 @@ Route::get(<span class="string token">'/publish'</span>, <span class="keyword to
 <p><a name="wildcard-subscriptions"></a></p>
 <h4 id="通配符订阅">通配符订阅</h4>
 <p>使用 <code>psubscribe</code> 方法，你可以订阅一个通配符频道，用来获取所有频道中的所有消息，频道名称将作为第二个参数传递给提供的回调闭包：</p>
-<pre><code>Redis::psubscribe([<span class="string token">'*'</span>], <span class="keyword token">function</span> (<span class="variable token">$message</span>, <span class="variable token">$channel</span>) {
+<pre><code>Redis::psubscribe([<span class="string token">'*'</span>], <span class="keyword token">function</span> (string <span class="variable token">$message</span>, string <span class="variable token">$channel</span>) {
     <span class="keyword token">echo</span> <span class="variable token">$message</span>;
 });
 
-Redis::psubscribe([<span class="string token">'users.*'</span>], <span class="keyword token">function</span> (<span class="variable token">$message</span>, <span class="variable token">$channel</span>) {
+Redis::psubscribe([<span class="string token">'users.*'</span>], <span class="keyword token">function</span> (string <span class="variable token">$message</span>, string <span class="variable token">$channel</span>) {
     <span class="keyword token">echo</span> <span class="variable token">$message</span>;
 });
 </code></pre>
