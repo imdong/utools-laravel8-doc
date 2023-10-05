@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -48,7 +48,7 @@
 <li><a href="#sail-container-cli">容器 CLI</a></li>
 <li><a href="#sail-php-versions">PHP 版本</a></li>
 <li><a href="#sail-node-versions">Node 版本</a></li>
-<li><a href="#sharing-your-site">共享你的网站</a></li>
+<li><a href="#sharing-your-site">共享您的网站</a></li>
 <li><a href="#debugging-with-xdebug">使用 Xdebug 进行调试</a><ul>
 <li><a href="#xdebug-cli-usage">通过命令行使用 Xdebug 进行调试</a></li>
 <li><a href="#xdebug-browser-usage">通过浏览器使用 Xdebug 进行调试</a></li>
@@ -58,53 +58,56 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p><a href="https://github.com/laravel/sail">Laravel Sail</a> 是一个轻量级的命令行界面，用于与 Laravel 的默认 Docker 开发环境进行交互。Sail 为使用 PHP，MySQL 和 Redis 构建 Laravel 应用程序提供了一个很好的起点，而无需事先具有 Docker 经验。</p>
+<p><a href="https://github.com/laravel/sail">Laravel Sail</a> 是一个轻量级的命令行界面，用于与 Laravel 的默认 Docker 开发环境进行交互。Sail 为使用 PHP, MySQL, 和 Redis 构建 Laravel 应用提供了一个很好的起点，不需要事先有 Docker 经验。</p>
 <p>Sail 的核心是 <code>docker-compose.yml</code> 文件和存储在项目根目录的 <code>sail</code> 脚本。<code>sail</code> 脚本为 CLI 提供了便捷的方法，可用于与 <code>docker-compose.yml</code> 文件定义的 Docker 容器进行交互。</p>
 <p>Laravel Sail 支持 macOS、Linux 和 Windows (通过 <a href="https://docs.microsoft.com/en-us/windows/wsl/about">WSL2</a>）。</p>
 <p><a name="installation"></a></p>
 <h2 id="安装--设定">安装 &amp; 设定</h2>
-<p>Laravel Sail 会随着所有全新的 Laravel 应用程序一起自动安装，因此你可以立即的开始使用它. 要了解如何创建一个新的 Laravel 应用程序，请查阅适合你目前操作系统的 <a href="https://learnku.cominstallation.html">安装文档</a>。在安装过程中，你将被要求选择你的应用程序将与哪些 Sail 支持的服务进行交互。</p>
+<p>Laravel Sail 会随着所有全新的 Laravel 应用程序一起自动安装，因此你可以立即的开始使用它。要了解如何创建一个新的 Laravel 应用程序，请查阅适合您目前操作系统的 <a href="https://learnku.com/docs/laravel/10.x/installation">安装文档</a>。在安装过程中，你将被要求选择你的应用程序将与哪些 Sail 支持的服务进行交互。</p>
 <p><a name="installing-sail-into-existing-applications"></a></p>
 <h3 id="安装-sail-到当前应用中">安装 Sail 到当前应用中</h3>
 <p>假如你有兴趣在你现有的 Laravel 应用程序中使用 Sail，你可以透过 Composer 套件管理简单的安装 Sail。当然，这些步骤的前提是假设你现有的本地开发环境允许你安装 Copmoser 依赖：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/sail --dev
 </code></pre>
-<p>在 Sail 完成安装后，你可以运行 Artisan 命令 <code>sail:install</code>。这个命令将会发布 Sail 的 <code>docker-compose.yml</code> 文件到你应用程序的根目录：</p>
+<p>在 Sail 完成安装后，你可以运行 Artisan 命令 <code>sail:install</code>。这个命令将会发布 Sail 的 <code>docker-compose.yml</code> 文件到你应用程序的根目录：</p>
 <pre><code class="language-shell">php artisan sail:install
 </code></pre>
 <p>最后，你可以启动 Sail 的服务了。想要继续学习如何使用 Sail，请接着阅读本文挡的其余部分：</p>
 <pre><code class="language-shell">./vendor/bin/sail up
+</code></pre>
+<p><a name="adding-additional-services"></a></p>
+<h4 id="增加额外服务">增加额外服务</h4>
+<p>如果你想在你现有的 Sail 安装中添加一个额外的服务，你可以运行<code>sail:add</code> Artisan 命令。</p>
+<pre><code class="language-shell">php artisan sail:add
 </code></pre>
 <p><a name="using-devcontainers"></a></p>
 <h4 id="使用开发容器">使用开发容器</h4>
 <p>如果你想在 <a href="https://code.visualstudio.com/docs/remote/containers">Devcontainer</a> 中进行开发，你可以在执行 <code>sail:install</code> 命令时添加 <code>--devcontainer</code> 参数。<code>--devcontainer</code> 将指示 <code>sail:install</code> 命令将默认的 <code>.devcontainer/devcontainer.json</code> 文件发布到你的应用程序根目录：</p>
 <pre><code class="language-shell">php artisan sail:install --devcontainer
 </code></pre>
-<p><a name="configuring-a-bash-alias"></a></p>
-<h3 id="配置-bash-别名">配置 Bash 别名</h3>
-<p>默认情况下，Sail 命令使用 <code>vendor/bin/sail</code> 脚本调用，该脚本已包含在所有新建的 Laravel 应用程序中：</p>
+<p><a name="configuring-a-shell-alias"></a></p>
+<h3 id="配置-shell-别名">配置 Shell 别名</h3>
+<p>默认情况下，Sail 命令使用 <code>vendor/bin/sail</code> 脚本调用，该脚本已包含在所有新建的 Laravel 应用程序中：</p>
 <pre><code class="language-shell">./vendor/bin/sail up
 </code></pre>
-<p>但与其重复的输入 <code>vendor/bin/sail</code> 来执行 Sail 命令，你可能会希望配置一个 Bash 别名方便你更容易的执行 Sail 命令：</p>
-<pre><code class="language-shell">alias sail='[ -f sail ] &amp;&amp; bash sail || bash vendor/bin/sail'
+<p>但与其重复的输入 <code>vendor/bin/sail</code> 来执行 Sail 命令，你可能会希望配置一个 Shell 别名方便你更容易的执行 Sail 命令：</p>
+<pre><code class="language-shell">alias sail='[ -f sail ] &amp;&amp; sh sail || sh vendor/bin/sail'
 </code></pre>
-<blockquote>
-<p>补充：通过 <code>vim ~/.bashrc</code> 或  <code>vim ~/.zshrc</code> 加入别名，可以让别名常驻。</p>
-</blockquote>
-<p>一旦配置了 Bash 别名，你可以通过简单的键入 <code>sail</code> 来执行 Sail 命令。本文接下来的示例都假定你已经配置了此别名：</p>
+<p>为了确保这一点始终可用，你可以把它添加到你的主目录下的 shell 配置文件中，如 <code>~/.zshrc</code> 或 <code>~/.bashrc</code> ，然后重新启动你的 shell。</p>
+<p>一旦配置了 shell 别名，你可以通过简单地输入 <code>sail</code> 来执行 Sail 命令。本文接下来的示例都假定你已经配置了此别名：</p>
 <pre><code class="language-shell">sail up
 </code></pre>
 <p><a name="starting-and-stopping-sail"></a></p>
 <h2 id="启动--停止-sail">启动 &amp; 停止 Sail</h2>
-<p>Laravel Sail 的 <code>docker-compose.yml</code> 文件定义了各种 Docker 容器，它们可以协同工作以帮助你构建 Laravel 应用程序。每一个容器都定义在 <code>docker-compose.yml</code> 文件的 <code>services</code> 的配置内。 <code>laravel.test</code> 容器是将服务于你的应用程序的主要应用程序容器。</p>
+<p>Laravel Sail 的 <code>docker-compose.yml</code> 文件定义了各种 Docker 容器，它们可以协同工作以帮助你构建 Laravel 应用程序。每一个容器都定义在 <code>docker-compose.yml</code> 文件的 <code>services</code> 的配置内。 <code>laravel.test</code> 容器是将服务于您的应用程序的主要应用程序容器。</p>
 <p>在开始 Sail 之前，你应该确认没有其他的网站服务器或数据库正运行在你的本地计算机上。要开始启用 <code>docker-compose.yml</code> 文件中定义的所有 Docker 容器，请执行 <code>up</code> 命令：</p>
 <pre><code class="language-shell">sail up
 </code></pre>
-<p>要在后台启动所有 Docker 容器，你可以在「分离 (detached)」模式下启动 Sail：</p>
+<p>要在后台启动所有的 Docker 容器，你可以以 &quot;detached&quot; 模式启动 Sail。</p>
 <pre><code class="language-shell">sail up -d
 </code></pre>
 <p>启动应用程序的容器后，你可以通过 Web 浏览器中访问项目：<a href="http://localhost/">http://localhost</a>.</p>
-<p>要停止所有容器，只需按下 <code>Control + C</code> 即可停止容器的执行。如果容器在后台运行，你可以使用 <code>stop</code> 命令：</p>
+<p>要停止所有的容器，你可以简单的按 Control + C 来停止容器的执行。或者，如果容器是在后台运行的，你可以使用 <code>stop</code> 命令。</p>
 <pre><code class="language-shell">sail stop
 </code></pre>
 <p><a name="executing-sail-commands"></a></p>
@@ -135,12 +138,12 @@ sail php script.php
 <p>你可以进入到应用程序目录下并执行以下命令来安装应用所需的依赖，这个命令使用一个包含 PHP 与 Composer 的小型 Docker 容器进行应用程序依赖的安装：</p>
 <pre><code class="language-shell">docker run --rm \
     -u <span class="string token">"$(id -u):$(id -g)"</span> \
-    -v $(pwd):/<span class="keyword token">var</span>/www/html \
+    -v <span class="string token">"$(pwd):/var/www/html"</span> \
     -w /<span class="keyword token">var</span>/www/html \
-    laravelsail/php81-composer:latest \
+    laravelsail/php82-composer:latest \
     composer install --ignore-platform-reqs
 </code></pre>
-<p>当你使用 <code>laravelsail/phpXX-composer</code> 镜像时，你应该选择和你的应用程序所用环境相同的 PHP 版本（<code>74</code>、<code>80</code> 或 <code>81</code>）。</p>
+<p>当你使用 <code>laravelsail/phpXX-composer</code> 镜像时，你应该选择和你的应用程序所用环境相同的 PHP 版本（<code>74</code>、<code>80</code>、<code>81</code>或 <code>82</code>）。</p>
 <p><a name="executing-artisan-commands"></a></p>
 <h3 id="执行-artisan-命令">执行 Artisan 命令</h3>
 <p>Artisan 命令可以使用 <code>artisan</code> 命令执行：</p>
@@ -151,7 +154,7 @@ sail php script.php
 <p>Node 命令可以使用 <code>node</code> 命令执行，而 NPM 命令可以使用 <code>npm</code> 命令执行：</p>
 <pre><code class="language-shell">sail node --version
 
-sail npm run prod
+sail npm run dev
 </code></pre>
 <p>如果你愿意，你可以使用 Yarn 代替 NPM：</p>
 <pre><code class="language-shell">sail yarn
@@ -160,22 +163,23 @@ sail npm run prod
 <h2 id="与数据库交互">与数据库交互</h2>
 <p><a name="mysql"></a></p>
 <h3 id="mysql">MySQL</h3>
-<p>你可能已经注意到，应用程序的 <code>docker-compose.yml</code> 文件包含一个 MySQL 容器的配置。该容器使用了 <a href="https://docs.docker.com/storage/volumes/">Docker volume</a>，以便即使在停止和重新启动容器时依然可以持久存储数据库中存储的数据。此外，当 MySQL 容器启动时，它将确保存在名称与你的 <code>DB_DATABASE</code> 环境变量的值匹配的数据库。</p>
-<p>启动容器后，你可以通过将应用程序 <code>.env</code> 文件中的 <code>DB_HOST</code> 环境变量设置为 <code>mysql</code> 来连接到应用程序中的 MySQL 实例。</p>
-<p>要从本地计算机连接到应用程序的 MySQL 数据库，你可以使用图形数据库管理应用程序，例如 <a href="https://tableplus.com/">TablePlus</a>。默认情况下，可以从 <code>localhost</code> 的 3306 端口访问 MySQL 数据库。</p>
+<p>你可能已经注意到，应用程序的 <code>docker-compose.yml</code> 文件包含一个 MySQL 容器的配置。该容器使用了 <a href="https://docs.docker.com/storage/volumes/">Docker volume</a>，以便即使在停止和重新启动容器时依然可以持久存储数据库中存储的数据。</p>
+<p>此外，在MySQL容器第一次启动时，它将为你创建两个数据库。第一个数据库使用你的 <code>DB_DATABASE</code> 环境变量的值命名，用于你的本地开发。第二个是专门的测试数据库，名为 <code>testing</code>，将确保你的测试不会干扰你的开发数据。</p>
+<p>一旦你启动了你的容器，你可以通过在你的应用程序的 <code>.env</code> 文件中设置 <code>DB_HOST</code> 环境变量来连接到你的应用程序中的 MySQL 实例 <code>mysql</code>。</p>
+<p>要从你的本地机器连接到你的应用程序的 MySQL 数据库，你可以使用一个图形化的数据库管理应用程序，如 <a href="https://tableplus.com/">TablePlus</a>。默认情况下，MySQL 数据库可以通过 <code>localhost</code> 端口 3306 访问，访问凭证与 <code>DB_USERNAME</code> 和 <code>DB_PASSWORD</code> 环境变量的值一致。或者，你可以以 <code>root</code> 用户的身份连接，它也利用 <code>DB_PASSWORD</code> 环境变量的值作为密码。</p>
 <p><a name="redis"></a></p>
 <h3 id="redis">Redis</h3>
 <p>应用程序的 <code>docker-compose.yml</code> 文件也包含 <a href="https://redis.io/">Redis</a> 容器的配置，此容器使用 <a href="https://docs.docker.com/storage/volumes/">Docker volume</a>，以便即使在停止和重新启动容器后，Redis 数据中存储的数据也可以持久保存。启动容器后，可以通过将应用程序 <code>.env</code> 文件中的环境变量 <code>REDIS_HOST</code> 设置为 <code>redis</code> 来连接到应用程序中的 Redis 实例。</p>
 <p>要从本地计算机连接到应用程序的 Redis 数据库，可以使用图形数据库管理应用程序，例如 <a href="https://tableplus.com/">TablePlus</a>。默认情况下，可以从 <code>localhost</code> 的 6379 端口访问 Redis 数据库。</p>
 <p><a name="meilisearch"></a></p>
-<h3 id="meilisearch">MeiliSearch</h3>
-<p>如果你在安装 Sail 时选择安装 <a href="https://www.meilisearch.com">MeiliSearch</a> 服务，你的应用程序的 <code>docker-compose.yml</code> 文件将包含一个 <a href="scout.html">Laravel Scout</a> 兼容且强大的<a href="https://github.com/meilisearch/meilisearch-laravel-scout">搜索引擎服务组件配置</a>。启动容器后，你可以通过将环境变量 <code>MEILISEARCH_HOST</code> 设置为 <code>http://meilisearch:7700</code> 来连接到应用程序中的 MeiliSearch 实例。</p>
+<h3 id="meilisearch">Meilisearch</h3>
+<p>如果你在安装 Sail 时选择安装 <a href="https://www.meilisearch.com">MeiliSearch</a> 服务，你的应用程序的 <code>docker-compose.yml</code> 文件将包含一个 <a href="/docs/laravel/10.x/scout">Laravel Scout</a> 兼容且强大的<a href="https://github.com/meilisearch/meilisearch-laravel-scout">搜索引擎服务组件配置</a>。启动容器后，你可以通过将环境变量 <code>MEILISEARCH_HOST</code> 设置为 <code>http://meilisearch:7700</code> 来连接到应用程序中的 MeiliSearch 实例。</p>
 <p>要从本地计算机访问 MeiliSearch 的 Web 管理面板，你可以通过浏览器访问 <code>http://localhost:7700</code>。</p>
 <p><a name="file-storage"></a></p>
 <h2 id="文件存储">文件存储</h2>
 <p>如果你计划在生产环境中运行应用程序时使用 Amazon S3 存储文件，你可能希望在安装 Sail 时安装 <a href="https://min.io">MinIO</a> 服务。 MinIO 提供了一个与 S3 兼容的 API，你可以使用 Laravel 的 <code>s3</code> 文件存储驱动程序在本地进行开发，而无需在生产 S3 环境中创建用于测试的存储桶。如果在安装 Sail 时选择安装 MinIO，部分 MinIO 相关的配置将添加到应用程序的 <code>docker-compose.yml</code> 文件中。</p>
 <p>默认情况下，应用程序的 <code>filesystems</code>  配置文件已经包含 <code>s3</code> 磁盘的磁盘配置。除了使用此磁盘与 Amazon S3 交互之外，你还可以使用它与任何 S3 兼容的文件存储服务（例如 MinIO）进行交互，只需修改控制其配置的关联环境变量即可。例如，在使用 MinIO 时，你的文件系统环境变量配置应定义如下：</p>
-<pre><code class="language-ini">FILESYSTEM_DRIVER=s3
+<pre><code class="language-ini">FILESYSTEM_DISK=s3
 AWS_ACCESS_KEY_ID=sail
 AWS_SECRET_ACCESS_KEY=password
 AWS_DEFAULT_REGION=us-east-<span class="number token">1</span>
@@ -183,9 +187,17 @@ AWS_BUCKET=local
 AWS_ENDPOINT=http:<span class="comment token">//minio:9000</span>
 AWS_USE_PATH_STYLE_ENDPOINT=<span class="keyword token">true</span>
 </code></pre>
+<p>为了让 Laravel 的 Flysystem 集成在使用 MinIO 时产生正确的 URL，你应该定义 <code>AWS_URL</code> 环境变量，使其与你的应用程序的本地 URL 相匹配，并在 URL 路径中包含桶的名称。</p>
+<pre><code class="language-ini">AWS_URL=http:<span class="comment token">//localhost:9000/local</span>
+</code></pre>
+<p>你可以通过 MinIO 控制台创建桶，该控制台可在 <code>http://localhost:8900</code> 。MinIO 控制台的默认用户名是 <code>sail</code>，默认密码是 <code>password</code>。</p>
+<blockquote>
+<p><strong>警告</strong>
+使用 MinIO 时，不支持通过 <code>temporaryUrl</code> 方法生成临时存储的 URL。</p>
+</blockquote>
 <p><a name="running-tests"></a></p>
 <h2 id="运行测试">运行测试</h2>
-<p>Laravel 提供了出色的开箱即用测试，你可以使用 Sail 的 <code>test</code> 命令运行应用程序的 <a href="testing.html">功能和单元测试</a>。任何 PHPUnit 可接受的命令选项都可以透过 <code>test</code> 命令传递：</p>
+<p>Laravel 提供了出色的开箱即用测试，你可以使用 Sail 的 <code>test</code> 命令运行应用程序的 <a href="/docs/laravel/10.x/testing">功能和单元测试</a>。任何 PHPUnit 可接受的命令选项都可以透过 <code>test</code> 命令传递：</p>
 <pre><code class="language-shell">sail test
 
 sail test --group orders
@@ -193,9 +205,12 @@ sail test --group orders
 <p>Sail <code>test</code> 命令相当于运行 Artisan <code>test</code> 命令：</p>
 <pre><code class="language-shell">sail artisan test
 </code></pre>
+<p>默认情况下, Sail会创建一个专门的 <code>测试</code> 数据库, 这样你的测试就不会干扰到你的数据库的当前状态. 在默认的Laravel安装中, Sail也会配置你的 <code>phpunit.xml</code> 文件, 在执行你的测试时使用这个数据库:</p>
+<pre><code class="language-xml">&lt;env name="DB_DATABASE" value="testing"/&gt;
+</code></pre>
 <p><a name="laravel-dusk"></a></p>
 <h3 id="laravel-dusk">Laravel Dusk</h3>
-<p><a href="dusk.html">Laravel Dusk</a> 提供了非常优雅、易于使用的浏览器自动化测试 API。有了 Sail，进行浏览器测试更加方便了，你甚至不用在你的本地电脑上安装 Selenium 或者任何其他工具。要开启这项功能，请在 <code>docker-compose.yml</code> 文件中取消 Selenium 服务相关配置的注释：</p>
+<p><a href="/docs/laravel/10.x/dusk">Laravel Dusk</a> 提供了非常优雅、易于使用的浏览器自动化测试 API。有了 Sail，进行浏览器测试更加方便了，你甚至不用在你的本地电脑上安装 Selenium 或者任何其他工具。要开启这项功能，请在 <code>docker-compose.yml</code> 文件中取消 Selenium 服务相关配置的注释：</p>
 <pre><code class="language-yaml">selenium:
     image: &#39;selenium/standalone-chrome&#39;
     volumes:
@@ -224,12 +239,12 @@ sail test --group orders
 </code></pre>
 <p><a name="previewing-emails"></a></p>
 <h2 id="预览电子邮件">预览电子邮件</h2>
-<p>Laravel Sail 默认的 <code>docker-compose.yml</code> 文件中包含了一个服务项 <a href="https://github.com/mailhog/MailHog">MailHog</a>。MailHog 会在你本地开发的过程中拦截应用程序发送的电子邮件，并提供一个便捷的 Web 界面，方便你透过浏览器预览电子邮件。使用 Sail 时，MailHog 默认的主机名称是 <code>mailhog</code> 并使用 1025 端口：</p>
-<pre><code class="language-ini">MAIL_HOST=mailhog
+<p>Laravel Sail 默认的 <code>docker-compose.yml</code> 文件中包含了一个服务项 <a href="https://github.com/axllent/mailpit">Mailpit</a>。Mailpit 在本地开发过程中拦截应用程序发送的邮件，并提供一个便捷的 Web 界面，这样你就可以在浏览器中预览你的邮件。当使用 Sail 时，Mailpit 的默认主机是 <code>mailpit</code> ，可通过端口 1025 使用。</p>
+<pre><code class="language-ini">MAIL_HOST=mailpit
 MAIL_PORT=<span class="number token">1025</span>
 MAIL_ENCRYPTION=<span class="keyword token">null</span>
 </code></pre>
-<p>当 Sail 运行时，你可以透过 <a href="http://localhost:8025/">http://localhost:8025</a> 访问 MailHog 的 Web 界面。</p>
+<p>当 Sail 运行时，你可以透过 <a href="http://localhost:8025/">http://localhost:8025</a> 访问 Mailpit 的 Web 界面。</p>
 <p><a name="sail-container-cli"></a></p>
 <h2 id="容器-cli">容器 CLI</h2>
 <p>有时候，你可能想要在应用容器中开启一个 Bash 会话。 可以通过执行 <code>shell</code> 命令，以访问容器中的文件和已安装的服务，此外，你还可以执行其他任意 Shell 指令：</p>
@@ -242,8 +257,11 @@ sail root-shell
 </code></pre>
 <p><a name="sail-php-versions"></a></p>
 <h2 id="php-版本">PHP 版本</h2>
-<p>Sail 目前支持通过 PHP 8.1、PHP 8.0 或 PHP 7.4 为你的应用程序提供服务。想更改应用程序使用的 PHP 版本，请在 <code>docker-compose.yml</code> 文件定义的容器 <code>laravel.test</code> 相应配置中调整 <code>build</code> 定义:</p>
-<pre><code class="language-yaml"><span class="comment token"># PHP 8.1</span>
+<p>Sail目前支持通过 PHP 8.2、8.1、PHP 8.0 或 PHP 7.4 为你的应用程序提供服务。目前 Sail 使用的默认 PHP 版本是 PHP 8.2。想更改应用程序使用的 PHP 版本，请在 <code>docker-compose.yml</code> 文件定义的容器 <code>laravel.test</code> 相应配置中调整 <code>build</code> 定义:</p>
+<pre><code class="language-yaml"><span class="comment token"># PHP 8.2</span>
+context: ./vendor/laravel/sail/runtimes/<span class="number token">8.2</span>
+
+<span class="comment token"># PHP 8.1</span>
 context: ./vendor/laravel/sail/runtimes/<span class="number token">8.1</span>
 
 <span class="comment token"># PHP 8.0</span>
@@ -262,7 +280,7 @@ sail up
 </code></pre>
 <p><a name="sail-node-versions"></a></p>
 <h2 id="node-版本">Node 版本</h2>
-<p>Sail 默认安装 Node 16。要更改镜像构建时所安装的 Node 版本，你可以在应用程序的 <code>docker-compose.yml</code> 文件中更新 <code>laravel.test</code> 服务的 <code>build.args</code> 定义：</p>
+<p>Sail 默认安装 Node 18。要更改镜像构建时所安装的 Node 版本，你可以在应用程序的 <code>docker-compose.yml</code> 文件中更新 <code>laravel.test</code> 服务的 <code>build.args</code> 定义：</p>
 <pre><code class="language-yaml">build:
     args:
         WWWGROUP: &#39;${WWWGROUP}&#39;
@@ -290,15 +308,16 @@ sail up
 <pre><code class="language-shell">sail share --subdomain=my-sail-site
 </code></pre>
 <blockquote>
-<p>Tip：<code>share</code> 命令是由 <a href="https://github.com/beyondcode/expose">Expose</a> 提供，这是 <a href="https://beyondco.de/">BeyondCode</a> 的一个开源网络隧道服务。</p>
+<p><strong>注意</strong>
+<code>share</code> 命令是由 <a href="https://github.com/beyondcode/expose">Expose</a> 提供，这是 <a href="https://beyondco.de/">BeyondCode</a> 的一个开源网络隧道服务。</p>
 </blockquote>
 <p><a name="debugging-with-xdebug"></a></p>
 <h2 id="使用-xdebug-进行调试">使用 Xdebug 进行调试</h2>
 <p>Laravel Sail 的 Docker 配置包含对 <a href="https://xdebug.org/">Xdebug</a> 的支持，这是一个流行且强大的 PHP 调试器。为了启用 Xdebug，你需要在应用程序的 <code>.env</code> 文件中添加一些变量以 <a href="https://xdebug.org/docs/step_debug#mode">配置 Xdebug</a>。要启用 Xdebug，你必须在启动 Sail 之前设置适当的应用模式：</p>
-<pre><code class="language-ini">SAIL_XDEBUG_MODE=develop,debug
+<pre><code class="language-ini">SAIL_XDEBUG_MODE=develop,debug,coverage
 </code></pre>
 <h4 id="linux-主机-ip-配置">Linux 主机 IP 配置</h4>
-<p>在容器内部，<code>XDEBUG_CONFIG</code> 环境变量被定义为 <code>client_host=host.docker.internal</code> 以便为 Mac 和 Windows (WSL2) 正确配置 Xdebug。如果你的本地机器运行的是 Linux，你将需要手动定义这个环境变量。</p>
+<p>在容器内部，<code>XDEBUG_CONFIG</code> 环境变量被定义为 <code>client_host=host.docker.internal</code> 以便为 Mac 和 Windows (WSL2) 正确配置 Xdebug。如果你的本地机器运行的是 Linux，确保你运行的是 Docker Engine 17.06.0+ 和 Compose 1.16.0+。否则，你将需要手动定义这个环境变量。</p>
 <p>首先，你需要通过运行以下命令来确定要添加到环境变量中的正确主机 IP 地址。通常，<code>&lt;container-name&gt;</code> 应该是为你的应用程序提供服务的容器的名称，并且通常以 <code>_laravel.test_1</code> 结尾：</p>
 <pre><code class="language-shell">docker inspect -f {{range.NetworkSettings.Networks}}{{.Gateway}}{{end}} &lt;container-name&gt;
 </code></pre>
@@ -319,7 +338,8 @@ sail debug migrate
 <p>要在通过 Web 浏览器与应用程序交互时调试你的应用程序，请按照 <a href="https://xdebug.org/docs/step_debug#web-application">Xdebug 提供的说明</a> 从 Web 浏览器启动 Xdebug 会话。</p>
 <p>如果你使用的是 PhpStorm，请查看 JetBrains 关于 <a href="https://www.jetbrains.com/help/phpstorm/zero-configuration-debugging.html">零配置调试</a> 的文档。</p>
 <blockquote>
-<p>注意：Laravel Sail 依赖于 <code>artisan serve</code> 来为你的应用程序提供服务。从 Laravel 8.53.0 版本开始，<code>artisan serve</code> 命令只接受 <code>XDEBUG_CONFIG</code> 和 <code>XDEBUG_MODE</code> 变量。旧版本的 Laravel（8.52.0 及以下）不支持这些变量并且不接受调试连接。</p>
+<p><strong>警告</strong>
+Laravel Sail 依赖于 <code>artisan serve</code> 来为你的应用程序提供服务。从 Laravel 8.53.0 版本开始，<code>artisan serve</code> 命令只接受 <code>XDEBUG_CONFIG</code> 和 <code>XDEBUG_MODE</code> 变量。从 Laravel 8.53.0 版本开始，旧版本的 Laravel（8.52.0 及以下）不支持这些变量并且不接受调试连接。</p>
 </blockquote>
 <p><a name="sail-customization"></a></p>
 <h2 id="定制化">定制化</h2>
