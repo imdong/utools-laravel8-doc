@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -22,6 +22,7 @@
 <li><a href="#basic-routing">基本路由</a><ul>
 <li><a href="#redirect-routes">路由重定向</a></li>
 <li><a href="#view-routes">路由视图</a></li>
+<li><a href="#the-route-list">route:list 命令</a></li>
 </ul>
 </li>
 <li><a href="#route-parameters">路由参数</a><ul>
@@ -58,7 +59,7 @@
 </ul>
 <p><a name="basic-routing"></a></p>
 <h2 id="基本路由">基本路由</h2>
-<p>最基本的Laravel路由接受一个 URI 和一个闭包，提供了一个简单优雅的方法来定义路由和行为，而不需要复杂的路由配置文件：</p>
+<p>最基本的 Laravel 路由接受一个 URI 和一个闭包，提供了一个简单优雅的方法来定义路由和行为，而不需要复杂的路由配置文件：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Route;
 
 Route::get(<span class="string token">'/greeting'</span>, <span class="keyword token">function</span> () {
@@ -67,16 +68,16 @@ Route::get(<span class="string token">'/greeting'</span>, <span class="keyword t
 </code></pre>
 <p><a name="the-default-route-files"></a></p>
 <h4 id="默认路由文件">默认路由文件</h4>
-<p>所有 Laravel 路由都定义在你的路由文件中，它位于 <code>routes</code> 目录。这些文件会被你的应用程序中的 <code>App\Providers\RouteServiceProvider</code> 自动加载。<code>routes/web.php</code> 文件用于定义 <code>web</code> 界面的路由。这些路由被分配给 <code>web</code> 中间件组, 它提供了 SESSION 状态和 CSRF 保护等功能。定义在 <code>routes/api.php</code> 中的路由都是无状态的，并且被分配了 <code>api</code> 中间件组。</p>
+<p>所有 Laravel 路由都定义在你的路由文件中，它位于 <code>routes</code> 目录。这些文件会被你的应用程序中的 <code>App\Providers\RouteServiceProvider</code> 自动加载。<code>routes/web.php</code> 文件用于定义 web 界面的路由。这些路由被分配给 <code>web</code> 中间件组，它提供了 会话状态和 CSRF 保护等功能。定义在 <code>routes/api.php</code> 中的路由都是无状态的，并且被分配了 <code>api</code> 中间件组。</p>
 <p>对于大多数应用程序，都是以在 <code>routes/web.php</code> 文件定义路由开始的。可以通过在浏览器中输入定义的路由 URL 来访问 <code>routes/web.php</code> 中定义的路由。例如，你可以在浏览器中输入 <code>http://example.com/user</code> 来访问以下路由：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\UserController;
 
 Route::get(<span class="string token">'/user'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'index'</span>]);
 </code></pre>
-<p>定义在 <code>routes/api.php</code> 文件中的路由是被 <code>RouteServiceProvider</code> 嵌套在一个路由组内。 在这个路由组内, 将自动应用 <code>/api</code> URI 前缀，所以你无需手动将其应用于文件中的每个路由。你可以通过修改 <code>RouteServiceProvider</code> 类来修改前缀和其他路由组选项。</p>
+<p>定义在 <code>routes/api.php</code> 文件中的路由是被 <code>RouteServiceProvider</code> 嵌套在一个路由组内。 在这个路由组内，将自动应用 <code>/api</code> URI 前缀，所以你无需手动将其应用于文件中的每个路由。你可以通过修改 <code>RouteServiceProvider</code> 类来修改前缀和其他路由组选项。</p>
 <p><a name="available-router-methods"></a></p>
 <h4 id="可用的路由方法">可用的路由方法</h4>
-<p>路由器允许你注册能响应任何 HTTP 请求的路由：</p>
+<p>路由器允许你注册能响应任何 HTTP 请求的路由</p>
 <pre><code>Route::get(<span class="variable token">$uri</span>, <span class="variable token">$callback</span>);
 Route::post(<span class="variable token">$uri</span>, <span class="variable token">$callback</span>);
 Route::put(<span class="variable token">$uri</span>, <span class="variable token">$callback</span>);
@@ -86,19 +87,20 @@ Route::options(<span class="variable token">$uri</span>, <span class="variable t
 </code></pre>
 <p>有的时候你可能需要注册一个可响应多个 HTTP 请求的路由，这时你可以使用 <code>match</code> 方法，也可以使用 <code>any</code> 方法注册一个实现响应所有 HTTP 请求的路由：</p>
 <pre><code>Route::match([<span class="string token">'get'</span>, <span class="string token">'post'</span>], <span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 
 Route::any(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <blockquote>
-<p>技巧：当定义多个相同路由时，使用 <code>get</code>， <code>post</code>， <code>put</code>， <code>patch</code>， <code>delete</code>， 和 <code>options</code> 方法的路由应该在使用 <code>any</code>， <code>match</code>， 和 <code>redirect</code> 方法的路由之前定义，这样可以确保请求与正确的路由匹配。</p>
+<p><strong>技巧</strong>
+当定义多个相同路由时，使用 <code>get</code>， <code>post</code>， <code>put</code>， <code>patch</code>， <code>delete</code>， 和 <code>options</code> 方法的路由应该在使用 <code>any</code>， <code>match</code>， 和 <code>redirect</code> 方法的路由之前定义，这样可以确保请求与正确的路由匹配。</p>
 </blockquote>
 <p><a name="dependency-injection"></a></p>
 <h4 id="依赖注入">依赖注入</h4>
-<p>你可以在路由的回调方法中，以形参的方式声明路由所需要的任何依赖项。这些依赖会被 Laravel 的 <a href="container.html">容器</a> 自动解析并注入。 例如, 你可以在闭包中声明 <code>Illuminate\Http\Request</code> 类，让当前的 HTTP 请求自动注入依赖到你的路由回调中：</p>
+<p>你可以在路由的回调方法中，以形参的方式声明路由所需要的任何依赖项。这些依赖会被 Laravel 的 <a href="/docs/laravel/10.x/container">容器</a> 自动解析并注入。 例如，你可以在闭包中声明 <code>Illuminate\Http\Request</code> 类， 让当前的 HTTP 请求自动注入依赖到你的路由回调中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
 
 Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
@@ -107,7 +109,7 @@ Route::get(<span class="string token">'/users'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="csrf-protection"></a></p>
 <h4 id="csrf-保护">CSRF 保护</h4>
-<p>请记住，指向 <code>POST</code>、<code>PUT</code>、<code>PATCH</code>、或 <code>DELETE</code> 路由的任何 HTML 表单都应该包含一个 CSRF 令牌字段，否则，这个请求将会被拒绝。可以在 <a href="csrf.html">CSRF 文档</a> 中阅读有关 CSRF 更多的信息：</p>
+<p>请记住，任何指向<code>POST</code>、<code>PUT</code>、<code>PATCH</code> 或 <code>DELETE</code> 路由(在 <code>web</code> 路由文件中定义)的 HTML 表单都应该包含 CSRF 令牌字，否则请求会被拒绝。更多 CSRF 保护的相关信息请阅读<a href="/docs/laravel/10.x/csrf">CSRF 文档</a>：</p>
 <pre><code>&lt;form method="POST" action="/profile"&gt;
     @csrf
     ...
@@ -115,114 +117,137 @@ Route::get(<span class="string token">'/users'</span>, <span class="keyword toke
 </code></pre>
 <p><a name="redirect-routes"></a></p>
 <h3 id="重定向路由">重定向路由</h3>
-<p>如果要定义重定向到另一个 URI 的路由，可以使用 <code>Route::redirect</code> 方法。这个方法可以快速的实现重定向，而不再需要去定义完整的路由或者控制器：</p>
+<p>如果要定义一个重定向到另一个 URI 的路由，可以使用 <code>Route::redirect</code> 方法。这个方法可以快速的实现重定向，而不再需要去定义完整的路由或者控制器：</p>
 <pre><code>Route::redirect(&#39;/here&#39;, &#39;/there&#39;);
 </code></pre>
-<p>默认情况下，<code>Route::redirect</code> 返回 <code>302</code> 状态码。你可以使用可选的第三个参数来定制状态码：</p>
+<p>默认情况下，<code>Route::redirect</code> 返回 <code>302</code> 状态码。你可以使用可选的第三个参数自定义状态码：</p>
 <pre><code>Route::redirect(&#39;/here&#39;, &#39;/there&#39;, 301);
 </code></pre>
-<p>或者，你可以使用 <code>Route::permanentRedirect</code> 方法返回 <code>301</code> 状态码：</p>
+<p>或者，你也可以使用 <code>Route::permanentRedirect</code> 方法返回 <code>301</code>状态码：</p>
 <pre><code>Route::permanentRedirect(&#39;/here&#39;, &#39;/there&#39;);
 </code></pre>
 <blockquote>
-<p>注意：在重定向路由中使用路由参数时，以下参数由 Laravel 保留，不能使用：  <code>destination</code> 和 <code>status</code></p>
+<p><strong>警告</strong><br>在重定向路由中使用路由参数时，以下参数由 Laravel 保留，不能使用：<code>destination</code> 和 <code>status</code>。</p>
 </blockquote>
 <p><a name="view-routes"></a></p>
 <h3 id="视图路由">视图路由</h3>
-<p>如果你的路由只需要返回一个 <a href="views.html">视图</a>，可以使用 <code>Route::view</code> 方法。它和 <code>redirect</code> 一样方便，不需要定义完整的路由或控制器。<code>view</code> 方法有三个参数，其中前两个是必填参数，分别是 URI 和视图名称。第三个参数选填，可以传入一个数组，数组中的数据会被传递给视图：</p>
+<p>如果你的路由只需返回一个<a href="/docs/laravel/10.x/views">视图</a>，你可以使用 <code>Route::view</code> 方法。就像 <code>redirect</code> 方法，该方法提供了一个让你不必定义完整路由或控制器的便捷操作。这个<code>view</code>方法的第一个参数是URI，第二个参数为视图名称。此外，你也可以在可选的第三个参数中传入数组，将数组的数据传递给视图：</p>
 <pre><code>Route::view('/welcome', 'welcome');
 
 Route::view('/welcome', 'welcome', ['name' =&gt; 'Taylor']);
 </code></pre>
 <blockquote>
-<p>注意：当在视图路由使用路由参数，下面的参数是由 Laravel 保留，不能使用：<code>view</code>， <code>data</code>，<code>status</code>，和 <code>headers</code></p>
+<p><strong>警告</strong><br>在视图路由中使用参数时，下列参数由 Laravel 保留，不能使用：<code>view</code>、<code>data</code>, <code>status</code> 及 <code>headers</code>。</p>
 </blockquote>
+<p><a name="the-route-list"></a></p>
+<h3 id="routelist-命令">route:list 命令</h3>
+<p>使用 <code>route:list</code> Artisan命令可以轻松提供应用程序定义的所有路线的概述：</p>
+<pre><code class="language-shell">php artisan route:<span class="keyword token">list</span>
+</code></pre>
+<p>正常情况下，<code>route:list</code>不会显示分配给路由的中间件信息；但是你可以通过在命令中添加 <code>-v</code> 选项 来显示路由中的中间件信息：</p>
+<pre><code class="language-shell">php artisan route:<span class="keyword token">list</span> -v
+</code></pre>
+<p>你也可以通过 <code>--path</code> 来显示指定的 URL 开头的路由：</p>
+<pre><code class="language-shell">php artisan route:<span class="keyword token">list</span> --path=api
+</code></pre>
+<p>此外，在执行 <code>route:list</code> 命令时，可以通过提供 <code>--except vendor</code> 选项来隐藏由第三方包定义的任何路由：</p>
+<pre><code class="language-shell">php artisan route:<span class="keyword token">list</span> --except-vendor
+</code></pre>
+<p>同理，也可以通过在执行 <code>route:list</code> 命令时提供 <code>--only vendor</code> 选项来显示由第三方包定义的路由：</p>
+<pre><code class="language-shell">php artisan route:<span class="keyword token">list</span> --only-vendor
+</code></pre>
 <p><a name="route-parameters"></a></p>
 <h2 id="路由参数">路由参数</h2>
 <p><a name="required-parameters"></a></p>
-<h3 id="必填参数">必填参数</h3>
+<h3 id="必需参数">必需参数</h3>
 <p>有时你将需要捕获路由内的 URI 段。例如，你可能需要从 URL 中捕获用户的 ID。你可以通过定义路由参数来做到这一点：</p>
-<pre><code>Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
+<pre><code>Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
     <span class="keyword token">return</span> <span class="string token">'User '</span>.<span class="variable token">$id</span>;
 });
 </code></pre>
 <p>也可以根据你的需要在路由中定义多个参数：</p>
-<pre><code>Route::get(<span class="string token">'/posts/{post}/comments/{comment}'</span>, <span class="keyword token">function</span> (<span class="variable token">$postId</span>, <span class="variable token">$commentId</span>) {
-    <span class="comment token">//</span>
+<pre><code>Route::get(<span class="string token">'/posts/{post}/comments/{comment}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$postId</span>, string <span class="variable token">$commentId</span>) {
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <p>路由的参数通常都会被放在 <code>{}</code> ，并且参数名只能为字母。下划线 (<code>_</code>) 也可以用于路由参数名中。路由参数会按路由定义的顺序依次注入到路由回调或者控制器中，而不受回调或者控制器的参数名称的影响。</p>
 <p><a name="parameters-and-dependency-injection"></a></p>
-<h4 id="参数和依赖注入">参数和依赖注入</h4>
+<h4 id="必填参数">必填参数</h4>
 <p>如果你的路由具有依赖关系，而你希望 Laravel 服务容器自动注入到路由的回调中，则应在依赖关系之后列出路由参数：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Http\Request;
 
-Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>, <span class="variable token">$id</span>) {
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>, string <span class="variable token">$id</span>) {
     <span class="keyword token">return</span> <span class="string token">'User '</span>.<span class="variable token">$id</span>;
 });
 </code></pre>
 <p><a name="parameters-optional-parameters"></a></p>
 <h3 id="可选参数">可选参数</h3>
 <p>有时，你可能需要指定一个路由参数，但你希望这个参数是可选的。你可以在参数后面加上 <code>?</code> 标记来实现，但前提是要确保路由的相应变量有默认值：</p>
-<pre><code>Route::get(<span class="string token">'/user/{name?}'</span>, <span class="keyword token">function</span> (<span class="variable token">$name</span> = <span class="keyword token">null</span>) {
+<pre><code>Route::get(<span class="string token">'/user/{name?}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$name</span> = <span class="keyword token">null</span>) {
     <span class="keyword token">return</span> <span class="variable token">$name</span>;
 });
 
-Route::get(<span class="string token">'/user/{name?}'</span>, <span class="keyword token">function</span> (<span class="variable token">$name</span> = <span class="string token">'John'</span>) {
+Route::get(<span class="string token">'/user/{name?}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$name</span> = <span class="string token">'John'</span>) {
     <span class="keyword token">return</span> <span class="variable token">$name</span>;
 });
 </code></pre>
 <p><a name="parameters-regular-expression-constraints"></a></p>
 <h3 id="正则表达式约束">正则表达式约束</h3>
-<p>你可以使用路由实例上的 where 方法来限制路由参数的格式。 where 方法接受参数的名称和定义如何约束参数的正则表达式：</p>
-<pre><code>Route::get(<span class="string token">'/user/{name}'</span>, <span class="keyword token">function</span> (<span class="variable token">$name</span>) {
-    <span class="comment token">//</span>
+<p>你可以使用路由实例上的 <code>where</code> 方法来限制路由参数的格式。 <code>where</code> 方法接受参数的名称和定义如何约束参数的正则表达式：</p>
+<pre><code>Route::get(<span class="string token">'/user/{name}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$name</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;where(<span class="string token">'name'</span>, <span class="string token">'[A-Za-z]+'</span>);
 
-Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">//</span>
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;where(<span class="string token">'id'</span>, <span class="string token">'[0-9]+'</span>);
 
-Route::get(<span class="string token">'/user/{id}/{name}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>, <span class="variable token">$name</span>) {
-    <span class="comment token">//</span>
+Route::get(<span class="string token">'/user/{id}/{name}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>, string <span class="variable token">$name</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;where([<span class="string token">'id'</span> =&gt; <span class="string token">'[0-9]+'</span>, <span class="string token">'name'</span> =&gt; <span class="string token">'[a-z]+'</span>]);
 </code></pre>
 <p>为方便起见，一些常用的正则表达式模式具有帮助方法，可让你快速将模式约束添加到路由：</p>
-<pre><code>Route::get(<span class="string token">'/user/{id}/{name}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>, <span class="variable token">$name</span>) {
-    <span class="comment token">//</span>
+<pre><code>Route::get(<span class="string token">'/user/{id}/{name}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>, string <span class="variable token">$name</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;whereNumber(<span class="string token">'id'</span>)-&gt;whereAlpha(<span class="string token">'name'</span>);
 
-Route::get(<span class="string token">'/user/{name}'</span>, <span class="keyword token">function</span> (<span class="variable token">$name</span>) {
-    <span class="comment token">//</span>
+Route::get(<span class="string token">'/user/{name}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$name</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;whereAlphaNumeric(<span class="string token">'name'</span>);
 
-Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">//</span>
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;whereUuid(<span class="string token">'id'</span>);
+
+Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">//</span>
+})-&gt;whereUlid(<span class="string token">'id'</span>);
+
+Route::get(<span class="string token">'/category/{category}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$category</span>) {
+    <span class="comment token">// ...</span>
+})-&gt;whereIn(<span class="string token">'category'</span>, [<span class="string token">'movie'</span>, <span class="string token">'song'</span>, <span class="string token">'painting'</span>]);
 </code></pre>
-<p>如果传入的请求与路由模式约束不匹配，将返回 404 HTTP 响应。</p>
+<p>如果传入请求与路由模式约束不匹配，将返回 404 HTTP 响应。</p>
 <p><a name="parameters-global-constraints"></a></p>
 <h4 id="全局约束">全局约束</h4>
-<p>如果你希望路由参数始终受给定正则表达式的约束，你可以使用 <code>pattern</code> 方法。 你应该在 <code>App\Providers\RouteServiceProvider</code> 类的 <code>boot</code> 方法中定义这些模式：</p>
+<p>如果你希望路由参数始终受给定正则表达式的约束，你可以使用 <code>pattern</code> 方法。 你应该在 <code>App\Providers\RouteServiceProvider</code> 类的 <code>boot</code> 方法中定义这些模式：</p>
 <pre><code><span class="comment token">/**
- * 定义路由模型绑定、模式过滤器等。
- *
- *<span class="phpdoc token"> @return</span> void
+ * 定义路由模型绑定、模式筛选器等。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Route::pattern(<span class="string token">'id'</span>, <span class="string token">'[0-9]+'</span>);
 }
 </code></pre>
 <p>一旦定义了模式，它就会自动应用到使用该参数名称的所有路由：</p>
-<pre><code>Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">// 仅当{id}是数字时执行。。。</span>
+<pre><code>Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// 仅当 {id} 是数字时执行。。。</span>
 });
 </code></pre>
 <p><a name="parameters-encoded-forward-slashes"></a></p>
 <h4 id="编码正斜杠">编码正斜杠</h4>
 <p>Laravel 路由组件允许除 <code>/</code> 之外的所有字符出现在路由参数值中。 你必须使用 <code>where</code> 条件正则表达式明确允许 <code>/</code> 成为占位符的一部分：</p>
-<pre><code>Route::get(<span class="string token">'/search/{search}'</span>, <span class="keyword token">function</span> (<span class="variable token">$search</span>) {
+<pre><code>Route::get(<span class="string token">'/search/{search}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$search</span>) {
     <span class="keyword token">return</span> <span class="variable token">$search</span>;
 })-&gt;where(<span class="string token">'search'</span>, <span class="string token">'.*'</span>);
 </code></pre>
@@ -231,9 +256,9 @@ Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword 
 </blockquote>
 <p><a name="named-routes"></a></p>
 <h2 id="命名路由">命名路由</h2>
-<p>命名路由允许为特定路由方便地生成URL或重定向。通过将    <code>name</code> 方法链接到路由定义上，可以指定路由的名称：</p>
+<p>命名路由允许为特定路由方便地生成 URL 或重定向。通过将 <code>name</code> 方法链接到路由定义上，可以指定路由的名称：</p>
 <pre><code>Route::get(<span class="string token">'/user/profile'</span>, <span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 })-&gt;name(<span class="string token">'profile'</span>);
 </code></pre>
 <p>你还可以为控制器操作指定路由名称：</p>
@@ -247,23 +272,25 @@ Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword 
 </blockquote>
 <p><a name="generating-urls-to-named-routes"></a></p>
 <h4 id="生成命名路由的-url">生成命名路由的 URL</h4>
-<p>一旦你为给定的路由分配了一个名字，你可以在通过 Laravel 的 <code>route</code> 和 <code>redirect</code> 辅助函数生成 URL 或重定向时使用该路由的名称：</p>
-<pre><code><span class="comment token">// 正在生成 URL...</span>
+<p>一旦你为给定的路由分配了一个名字，你可以在通过 Laravel 的 <code>route</code> 和 <code>redirect</code> 辅助函数生成 URL 或重定向时使用该路由的名称：</p>
+<pre><code><span class="comment token">// 生成URL。。。</span>
 <span class="variable token">$url</span> = route(<span class="string token">'profile'</span>);
 
-<span class="comment token">// 正在生成重定向...</span>
+<span class="comment token">// 生成重定向。。。</span>
 <span class="keyword token">return</span> redirect()-&gt;route(<span class="string token">'profile'</span>);
+
+<span class="keyword token">return</span> to_route(<span class="string token">'profile'</span>);
 </code></pre>
-<p>如果命名路由定义了参数，你可以将参数作为第二个参数传递给 <code>route</code> 函数。 给定的参数将自动插入到生成的 URL 的正确位置：</p>
-<pre><code>Route::get(<span class="string token">'/user/{id}/profile'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">//</span>
+<p>如果命名路由定义了参数，你可以将参数作为第二个参数传递给 <code>route</code> 函数。 给定的参数将自动插入到生成的 URL 的正确位置：</p>
+<pre><code>Route::get(<span class="string token">'/user/{id}/profile'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;name(<span class="string token">'profile'</span>);
 
 <span class="variable token">$url</span> = route(<span class="string token">'profile'</span>, [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>]);
 </code></pre>
-<p>如果你在数组中传递其他参数，这些键/值对将自动添加到生成的 URL 的查询字符串中：</p>
-<pre><code>Route::get(<span class="string token">'/user/{id}/profile'</span>, <span class="keyword token">function</span> (<span class="variable token">$id</span>) {
-    <span class="comment token">//</span>
+<p>如果你在数组中传递其他参数，这些键 / 值对将自动添加到生成的 URL 的查询字符串中：</p>
+<pre><code>Route::get(<span class="string token">'/user/{id}/profile'</span>, <span class="keyword token">function</span> (string <span class="variable token">$id</span>) {
+    <span class="comment token">// ...</span>
 })-&gt;name(<span class="string token">'profile'</span>);
 
 <span class="variable token">$url</span> = route(<span class="string token">'profile'</span>, [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>, <span class="string token">'photos'</span> =&gt; <span class="string token">'yes'</span>]);
@@ -271,22 +298,21 @@ Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword 
 <span class="comment token">// /user/1/profile?photos=yes</span>
 </code></pre>
 <blockquote>
-<p>技巧：有时，你可能希望为 URL 参数指定请求范围的默认值，例如当前语言环境。 为此，你可以使用 <a href="urls.html#default-values"><code>URL::defaults</code> 方法</a>。</p>
+<p>技巧：有时，你可能希望为 URL 参数指定请求范围的默认值，例如当前语言环境。 为此，你可以使用 <a href="/docs/laravel/10.x/urlsmd/14854#default-values"><code>URL::defaults</code> 方法</a>.</p>
 </blockquote>
 <p><a name="inspecting-the-current-route"></a></p>
 <h4 id="检查当前路由">检查当前路由</h4>
 <p>如果你想确定当前请求是否路由到给定的命名路由，你可以在 Route 实例上使用 <code>named</code> 方法。 例如，你可以从路由中间件检查当前路由名称：</p>
 <pre><code><span class="comment token">/**
- * 处理传入的请求。
- *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
- *<span class="phpdoc token"> @param</span>  \Closure  $next
- *<span class="phpdoc token"> @return</span> mixed
+ * 处理传入请求。
+  *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
+  *<span class="phpdoc token"> @param</span>  \Closure  $next
+  *<span class="phpdoc token"> @return</span> mixed
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> handle(<span class="variable token">$request</span>, Closure <span class="variable token">$next</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>): Response
 {
     <span class="keyword token">if</span> (<span class="variable token">$request</span>-&gt;route()-&gt;named(<span class="string token">'profile'</span>)) {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     }
 
     <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>);
@@ -295,23 +321,23 @@ Route::get(<span class="string token">'/user/{id}'</span>, <span class="keyword 
 <p><a name="route-groups"></a></p>
 <h2 id="路由组">路由组</h2>
 <p>路由组允许你共享路由属性，例如中间件，而无需在每个单独的路由上定义这些属性。</p>
-<p>嵌套组尝试智能地将属性与其父组「合并」。中间件和 <code>where</code> 条件合并，同时附加名称和前缀。 URI 前缀中的命名空间分隔符和斜杠会在适当的地方自动添加。</p>
+<p>嵌套组尝试智能地将属性与其父组 &quot;合并&quot;。中间件和 <code>where</code> 条件合并，同时附加名称和前缀。 URI 前缀中的命名空间分隔符和斜杠会在适当的地方自动添加。</p>
 <p><a name="route-group-middleware"></a></p>
 <h3 id="路由中间件">路由中间件</h3>
-<p>要将 <a href="middleware.html">middleware</a> 分配给组内的所有路由，你可以在定义组之前使用 <code>middleware</code> 方法。 中间件按照它们在数组中列出的顺序执行：</p>
+<p>要将 <a href="/docs/laravel/10.x/middleware">中间件</a> 分配给组内的所有路由，你可以在定义组之前使用 <code>middleware</code> 方法。 中间件按照它们在数组中列出的顺序执行：</p>
 <pre><code>Route::middleware([<span class="string token">'first'</span>, <span class="string token">'second'</span>])-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// 使用first和second中间件...</span>
+        <span class="comment token">// 使用第一个和第二个中间件。。。</span>
     });
 
     Route::get(<span class="string token">'/user/profile'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// 使用first和second中间件...</span>
+        <span class="comment token">// 使用第一个和第二个中间件。。。</span>
     });
 });
 </code></pre>
 <p><a name="route-group-controllers"></a></p>
 <h3 id="控制器">控制器</h3>
-<p>如果一组路由都使用相同的 <a href="controllers.html">控制器</a>，你可以使用 <code>controller</code> 方法为组内的所有路由定义公共控制器。然后，在定义路由时，你只需要提供它们调用的控制器方法：</p>
+<p>如果一组路由都使用相同的 <a href="/docs/laravel/10.x/controllers">控制器</a>, 你可以使用 <code>controller</code> 方法为组内的所有路由定义公共控制器。然后，在定义路由时，你只需要提供它们调用的控制器方法：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\OrderController;
 
 Route::controller(OrderController::<span class="keyword token">class</span>)-&gt;group(<span class="keyword token">function</span> () {
@@ -321,10 +347,10 @@ Route::controller(OrderController::<span class="keyword token">class</span>)-&gt
 </code></pre>
 <p><a name="route-group-subdomain-routing"></a></p>
 <h3 id="子域路由">子域路由</h3>
-<p>路由组也可以用来处理子域路由。子域可以像路由 uri 一样被分配路由参数，允许你捕获子域的一部分以便在路由或控制器中使用。子域可以在定义组之前调用 <code>domain</code> 方法来指定:</p>
+<p>路由组也可以用来处理子域路由。子域可以像路由 uri 一样被分配路由参数，允许你捕获子域的一部分以便在路由或控制器中使用。子域可以在定义组之前调用 <code>domain</code> 方法来指定:</p>
 <pre><code>Route::domain(<span class="string token">'{account}.example.com'</span>)-&gt;group(<span class="keyword token">function</span> () {
-    Route::get(<span class="string token">'user/{id}'</span>, <span class="keyword token">function</span> (<span class="variable token">$account</span>, <span class="variable token">$id</span>) {
-        <span class="comment token">//</span>
+    Route::get(<span class="string token">'user/{id}'</span>, <span class="keyword token">function</span> (string <span class="variable token">$account</span>, string <span class="variable token">$id</span>) {
+        <span class="comment token">// ...</span>
     });
 });
 </code></pre>
@@ -333,19 +359,19 @@ Route::controller(OrderController::<span class="keyword token">class</span>)-&gt
 </blockquote>
 <p><a name="route-group-prefixes"></a></p>
 <h3 id="路由前缀">路由前缀</h3>
-<p><code>prefix</code> 方法可以用给定的 URI 为组中的每个路由做前缀。例如，你可能想要在组内的所有路由 uri 前面加上 <code>admin</code> 前缀：</p>
+<p><code>prefix</code> 方法可以用给定的 URI 为组中的每个路由做前缀。例如，你可能想要在组内的所有路由 uri 前面加上 <code>admin</code> 前缀：</p>
 <pre><code>Route::prefix(<span class="string token">'admin'</span>)-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// Matches The "/admin/users" URL</span>
+        <span class="comment token">// 对应 "/admin/users" 的 URL</span>
     });
 });
 </code></pre>
 <p><a name="route-group-name-prefixes"></a></p>
 <h3 id="路由名称前缀">路由名称前缀</h3>
-<p><code>name</code> 方法可以用给定字符串作为组中的每个路由名的前缀。例如，你可能想要用 <code>admin</code> 作为所有分组路由的前缀。因为给定字符串的前缀与指定的路由名完全一致，所以我们一定要提供末尾 <code>.</code> 字符在前缀中：</p>
+<p><code>name</code> 方法可以用给定字符串作为组中的每个路由名的前缀。例如，你可能想要用 <code>admin</code> 作为所有分组路由的前缀。因为给定字符串的前缀与指定的路由名完全一致，所以我们一定要提供末尾 <code>.</code> 字符在前缀中：</p>
 <pre><code>Route::name(<span class="string token">'admin.'</span>)-&gt;group(<span class="keyword token">function</span> () {
     Route::get(<span class="string token">'/users'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">// Route assigned name "admin.users"...</span>
+        <span class="comment token">// 被分配的路由名为："admin.users"</span>
     })-&gt;name(<span class="string token">'users'</span>);
 });
 </code></pre>
@@ -362,14 +388,14 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 });
 </code></pre>
 <p>由于 <code>$user</code> 变量被类型提示为 <code>App\Models\User</code> Eloquent 模型，并且变量名称与 <code>{user}</code> URI 段匹配，Laravel 将自动注入 ID 匹配相应的模型实例 来自请求 URI 的值。如果在数据库中没有找到匹配的模型实例，将自动生成 404 HTTP 响应。</p>
-<p>当然，使用控制器方法时也可以使用隐式绑定。同样，请注意 <code>{user}</code> URI 段与控制器中的 <code>$user</code> 变量匹配，该变量包含 <code>App\Models\User</code> 类型提示：</p>
+<p>当然，使用控制器方法时也可以使用隐式绑定。同样，请注意 <code>{user}</code> URI 段与控制器中的 <code>$user</code> 变量匹配，该变量包含 <code>App\Models\User</code> 类型提示：</p>
 <pre><code><span class="keyword token">use</span> App\Http\Controllers\UserController;
 <span class="keyword token">use</span> App\Models\User;
 
-<span class="comment token">// Route definition...</span>
+<span class="comment token">// 路由定义。。。</span>
 Route::get(<span class="string token">'/users/{user}'</span>, [UserController::<span class="keyword token">class</span>, <span class="string token">'show'</span>]);
 
-<span class="comment token">// Controller method definition...</span>
+<span class="comment token">// 定义控制器方法。。。</span>
 <span class="keyword token">public</span> <span class="keyword token">function</span> show(User <span class="variable token">$user</span>)
 {
     <span class="keyword token">return</span> view(<span class="string token">'user.profile'</span>, [<span class="string token">'user'</span> =&gt; <span class="variable token">$user</span>]);
@@ -377,7 +403,7 @@ Route::get(<span class="string token">'/users/{user}'</span>, [UserController::<
 </code></pre>
 <p><a name="implicit-soft-deleted-models"></a></p>
 <h4 id="软删除模型">软删除模型</h4>
-<p>通常，隐式模型绑定不会检索已 <a href="eloquent.html#soft-deleting">软删除</a> 的模型。但是，你可以通过将 <code>withTrashed</code> 方法链接到你的路由定义来指示隐式绑定来检索这些模型：</p>
+<p>通常，隐式模型绑定不会检索已 <a href="/docs/laravel/10.x/eloquent#soft-deleting">软删除</a> 的模型。但是，你可以通过将 <code>withTrashed</code> 方法链接到你的路由定义来指示隐式绑定来检索这些模型：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 Route::get(<span class="string token">'/users/{user}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
@@ -387,20 +413,18 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 <p><a name="customizing-the-key"></a>
 <a name="customizing-the-default-key-name"></a></p>
 <h4 id="自定义密钥">自定义密钥</h4>
-<p>有时你可能希望使用 id 以外的列来解析 Eloquent 模型。为此，你可以在路由参数定义中指定列：</p>
+<p>有时你可能希望使用 <code>id</code> 外的列来解析 Eloquent 模型。为此，你可以在路由参数定义中指定列：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Post;
 
 Route::get(<span class="string token">'/posts/{post:slug}'</span>, <span class="keyword token">function</span> (Post <span class="variable token">$post</span>) {
     <span class="keyword token">return</span> <span class="variable token">$post</span>;
 });
 </code></pre>
-<p>如果你希望模型绑定在检索给定模型类时始终使用 <code>id</code> 以外的数据库列，则可以覆盖 Eloquent 模型上的 <code>getRouteKeyName</code> 方法：</p>
+<p>如果你希望模型绑定在检索给定模型类时始终使用 <code>id</code> 以外的数据库列，则可以覆盖 Eloquent 模型上的 <code>getRouteKeyName</code> 方法：</p>
 <pre><code><span class="comment token">/**
- * Get the route key for the model.
- *
- *<span class="phpdoc token"> @return</span> string
+ * 获取模型的路线密钥。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> getRouteKeyName()
+<span class="keyword token">public</span> <span class="keyword token">function</span> getRouteKeyName(): string
 {
     <span class="keyword token">return</span> <span class="string token">'slug'</span>;
 }
@@ -431,6 +455,11 @@ Route::get(<span class="string token">'/users/{user}/posts/{post}'</span>, <span
     });
 });
 </code></pre>
+<p>类似地，你可以通过调用 <code>withoutScopedBindings</code> 方法来明确的指示 Laravel 不做作用域绑定：</p>
+<pre><code>Route::get(<span class="string token">'/users/{user}/posts/{post:slug}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>, Post <span class="variable token">$post</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$post</span>;
+})-&gt;withoutScopedBindings();
+</code></pre>
 <p><a name="customizing-missing-model-behavior"></a></p>
 <h4 id="自定义缺失模型行为">自定义缺失模型行为</h4>
 <p>通常，如果未找到隐式绑定模型，则会生成 404 HTTP 响应。但是，你可以通过在定义路由时调用 <code>missing</code> 方法来自定义此行为。<code>missing</code> 方法接受一个闭包，如果找不到隐式绑定模型，则将调用该闭包：</p>
@@ -446,7 +475,7 @@ Route::get(<span class="string token">'/locations/{location:slug}'</span>, [Loca
 </code></pre>
 <p><a name="implicit-enum-binding"></a></p>
 <h3 id="隐式枚举绑定">隐式枚举绑定</h3>
-<p>PHP 8.1 引入了对 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">Enums</a> 的支持。为了补充这个特性，Laravel 允许你在你的路由定义中键入一个 Enum，并且 Laravel 只会在该路由段对应于一个有效的 Enum 值时调用该路由。否则，将自动返回 404 HTTP 响应。例如，给定以下枚举：</p>
+<p>PHP 8.1 引入了对 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">Enums</a>. 的支持。为了补充这个特性，Laravel 允许你在你的路由定义中键入一个 <a href="https://www.php.net/manual/en/language.enumerations.backed.php">Enums</a> 并且 Laravel 只会在该路由段对应于一个有效的 Enum 值时调用该路由。否则，将自动返回 404 HTTP 响应。例如，给定以下枚举：</p>
 <pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Enums;
@@ -457,7 +486,7 @@ enum Category: string
     <span class="keyword token">case</span> People = <span class="string token">'people'</span>;
 }
 </code></pre>
-<p>你可以定义一个只有在 <code>{category}</code> 路由段是 <code>fruits</code> 或 <code>people</code> 时才会被调用的路由。 否则，Laravel 将返回 404 HTTP 响应：</p>
+<p>你可以定义一个只有在 <code>{category}</code> 路由段是 <code>fruits</code> 或 <code>people</code> 时才会被调用的路由。 否则，Laravel 将返回 404 HTTP 响应：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> App\Enums\Category;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Route;
 
@@ -467,30 +496,28 @@ Route::get(<span class="string token">'/categories/{category}'</span>, <span cla
 </code></pre>
 <p><a name="explicit-binding"></a></p>
 <h3 id="显式绑定">显式绑定</h3>
-<p>你不需要使用 Laravel 隐式的、基于约定的模型解析来使用模型绑定。你还可以显式定义路由参数与模型的对应方式。要注册显式绑定，请使用路由器的“模型”方法为给定参数指定类。 你应该在 RouteServiceProvider 类的 boot 方法的开头定义显式模型绑定：</p>
+<p>不需要使用 Laravel 隐式的、基于约定的模型解析来使用模型绑定。你还可以显式定义路由参数与模型的对应方式。要注册显式绑定，请使用路由器的 <code>model</code> 方法为给定参数指定类。在 <code>RouteServiceProvider</code> 类的 <code>boot</code> 方法的开头定义显式模型绑定：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Route;
 
 <span class="comment token">/**
- * Define your route model bindings, pattern filters, etc.
- *
- *<span class="phpdoc token"> @return</span> void
+ * 定义路由模型绑定、模式筛选器等。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Route::model(<span class="string token">'user'</span>, User::<span class="keyword token">class</span>);
 
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>接下来，定义一个包含 <code>{user}</code> 参数的路由：</p>
+<p>接下来，定义一个包含 <code>{user}</code> 参数的路由：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 Route::get(<span class="string token">'/users/{user}'</span>, <span class="keyword token">function</span> (User <span class="variable token">$user</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
-<p>由于我们已将所有 <code>{user}</code> 参数绑定到 <code>App\Models\User</code> 模型，该类的一个实例将被注入到路由中。 因此，例如，对 <code>users/1</code> 的请求将从 ID 为 <code>1</code> 的数据库中注入 <code>User</code> 实例。</p>
+<p>由于我们已将所有 <code>{user}</code> 参数绑定到 <code>App\Models\User</code> 模型，该类的一个实例将被注入到路由中。因此，例如，对 <code>users/1</code> 的请求将从 ID 为 <code>1</code> 的数据库中注入 <code>User</code> 实例。</p>
 <p>如果在数据库中没有找到匹配的模型实例，则会自动生成 404 HTTP 响应。</p>
 <p><a name="customizing-the-resolution-logic"></a></p>
 <h4 id="自定义解析逻辑">自定义解析逻辑</h4>
@@ -499,22 +526,20 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 <span class="keyword token">use</span> Illuminate\Support\Facades\Route;
 
 <span class="comment token">/**
- * Define your route model bindings, pattern filters, etc.
- *
- *<span class="phpdoc token"> @return</span> void
+ * 定义路由模型绑定、模式筛选器等。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
-    Route::bind(<span class="string token">'user'</span>, <span class="keyword token">function</span> (<span class="variable token">$value</span>) {
+    Route::bind(<span class="string token">'user'</span>, <span class="keyword token">function</span> (string <span class="variable token">$value</span>) {
         <span class="keyword token">return</span> User::where(<span class="string token">'name'</span>, <span class="variable token">$value</span>)-&gt;firstOrFail();
     });
 
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>或者，你可以覆盖 Eloquent 模型上的 <code>resolveRouteBinding</code> 方法。此方法将接收 URI 段的值，并应返回应注入路由的类的实例：</p>
+<p>或者，你可以覆盖 Eloquent 模型上的 <code>resolveRouteBinding</code> 方法。此方法将接收 URI 段的值，并应返回应注入路由的类的实例：</p>
 <pre><code><span class="comment token">/**
- * Retrieve the model for a bound value.
+ * 检索绑定值的模型。
  *
  *<span class="phpdoc token"> @param</span>  mixed  $value
  *<span class="phpdoc token"> @param</span>  string|null  $field
@@ -525,9 +550,9 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
     <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;where(<span class="string token">'name'</span>, <span class="variable token">$value</span>)-&gt;firstOrFail();
 }
 </code></pre>
-<p>如果路由正在使用 <a href="#implicit-model-binding-scoping">implicit binding scoping</a>，则 <code>resolveChildRouteBinding</code> 方法将用于解析父模型的子绑定：</p>
+<p>如果路由正在使用 <a href="#implicit-model-binding-scoping">implicit binding scoping</a>, 则 <code>resolveChildRouteBinding</code> 方法将用于解析父模型的子绑定：</p>
 <pre><code><span class="comment token">/**
- * Retrieve the child model for a bound value.
+ * 检索绑定值的子模型。
  *
  *<span class="phpdoc token"> @param</span>  string  $childType
  *<span class="phpdoc token"> @param</span>  mixed  $value
@@ -540,40 +565,57 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 }
 </code></pre>
 <p><a name="fallback-routes"></a></p>
-<h2 id="fallback-路由">fallback 路由</h2>
-<p>使用 <code>Route::fallback</code> 方法，你可以定义一个在没有其他路由匹配传入请求时将执行的路由。 通常，未处理的请求将通过应用程序的异常处理程序自动呈现「404」页面。但是，由于你通常会在 <code>routes/web.php</code> 文件中定义 <code>fallback</code> 路由，因此 <code>web</code> 中间件组中的所有中间件都将应用于该路由。你可以根据需要随意向此路由添加额外的中间件：</p>
+<h2 id="fallback-路由">Fallback 路由</h2>
+<p>使用 <code>Route::fallback</code> 方法，你可以定义一个在没有其他路由匹配传入请求时将执行的路由。通常，未处理的请求将通过应用程序的异常处理程序自动呈现「404」页面。但是，由于你通常会在 <code>routes/web.php</code> 文件中定义 fallback 路由，因此 web 中间件组中的所有中间件都将应用于该路由。你可以根据需要随意向此路由添加额外的中间件：</p>
 <pre><code>Route::fallback(<span class="keyword token">function</span> () {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 });
 </code></pre>
 <blockquote>
-<p>注意：fallback路由应该始终是你的应用程序注册的最后一个路由。</p>
+<p>注意：Fallback 路由应该始终是你的应用程序注册的最后一个路由。</p>
 </blockquote>
 <p><a name="rate-limiting"></a></p>
 <h2 id="速率限制">速率限制</h2>
 <p><a name="defining-rate-limiters"></a></p>
 <h3 id="定义速率限制器">定义速率限制器</h3>
-<p>Laravel 包含强大且可自定义的速率限制服务，你可以利用这些服务来限制给定路由或一组路由的流量。首先，你应该定义满足应用程序需求的速率限制器配置。通常，这应该在应用程序的 <code>App\Providers\RouteServiceProvider</code> 类的 <code>configureRateLimiting</code> 方法中完成。</p>
-<p>速率限制器是使用 <code>RateLimiter</code> 外观的 <code>for</code> 方法定义的。 <code>for</code> 方法接受一个速率限制器名称和一个闭包，该闭包返回应该应用于分配给速率限制器的路由的限制配置。限制配置是 <code>Illuminate\Cache\RateLimiting\Limit</code> 类的实例。此类包含有用的「构建器」方法，以便你可以快速定义限制。速率限制器名称可以是你希望的任何字符串：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Cache\RateLimiting\Limit;
+<p>Laravel 包括功能强大且可定制的限速服务，你可以利用这些服务来限制给定路线或一组路线的流量。首先，你应该定义满足应用程序需求的速率限制器配置。通常，这应该在应用程序的 <code>App\Providers\RouteServiceProvider</code> 类的 <code>configureRateLimiting</code> 方法中完成，该类已经包含了一个速率限制器定义，该定义应用于应用程序 <code>routes/api.php</code> 文件中的路由：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Cache\RateLimiting\Limit;
+<span class="keyword token">use</span> Illuminate\Http\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
 
 <span class="comment token">/**
- * Configure the rate limiters for the application.
- *
- *<span class="phpdoc token"> @return</span> void
+ * 为应用程序配置速率限制器。
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> configureRateLimiting()
+<span class="keyword token">protected</span> <span class="keyword token">function</span> boot(): void
+{
+    RateLimiter::<span class="keyword token">for</span>(<span class="string token">'api'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
+        <span class="keyword token">return</span> Limit::perMinute(<span class="number token">60</span>)-&gt;by(<span class="variable token">$request</span>-&gt;user()?-&gt;id ?: <span class="variable token">$request</span>-&gt;ip());
+    });
+
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>速率限制器是使用 <code>RateLimiter</code> 外观的 <code>for</code> 方法定义的。for 方法接受一个速率限制器名称和一个闭包，该闭包返回应该应用于分配给速率限制器的路由的限制配置。限制配置是 <code>Illuminate\Cache\RateLimiting\Limit</code> 类的实例。此类包含有用的「构建器」方法，以便你可以快速定义限制。速率限制器名称可以是你希望的任何字符串：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Cache\RateLimiting\Limit;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Support\Facades\RateLimiter;
+
+<span class="comment token">/**
+ * 为应用程序配置速率限制器。
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">function</span> boot(): void
 {
     RateLimiter::<span class="keyword token">for</span>(<span class="string token">'global'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
         <span class="keyword token">return</span> Limit::perMinute(<span class="number token">1000</span>);
     });
+
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p>如果传入的请求超过指定的速率限制，Laravel 将自动返回一个带有 429 HTTP 状态码的响应。如果你想定义自己的响应，应该由速率限制返回，你可以使用 <code>response</code> 方法：</p>
 <pre><code>RateLimiter::<span class="keyword token">for</span>(<span class="string token">'global'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
-    <span class="keyword token">return</span> Limit::perMinute(<span class="number token">1000</span>)-&gt;response(<span class="keyword token">function</span> () {
-        <span class="keyword token">return</span> response(<span class="string token">'Custom response...'</span>, <span class="number token">429</span>);
+    <span class="keyword token">return</span> Limit::perMinute(<span class="number token">1000</span>)-&gt;response(<span class="keyword token">function</span> (Request <span class="variable token">$request</span>, <span class="keyword token">array</span> <span class="variable token">$headers</span>) {
+        <span class="keyword token">return</span> response(<span class="string token">'Custom response...'</span>, <span class="number token">429</span>, <span class="variable token">$headers</span>);
     });
 });
 </code></pre>
@@ -586,7 +628,7 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 </code></pre>
 <p><a name="segmenting-rate-limits"></a></p>
 <h4 id="分段速率限制">分段速率限制</h4>
-<p>有时你可能希望按某个任意值对速率限制进行分段。例如，你可能希望每个 IP 地址每分钟允许用户访问给定路由 100 次。为此，你可以在构建速率限制时使用 <code>by</code> 方法：</p>
+<p>有时你可能希望按某个任意值对速率限制进行分段。例如，你可能希望每个 IP 地址每分钟允许用户访问给定路由 100 次。为此，你可以在构建速率限制时使用 <code>by</code> 方法：</p>
 <pre><code>RateLimiter::<span class="keyword token">for</span>(<span class="string token">'uploads'</span>, <span class="keyword token">function</span> (Request <span class="variable token">$request</span>) {
     <span class="keyword token">return</span> <span class="variable token">$request</span>-&gt;user()-&gt;vipCustomer()
                 ? Limit::none()
@@ -612,31 +654,31 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 </code></pre>
 <p><a name="attaching-rate-limiters-to-routes"></a></p>
 <h3 id="将速率限制器附加到路由">将速率限制器附加到路由</h3>
-<p>可以使用 <code>throttle</code> <a href="middleware.html">middleware</a> 将速率限制器附加到路由或路由组。路由中间件接受你希望分配给路由的速率限制器的名称：</p>
+<p>可以使用 <code>throttle</code> <a href="/docs/laravel/10.x/middleware">middleware</a>。 将速率限制器附加到路由或路由组。路由中间件接受你希望分配给路由的速率限制器的名称：</p>
 <pre><code>Route::middleware([<span class="string token">'throttle:uploads'</span>])-&gt;group(<span class="keyword token">function</span> () {
     Route::post(<span class="string token">'/audio'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     });
 
     Route::post(<span class="string token">'/video'</span>, <span class="keyword token">function</span> () {
-        <span class="comment token">//</span>
+        <span class="comment token">// ...</span>
     });
 });
 </code></pre>
 <p><a name="throttling-with-redis"></a></p>
 <h4 id="使用-redis-节流">使用 Redis 节流</h4>
-<p>通常，<code>throttle</code> 中间件映射到 <code>Illuminate\Routing\Middleware\ThrottleRequests</code> 类。 此映射在应用程序的 HTTP 内核 (<code>App\Http\Kernel</code>) 中定义。但是，如果你使用 Redis 作为应用程序的缓存驱动程序，你可能希望更改此映射以使用 <code>Illuminate\Routing\Middleware\ThrottleRequestsWithRedis</code> 类。这个类在使用 Redis 管理速率限制方面更有效：</p>
+<p>通常，<code>throttle</code> 中间件映射到 <code>Illuminate\Routing\Middleware\ThrottleRequests</code> 类。此映射在应用程序的 HTTP 内核 (App\Http\Kernel) 中定义。但是，如果你使用 Redis 作为应用程序的缓存驱动程序，你可能希望更改此映射以使用 <code>Illuminate\Routing\Middleware\ThrottleRequestsWithRedis</code> 类。这个类在使用 Redis 管理速率限制方面更有效：</p>
 <pre><code><span class="string token">'throttle'</span> =&gt; \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::<span class="keyword token">class</span>,
 </code></pre>
 <p><a name="form-method-spoofing"></a></p>
 <h2 id="伪造表单方法">伪造表单方法</h2>
-<p>HTML 表单不支持「PUT」，「PATCH」或「DELETE」请求。所以，当定义「PUT」，「PATCH」或「DELETE」路由用在 HTML 表单时，你将需要一个隐藏的加「_method」字段在表单中。该「_method」字段的值将会与 HTTP 请求一起发送。</p>
+<p>HTML 表单不支持 <code>PUT</code> ， <code>PATCH</code> 或 <code>DELETE</code> 请求。所以，当定义 <code>PUT</code> ， <code>PATCH</code> 或 <code>DELETE</code> 路由用在 HTML 表单时，你将需要一个隐藏的加 <code>_method</code> 字段在表单中。该 <code>_method</code> 字段的值将会与 HTTP 请求一起发送。</p>
 <pre><code>&lt;form action="/example" method="POST"&gt;
     &lt;input type="hidden" name="_method" value="PUT"&gt;
     &lt;input type="hidden" name="_token" value="{{ csrf_token() }}"&gt;
 &lt;/form&gt;
 </code></pre>
-<p>为方便起见，你可以使用 <code>@method</code> <a href="blade.html">Blade 指令</a> 生成 <code>_method</code> 输入字段：</p>
+<p>为方便起见，你可以使用 <code>@method</code> <a href="/docs/laravel/10.x/blade">Blade 指令</a> 生成 <code>_method</code> 输入字段：</p>
 <pre><code>&lt;form action="/example" method="POST"&gt;
     @method('PUT')
     @csrf
@@ -644,27 +686,27 @@ Route::get(<span class="string token">'/users/{user}'</span>, <span class="keywo
 </code></pre>
 <p><a name="accessing-the-current-route"></a></p>
 <h2 id="访问当前路由">访问当前路由</h2>
-<p>你可以使用 <code>Route Facade</code> 的 <code>current</code>、<code>currentRouteName</code> 和 <code>currentRouteAction</code> 方法来访问有关处理传入请求的路由的信息：</p>
+<p>你可以使用 <code>Route Facade</code> 的 <code>current</code>、<code>currentRouteName</code> 和 <code>currentRouteAction</code> 方法来访问有关处理传入请求的路由的信息：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Route;
 
 <span class="variable token">$route</span> = Route::current(); <span class="comment token">// Illuminate\Routing\Route</span>
 <span class="variable token">$name</span> = Route::currentRouteName(); <span class="comment token">// string</span>
 <span class="variable token">$action</span> = Route::currentRouteAction(); <span class="comment token">// string</span>
 </code></pre>
-<p>你可以参考<a href="https://laravel.com/api/laravel/9.x/Illuminate/Routing/Router.html">Route facade 的底层类</a> 和 <a href="https://laravel.com/api/laravel/9.x/Illuminate/Routing/Route.html">Route 实例</a> 的 API 文档查看路由器和路由类上可用的所有方法。</p>
+<p>你可以参考 <a href="https://laravel.com/api/laravel/10.x/Illuminate/Routing/Router.html">Route facade 的底层类</a> 和 <a href="https://laravel.com/api/laravel/10.x/Illuminate/Routing/Route.html">Route 实例</a> 的 API 文档查看路由器和路由类上可用的所有方法。</p>
 <p><a name="cors"></a></p>
 <h2 id="跨域资源共享-cors">跨域资源共享 (CORS)</h2>
-<p>Laravel 可以使用你配置的值自动响应 CORS <code>OPTIONS</code> HTTP 请求。所有 CORS 设置都可以在应用程序的 <code>config/cors.php</code> 配置文件中进行配置。 <code>OPTIONS</code> 请求将由默认包含在全局中间件堆栈中的 <code>HandleCors</code> <a href="middleware.html">中间件</a> 自动处理。你的全局中间件堆栈位于应用程序的 HTTP 内核 (<code>App\Http\Kernel</code>) 中。</p>
+<p>Laravel 可以使用你配置的值自动响应 CORS <code>OPTIONS</code> HTTP 请求。所有 CORS 设置都可以在应用程序的 <code>config/cors.php</code> 配置文件中进行配置。OPTIONS 请求将由默认包含在全局中间件堆栈中的 HandleCors <a href="/docs/laravel/10.x/middleware">middleware</a> 自动处理。你的全局中间件堆栈位于应用程序的 HTTP 内核 (<code>App\Http\Kernel</code>) 中。</p>
 <blockquote>
-<p>技巧：有关 CORS 和 CORS 标头的更多信息，请参阅 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#The_HTTP_response_headers">MDN 关于 CORS 的 Web 文档</a>。</p>
+<p>技巧：有关 CORS 和 CORS 标头的更多信息，请参阅 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#The_HTTP_response_headers">MDN 关于 CORS 的 Web 文档</a>。</p>
 </blockquote>
 <p><a name="route-caching"></a></p>
 <h2 id="路由缓存">路由缓存</h2>
 <p>在将应用程序部署到生产环境时，你应该利用 Laravel 的路由缓存。使用路由缓存将大大减少注册所有应用程序路由所需的时间。要生成路由缓存，请执行 <code>route:cache</code> Artisan 命令：</p>
 <pre><code class="language-shell">php artisan route:cache
 </code></pre>
-<p>运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路由，你将需要生成新的路由缓存。因此，你应该只在项目部署期间运行 <code>route:cache</code> 命令。</p>
-<p>你可以使用 <code>route:clear</code> 命令清除路由缓存：</p>
+<p>运行此命令后，你的缓存路由文件将在每个请求上加载。请记住，如果你添加任何新路线，你将需要生成新的路线缓存。因此，你应该只在项目部署期间运行 <code>route:cache</code> 命令。</p>
+<p>你可以使用 <code>route:clear</code> 命令清除路由缓存：</p>
 <pre><code class="language-shell">php artisan route:clear
 </code></pre>
 <p><a name="自定义秘钥"></a>
