@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -45,10 +45,11 @@
 </code></pre>
 <p><a name="upgrading-socialite"></a></p>
 <h2 id="升级">升级</h2>
-<p>升级到 Socialite 的新主要版本时，请务必仔细查看 <a href="https://github.com/laravel/socialite/blob/master/UPGRADE.md">the upgrade guide</a>.</p>
+<p>升级到 Socialite 的新主要版本时，请务必仔细查看 <a href="https://github.com/laravel/socialite/blob/master/UPGRADE.">the upgrade guide</a>.</p>
 <p><a name="configuration"></a></p>
 <h2 id="配置">配置</h2>
-<p>在使用 Socialite 之前，需要为应用程序使用的 OAuth 服务添加凭据。这些凭证应该放在你的 <code>config/services.php</code> 配置文件中， 并且应该使用 <code>facebook</code>， <code>twitter</code>，<code>linkedin</code>， <code>google</code>， <code>github</code>， <code>gitlab</code>， 或 <code>bitbucket</code>作为键名，取决于应用程序所需的 Providers 。例如:</p>
+<p>在使用 Socialite 之前，你需要为应用程序使用的OAuth提供程序添加凭据。通常，可以通过在要验证的服务的仪表板中创建“开发人员应用程序”来检索这些凭据。</p>
+<p>这些凭证应该放在你的 <code>config/services.php</code> 配置文件中， 并且应该使用 <code>facebook</code>, <code>twitter</code> (OAuth 1.0), <code>twitter-oauth-2</code> (OAuth 2.0), <code>linkedin</code>, <code>google</code>, <code>github</code>, <code>gitlab</code>, 或者 <code>bitbucket</code>, 取决于应用程序所需的提供商：</p>
 <pre><code>'github' =&gt; [
     'client_id' =&gt; env('GITHUB_CLIENT_ID'),
     'client_secret' =&gt; env('GITHUB_CLIENT_SECRET'),
@@ -78,7 +79,7 @@ Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyw
 <p><code>redirect</code> 提供的方法 <code>Socialite</code> facade 负责将用户重定向到 OAuth provider，而该 user 方法将读取传入的请求并在身份验证后从提供程序中检索用户的信息。</p>
 <p><a name="authentication-and-storage"></a></p>
 <h3 id="身份验证和存储">身份验证和存储</h3>
-<p>从 OAuth 提供程序检索到用户后，你可以确定该用户是否存在于应用程序的数据库中并<a href="authentication.html#authenticate-a-user-instance">验证用户</a>。如果用户在应用程序的数据库中不存在，通常会在数据库中创建一条新记录来代表该用户：</p>
+<p>从 OAuth 提供程序检索到用户后，你可以确定该用户是否存在于应用程序的数据库中并<a href="/docs/laravel/10.x/authentication#authenticate-a-user-instance">验证用户</a>。如果用户在应用程序的数据库中不存在，通常会在数据库中创建一条新记录来代表该用户：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Auth;
 <span class="keyword token">use</span> Laravel\Socialite\Facades\Socialite;
@@ -86,22 +87,14 @@ Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyw
 Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyword token">function</span> () {
     <span class="variable token">$githubUser</span> = Socialite::driver(<span class="string token">'github'</span>)-&gt;user();
 
-    <span class="variable token">$user</span> = User::where(<span class="string token">'github_id'</span>, <span class="variable token">$githubUser</span>-&gt;id)-&gt;first();
-
-    <span class="keyword token">if</span> (<span class="variable token">$user</span>) {
-        <span class="variable token">$user</span>-&gt;update([
-            <span class="string token">'github_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;token,
-            <span class="string token">'github_refresh_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;refreshToken,
-        ]);
-    } <span class="keyword token">else</span> {
-        <span class="variable token">$user</span> = User::create([
-            <span class="string token">'name'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;name,
-            <span class="string token">'email'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;email,
-            <span class="string token">'github_id'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;id,
-            <span class="string token">'github_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;token,
-            <span class="string token">'github_refresh_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;refreshToken,
-        ]);
-    }
+    <span class="variable token">$user</span> = User::updateOrCreate([
+        <span class="string token">'github_id'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;id,
+    ], [
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;name,
+        <span class="string token">'email'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;email,
+        <span class="string token">'github_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;token,
+        <span class="string token">'github_refresh_token'</span> =&gt; <span class="variable token">$githubUser</span>-&gt;refreshToken,
+    ]);
 
     Auth::login(<span class="variable token">$user</span>);
 
@@ -139,7 +132,8 @@ Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyw
 </blockquote>
 <p><a name="retrieving-user-details"></a></p>
 <h2 id="检索用户详细信息">检索用户详细信息</h2>
-<p>在将用户重定向回你的身份验证回调路由之后，你可以使用 Socialite 的 <code>user</code> 方法检索用户的详细信息。<code>user</code> 方法为返回的用户对象提供了各种属性和方法，你可以使用这些属性和方法在你自己的数据库中存储有关该用户的信息。你可以使用不同的属性和方法这取决于要进行身份验证的 OAuth 提供程序是否支持 OAuth 1.0 或 OAuth 2.0：</p>
+<p>在将用户重定向回你的身份验证回调路由之后，你可以使用 Socialite 的 <code>user</code> 方法检索用户的详细信息。<code>user</code> 方法为返回的用户对象提供了各种属性和方法，你可以使用这些属性和方法在你自己的数据库中存储有关该用户的信息。</p>
+<p>你可以使用不同的属性和方法这取决于要进行身份验证的 OAuth 提供程序是否支持 OAuth 1.0 或 OAuth 2.0：</p>
 <pre><code><span class="keyword token">use</span> Laravel\Socialite\Facades\Socialite;
 
 Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyword token">function</span> () {
@@ -169,8 +163,8 @@ Route::get(<span class="string token">'/auth/callback'</span>, <span class="keyw
 
 <span class="variable token">$user</span> = Socialite::driver(<span class="string token">'github'</span>)-&gt;userFromToken(<span class="variable token">$token</span>);
 </code></pre>
-<p><a name="retrieving-user-details-from-a-token-and-secret-oauth1"></a></p>
-<h4 id="从令牌和秘钥中检索用户的详细信息-oauth1">从令牌和秘钥中检索用户的详细信息 (OAuth1)</h4>
+<p><a name="retrieving-user-details-from-a-token-oauth2"></a></p>
+<h4 id="从令牌中检索用户详细信息-oauth2-1">从令牌中检索用户详细信息 (OAuth2)</h4>
 <p>如果你已经有了一对有效的用户令牌/秘钥，你可以使用 Socialite 的 <code>userFromTokenAndSecret</code> 方法检索他们的详细信息：</p>
 <pre><code><span class="keyword token">use</span> Laravel\Socialite\Facades\Socialite;
 
