@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -30,17 +30,17 @@
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>Laravel 内置了一个可为你的数据库填充测试数据的填充类。所有的填充类都放在  <code>database/seeds</code> 目录下。Laravel 默认定义了一个 <code>DatabaseSeeder</code> 类。通过这个类，你可以用 <code>call</code> 方法来运行其他的 seed 类，从而控制数据填充的顺序。</p>
+<p>Laravel 内置了一个可为你的数据库填充测试数据的数据填充类。所有的数据填充类都应该放在 <code>database/seeds</code> 目录下。Laravel 默认定义了一个 <code>DatabaseSeeder</code> 类。通过这个类，你可以用 <code>call</code> 方法来运行其他的 <code>seed</code> 类，从而控制数据填充的顺序。</p>
 <blockquote>
-<p>技巧：使用数据填充时会自动禁用 <a href="eloquent.html#mass-assignment">批量赋值保护</a>。</p>
+<p><strong>注意</strong><br>在数据库填充期间，<a href="/docs/laravel/10.x/eloquentmd#mass-assignment">批量赋值保护</a>被自动禁用。</p>
 </blockquote>
 <p><a name="writing-seeders"></a></p>
 <h2 id="编写-seeders">编写 Seeders</h2>
-<p>运行 <a href="artisan.html">Artisan 命令</a> <code>make:seeder</code> 可以生成 Seeder，框架生成的 seeders 都放在 <code>database/seeders</code> 目录下：</p>
+<p>运行 <a href="/docs/laravel/10.x/artisan">Artisan 命令</a> <code>make:seeder</code> 可以生成 Seeder，生成的 seeders 都放在 <code>database/seeders</code> 目录下：</p>
 <pre><code class="language-shell">php artisan make:seeder UserSeeder
 </code></pre>
-<p>Seeder 类只包含一个默认方法：<code>run</code>。这个方法会在执行 <code>db:seed</code> 这个 <a href="artisan.html">Artisan command</a> 时被调用。在 <code>run</code> 方法里，你可以按需在数据库中插入数据。你也可以用 <a href="queries.html">构造查询器</a> 或 <a href="database-testing.html#defining-model-factories">Eloquent 模型工厂</a> 来手动插入数据。</p>
-<p>如下所示, 在默认的 <code>DatabaseSeeder</code> 类中的 <code>run</code> 方法中添加一条数据插入语句：</p>
+<p>一个数据填充类默认只包含一个方法：<code>run</code> ，当执行 <code>db:seed</code> <a href="/docs/laravel/10.x/artisan">Artisan命令</a> 时，被调用。在 <code>run</code> 方法中, 可以按需将数据插入数据库中。 也可以使用<a href="/docs/laravel/10.x/queries">查询构造器</a>来手动插入数据，或者可以使用 <a href="/docs/laravel/10.x/eloquent-factories">Eloquent 数据工厂</a>。</p>
+<p>例如，在默认 <code>DatabaseSeeder</code> 类的 <code>run</code> 方法中添加一个数据库插入语句：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Database\Seeders;
@@ -53,11 +53,9 @@
 <span class="keyword token">class</span> DatabaseSeeder <span class="keyword token">extends</span> Seeder
 {
     <span class="comment token">/**
-     * 执行数据填充
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 运行数据填充
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> run()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> run(): void
     {
         DB::table(<span class="string token">'users'</span>)-&gt;insert([
             <span class="string token">'name'</span> =&gt; Str::random(<span class="number token">10</span>),
@@ -68,20 +66,18 @@
 }
 </code></pre>
 <blockquote>
-<p>技巧：你在 <code>run</code> 方法签名中可以用类型来约束你需要的依赖。它们会被 Laravel <a href="container.html">服务容器</a> 自动解析。</p>
+<p><strong>注意</strong><br>可以在 <code>run</code> 方法的参数中键入你需要的任何依赖性,它们将自动通过 Laravel <a href="/docs/laravel/10.x/container">服务容器</a>注入。</p>
 </blockquote>
 <p><a name="using-model-factories"></a></p>
 <h3 id="使用模型工厂">使用模型工厂</h3>
-<p>当然，手动为每个模型填充指定属性很麻烦，你可以使用 <a href="database-testing.html#defining-model-factories">模型工厂</a> 轻松地生成大量数据库数据。首先，阅读 <a href="database-testing.html#defining-model-factories">模型工厂文档</a> 来学习如何定义工厂文件。</p>
-<p>例如，创建 50 个用户并为每个用户创建关联：</p>
+<p>当然，手动指定每个模型填充的属性是很麻烦的。因此可以使用 <a href="/docs/laravel/10.x/eloquent-factories">Eloquent 数据工厂</a>来更方便地生成大量的数据库记录。首先，查看 <a href="/docs/laravel/10.x/eloquent-factories">Eloquent 数据工厂</a>，了解如何定义工厂。</p>
+<p>例如，创建50个用户，每个用户有一个相关的帖子：</p>
 <pre><code><span class="keyword token">use</span> App\Models\User;
 
 <span class="comment token">/**
- * 执行数据填充
- *
- *<span class="phpdoc token"> @return</span> void
+ * 运行数据库迁移
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> run()
+<span class="keyword token">public</span> <span class="keyword token">function</span> run(): void
 {
     User::factory()
             -&gt;count(<span class="number token">50</span>)
@@ -91,13 +87,11 @@
 </code></pre>
 <p><a name="calling-additional-seeders"></a></p>
 <h3 id="调用其他-seeders">调用其他 Seeders</h3>
-<p>在 <code>DatabaseSeeder</code> 类中，你可以使用 <code>call</code> 方法来运行其他的 seed 类。使用 <code>call</code> 方法可以将数据填充拆分成多个文件，这样就不会使单个 seeder 文件变得非常大。 只需向 <code>call</code> 方法中传递要运行的 seeder 类名称即可：</p>
+<p>在 <code>DatabaseSeeder</code> 类中，可以使用 <code>call</code> 方法来执行其他的填充类。使用 <code>call</code> 方法可以将数据库迁移分成多个文件，这样就不会出现单个数据填充类过大。<code>call</code> 方法接受一个由数据填充类组成的数组：</p>
 <pre><code><span class="comment token">/**
- * 执行数据填充
- *
- *<span class="phpdoc token"> @return</span> void
+ * 运行数据库迁移
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> run()
+<span class="keyword token">public</span> <span class="keyword token">function</span> run(): void
 {
     <span class="variable token">$this</span>-&gt;call([
         UserSeeder::<span class="keyword token">class</span>,
@@ -108,7 +102,7 @@
 </code></pre>
 <p><a name="muting-model-events"></a></p>
 <h3 id="禁用模型事件">禁用模型事件</h3>
-<p>在运行 Seeders 时，你可能希望阻止模型调用事件。你可以使用 <code>WithoutModelEvents</code> 特征来实现这一点。使用 <code>WithoutModelEvents</code> trait 可确保不调用模型事件，即使通过 <code>call</code> 方法执行了额外的 seed 类：</p>
+<p>在运行时，你可能想阻止模型调用事件，可以使用 <code>WithoutModelEvents</code> 特性。使用 <code>WithoutModelEvents</code> trait 可确保不调用模型事件，即使通过 <code>call</code> 方法执行了额外的 seed 类：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> Database\Seeders;
@@ -121,11 +115,9 @@
     <span class="keyword token">use</span> WithoutModelEvents;
 
     <span class="comment token">/**
- * 执行数据填充
-     *
-     *<span class="phpdoc token"> @return</span> void
+     * 运行数据库迁移
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> run()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> run(): void
     {
         <span class="variable token">$this</span>-&gt;call([
             UserSeeder::<span class="keyword token">class</span>,
@@ -135,13 +127,15 @@
 </code></pre>
 <p><a name="running-seeders"></a></p>
 <h2 id="运行-seeders">运行 Seeders</h2>
-<p>你可以使用 Artisan 命令 <code>db:seed</code> 来填充数据库。默认情况下， <code>db:seed</code> 命令将运行 <code>Database\Seeders\DatabaseSeeder</code> 类，这个类又可以调用其他 seed 类。不过，你也可以使用 <code>--class</code> 选项来指定一个特定的 seeder 类：</p>
+<p>执行 <code>db:seed</code> Artisan 命令来为数据库填充数据。默认情况下，<code>db:seed</code> 命令会运行 <code>Database\Seeders\DatabaseSeeder</code> 类来调用其他数据填充类。当然，也可以使用 <code>--class</code> 选项来指定一个特定的填充类：</p>
 <pre><code class="language-shell">php artisan db:seed
 
 php artisan db:seed --<span class="keyword token">class</span>=UserSeeder
 </code></pre>
-<p>你还可以使用 <code>migrate:fresh</code> 命令结合 <code>--seed</code> 选项，这将删除数据库中所有表并重新运行所有迁移。此命令对于完全重建数据库非常有用：</p>
+<p>你还可以使用 <code>migrate:fresh</code> 命令结合 <code>--seed</code> 选项，这将删除数据库中所有表并重新运行所有迁移。此命令对于完全重建数据库非常有用。 <code>--seeder</code> 选项可以用来指定要运行的填充文件：</p>
 <pre><code class="language-shell">php artisan migrate:fresh --seed
+
+php artisan migrate:fresh --seed --seeder=UserSeeder 
 </code></pre>
 <p><a name="forcing-seeding-production"></a></p>
 <h4 id="在生产环境中强制运行填充">在生产环境中强制运行填充</h4>
