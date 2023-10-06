@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -28,11 +28,12 @@
 <li><a href="#configuration">配置</a><ul>
 <li><a href="#configuring-model-indexes">配置模型索引</a></li>
 <li><a href="#configuring-searchable-data">配置可搜索数据</a></li>
-<li><a href="#configuring-the-model-id">配置模型ID</a></li>
+<li><a href="#configuring-the-model-id">配置模型 ID</a></li>
+<li><a href="#configuring-search-engines-per-model">配置每个模型的搜索引擎</a></li>
 <li><a href="#identifying-users">识别用户</a></li>
 </ul>
 </li>
-<li><a href="#database-and-collection-engines">数据库/收集引擎</a><ul>
+<li><a href="#database-and-collection-engines">数据库 / 收集引擎</a><ul>
 <li><a href="#database-engine">数据库引擎</a></li>
 <li><a href="#collection-engine">Collection 引擎</a></li>
 </ul>
@@ -55,19 +56,17 @@
 </li>
 <li><a href="#custom-engines">自定义引擎</a></li>
 <li><a href="#builder-macros">生成器宏</a></li>
-<li><a href="#custom-engines">Custom Engines</a></li>
-<li><a href="#builder-macros">Builder Macros</a></li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="介绍">介绍</h2>
-<p><a href="https://github.com/laravel/scout">Laravel Scout</a> 为 <a href="eloquent.html">Eloquent 模型</a> 的全文搜索提供了一个简单的基于驱动程序的解决方案，通过使用模型观察者，Scout将自动同步 Eloquent 记录的搜索索引。</p>
-<p>目前，Scout 附带 <a href="https://www.algolia.com/">Algolia</a>、<a href="https://www.meilisearch.com">MeiliSearch</a> 和 MySQL / PostgreSQL (<code>database</code>) 驱动程序。此外，Scout 包括一个「collection」驱动程序，该驱动程序专为本地开发使用而设计，不需要任何外部依赖项或第三方服务。此外，编写自定义驱动程序很简单，你可以使用自己的搜索实现自由扩展 Scout。</p>
+<p><a href="https://github.com/laravel/scout">Laravel Scout</a> 为 <a href="/docs/laravel/10.x/eloquent">Eloquent models</a> 的全文搜索提供了一个简单的基于驱动程序的解决方案，通过使用模型观察者，Scout 将自动同步 Eloquent 记录的搜索索引。</p>
+<p>目前，Scout 附带 <a href="https://www.algolia.com/">Algolia</a>, <a href="https://www.meilisearch.com">Meilisearch</a>, 和 MySQL / PostgreSQL (<code>database</code>) 驱动程序。此外，Scout 包括一个「collection」驱动程序，该驱动程序专为本地开发使用而设计，不需要任何外部依赖项或第三方服务。此外，编写自定义驱动程序很简单，你可以使用自己的搜索实现自由扩展 Scout。</p>
 <p><a name="installation"></a></p>
 <h2 id="安装">安装</h2>
 <p>首先，通过 Composer 软件包管理器安装 Scout：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/scout
 </code></pre>
-<p>Scout 安装完成后，使用Artisan 命令 <code>vendor:publish</code> 生成 Scout 配置文件。此命令将会在你的 <code>config</code> 目录下 生成一个 <code>scout.php</code> 配置文件:</p>
+<p>Scout 安装完成后，使用 Artisan 命令 <code>vendor:publish</code> 生成 Scout 配置文件。此命令将会在你的 <code>config</code> 目录下 生成一个 <code>scout.php</code> 配置文件:</p>
 <pre><code class="language-shell">php artisan vendor:publish --provider=&quot;Laravel\Scout\ScoutServiceProvider&quot;
 </code></pre>
 <p>最后，在你要做搜索的模型中添加 <code>Laravel\Scout\Searchable</code> trait 。这个 trait 会注册一个模型观察者来保持模型和搜索驱动的同步:</p>
@@ -87,36 +86,44 @@
 <h3 id="驱动的先决条件">驱动的先决条件</h3>
 <p><a name="algolia"></a></p>
 <h4 id="algolia">Algolia</h4>
-<p>使用 Algolia 驱动时，需要在 <code>config/scout.php</code> 配置文件配置你的 Algolia <code>id</code> 和 <code>secret</code> 凭证。配置好凭证之后，还需要使用 Composer 安装 Algolia PHP SDK：</p>
+<p>使用 Algolia 驱动时，需要在 <code>config/scout.php</code> 配置文件配置你的 <code>Algolia</code> <code>id</code> 和 <code>secret</code> 凭证。配置好凭证之后，还需要使用 Composer 安装 Algolia PHP SDK：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> algolia/algoliasearch-client-php
 </code></pre>
 <p><a name="meilisearch"></a></p>
-<h4 id="meilisearch">MeiliSearch</h4>
-<p><a href="https://www.meilisearch.com">MeiliSearch</a> 是一个速度极快的开源搜索引擎。如果你不确定如何在本地机器上安装 MeiliSearch，你可以使用 Laravel 官方支持的 Docker 开发环境 <a href="sail.html#meilisearch">Laravel Sail</a>。</p>
+<h4 id="meilisearch">Meilisearch</h4>
+<p><a href="https://www.meilisearch.com">Meilisearch</a> 是一个速度极快的开源搜索引擎。如果你不确定如何在本地机器上安装 MeiliSearch，你可以使用 Laravel 官方支持的 Docker 开发环境 <a href="/docs/laravel/10.x/sail#meilisearch">Laravel Sail</a>。</p>
 <p>使用 MeiliSearch 驱动程序时，你需要通过 Composer 包管理器安装 MeiliSearch PHP SDK：</p>
 <pre><code class="language-shell">composer <span class="keyword token">require</span> meilisearch/meilisearch-php http-interop/http-factory-guzzle
 </code></pre>
-<p>然后，在应用程序的 .env 文件中设置 <code>SCOUT_DRIVER</code> 环境变量以及你的 MeiliSearch <code>host</code> 和 <code>key</code> 凭据：</p>
+<p>然后，在应用程序的 <code>.env</code> 文件中设置 <code>SCOUT_DRIVER</code> 环境变量以及你的 MeiliSearch <code>host</code> 和 <code>key</code> 凭据：</p>
 <pre><code class="language-ini">SCOUT_DRIVER=meilisearch
 MEILISEARCH_HOST=http:<span class="comment token">//127.0.0.1:7700</span>
 MEILISEARCH_KEY=masterKey
 </code></pre>
-<p>更多关于 MeiliSearch 的信息，请参考 <a href="https://docs.meilisearch.com/learn/getting_started/quick_start.html">MeiliSearch 技术文档</a>。</p>
-<p>此外，你应该通过查看 <a href="https://github.com/meilisearch/meilisearch-php#-compatibility-with-meilisearch">MeiliSearch 关于二进制兼容性的文档</a> 确保安装与你的 MeiliSearch 二进制版本兼容的 <code>meilisearch/meilisearch-php</code> 版本。</p>
+<p>更多关于 MeiliSearch 的信息，请参考 <a href="https://docs.meilisearch.com/learn/getting_started/quick_start.html">MeiliSearch 技术文档</a>。</p>
+<p>此外，你应该通过查看 <a href="https://github.com/meilisearch/meilisearch-php#-compatibility-with-meilisearch">MeiliSearch 关于二进制兼容性的文档</a>确保安装与你的 MeiliSearch 二进制版本兼容的 <code>meilisearch/meilisearch-php</code> 版本。</p>
 <blockquote>
-<p>注意：在使用 MeiliSearch 的应用程序上升级 Scout 时，您应该始终留意查看关于 MeiliSearch 升级发布的 <a href="https://github.com/meilisearch/MeiliSearch/releases">其他重大（破坏性）更改</a>，以保证升级顺利。</p>
+<p> Meilisearch service itself.
+注意：在使用 MeiliSearch 的应用程序上升级 Scout 时，你应该始终留意查看关于 MeiliSearch 升级发布的<a href="https://github.com/meilisearch/MeiliSearch/releases">其他重大（破坏性）更改</a>，以保证升级顺利。</p>
 </blockquote>
 <p><a name="queueing"></a></p>
 <h3 id="队列">队列</h3>
-<p>虽然不是严格要求使用队列，但在使用库之前，你应该强烈考虑配置 <a href="queues.html">队列驱动</a>。 运行队列 worker 将允许 Scout 将所有将你的模型信息同步到你的搜索索引的操作进行排队，从而为你的应用的 Web 界面提供更好的响应时间。</p>
-<p>配置好队列驱动后，将 <code>config/scout.php</code> 配置文件中的 <code>queue</code> 选项的值设置为 <code>true</code>：</p>
+<p>虽然不强制要求使用 Scout，但在使用该库之前，强烈建议配置一个<a href="/docs/laravel/10.x/queues">队列驱动</a>。运行队列 worker 将允许 Scout 将所有同步模型信息到搜索索引的操作都放入队列中，从而为你的应用程序的Web界面提供更快的响应时间。</p>
+<p>一旦你配置了队列驱动程序，请将 <code>config/scout.php</code> 配置文件中的 <code>queue</code> 选项的值设置为 <code>true</code>：</p>
 <pre><code><span class="string token">'queue'</span> =&gt; <span class="keyword token">true</span>,
+</code></pre>
+<p>即使将 <code>queue</code> 选项设置为 <code>false</code>，也要记住有些 Scout 驱动程序（如 Algolia 和 Meilisearch）始终异步记录索引。也就是说，即使索引操作已在 Laravel 应用程序中完成，但搜索引擎本身可能不会立即反映新记录和更新记录。</p>
+<p>要指定 Scout 使用的连接和队列，请将 <code>queue</code> 配置选项定义为数组：</p>
+<pre><code>'queue' =&gt; [
+    'connection' =&gt; 'redis',
+    'queue' =&gt; 'scout'
+],
 </code></pre>
 <p><a name="configuration"></a></p>
 <h2 id="配置">配置</h2>
 <p><a name="configuring-model-indexes"></a></p>
 <h3 id="配置模型索引">配置模型索引</h3>
-<p>每个 Eloquent 模型都与给定的搜索 「索引」同步，该索引包含该模型的所有可搜索记录。 换句话说，你可以将每个索引视为一个 MySQL 表。 默认情况下，每个模型都将持久化到与模型的典型 「表」名称匹配的索引。 通常，是模型名称的复数形式； 但你可以通过重写模型上的 <code>searchableAs</code> 方法来自由地自定义模型的索引：</p>
+<p>每个 Eloquent 模型都与一个给定的搜索「索引」同步，该索引包含该模型的所有可搜索记录。换句话说，可以将每个索引视为 MySQL 表。默认情况下，每个模型将持久化到与模型的典型「表」名称匹配的索引中。通常，这是模型名称的复数形式；但是，你可以通过在模型上重写 <code>searchableAs</code> 方法来自定义模型的索引：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -129,11 +136,9 @@ MEILISEARCH_KEY=masterKey
     <span class="keyword token">use</span> Searchable;
 
     <span class="comment token">/**
-     * 获取与模型关联的索引的名称。
-     *
-     *<span class="phpdoc token"> @return</span> string
+     * 获取与模型关联的索引的名称.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> searchableAs()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> searchableAs(): string
     {
         <span class="keyword token">return</span> <span class="string token">'posts_index'</span>;
     }
@@ -141,7 +146,7 @@ MEILISEARCH_KEY=masterKey
 </code></pre>
 <p><a name="configuring-searchable-data"></a></p>
 <h3 id="配置可搜索数据">配置可搜索数据</h3>
-<p>默认情况下，模型以完整的 <code>toArray</code> 格式持久化到搜索索引。如果要自定义同步到搜索索引的数据，可以覆盖模型上的 <code>toSearchableArray</code> 方法：</p>
+<p>默认情况下，给定模型的 <code>toArray</code> 形式的整个内容将被持久化到其搜索索引中。如果要自定义同步到搜索索引的数据，可以重写模型上的 <code>toSearchableArray</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -154,11 +159,11 @@ MEILISEARCH_KEY=masterKey
     <span class="keyword token">use</span> Searchable;
 
     <span class="comment token">/**
-     * 获取模型的可索引的数据。
+     * 获取模型的可索引数据。
      *
-     *<span class="phpdoc token"> @return</span> array
+     *<span class="phpdoc token"> @return</span> array&lt;string, mixed&gt;
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> toSearchableArray()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> toSearchableArray(): <span class="keyword token">array</span>
     {
         <span class="variable token">$array</span> = <span class="variable token">$this</span>-&gt;toArray();
 
@@ -168,9 +173,50 @@ MEILISEARCH_KEY=masterKey
     }
 }
 </code></pre>
+<p>一些搜索引擎（如 Meilisearch）只会在正确的数据类型上执行过滤操作（<code>&gt;</code> 、 <code>&lt;</code> 等）。因此，在使用这些搜索引擎并自定义可搜索数据时，你应该确保数值类型被转换为正确的类型：</p>
+<pre><code><span class="keyword token">public</span> <span class="keyword token">function</span> toSearchableArray()
+{
+    <span class="keyword token">return</span> [
+        <span class="string token">'id'</span> =&gt; (int) <span class="variable token">$this</span>-&gt;id,
+        <span class="string token">'name'</span> =&gt; <span class="variable token">$this</span>-&gt;name,
+        <span class="string token">'price'</span> =&gt; (float) <span class="variable token">$this</span>-&gt;price,
+    ];
+}
+</code></pre>
+<p><a name="configuring-filterable-data-for-meilisearch"></a></p>
+<h4 id="配置可过滤数据和索引设置-meilisearch">配置可过滤数据和索引设置 (Meilisearch)</h4>
+<p>与 Scout 的其他驱动程序不同，Meilisearch 要求你预定义索引搜索设置，例如可过滤属性、可排序属性和<a href="https://docs.meilisearch.com/reference/api/settings.html">其他支持的设置字段</a>。</p>
+<p>可过滤属性是你在调用 Scout 的 <code>where</code> 方法时想要过滤的任何属性，而可排序属性是你在调用 Scout 的 <code>orderBy</code> 方法时想要排序的任何属性。要定义索引设置，请调整应用程序的 <code>scout</code> 配置文件中 <code>meilisearch</code> 配置条目的 <code>index-settings</code> 部分：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> App\Models\Flight;
+
+<span class="string token">'meilisearch'</span> =&gt; [
+    <span class="string token">'host'</span> =&gt; env(<span class="string token">'MEILISEARCH_HOST'</span>, <span class="string token">'http://localhost:7700'</span>),
+    <span class="string token">'key'</span> =&gt; env(<span class="string token">'MEILISEARCH_KEY'</span>, <span class="keyword token">null</span>),
+    <span class="string token">'index-settings'</span> =&gt; [
+        User::<span class="keyword token">class</span> =&gt; [
+            <span class="string token">'filterableAttributes'</span>=&gt; [<span class="string token">'id'</span>, <span class="string token">'name'</span>, <span class="string token">'email'</span>],
+            <span class="string token">'sortableAttributes'</span> =&gt; [<span class="string token">'created_at'</span>],
+            <span class="comment token">// 其他设置字段...</span>
+        ],
+        Flight::<span class="keyword token">class</span> =&gt; [
+            <span class="string token">'filterableAttributes'</span>=&gt; [<span class="string token">'id'</span>, <span class="string token">'destination'</span>],
+            <span class="string token">'sortableAttributes'</span> =&gt; [<span class="string token">'updated_at'</span>],
+        ],
+    ],
+],
+</code></pre>
+<p>如果给定索引下的模型可以进行软删除，并且已包含在<code>index-settings</code>数组中，Scout 将自动支持在该索引上过滤软删除的模型。如果你没有其他可过滤或可排序的属性来定义软删除的模型索引，则可以简单地向该模型的<code>index-settings</code>数组添加一个空条目：</p>
+<pre><code class="language-php"><span class="string token">'index-settings'</span> =&gt; [
+    Flight::<span class="keyword token">class</span> =&gt; []
+],
+</code></pre>
+<p>在配置应用程序的索引设置之后，你必须调用 <code>scout:sync-index-settings</code> Artisan 命令。此命令将向 Meilisearch 通知你当前配置的索引设置。为了方便起见，你可能希望将此命令作为部署过程的一部分：</p>
+<pre><code class="language-shell">php artisan scout:sync-index-settings
+</code></pre>
 <p><a name="configuring-the-model-id"></a></p>
-<h3 id="配置模型-id">配置模型 ID</h3>
-<p>默认情况下，Scout 将使用模型的主键作为搜索索引中存储的唯一 ID / key。 可以通过模型上的 <code>getScoutKey</code> 和 <code>getScoutKeyName</code> 方法自定义：</p>
+<h3 id="配置模型id">配置模型ID</h3>
+<p>默认情况下，Scout 将使用模型的主键作为存储在搜索索引中的模型唯一ID/键。如果你需要自定义此行为，可以重写模型的 <code>getScoutKey</code> 和 <code>getScoutKeyName</code> 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Models;
@@ -183,58 +229,135 @@ MEILISEARCH_KEY=masterKey
     <span class="keyword token">use</span> Searchable;
 
     <span class="comment token">/**
-     * 获取用于索引模型的值
-     *
-     *<span class="phpdoc token"> @return</span> mixed
+     * 获取这个模型用于索引的值.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKey()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKey(): mixed
     {
         <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;email;
     }
 
     <span class="comment token">/**
-     * 获取用于索引模型的键名
-     *
-     *<span class="phpdoc token"> @return</span> mixed
+     * 获取这个模型用于索引的键.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKeyName()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKeyName(): mixed
     {
         <span class="keyword token">return</span> <span class="string token">'email'</span>;
     }
 }
 </code></pre>
+<p><a name="configuring-search-engines-per-model"></a></p>
+<h3 id="设置模型的搜索引擎">设置模型的搜索引擎</h3>
+<p>当进行搜索时，Scout 通常会使用应用程序的 <code>scout</code> 配置文件中指定的默认搜索引擎。但是，可以通过在模型上覆盖 <code>searchableUsing</code> 方法来更改特定模型的搜索引擎：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+<span class="keyword token">use</span> Laravel\Scout\Engines\Engine;
+<span class="keyword token">use</span> Laravel\Scout\EngineManager;
+<span class="keyword token">use</span> Laravel\Scout\Searchable;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">use</span> Searchable;
+
+    <span class="comment token">/**
+     * 获取这个模型用于索引的搜索引擎.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> searchableUsing(): Engine
+    {
+        <span class="keyword token">return</span> app(EngineManager::<span class="keyword token">class</span>)-&gt;engine(<span class="string token">'meilisearch'</span>);
+    }
+}
+</code></pre>
+<p><a name="configuring-the-model-id"></a></p>
+<h3 id="配置模型id-1">配置模型ID</h3>
+<p>默认情况下，Scout 将使用模型的主键作为存储在搜索索引中的模型的唯一ID /键。如果你需要自定义此行为，你可以覆盖模型上的<code>getScoutKey</code>和<code>getScoutKeyName</code>方法:</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+<span class="keyword token">use</span> Laravel\Scout\Searchable;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">use</span> Searchable;
+
+    <span class="comment token">/**
+     * 获取用于索引模型的值.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKey(): mixed
+    {
+        <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;email;
+    }
+
+    <span class="comment token">/**
+     * 获取用于索引模型的键名.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> getScoutKeyName(): mixed
+    {
+        <span class="keyword token">return</span> <span class="string token">'email'</span>;
+    }
+}
+</code></pre>
+<p><a name="configuring-search-engines-per-model"></a></p>
+<h3 id="按型号配置搜索引擎">按型号配置搜索引擎</h3>
+<p>搜索时，Scout 通常使用你应用程序的 Scout 配置文件中指定的默认搜索引擎。然而，可以通过覆盖模型上的<code>searchableUsing</code>方法来更改特定模型的搜索引擎:</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+<span class="keyword token">use</span> Laravel\Scout\Engines\Engine;
+<span class="keyword token">use</span> Laravel\Scout\EngineManager;
+<span class="keyword token">use</span> Laravel\Scout\Searchable;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model
+{
+    <span class="keyword token">use</span> Searchable;
+
+    <span class="comment token">/**
+     * 获取用于索引模型的引擎.
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> searchableUsing(): Engine
+    {
+        <span class="keyword token">return</span> app(EngineManager::<span class="keyword token">class</span>)-&gt;engine(<span class="string token">'meilisearch'</span>);
+    }
+}
+</code></pre>
 <p><a name="identifying-users"></a></p>
 <h3 id="识别用户">识别用户</h3>
-<p>Scout 还允许您在使用 <a href="https://algolia.com">Algolia</a> 时自动识别用户。在 Algolia 的仪表板中查看搜索分析时，将经过身份验证的用户与搜索操作相关联可能会有所帮助。您可以通过在应用程序的 <code>.env</code> 文件中将 <code>SCOUT_IDENTIFY</code> 环境变量定义为 <code>true</code> 来启用用户标识：</p>
+<p>如果你在使用 <a href="https://algolia.com/">Algolia</a> 时想要自动识别用户，Scout 可以帮助你。将已认证的用户与搜索操作相关联，可以在 Algolia 的仪表板中查看搜索分析时非常有用。你可以通过在应用程序的 <code>.env</code> 文件中将 <code>SCOUT_IDENTIFY</code> 环境变量定义为 <code>true</code> 来启用用户识别：</p>
 <pre><code class="language-ini">SCOUT_IDENTIFY=<span class="keyword token">true</span>
 </code></pre>
-<p>启用此功能还会将请求的 IP 地址和经过身份验证的用户的主标识符传递给 Algolia，以便将此数据与用户发出的任何搜索请求相关联。</p>
+<p>启用此功能还会将请求的 IP 地址和已验证的用户的主要标识符传递给 Algolia，以便将此数据与用户发出的任何搜索请求相关联。</p>
 <p><a name="database-and-collection-engines"></a></p>
-<h2 id="数据库--collection-引擎">数据库 / Collection 引擎</h2>
+<h2 id="数据库集合引擎">数据库/集合引擎</h2>
 <p><a name="database-engine"></a></p>
 <h3 id="数据库引擎">数据库引擎</h3>
 <blockquote>
-<p>注意：数据库引擎目前支持 MySQL 和 PostgreSQL。</p>
+<p>注意：目前，数据库引擎支持 MySQL 和 PostgreSQL。</p>
 </blockquote>
-<p>如果你的应用程序使用中小型数据库交互，且数据库本身负载较低，你可能会发现使用 Scout 的「数据库引擎」会更方便。数据库引擎将在过滤现有数据库的结果时使用「where like」子句和全文索引，以确定查询的适用搜索结果。</p>
-<p>要使用数据库引擎，你可以简单地将 <code>SCOUT_DRIVER</code> 环境变量的值设置为 <code>database</code>，或者直接在应用程序的 <code>scout</code> 配置文件中指定 <code>database</code> 驱动程序：</p>
+<p>如果你的应用程序与小到中等大小的数据库交互或工作负载较轻，你可能会发现使用 Scout 的 「database」 引擎更为方便。数据库引擎将使用 「where like」子句和全文索引来过滤你现有数据库的结果，以确定适用于你查询的搜索结果。</p>
+<p>要使用数据库引擎，你可以简单地将 <code>SCOUT_DRIVER</code> 环境变量的值设置为 <code>database</code>，或直接在你的应用程序的 <code>scout</code> 配置文件中指定 <code>database</code> 驱动程序：</p>
 <pre><code class="language-ini">SCOUT_DRIVER=database
 </code></pre>
-<p>一旦你将数据库引擎指定为首选驱动程序后，你必须 <a href="#configuring-searchable-data">配置你的可搜索数据</a>。然后，你可以针对你的模型开始 <a href="#searching">执行搜索查询</a>。使用数据库引擎时不需要搜索引擎索引，例如填充 Algolia 或 MeiliSearch 索引所需的索引。</p>
+<p>一旦你已将数据库引擎指定为首选驱动程序，你必须<a href="#configuring-searchable-data">配置你的可搜索数据</a>。然后，你可以开始<a href="#searching">执行搜索查询</a>来查询你的模型。使用数据库引擎时，不需要进行搜索引擎索引，例如用于填充 Algolia 或 Meilisearch 索引所需的索引。</p>
 <h4 id="自定义数据库搜索策略">自定义数据库搜索策略</h4>
-<p>默认情况下，数据库引擎将对你已<a href="#configuring-searchable-data">配置为可搜索</a> 的每个模型属性执行「where like」查询。但是，在某些情况下，这可能会导致性能不佳。因此，你可以通过配置数据库引擎的搜索策略，使某些指定的列使用全文搜索查询或仅使「where like」约束来搜索字符串的前缀（<code>example%</code>），而不是在整个字符串中搜索（<code>%example%</code>)。</p>
-<p>要定义此行为，你可以将 PHP 属性分配给模型的 <code>toSearchableArray</code> 方法。任何未分配额外搜索策略行为的列将继续使用默认的「where like」策略：</p>
+<p>默认情况下，数据库引擎将对你所<a href="#configuring-searchable-data">配置为可搜索的</a>每个模型属性执行 「where like」 查询。然而，在某些情况下，这可能会导致性能不佳。因此，数据库引擎的搜索策略可以配置，以便某些指定的列利用全文搜索查询，或者仅使用 「where like」 约束来搜索字符串的前缀(<code>example%</code>)，而不是在整个字符串中搜索(<code>%example%</code>)。</p>
+<p>为了定义这种行为，你可以将 PHP 属性赋值给你的模型的 toSearchableArray 方法。任何未被分配其他搜索策略行为的列将继续使用默认的「where like」策略：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Laravel\Scout\Attributes\SearchUsingFullText;
 <span class="keyword token">use</span> Laravel\Scout\Attributes\SearchUsingPrefix;
 
 <span class="comment token">/**
  * 获取模型的可索引数据数组。
  *
- *<span class="phpdoc token"> @return</span> array
+ *<span class="phpdoc token"> @return</span> array&lt;string, mixed&gt;
  */</span>
 <span class="comment token">#[SearchUsingPrefix(['id', 'email'])]</span>
 <span class="comment token">#[SearchUsingFullText(['bio'])]</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> toSearchableArray()
+<span class="keyword token">public</span> <span class="keyword token">function</span> toSearchableArray(): <span class="keyword token">array</span>
 {
     <span class="keyword token">return</span> [
         <span class="string token">'id'</span> =&gt; <span class="variable token">$this</span>-&gt;id,
@@ -245,45 +368,44 @@ MEILISEARCH_KEY=masterKey
 }
 </code></pre>
 <blockquote>
-<p>注意：在指定列应使用全文查询约束之前，请确保已为该列分配了 <a href="migrations.html#available-index-types">全文索引</a>。</p>
+<p>注意：在指定列应使用全文查询约束之前，请确保已为该列分配<a href="/docs/laravel/10.x/migrations#available-index-types">全文索引</a>。</p>
 </blockquote>
 <p><a name="collection-engine"></a></p>
-<h3 id="collection-引擎">Collection 引擎</h3>
-<p>虽然你在本地开发过程中可以自由使用 Algolia 或 MeiliSearch 搜索引擎，但你可能会发现使用「Collection」引擎更方便。Collection 引擎将对现有数据库的结果使用「where」子句和收集过滤来确定适用于你的查询的搜索结果。使用此引擎时，无需为您的可搜索模型「索引」，因为它们只会从您的本地数据库中检索。</p>
-<p>要使用收集引擎，你可以简单地将 <code>SCOUT_DRIVER</code> 环境变量的值设置为 <code>collection</code>，或者直接在应用程序的 <code>scout</code> 配置文件中指定 <code>collection</code> 驱动程序：</p>
+<h3 id="集合引擎">集合引擎</h3>
+<p>在本地开发过程中，你可以自由地使用 Algolia 或 Meilisearch 搜索引擎，但你可能会发现使用「集合」引擎更加方便。集合引擎将使用「where」子句和集合过滤器来从你现有的数据库结果中确定适用于你查询的搜索结果。当使用此引擎时，无需对可搜索模型进行「索引」，因为它们只需从本地数据库中检索即可。</p>
+<p>要使用收集引擎，你可以简单地将 <code>SCOUT_DRIVER</code> 环境变量的值设置为 <code>collection</code>，或者直接在你的应用的 <code>scout</code> 配置文件中指定 <code>collection</code> 驱动程序：</p>
 <pre><code class="language-ini">SCOUT_DRIVER=collection
 </code></pre>
-<p>一旦你将 Collection  驱动指定为首选驱动程序，你就可以开始对你的模型<a href="#searching">执行搜索查询</a>。使用 Collection 引擎时，不需要搜索引擎索引，例如填充 Algolia 或 MeiliSearch 索引所需的索引。</p>
+<p>一旦你将收集驱动程序指定为首选驱动程序，你就可以开始针对你的模型<a href="#searching">执行搜索查询</a>。使用收集引擎时，不需要进行搜索引擎索引，如种子 Algolia 或 Meilisearch 索引所需的索引。</p>
 <h4 id="与数据库引擎的区别">与数据库引擎的区别</h4>
-<p>乍一看，「数据库」和「Collection 」引擎非常相似。它们都直接与你的数据库交互以检索搜索结果。但是，Collection 引擎不使用全文索引或「LIKE」子句来查找匹配记录。相反，它会提取所有可能的记录并使用 Laravel 的 <code>Str::is</code> 帮助器来确定搜索字符串是否存在于模型属性值中。</p>
-<p>Collection 引擎是最便携的搜索引擎，因为它适用于 Laravel 支持的所有关系数据库（包括 SQLite 和 SQL Server）；但是，它的效率低于 Scout 的数据库引擎。</p>
+<p>乍一看，「数据库」和「收集」引擎非常相似。它们都直接与你的数据库交互以检索搜索结果。然而，收集引擎不使用全文索引或 <code>LIKE</code> 子句来查找匹配的记录。相反，它会拉取所有可能的记录，并使用 Laravel 的 <code>Str::is</code> 助手来确定搜索字符串是否存在于模型属性值中。</p>
+<p>收集引擎是最便携的搜索引擎，因为它适用于 Laravel 支持的所有关系型数据库（包括 SQLite 和 SQL Server）；然而，它的效率比 Scout 的数据库引擎低。</p>
 <p><a name="indexing"></a></p>
 <h2 id="索引">索引</h2>
 <p><a name="batch-import"></a></p>
 <h3 id="批量导入">批量导入</h3>
-<p>如果要将 Scout 安装到现有项目中，则可能已有需要导入索引的数据库记录。Scout 提供 Artisan 命令 <code>scout:import</code>，可用于将所有现有记录导入搜索索引：</p>
+<p>如果你要将 Scout 安装到现有项目中，你可能已经有需要导入到你的索引中的数据库记录。Scout 提供了一个 <code>scout:import</code> Artisan 命令，你可以使用它将所有现有记录导入到你的搜索索引中：</p>
 <pre><code class="language-shell">php artisan scout:import &quot;App\Models\Post&quot;
 </code></pre>
-<p> <code>flush</code> 命令可用于从搜索索引中删除模型的所有记录：</p>
+<p><code>flush</code> 命令可用于从你的搜索索引中删除模型的所有记录：</p>
 <pre><code class="language-shell">php artisan scout:flush &quot;App\Models\Post&quot;
 </code></pre>
 <p><a name="modifying-the-import-query"></a></p>
 <h4 id="修改导入查询">修改导入查询</h4>
-<p>如果要修改用于检索所有模型以进行批量导入的查询，可以在模型上定义 <code>makeAllSearchableUsing</code> 方法。这是一个很好的地方，可以在导入模型之前添加任何可能需要的即时关系加载：</p>
-<pre><code><span class="comment token">/**
- * 在使所有模型都可搜索时，修改用于检索模型的查询。
- *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Database\Eloquent\Builder  $query
- *<span class="phpdoc token"> @return</span> \Illuminate\Database\Eloquent\Builder
+<p>如果你想修改用于获取所有批量导入模型的查询，你可以在你的模型上定义一个<code>makeAllSearchableUsing</code>方法。这是一个很好的地方，可以在导入模型之前添加任何必要的关系加载:</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="comment token">/**
+ * 修改用于检索模型的查询，使所有模型都可搜索.
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> makeAllSearchableUsing(<span class="variable token">$query</span>)
+<span class="keyword token">protected</span> <span class="keyword token">function</span> makeAllSearchableUsing(Builder <span class="variable token">$query</span>): Builder
 {
     <span class="keyword token">return</span> <span class="variable token">$query</span>-&gt;with(<span class="string token">'author'</span>);
 }
 </code></pre>
 <p><a name="adding-records"></a></p>
 <h3 id="添加记录">添加记录</h3>
-<p>一旦将 <code>Laravel\Scout\Searchable</code> trait 添加到模型中，你只需 <code>save</code> 或 <code>create</code> 模型实例，它就会自动添加到搜索索引中。如果已将 Scout 配置为 <a href="#queueing">使用队列</a>，此操作将由队列 worker 进程在后台执行：</p>
+<p>一旦你将<code>Laravel\Scout\Searchable</code> Trait添加到模型中，你所需要做的就是<code>保存</code>或<code>创建</code>一个模型实例，它将自动添加到你的搜索索引中。如果你将Scout配置为<a href="#queueing">使用队列</a>，则此操作将由你的队列工作者在后台执行:</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$order</span> = <span class="keyword token">new</span> Order;
@@ -293,93 +415,92 @@ MEILISEARCH_KEY=masterKey
 <span class="variable token">$order</span>-&gt;save();
 </code></pre>
 <p><a name="adding-records-via-query"></a></p>
-<h4 id="通过查询添加">通过查询添加</h4>
-<p>如果你希望通过 Eloquent 查询将模型集合添加到搜索索引中，你也可以在 Eloquent 查询构造器上链式调用 <code>searchable</code> 方法。<code>searchable</code> 会把构造器的查询 <a href="eloquent.html#chunking-results">结果分块</a> 并将记录添加到搜索索引中。同样，如果你已将 Scout 配置为使用队列，则队列 worker 将在后台导入所有块：</p>
+<h4 id="通过查询添加记录">通过查询添加记录</h4>
+<p>如果你想通过Eloquent查询将模型集合添加到你的搜索索引中，你可以将<code>searchable</code>方法链接到Eloquent查询中。<code>searchable</code>方法会将查询的<a href="/docs/laravel/10.x/eloquent#chunking-results">结果分块</a>并将记录添加到你的搜索索引中。同样，如果你已经配置了Scout来使用队列，那么所有的块都将由你的队列工作程序在后台导入:</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 Order::where(<span class="string token">'price'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)-&gt;searchable();
 </code></pre>
-<p>你还可以在 Eloquent 关联实例上调用 <code>searchable</code> 方法：</p>
+<p>你也可以在Eloquent关系实例上调用<code>searchable</code>方法:</p>
 <pre><code><span class="variable token">$user</span>-&gt;orders()-&gt;searchable();
 </code></pre>
-<p>或者，如果内存中已经有一组 Eloquent 模型，可以调用集合实例上的 <code>searchable</code> 方法，将模型实例添加到相应的索引中：</p>
+<p>如果你已经有一组Eloquent模型对象在内存中，可以在该集合实例上调用<code>searchable</code>方法，将模型实例添加到对应的索引中：</p>
 <pre><code><span class="variable token">$orders</span>-&gt;searchable();
 </code></pre>
 <blockquote>
-<p>技巧：<code>searchable</code> 方法可被视为 「upsert」操作。换句话说，如果模型记录已经在索引中，它将被更新。如果它不存在于搜索索引中，则将其添加到索引中。</p>
+<p><strong>注意</strong>
+searchable 方法可以被视为「upsert」操作。换句话说，如果模型记录已经存在于索引中，它将被更新。如果它在搜索索引中不存在，则将其添加到索引中。</p>
 </blockquote>
 <p><a name="updating-records"></a></p>
 <h3 id="更新记录">更新记录</h3>
-<p>要更新可搜索的模型，只需要更新模型实例的属性并将模型 <code>save</code> 到数据库。Scout 会自动将更新同步到你的搜索索引中：</p>
+<p>要更新可搜索的模型，只需更新模型实例的属性并将模型保存到你的数据库中。Scout 将自动将更改持久化到你的搜索索引中：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$order</span> = Order::find(<span class="number token">1</span>);
 
-<span class="comment token">// 更新订单...</span>
+<span class="comment token">// 更新订单…</span>
 
 <span class="variable token">$order</span>-&gt;save();
 </code></pre>
-<p>你也可以在 Eloquent 查询语句上使用 <code>searchable</code> 方法来更新一个模型的集合。如果这个模型不存在你检索的索引里，就会被创建：</p>
+<p>你还可以在Eloquent查询实例上调用 <code>searchable</code> 方法，以更新模型的集合。如果模型不存在于搜索索引中，则将创建它们：</p>
 <pre><code>Order::where('price', '&gt;', 100)-&gt;searchable();
 </code></pre>
-<p>如果要更新关系中所有模型的搜索索引记录，可以在关系实例上调用 <code>searchable</code> ：</p>
+<p>如果想要更新关系中所有模型的搜索索引记录，可以在关系实例上调用<code>searchable</code>方法：</p>
 <pre><code><span class="variable token">$user</span>-&gt;orders()-&gt;searchable();
 </code></pre>
-<p>或者，如果内存中已经有 Eloquent 模型集合，则可以调用集合实例上的 <code>searchable</code> 方法来更新相应索引中的模型实例：</p>
+<p>或者，如果你已经在内存中有一组 Eloquent 模型，可以在该集合实例上调用<code>searchable</code> 方法，以更新对应索引中的模型实例：</p>
 <pre><code><span class="variable token">$orders</span>-&gt;searchable();
 </code></pre>
 <p><a name="removing-records"></a></p>
-<h3 id="移除记录">移除记录</h3>
-<p>要从索引中删除记录，只需从数据库中 <code>delete</code> 模型即可。即使你正在使用 <a href="eloquent.html#soft-deleting">软删除</a> 模型，也可以这样做：</p>
+<h3 id="删除记录">删除记录</h3>
+<p>要从索引中删除记录，只需从数据库中删除模型即可。即使你正在使用<a href="/docs/laravel/10.x/eloquent#soft-deleting">软删除</a>模型，也可以这样做：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$order</span> = Order::find(<span class="number token">1</span>);
 
 <span class="variable token">$order</span>-&gt;delete();
 </code></pre>
-<p>如果你不希望记录在删除之前被检索到，可以在 Eloquent 查询实例或集合上使用 <code>unsearchable</code> 方法：</p>
+<p>如果你不想在删除记录之前检索模型，你可以在 Eloquent 查询实例上使用 <code>unsearchable</code> 方法：</p>
 <pre><code>Order::where('price', '&gt;', 100)-&gt;unsearchable();
 </code></pre>
-<p>如果要删除关系中所有模型的搜索索引记录，可以在关系实例上调用 <code>unsearchable</code> ：</p>
+<p>如果你想删除与关系中所有模型相关的搜索索引记录，你可以在关系实例上调用 <code>unsearchable</code> 方法：</p>
 <pre><code><span class="variable token">$user</span>-&gt;orders()-&gt;unsearchable();
 </code></pre>
-<p>或者，如果内存中已经有 Eloquent 模型集合，则可以调用集合实例上的 <code>unsearchable</code> 方法，从相应的索引中删除模型实例：</p>
+<p>或者，如果你已经有一组 Eloquent 模型在内存中，你可以在集合实例上调用 <code>unsearchable</code> 方法，将模型实例从相应的索引中移除：</p>
 <pre><code><span class="variable token">$orders</span>-&gt;unsearchable();
 </code></pre>
 <p><a name="pausing-indexing"></a></p>
 <h3 id="暂停索引">暂停索引</h3>
-<p>你可能需要在执行一批 Eloquent 操作的时候，不同步模型数据到搜索索引。此时你可以使用 <code>withoutSyncingToSearch</code> 方法来执行此操作。这个方法接受一个立即执行的回调。该回调中所有的操作都不会同步到模型的索引：</p>
+<p>有时你可能需要在不将模型数据同步到搜索索引的情况下对模型执行一批 Eloquent 操作。你可以使用 <code>withoutSyncingToSearch</code> 方法来实现这一点。该方法接受一个闭包，将立即执行。在闭包内发生的任何模型操作都不会同步到模型的索引：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 Order::withoutSyncingToSearch(<span class="keyword token">function</span> () {
-    <span class="comment token">// 执行模型操作...</span>
+    <span class="comment token">// 执行模型动作…</span>
 });
 </code></pre>
 <p><a name="conditionally-searchable-model-instances"></a></p>
-<h3 id="有条件的搜索模型实例">有条件的搜索模型实例</h3>
-<p>有时你可能只需要在某些条件下使模型可搜索。例如，假设你有 <code>App\Models\Post</code> 模型可能是两种状态之一：「草稿」和「已发布」。你可能只允许搜索 「已发布」的帖子。为了实现这一点，你需要在模型中定义一个 <code>shouldBeSearchable</code> 方法：</p>
+<h3 id="有条件地搜索模型实例">有条件地搜索模型实例</h3>
+<p>有时你可能需要在某些条件下使模型可搜索。例如，假设你有一个 <code>App\Models\Post</code> 模型，它可能处于两种状态之一：「draft」（草稿）和 「published」（已发布）。你可能只想让 「published」（已发布）的帖子可以被搜索。为了实现这一点，你可以在你的模型中定义一个 <code>shouldBeSearchable</code> 方法：</p>
 <pre><code><span class="comment token">/**
- * 确定模型是否可搜索
- *
- *<span class="phpdoc token"> @return</span> bool
+ * 确定模型是否应该可搜索。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> shouldBeSearchable()
+<span class="keyword token">public</span> <span class="keyword token">function</span> shouldBeSearchable(): bool
 {
     <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;isPublished();
 }
 </code></pre>
-<p>仅当通过 <code>save</code> 和 <code>create</code> 方法、查询或关联模型操作时，才应使用 <code>shouldBeSearchable</code> 方法。直接使用 <code>searchable</code> 方法将使模型或集合的可搜索结果覆盖 <code>shouldBeSearchable</code> 方法的结果:</p>
+<p><code>shouldBeSearchable</code> 方法仅在通过 <code>save</code> 和 <code>create</code> 方法、查询或关系操作模型时应用。直接使用 <code>searchable</code> 方法使模型或集合可搜索将覆盖 <code>shouldBeSearchable</code> 方法的结果。</p>
 <blockquote>
-<p>注意：<code>shouldBeSearchable</code> 方法在使用 Scout 的“数据库”引擎时不适用，因为所有可搜索的数据始终存储在数据库中。要在使用数据库引擎时实现类似的行为，你应该改用 <a href="#where-clauses">where 子句</a>。</p>
+<p><strong>警告</strong><br>当使用 Scout 的「database」（数据库）引擎时，<code>shouldBeSearchable</code> 方法不适用，因为所有可搜索的数据都存储在数据库中。要在使用数据库引擎时实现类似的行为，你应该使用 <a href="#where-clauses">where 子句</a>代替。</p>
 </blockquote>
 <p><a name="searching"></a></p>
 <h2 id="搜索">搜索</h2>
-<p>你可以使用 <code>search</code> 方法来搜索模型。search 方法接受一个用于搜索模型的字符串。你还需要在搜索查询上链式调用 <code>get</code> 方法，才能用给定的搜索语句查询与之匹配的 Eloquent 模型：</p>
+<p>你可以使用 <code>search</code> 方法开始搜索一个模型。搜索方法接受一个将用于搜索模型的字符串。然后，你应该在搜索查询上链接 <code>get</code> 方法以检索与给定搜索查询匹配的 Eloquent 模型：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;get();
 </code></pre>
-<p>由于 Scout 搜索返回 Eloquent 模型的集合，你甚至可以直接从路由或控制器返回结果，结果将自动转换为 JSON ：</p>
+<p>由于 Scout 搜索返回一组 Eloquent 模型，你甚至可以直接从路由或控制器返回结果，它们将自动转换为 JSON：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 
@@ -387,40 +508,44 @@ Route::get(<span class="string token">'/search'</span>, <span class="keyword tok
     <span class="keyword token">return</span> Order::search(<span class="variable token">$request</span>-&gt;search)-&gt;get();
 });
 </code></pre>
-<p>如果你想在它们转换成 Eloquent 模型前得到原始结果，你应该使用 <code>raw</code> 方法：</p>
+<p>如果你想在将搜索结果转换为 Eloquent 模型之前获取原始搜索结果，你可以使用 <code>raw</code> 方法：</p>
 <pre><code><span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;raw();
 </code></pre>
 <p><a name="custom-indexes"></a></p>
 <h4 id="自定义索引">自定义索引</h4>
-<p>搜索查询通常会在模型的 <a href="#configuring-model-indexes"><code>searchableAs</code></a> 方法指定的索引上执行。但是，你可以使用 <code>within</code> 方法指定应搜索的自定义索引：</p>
+<p>搜索查询通常会在模型的 <a href="#configuring-model-indexes"><code>searchableAs</code></a> 方法指定的索引上执行。然而，你可以使用 <code>within</code> 方法指定一个应该被搜索的自定义索引：</p>
 <pre><code><span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)
     -&gt;within(<span class="string token">'tv_shows_popularity_desc'</span>)
     -&gt;get();
 </code></pre>
 <p><a name="where-clauses"></a></p>
 <h3 id="where-子句">Where 子句</h3>
-<p>Scout 允许你在搜索查询中添加简单的「where」子句。目前，这些子句仅支持基本的数值相等性检查，主要用于按所有者 ID 确定搜索查询的范围。</p>
+<p>Scout 允许你在搜索查询中添加简单的「where」子句。目前，这些子句只支持基本的数值相等检查，主要用于通过所有者 ID 限定搜索查询：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;where(<span class="string token">'user_id'</span>, <span class="number token">1</span>)-&gt;get();
 </code></pre>
-<p>你可以使用 <code>whereIn</code> 方法将结果限制在给定的一组值上：</p>
+<p>你可以使用 <code>whereIn</code> 方法将结果约束在给定的一组值中：</p>
 <pre><code><span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;whereIn(
     <span class="string token">'status'</span>, [<span class="string token">'paid'</span>, <span class="string token">'open'</span>]
 )-&gt;get();
 </code></pre>
-<p>由于搜索索引不是关系数据库，因此目前不支持更高级的「where」子句。</p>
+<p>由于搜索索引不是关系数据库，所以目前不支持更高级的「where」子句。</p>
+<blockquote>
+<p>**警告 **
+如果你的应用程序使用了 Meilisearch，你必须在使用 Scout 的「where」子句之前配置你的应用程序的<a href="#configuring-filterable-data-for-meilisearch">可过滤属性</a>。</p>
+</blockquote>
 <p><a name="pagination"></a></p>
 <h3 id="分页">分页</h3>
-<p>除了检索模型的集合，你也可以使用 <code>paginate</code> 方法对搜索结果进行分页。这个方法会返回一个就像 <a href="pagination.html">传统的 Eloquent 查询分页 </a> 一样的 <code>Illuminate\Pagination\LengthAwarePaginator</code> 实例：</p>
+<p>除了检索模型集合之外，你还可以使用 <code>paginate</code> 方法对搜索结果进行分页。此方法将返回一个 <code>Illuminate\Pagination\LengthAwarePaginator</code> 实例，就像你对<a href="/docs/laravel/10.x/pagination">传统的 Eloquent 查询进行分页</a>一样：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 <span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;paginate();
 </code></pre>
-<p>通过将数量作为第一个参数传递给 <code>paginate</code> 方法，可以指定每页要检索多少个模型：</p>
+<p>你可以通过将数量作为第一个参数传递给 <code>paginate</code> 方法来指定每页检索多少个模型：</p>
 <pre><code><span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;paginate(<span class="number token">15</span>);
 </code></pre>
-<p>检索结果后，你可以使用 <a href="blade.html">Blade</a> 显示结果并呈现页面链接，就像对传统的 Eloquent 查询进行分页一样：</p>
+<p>一旦你检索到了结果，你可以使用 <a href="/docs/laravel/10.x/blade">Blade</a> 显示结果并渲染页面链接，就像你对传统的 Eloquent 查询进行分页一样：</p>
 <pre><code class="language-html">&lt;div <span class="keyword token">class</span>=<span class="string token">"container"</span>&gt;
     @<span class="keyword token">foreach</span> (<span class="variable token">$orders</span> <span class="keyword token">as</span> <span class="variable token">$order</span>)
         {{ <span class="variable token">$order</span>-&gt;price }}
@@ -429,7 +554,7 @@ Route::get(<span class="string token">'/search'</span>, <span class="keyword tok
 
 {{ <span class="variable token">$orders</span>-&gt;links() }}
 </code></pre>
-<p>当然，如果希望以 JSON 形式检索分页结果，可以直接从路由或控制器返回分页器实例：</p>
+<p>当然，如果你想将分页结果作为 JSON 检索，可以直接从路由或控制器返回分页器实例：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 
@@ -437,26 +562,29 @@ Route::get(<span class="string token">'/orders'</span>, <span class="keyword tok
     <span class="keyword token">return</span> Order::search(<span class="variable token">$request</span>-&gt;input(<span class="string token">'query'</span>))-&gt;paginate(<span class="number token">15</span>);
 });
 </code></pre>
+<blockquote>
+<p><strong>警告</strong><br>由于搜索引擎不了解你的 Eloquent 模型的全局作用域定义，因此在使用 Scout 分页的应用程序中，你不应该使用全局作用域。或者，你应该在通过 Scout 搜索时重新创建全局作用域的约束。</p>
+</blockquote>
 <p><a name="soft-deleting"></a></p>
 <h3 id="软删除">软删除</h3>
-<p>如果你索引的模型是 <a href="eloquent.html#soft-deleting">软删除</a>，并且你需要搜索已删除的模型，请将 <code>config/scout.php</code> 配置文件中的 <code>soft_delete</code> 选项设置为  <code>true</code>：</p>
+<p>如果你的索引模型使用了软删除并且你需要搜索已软删除的模型，请将 <code>config/scout.php</code> 配置文件中的 <code>soft_delete</code> 选项设置为 <code>true</code>。</p>
 <pre><code><span class="string token">'soft_delete'</span> =&gt; <span class="keyword token">true</span>,
 </code></pre>
-<p>当此配置选项为 <code>true</code> 时，Scout 不会从搜索索引中删除软删除的模型。相反，它将在索引记录上设置一个隐藏的<code>__soft_deleted</code> 属性。然后，你可以在搜索时使用 <code>withTrashed</code> 或 <code>onlyTrashed</code> 方法检索软删除记录：</p>
+<p>当这个配置选项为 <code>true</code> 时，Scout 不会从搜索索引中删除已软删除的模型。相反，它会在索引记录上设置一个隐藏的 <code>__soft_deleted</code> 属性。然后，你可以使用 <code>withTrashed</code> 或 <code>onlyTrashed</code> 方法在搜索时检索已软删除的记录：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
-<span class="comment token">// 检索结果包括已删除记录</span>
+<span class="comment token">// 在检索结果时包含已删除的记录。。。</span>
 <span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;withTrashed()-&gt;get();
 
-<span class="comment token">// 仅检索已删除记录...</span>
+<span class="comment token">// 仅在检索结果时包含已删除的记录。。。</span>
 <span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)-&gt;onlyTrashed()-&gt;get();
 </code></pre>
 <blockquote>
-<p>技巧：当使用 <code>forceDelete</code> 永久删除软删除模型时，Scout 会自动将其从搜索索引中删除。</p>
+<p>技巧：当使用 <code>forceDelete</code> 永久删除软删除模型时，Scout 将自动从搜索索引中移除它。</p>
 </blockquote>
 <p><a name="customizing-engine-searches"></a></p>
-<h3 id="自定义搜索引擎">自定义搜索引擎</h3>
-<p>如果需要对引擎的搜索行为执行高级自定义，可以将闭包作为第二个参数传递给 <code>search</code>  方法。例如，在将搜索查询传递给 Algolia 之前，可以使用此回调将地理位置数据添加到搜索选项中：</p>
+<h3 id="自定义引擎搜索">自定义引擎搜索</h3>
+<p>如果你需要对一个引擎的搜索行为进行高级定制，你可以将一个闭包作为 <code>search</code> 方法的第二个参数传递进去。例如，你可以使用这个回调在搜索查询传递给 Algolia 之前将地理位置数据添加到你的搜索选项中：</p>
 <pre><code><span class="keyword token">use</span> Algolia\AlgoliaSearch\SearchIndex;
 <span class="keyword token">use</span> App\Models\Order;
 
@@ -472,11 +600,22 @@ Order::search(
     }
 )-&gt;get();
 </code></pre>
+<p><a name="customizing-the-eloquent-results-query"></a></p>
+<h4 id="自定义-eloquent-结果查询">自定义 Eloquent 结果查询</h4>
+<p>在 Scout 从你的应用程序搜索引擎中检索到匹配的 Eloquent 模型列表后，Eloquent 会使用模型的主键检索所有匹配的模型。你可以通过调用 <code>query</code> 方法来自定义此查询。<code>query</code> 方法接受一个闭包，它将接收 Eloquent 查询构建器实例作为参数：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Models\Order;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+
+<span class="variable token">$orders</span> = Order::search(<span class="string token">'Star Trek'</span>)
+    -&gt;query(fn (Builder <span class="variable token">$query</span>) =&gt; <span class="variable token">$query</span>-&gt;with(<span class="string token">'invoices'</span>))
+    -&gt;get();
+</code></pre>
+<p>由于此回调是在从应用程序的搜索引擎中已经检索到相关模型之后调用的，因此 <code>query</code> 方法不应用于「过滤」结果。相反，你应该使用 <a href="#where-clauses">Scout where 子句</a>。</p>
 <p><a name="custom-engines"></a></p>
 <h2 id="自定义引擎">自定义引擎</h2>
 <p><a name="writing-the-engine"></a></p>
 <h4 id="编写引擎">编写引擎</h4>
-<p>如果内置的 Scout 搜索引擎不能满足你的需求，你可以编写自定义的引擎并且将它注册到 Scout。 你的引擎需要继承 <code>Laravel\Scout\Engines\Engine</code> 抽象类，这个抽象类包含了你自定义的引擎必须要实现的八个方法：</p>
+<p>如果 Scout 内置的搜索引擎不符合你的需求，你可以编写自己的自定义引擎并将其注册到 Scout。你的引擎应该继承 <code>Laravel\Scout\Engines\Engine</code> 抽象类。这个抽象类包含了你的自定义引擎必须实现的八个方法：</p>
 <pre><code><span class="keyword token">use</span> Laravel\Scout\Builder;
 
 <span class="keyword token">abstract</span> <span class="keyword token">public</span> <span class="keyword token">function</span> update(<span class="variable token">$models</span>);
@@ -488,42 +627,37 @@ Order::search(
 <span class="keyword token">abstract</span> <span class="keyword token">public</span> <span class="keyword token">function</span> getTotalCount(<span class="variable token">$results</span>);
 <span class="keyword token">abstract</span> <span class="keyword token">public</span> <span class="keyword token">function</span> flush(<span class="variable token">$model</span>);
 </code></pre>
-<p>在 <code>Laravel\Scout\Engines\AlgoliaEngine</code> 类里查看这些方法的实现会对你有较大的帮助。这个类会为你在学习如何在自定义引擎中实现这些方法提供一个好的起点。</p>
+<p>你可能会发现，查看 <code>Laravel\Scout\Engines\AlgoliaEngine</code> 类上这些方法的实现会很有帮助。这个类将为你提供一个良好的起点，以学习如何在自己的引擎中实现每个方法。</p>
 <p><a name="registering-the-engine"></a></p>
 <h4 id="注册引擎">注册引擎</h4>
-<p>一旦你写好了自定义引擎，你可以用 Scout 引擎管理的 <code>extend</code> 方法将它注册到 Scout。你只需要从<code>App\Providers\AppServiceProvider</code>  下的 <code>boot</code> 方法或者应用中使用的任何一个服务提供器中调用 <code>extend</code> 方法。</p>
-<p>举个例子，如果你写好了一个 <code>MySqlSearchEngine</code>，你可以像这样去注册它：</p>
-<pre><code><span class="keyword token">use</span> App\ScoutExtensions\MySqlSearchEngine
+<p>一旦你编写好自己的引擎，就可以使用 Scout 的引擎管理器的 <code>extend</code> 方法将其注册到 Scout 中。Scout 的引擎管理器可以从Laravel服务容器中解析。你应该从 <code>App\Providers\AppServiceProvider</code> 类或应用程序使用的任何其他服务提供程序的 <code>boot</code> 方法中调用 <code>extend</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> App\ScoutExtensions\MySqlSearchEngine;
 <span class="keyword token">use</span> Laravel\Scout\EngineManager;
 
 <span class="comment token">/**
- * Bootstrap any application services.
- *
- *<span class="phpdoc token"> @return</span> void
+ * 引导任何应用程序服务。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     resolve(EngineManager::<span class="keyword token">class</span>)-&gt;extend(<span class="string token">'mysql'</span>, <span class="keyword token">function</span> () {
         <span class="keyword token">return</span> <span class="keyword token">new</span> MySqlSearchEngine;
     });
 }
 </code></pre>
-<p>引擎注册后，你可以在 <code>config/scout.php</code> ,配置文件中指定它为默认的 Scout  <code>driver</code> :</p>
+<p>引擎注册后，你可以在 <code>config/scout.php</code> , 配置文件中指定它为默认的 Scout <code>driver</code></p>
 <pre><code>'driver' =&gt; 'mysql',
 </code></pre>
 <p><a name="builder-macros"></a></p>
 <h2 id="生成宏命令">生成宏命令</h2>
-<p>如果你想要自定义生成器方法，你可以使用<code>Laravel\Scout\Builder</code> 类下的&quot;macro&quot; 方法。 通常，定义「macros」时，需要实现 <a href="providers.html">service provider&#39;s</a> <code>boot</code> 方法:</p>
+<p>如果你想要自定义生成器方法，你可以使用 <code>Laravel\Scout\Builder</code> 类下的 &quot;macro&quot; 方法。 通常，定义「macros」时，需要实现 <a href="/docs/laravel/10.x/providers">service provider’s</a> <code>boot</code> 方法:</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Response;
 <span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
 <span class="keyword token">use</span> Laravel\Scout\Builder;
 
 <span class="comment token">/**
- * 注册应用的 Scout 宏命令
- *
- *<span class="phpdoc token"> @return</span> void
+ * 引导任何应用程序服务。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Builder::macro(<span class="string token">'count'</span>, <span class="keyword token">function</span> () {
         <span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;engine()-&gt;getTotalCount(
@@ -532,7 +666,7 @@ Order::search(
     });
 }
 </code></pre>
-<p><code>macro</code> 函数接受一个名字作为第一个参数，第二个参数为一个闭包函数。当调用  <code>Laravel\Scout\Builder</code> 宏命令时，调用这个函数.</p>
+<p><code>macro</code> 函数接受一个名字作为第一个参数，第二个参数为一个闭包函数。当调用 <code>Laravel\Scout\Builder</code> 宏命令时，调用这个函数.</p>
 <pre><code><span class="keyword token">use</span> App\Models\Order;
 
 Order::search(<span class="string token">'Star Trek'</span>)-&gt;count();
