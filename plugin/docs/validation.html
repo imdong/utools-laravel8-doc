@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Laravel 9.x 中文文档</title>
+    <title>Laravel 10.x 中文文档</title>
     <link rel="stylesheet" href="../style/idea.css">
 <link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
 <link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
@@ -17,115 +17,115 @@
 </head>
 
 <body>
-    <div class="markdown-body"><h1 id="validation">Validation</h1>
+    <div class="markdown-body"><h1 id="表单验证">表单验证</h1>
 <ul>
 <li><a href="#introduction">简介</a></li>
-<li><a href="#validation-quickstart">快速验证</a><ul>
+<li><a href="#validation-quickstart">快速开始</a><ul>
 <li><a href="#quick-defining-the-routes">定义路由</a></li>
 <li><a href="#quick-creating-the-controller">创建控制器</a></li>
 <li><a href="#quick-writing-the-validation-logic">编写验证逻辑</a></li>
-<li><a href="#quick-displaying-the-validation-errors">显示验证的错误信息</a></li>
+<li><a href="#quick-displaying-the-validation-errors">显示验证错误信息</a></li>
 <li><a href="#repopulating-forms">回填表单</a></li>
 <li><a href="#a-note-on-optional-fields">可选字段的注意事项</a></li>
+<li><a href="#validation-error-response-format">验证错误响应的格式化</a></li>
 </ul>
 </li>
 <li><a href="#form-request-validation">表单请求验证</a><ul>
-<li><a href="#creating-form-requests">创建表单请求验证</a></li>
-<li><a href="#authorizing-form-requests">表单请求认证授权</a></li>
-<li><a href="#customizing-the-error-messages">自定义验证错误信息</a></li>
-<li><a href="#preparing-input-for-validation">准备验证数据</a></li>
+<li><a href="#creating-form-requests">创建表单请求类</a></li>
+<li><a href="#authorizing-form-requests">表单请求授权验证</a></li>
+<li><a href="#customizing-the-error-messages">自定义错误消息</a></li>
+<li><a href="#preparing-input-for-validation">表单输入预处理</a></li>
 </ul>
 </li>
 <li><a href="#manually-creating-validators">手动创建验证器</a><ul>
 <li><a href="#automatic-redirection">自动重定向</a></li>
-<li><a href="#named-error-bags">命名错误信息包</a></li>
-<li><a href="#manual-customizing-the-error-messages">自定义错误信息</a></li>
+<li><a href="#named-error-bags">命名错误包</a></li>
+<li><a href="#manual-customizing-the-error-messages">自定义错误消息</a></li>
 <li><a href="#after-validation-hook">验证后的钩子</a></li>
 </ul>
 </li>
-<li><a href="#working-with-validated-input">处理验证字段</a></li>
-<li><a href="#working-with-error-messages">处理错误信息</a><ul>
-<li><a href="#specifying-custom-messages-in-language-files">在语言文件中指定自定义消息</a></li>
-<li><a href="#specifying-attribute-in-language-files">在语言文件中指定属性</a></li>
-<li><a href="#specifying-values-in-language-files">在语言文件中指定值</a></li>
+<li><a href="#working-with-validated-input">使用验证后的表单输入</a></li>
+<li><a href="#working-with-error-messages">使用验证错误信息</a><ul>
+<li><a href="#specifying-custom-messages-in-language-files">在本地化文件中指定自定义消息</a></li>
+<li><a href="#specifying-attribute-in-language-files">在本地化文件中指定属性</a></li>
+<li><a href="#specifying-values-in-language-files">在本地化文件中指定值</a></li>
 </ul>
 </li>
 <li><a href="#available-validation-rules">可用的验证规则</a></li>
 <li><a href="#conditionally-adding-rules">按条件添加验证规则</a></li>
-<li><a href="#validating-arrays">数组的验证</a><ul>
-<li><a href="#validating-nested-array-input">验证多维数组字段</a></li>
+<li><a href="#validating-arrays">验证数组</a><ul>
+<li><a href="#validating-nested-array-input">验证多维数组</a></li>
+<li><a href="#error-message-indexes-and-positions">错误消息的索引和定位</a></li>
 </ul>
 </li>
-<li><a href="#validating-passwords">密码的验证</a></li>
+<li><a href="#validating-files">验证文件</a></li>
+<li><a href="#validating-passwords">验证密码</a></li>
 <li><a href="#custom-validation-rules">自定义验证规则</a><ul>
-<li><a href="#using-rule-objects">使用规则类</a></li>
-<li><a href="#using-closures">使用闭包</a></li>
+<li><a href="#using-rule-objects">使用 Rule 对象</a></li>
+<li><a href="#using-closures">使用闭包函数</a></li>
 <li><a href="#implicit-rules">隐式规则</a></li>
 </ul>
 </li>
 </ul>
 <p><a name="introduction"></a></p>
 <h2 id="简介">简介</h2>
-<p>Laravel 提供了几种不同的方法来验证传入应用程序的数据。最常见的做法是在所有传入的 HTTP 请求中使用 <code>validate</code> 方法。但是，我们还将讨论其他验证方法。</p>
+<p>Laravel 提供了几种不同的方法来验证传入应用程序的数据。最常见的做法是在所有传入的 HTTP 请求中使用 <code>validate</code> 方法。同时，我们还将讨论其他验证方法。</p>
 <p>Laravel 包含了各种方便的验证规则，你可以将它们应用于数据，甚至可以验证给定数据库表中的值是否唯一。我们将详细介绍每个验证规则，以便你熟悉 Laravel 的所有验证功能。</p>
 <p><a name="validation-quickstart"></a></p>
-<h2 id="快速验证">快速验证</h2>
+<h2 id="快速开始">快速开始</h2>
 <p>为了了解 Laravel 强大的验证功能，我们来看一个表单验证并将错误消息展示给用户的完整示例。通过阅读概述，这将会对你如何使用 Laravel 验证传入的请求数据有一个很好的理解：</p>
 <p><a name="quick-defining-the-routes"></a></p>
 <h3 id="定义路由">定义路由</h3>
-<p>首先，假设我们在 <code>routes/web.php</code> 路由文件中定义了下面这些路由：</p>
-<pre><code><span class="keyword token">use</span> App\Http\Controllers\PostController;
-
+<p>首先，假设我们在 <code>routes/web.php</code> 路由文件中定义了下面这些路由：</p>
+<pre><code><span class="keyword token">use</span> App\Http\Controllers\PostController;&nbsp;
 Route::get(<span class="string token">'/post/create'</span>, [PostController::<span class="keyword token">class</span>, <span class="string token">'create'</span>]);
 Route::post(<span class="string token">'/post'</span>, [PostController::<span class="keyword token">class</span>, <span class="string token">'store'</span>]);
 </code></pre>
-<p><code>GET</code> 路由会显示一个供用户创建新博客文章的表单，而 <code>POST</code> 路由会将新的博客文章存储到数据库中。</p>
+<p><code>GET</code> 路由会显示一个供用户创建新博客文章的表单，而 <code>POST</code> 路由会将新的博客文章存储到数据库中。</p>
 <p><a name="quick-creating-the-controller"></a></p>
 <h3 id="创建控制器">创建控制器</h3>
 <p>接下来，让我们一起来看看处理这些路由的简单控制器。我们暂时留空了 store 方法：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
-
+ 
 <span class="keyword token">use</span> App\Http\Controllers\Controller;
+<span class="keyword token">use</span> Illuminate\Http\RedirectResponse;
 <span class="keyword token">use</span> Illuminate\Http\Request;
-
+<span class="keyword token">use</span> Illuminate\View\View;
+ 
 <span class="keyword token">class</span> PostController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 显示创建博客文章的表单。
-     *
-     *<span class="phpdoc token"> @return</span> \Illuminate\View\View
+     * 博客的表单视图
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> create()
+    <span class="keyword token">public</span> <span class="keyword token">function</span> create(): View
     {
         <span class="keyword token">return</span> view(<span class="string token">'post.create'</span>);
     }
-
+ 
     <span class="comment token">/**
-     * 存储一篇新的博客文章。
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
-     *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
+     * 存储博客的 Action
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>): RedirectResponse
     {
-        <span class="comment token">// Validate and store the blog post...</span>
+        <span class="comment token">// 验证并且执行存储逻辑</span>
+ 
+        <span class="variable token">$post</span> = <span class="comment token">/** ... */</span>
+ 
+        <span class="keyword token">return</span> to_route(<span class="string token">'post.show'</span>, [<span class="string token">'post'</span> =&gt; <span class="variable token">$post</span>-&gt;id]);
     }
 }
 </code></pre>
 <p><a name="quick-writing-the-validation-logic"></a></p>
 <h3 id="编写验证逻辑">编写验证逻辑</h3>
-<p>现在我们开始在 <code>store</code> 方法中编写用来验证新的博客文章的逻辑代码。为此，我们将使用 <code>Illuminate\Http\Request</code> 类提供的 <code>validate</code> 方法。如果验证通过，你的代码会继续正常运行。如果验证失败，则会抛出<code>Illuminate\Validation\ValidationException</code>异常，并自动将对应的错误响应返回给用户。</p>
+<p>现在我们开始在 <code>store</code> 方法中编写用来验证新的博客文章的逻辑代码。为此，我们将使用 <code>Illuminate\Http\Request</code> 类提供的 <code>validate</code> 方法。如果验证通过，你的代码会继续正常运行。如果验证失败，则会抛出 <code>Illuminate\Validation\ValidationException</code> 异常，并自动将对应的错误响应返回给用户。</p>
 <p>如果在传统 HTTP 请求期间验证失败，则会生成对先前 URL 的重定向响应。如果传入的请求是 XHR，将将返回包含验证错误信息的 JSON 响应。</p>
-<p>为了深入理解 <code>validate</code> 方法，让我们接着回到 <code>store</code> 方法中：</p>
+<p>为了深入理解 <code>validate</code>  方法，让我们接着回到 <code>store</code> 方法中：</p>
 <pre><code><span class="comment token">/**
  * 存储一篇新的博客文章。
- *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Http\Request  $request
- *<span class="phpdoc token"> @return</span> \Illuminate\Http\Response
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>): RedirectResponse
 {
     <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;validate([
         <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
@@ -133,16 +133,18 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
     ]);
 
     <span class="comment token">// 博客文章验证通过...</span>
+
+    <span class="keyword token">return</span> redirect(<span class="string token">'/posts'</span>);
 }
 </code></pre>
-<p>如您所见，验证规则被传递到 <code>validate</code> 方法中。不用担心 - 所有可用的验证规则均已<a href="#available-validation-rules">记录在案</a>。另外再提醒一次，如果验证失败，会自动生成一个对应的响应。如果验证通过，那我们的控制器会继续正常运行。
-或者，验证规则可以使用数组而不是单个 <code>|</code> 分隔的字符串：</p>
+<p>如你所见，验证规则被传递到 <code>validate</code> 方法中。不用担心——所有可用的验证规则均已 <a href="#available-validation-rules">存档</a>。 另外再提醒一次，如果验证失败，会自动生成一个对应的响应。如果验证通过，那我们的控制器会继续正常运行。</p>
+<p>另外，验证规则可以使用数组，而不是单个 <code>|</code> 分隔的字符串：</p>
 <pre><code><span class="variable token">$validatedData</span> = <span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'title'</span> =&gt; [<span class="string token">'required'</span>, <span class="string token">'unique:posts'</span>, <span class="string token">'max:255'</span>],
     <span class="string token">'body'</span> =&gt; [<span class="string token">'required'</span>],
 ]);
 </code></pre>
-<p>另外，你可以使用 <code>validateWithBag</code> 方法来验证请求，并将所有错误信息储存在一个<a href="#named-error-bags">命名错误信息包</a>：</p>
+<p>此外，你可以使用 <code>validateWithBag</code> 方法来验证请求，并将所有错误信息储存在一个 <a href="#named-error-bags">命名错误信息包</a>：</p>
 <pre><code><span class="variable token">$validatedData</span> = <span class="variable token">$request</span>-&gt;validateWithBag(<span class="string token">'post'</span>, [
     <span class="string token">'title'</span> =&gt; [<span class="string token">'required'</span>, <span class="string token">'unique:posts'</span>, <span class="string token">'max:255'</span>],
     <span class="string token">'body'</span> =&gt; [<span class="string token">'required'</span>],
@@ -150,23 +152,23 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="stopping-on-first-validation-failure"></a></p>
 <h4 id="在首次验证失败时停止运行">在首次验证失败时停止运行</h4>
-<p>有时候我们希望某个字段在第一次验证失败后就停止运行验证规则，只需要将 <code>bail</code> 添加到规则中</p>
+<p>有时候我们希望某个字段在第一次验证失败后就停止运行验证规则，只需要将 <code>bail</code> 添加到规则中：</p>
 <pre><code><span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'title'</span> =&gt; <span class="string token">'bail|required|unique:posts|max:255'</span>,
     <span class="string token">'body'</span> =&gt; <span class="string token">'required'</span>,
 ]);
 </code></pre>
-<p>在这个例子中，如果 <code>title</code> 字段没有通过 <code>unique</code> 规则，那么不会继续验证 <code>max</code> 规则。规则会按照分配时的顺序来验证。</p>
+<p>在这个例子中，如果 <code>title</code> 字段没有通过 <code>unique</code> 规则，那么不会继续验证 <code>max</code> 规则。规则会按照分配时的顺序来验证。</p>
 <p><a name="a-note-on-nested-attributes"></a></p>
 <h4 id="嵌套字段的说明">嵌套字段的说明</h4>
-<p>如果你的 HTTP 请求包含「嵌套」参数，你可以在验证规则中使用 <code>.</code> 语法来指定这些参数：</p>
+<p>如果传入的 HTTP 请求包含「嵌套」参数，你可以在验证规则中使用<code>.</code>语法来指定这些参数：</p>
 <pre><code><span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
     <span class="string token">'author.name'</span> =&gt; <span class="string token">'required'</span>,
     <span class="string token">'author.description'</span> =&gt; <span class="string token">'required'</span>,
 ]);
 </code></pre>
-<p>另外，如果你的字段名称包含点，则可以通过使用反斜杠将点转义，以防止将其解释为 <code>.</code> 语法：</p>
+<p>另外，如果你的字段名称包含点，则可以通过使用反斜杠将点转义，以防止将其解释为<code>.</code>语法：</p>
 <pre><code><span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
     <span class="string token">'v1\.0'</span> =&gt; <span class="string token">'required'</span>,
@@ -174,9 +176,9 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="quick-displaying-the-validation-errors"></a></p>
 <h3 id="显示验证错误信息">显示验证错误信息</h3>
-<p>那么，如果传入的请求参数未通过给定的验证规则呢？正如前面所提到的，Laravel 会自动将用户重定向到之前的位置。另外，所有的验证错误信息和 <a href="requests.html#retrieving-old-input">请求输入</a> 都将自动存储到 <a href="session.html#flash-data">闪存 session</a> 中。</p>
-<p><code>Illuminate\View\Middleware\ShareErrorsFromSession</code> 中间件与应用程序的所有视图共享一个 <code>$errors</code> 变量，该变量由 <code>web</code> 中间件组提供。当应用该中间件时，<code>$errors</code> 变量在你的视图中始终可用，从而使你可以方便地假定 <code>$errors</code> 变量始终被定义并且可以安全地使用。<code>$errors</code> 变量是<code>Illuminate\Support\MessageBag</code> 的一个实例。有关使用此对象的更多信息，请 <a href="#working-with-error-messages">参阅这篇文档</a>。</p>
-<p>所以，在如下的例子中，当表单验证失败时，用户将被重定向到控制器的 <code>create</code> 方法中，我们可在视图中显示错误信息：</p>
+<p>那么，如果传入的请求字段没有通过验证规则呢？如前所述，Laravel 会自动将用户重定向到之前的位置。此外，所有的验证错误和<a href="/docs/laravel/10.x/requests#retrieving-old-input">请求输入</a>都会自动存入到<a href="/docs/laravel/10.x/session#flash-data">闪存 session</a> 中。</p>
+<p><code>Illuminate\View\Middleware\ShareErrorsFromSession</code>中间件与应用程序的所有视图共享一个<code>$errors</code>变量，该变量由<code>web</code>中间件组提供。当应用该中间件时，<code>$errors</code> 变量始终在视图中可用，<code>$errors</code> 变量是 <code>Illuminate\Support\MessageBag</code> 的实例。更多有关使用该对象的信息，<a href="#working-with-error-messages">查看文档</a></p>
+<p>因此，在实例中，当验证失败时，用户将重定向到控制器<code>create</code>方法，从而在视图中显示错误消息：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/post/create.blade.php --&gt;
 
 &lt;h1&gt;Create Post&lt;/h1&gt;
@@ -194,15 +196,19 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 &lt;!-- Create Post Form --&gt;
 </code></pre>
 <p><a name="quick-customizing-the-error-messages"></a></p>
-<h4 id="自定义错误消息">自定义错误消息</h4>
-<p>Laravel 的内置验证规则每个都有一条错误消息，位于应用程序的 <code>lang/en/validation.php</code> 文件中。在此文件中，你将找到每个验证规则的翻译条目。你可以根据应用程序的需求随意更改或修改这些消息。</p>
-<p>此外，你可以将此文件复制到另一个翻译语言的目录中，以翻译应用程序语言的消息。要了解有关 Laravel 本地化的更多信息，请查看完整的 <a href="localization.html">本地化文档</a>。</p>
+<h4 id="在语言文件中指定自定义消息">在语言文件中指定自定义消息</h4>
+<p>Laravel 的内置验证规则每个都对应一个错误消息，位于应用程序的<code>lang/en/validation.php</code>文件中。在此文件中，你将找到每个验证规则的翻译条目。你可以根据应用程序的需求随意更改或修改这些消息。</p>
+<p>此外，你可以将此文件复制到另一个翻译语言目录中，以翻译应用程序语言的消息。要了解有关 Laravel 本地化的更多信息，请查看完整的<a href="/docs/laravel/10.x/localization">本地化文档</a>.</p>
+<blockquote>
+<p><strong>注意</strong>
+默认，Laravel 应用程序框架不包括<code>lang</code>目录。如果你想自定义 Laravel 的语言文件，你可以通过<code>lang:publish</code> Artisan 命令发布它们。</p>
+</blockquote>
 <p><a name="quick-xhr-requests-and-validation"></a></p>
 <h4 id="xhr-请求--验证">XHR 请求 &amp; 验证</h4>
-<p>在如下示例中，我们使用传统形式将数据发送到应用程序。但是，许多应用程序从 JavaScript 驱动的前端接收 XHR 请求。在 XHR 请求期间使用 <code>validate</code> 方法时，Laravel 将不会生成重定向响应。相反，Laravel 会生成一个包含所有验证错误的 JSON 响应。该 JSON 响应将以 <code>422</code> HTTP 状态码发送。</p>
+<p>在如下示例中，我们使用传统形式将数据发送到应用程序。但是，许多应用程序从 JavaScript 驱动的前端接收 XHR 请求。在 XHR 请求期间使用<code>validate</code>方法时，Laravel 将不会生成重定向响应。相反，Laravel生成一个<a href="#validation-error-response-format">包含所有验证错误的 JSON 响应</a>。该 JSON 响应将以 422 HTTP 状态码发送。</p>
 <p><a name="the-at-error-directive"></a></p>
-<h4 id="error-指令"><code>@error</code> 指令</h4>
-<p>你亦可使用 <code>@error</code> <a href="blade.html">Blade</a> 指令方便地检查给定的属性是否存在验证错误信息。在 <code>@error</code> 指令中，你可以输出 <code>$message</code> 变量以显示错误信息：</p>
+<h4 id="error指令"><code>@error</code>指令</h4>
+<p>你亦可使用 <code>@error</code> <a href="/docs/laravel/10.x/blade">Blade</a> 指令方便地检查给定的属性是否存在验证错误信息。在<code>@error</code>指令中，你可以输出<code>$message</code>变量以显示错误信息：</p>
 <pre><code class="language-blade">&lt;!-- /resources/views/post/create.blade.php --&gt;
 
 &lt;label <span class="keyword token">for</span>=<span class="string token">"title"</span>&gt;Post Title&lt;/label&gt;
@@ -216,43 +222,66 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
     &lt;div <span class="keyword token">class</span>=<span class="string token">"alert alert-danger"</span>&gt;{{ <span class="variable token">$message</span> }}&lt;/div&gt;
 @enderror
 </code></pre>
-<p>如果您使用 <a href="#named-error-bags">命名错误包</a>，您可以将错误包的名称作为第二个参数传递给 <code>@error</code> 指令：</p>
+<p>如果你使用<a href="#named-error-bags">命名错误包</a>，你可以将错误包的名称作为第二个参数传递给<code>@error</code>指令：</p>
 <pre><code class="language-blade">&lt;input ... <span class="keyword token">class</span>=<span class="string token">"@error('title', 'post') is-invalid @enderror"</span>&gt;
 </code></pre>
 <p><a name="repopulating-forms"></a></p>
 <h3 id="回填表单">回填表单</h3>
-<p>当 Laravel 由于验证错误而生成重定向响应时，框架将自动 <a href="session.html#flash-data">将所有请求的输入闪存到 session 中</a>。这样做是为了方便你在下一个请求期间访问输入，并重新填充用户尝试提交的表单。</p>
-<p>要从先前的请求中检索闪存的输入，请在 <code>Illuminate\Http\Request</code> 的实例上调用 <code>old</code> 方法。 <code>old</code> 方法将从 <a href="session.html">session</a> 中提取先前闪存的输入数据：</p>
+<p>当 Laravel 由于验证错误而生成重定向响应时，框架将自动<a href="/docs/laravel/10.x/session#flash-data">将所有请求的输入闪存到 session 中</a>。这样做是为了方便你在下一个请求期间访问输入，并重新填充用户尝试提交的表单。</p>
+<p>要从先前的请求中检索闪存的输入，请在 <code>Illuminate\Http\Request</code>的实例上调用<code>old</code>方法。 <code>old</code>方法将从 <a href="/docs/laravel/10.x/session">session</a> 中提取先前闪存的输入数据：</p>
 <pre><code><span class="variable token">$title</span> = <span class="variable token">$request</span>-&gt;old(<span class="string token">'title'</span>);
 </code></pre>
-<p>Laravel 还提供了一个全局性的 <code>old</code>。如果要在 <a href="blade.html">Blade 模板</a> 中显示旧输入，则使用 <code>old</code> 来重新填充表单会更加方便。如果给定字段不存在旧输入，则将返回 <code>null</code>：</p>
+<p>Laravel 还提供了一个全局性的<code>old</code>。如果要在 <a href="/docs/laravel/10.x/blade">Blade 模板</a>, 中显示旧输入，则使用<code>old</code>来重新填充表单会更加方便。如果给定字段不存在旧输入，则将返回<code>null</code>：</p>
 <pre><code class="language-blade">&lt;input type="text" name="title" value="{{ old('title') }}"&gt;
 </code></pre>
 <p><a name="a-note-on-optional-fields"></a></p>
 <h3 id="关于可选字段的注意事项">关于可选字段的注意事项</h3>
-<p>默认情况下， 在您的 Laravel 应用的全局中间件堆栈 <code>App\Http\Kernel</code> 类中包含了 <code>TrimStrings</code> 和 <code>ConvertEmptyStringsToNull</code> 中间件。因此，如果你不想让 <code>null</code> 被验证器标识为非法的话，你需要将「可选」字段标志为 <code>nullable</code>。例如：</p>
+<p>默认情况下， 在你的 Laravel 应用的全局中间件堆栈<code>App\Http\Kernel</code>类中包含了<code>TrimStrings</code>和<code>ConvertEmptyStringsToNull</code>中间件。因此，如果你不想让<code>null</code>被验证器标识为非法的话，你需要将「可选」字段标志为<code>nullable</code>。例如：</p>
 <pre><code><span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
     <span class="string token">'body'</span> =&gt; <span class="string token">'required'</span>,
     <span class="string token">'publish_at'</span> =&gt; <span class="string token">'nullable|date'</span>,
 ]);
 </code></pre>
-<p>在上述例子中，我们指定了 <code>publish_at</code> 字段可以是<code>null</code>的或者是一个有效的日期格式。如果 <code>nullable</code> 修饰词没有被添加到规则定义中，验证器会将 <code>null</code> 视为无效的日期格式。</p>
+<p>在此示例中，我们指定 <code>publish_at</code> 字段可以为 <code>null</code> 或有效的日期表示。如果没有将 <code>nullable</code> 修饰符添加到规则定义中，则验证器会将 <code>null</code> 视为无效日期。</p>
+<p><a name="validation-error-response-format"></a></p>
+<h3 id="验证错误响应格式">验证错误响应格式</h3>
+<p>当您的应用程序抛出 <code>Illuminate\Validation\ValidationException</code> 异常，并且传入的 HTTP 请求希望返回 JSON 响应时，Laravel 将自动为您格式化错误消息，并返回 <code>422 Unprocessable Entity</code> HTTP 响应。</p>
+<p>下面是验证错误的 JSON 响应格式示例。请注意，嵌套的错误键会被转换为“点”符号格式：</p>
+<pre><code class="language-json">{
+    &quot;message&quot;: &quot;The team name must be a string. (and 4 more errors)&quot;,
+    &quot;errors&quot;: {
+        &quot;team_name&quot;: [
+            &quot;The team name must be a string.&quot;,
+            &quot;The team name must be at least 1 characters.&quot;
+        ],
+        &quot;authorization.role&quot;: [
+            &quot;The selected authorization.role is invalid.&quot;
+        ],
+        &quot;users.0.email&quot;: [
+            &quot;The users.0.email field is required.&quot;
+        ],
+        &quot;users.2.email&quot;: [
+            &quot;The users.2.email must be a valid email address.&quot;
+        ]
+    }
+}
+</code></pre>
 <p><a name="form-request-validation"></a></p>
-<h2 id="验证表单请求">验证表单请求</h2>
+<h2 id="表单请求验证">表单请求验证</h2>
 <p><a name="creating-form-requests"></a></p>
-<h3 id="创建表单请求验证">创建表单请求验证</h3>
-<p>面对更复杂的验证场景，您可以创建一个「表单请求」。表单请求是一个包含了验证逻辑的自定义请求类。要创建一个表单请求类，请使用 <code>make:request</code> Artisan CLI 命令：</p>
+<h3 id="创建表单请求">创建表单请求</h3>
+<p>对于更复杂的验证场景，您可能希望创建一个“表单请求”。表单请求是自定义请求类，封装了自己的验证和授权逻辑。要创建一个表单请求类，您可以使用 <code>make:request</code> Artisan CLI 命令：</p>
 <pre><code class="language-shell">php artisan make:request StorePostRequest
 </code></pre>
-<p>该命令生成的表单请求类将被置于 <code>app/Http/Requests</code> 目录中。如果这个目录不存在，在您运行 <code>make:request</code> 命令后将会创建这个目录。Laravel 生成的每个表单请求都有两个方法：<code>authorize</code> 和 <code>rules</code>。</p>
-<p>正如您可能已经猜到的那样，<code>authorize</code> 方法负责确定当前经过身份验证的用户是否可以执行请求操作，而 <code>rules</code> 方法则返回适用于请求数据的验证规则：</p>
+<p>生成的表单请求类将被放置在 <code>app/Http/Requests</code> 目录中。如果此目录不存在，则在运行 <code>make:request</code> 命令时将创建该目录。Laravel 生成的每个表单请求都有两个方法：<code>authorize</code> 和 <code>rules</code>。</p>
+<p>你可能已经猜到了，<code>authorize</code> 方法负责确定当前已认证用户是否可以执行请求所代表的操作，而 <code>rules</code> 方法返回应用于请求数据的验证规则：</p>
 <pre><code><span class="comment token">/**
- * 获取应用于该请求的验证规则。
+ * 获取应用于请求的验证规则。
  *
- *<span class="phpdoc token"> @return</span> array
+ *<span class="phpdoc token"> @return</span> array&lt;string, \Illuminate\Contracts\Validation\Rule|array|string&gt;
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> rules()
+<span class="keyword token">public</span> <span class="keyword token">function</span> rules(): <span class="keyword token">array</span>
 {
     <span class="keyword token">return</span> [
         <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
@@ -261,40 +290,41 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 }
 </code></pre>
 <blockquote>
-<p>技巧：你可以向 <code>rules</code> 方法传入所需的任何依赖项。它们将被 Laravel <a href="container.html">服务容器</a> 自动解析。</p>
+<p><strong>注意</strong>
+你可以在 <code>rules</code> 方法的签名中指定任何你需要的依赖项类型提示。它们将通过 Laravel 的 <a href="/docs/laravel/10.x/container">服务容器</a> 自动解析。</p>
 </blockquote>
-<p>所以，验证规则是如何运行的呢？您所需要做的就是在控制器方法中类型提示传入的请求。在调用控制器方法之前验证传入的表单请求，这意味着您不需要在控制器中写任何验证逻辑：</p>
+<p>那么，验证规则是如何被评估的呢？你只需要在控制器方法中对请求进行类型提示。在调用控制器方法之前，传入的表单请求将被验证，这意味着你不需要在控制器中添加任何验证逻辑：</p>
 <pre><code><span class="comment token">/**
- * 存储新的博客文章。
- *
- *<span class="phpdoc token"> @param</span>  \App\Http\Requests\StorePostRequest  $request
- *<span class="phpdoc token"> @return</span> Illuminate\Http\Response
+ * 存储新博客文章。
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> store(StorePostRequest <span class="variable token">$request</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> store(StorePostRequest <span class="variable token">$request</span>): RedirectResponse
 {
-    <span class="comment token">// 传入的请求通过验证...</span>
+    <span class="comment token">// 传入的请求有效...</span>
 
-    <span class="comment token">// 获取通过验证的数据...</span>
+    <span class="comment token">// 检索已验证的输入数据...</span>
     <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;validated();
 
-    <span class="comment token">// 获取部分通过验证的数据...</span>
+    <span class="comment token">// Retrieve a portion of the validated input data...</span>
     <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;only([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
     <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;except([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
+
+    <span class="comment token">// 存储博客文章...</span>
+
+    <span class="keyword token">return</span> redirect(<span class="string token">'/posts'</span>);
 }
 </code></pre>
-<p>如果验证失败，就会生成一个让用户返回到先前位置的重定向响应。这些错误也会被闪存到 session 中，以便这些错误都可以在页面中显示出来。如果传入的请求是 XHR，会向用户返回具有 422 状态代码和验证错误信息的 JSON 数据的 HTTP 响应。</p>
+<p>如果验证失败，将生成重定向响应以将用户发送回其先前的位置。错误也将被闪存到会话中，以便进行显示。如果请求是 XHR 请求，则会向用户返回带有 422 状态代码的 HTTP 响应，其中包含<a href="#validation-error-response-format">JSON 格式的验证错误表示</a>。</p>
 <p><a name="adding-after-hooks-to-form-requests"></a></p>
 <h4 id="在表单请求后添加钩子">在表单请求后添加钩子</h4>
 <p>如果您想在表单请求「之后」添加验证钩子，可以使用 <code>withValidator</code> 方法。这个方法接收一个完整的验证构造器，允许你在验证结果返回之前调用任何方法：</p>
-<pre><code><span class="comment token">/**
+<pre><code><span class="keyword token">use</span> Illuminate\Validation\Validator;
+
+<span class="comment token">/**
  * 配置验证实例。
- *
- *<span class="phpdoc token"> @param</span>  \Illuminate\Validation\Validator  $validator
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> withValidator(<span class="variable token">$validator</span>)
+<span class="keyword token">public</span> <span class="keyword token">function</span> withValidator(Validator <span class="variable token">$validator</span>): void
 {
-    <span class="variable token">$validator</span>-&gt;after(<span class="keyword token">function</span> (<span class="variable token">$validator</span>) {
+    <span class="variable token">$validator</span>-&gt;after(<span class="keyword token">function</span> (Validator <span class="variable token">$validator</span>) {
         <span class="keyword token">if</span> (<span class="variable token">$this</span>-&gt;somethingElseIsInvalid()) {
             <span class="variable token">$validator</span>-&gt;errors()-&gt;add(<span class="string token">'field'</span>, <span class="string token">'Something is wrong with this field!'</span>);
         }
@@ -303,7 +333,7 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="request-stopping-on-first-validation-rule-failure"></a></p>
 <h4 id="单个验证规则失败后停止">单个验证规则失败后停止</h4>
-<p>通过向您的请求类添加 <code>stopOnFirstFailure</code> 属性，您可以通知验证器一旦发生单个验证失败后，停止验证所有规则。</p>
+<p>通过向您的请求类添加 <code>stopOnFirstFailure</code> 属性，您可以通知验证器一旦发生单个验证失败后，停止验证所有规则。</p>
 <pre><code><span class="comment token">/**
  * 表示验证器是否应在第一个规则失败时停止。
  *
@@ -313,7 +343,7 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="customizing-the-redirect-location"></a></p>
 <h4 id="自定义重定向">自定义重定向</h4>
-<p>如前所述，当表单请求验证失败时，将会生成一个让用户返回到先前位置的重定向响应。当然，您也可以自由定义此行为。如果您要这样做，可以在表单请求中定义一个 <code>$redirect</code> 属性：</p>
+<p>如前所述，当表单请求验证失败时，将会生成一个让用户返回到先前位置的重定向响应。当然，您也可以自由定义此行为。如果您要这样做，可以在表单请求中定义一个 <code>$redirect</code> 属性：</p>
 <pre><code><span class="comment token">/**
  * 如果验证失败，用户应重定向到的 URI。
  *
@@ -321,7 +351,7 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
  */</span>
 <span class="keyword token">protected</span> <span class="variable token">$redirect</span> = <span class="string token">'/dashboard'</span>;
 </code></pre>
-<p>或者，如果你想将用户重定向到一个命名路由，你可以定义一个 <code>$redirectRoute</code> 属性来代替：</p>
+<p>或者，如果你想将用户重定向到一个命名路由，你可以定义一个 <code>$redirectRoute</code> 属性来代替：</p>
 <pre><code><span class="comment token">/**
  * 如果验证失败，用户应该重定向到的路由。
  *
@@ -331,15 +361,13 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="authorizing-form-requests"></a></p>
 <h3 id="表单请求授权验证">表单请求授权验证</h3>
-<p>表单请求类内也包含了 <code>authorize</code> 方法。在这个方法中，您可以检查经过身份验证的用户确定其是否具有更新给定资源的权限。例如，您可以判断用户是否拥有更新文章评论的权限。最有可能的是，您将通过以下方法与你的 <a href="authorization.html">授权与策略</a> 进行交互：</p>
+<p>表单请求类内也包含了 <code>authorize</code> 方法。在这个方法中，您可以检查经过身份验证的用户确定其是否具有更新给定资源的权限。例如，您可以判断用户是否拥有更新文章评论的权限。最有可能的是，您将通过以下方法与你的 <a href="/docs/laravel/10.x/authorization">授权与策略</a> 进行交互：</p>
 <pre><code><span class="keyword token">use</span> App\Models\Comment;
 
 <span class="comment token">/**
  * 确定用户是否有请求权限。
- *
- *<span class="phpdoc token"> @return</span> bool
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> authorize()
+<span class="keyword token">public</span> <span class="keyword token">function</span> authorize(): bool
 {
     <span class="variable token">$comment</span> = Comment::find(<span class="variable token">$this</span>-&gt;route(<span class="string token">'comment'</span>));
 
@@ -349,33 +377,32 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <p>由于所有的表单请求都是继承了 Laravel 中的请求基类，所以我们可以使用 <code>user</code> 方法去获取当前认证登录的用户。同时请注意上述例子中对 <code>route</code> 方法的调用。这个方法允许你在被调用的路由上获取其定义的 URI 参数，譬如下面例子中的 <code>{comment}</code> 参数：</p>
 <pre><code>Route::post(&#39;/comment/{comment}&#39;);
 </code></pre>
-<p>因此，如果您的应用程序正在使用 <a href="routing.html#route-model-binding">路由模型绑定</a>，则可以通过将解析的模型作为请求从而让您的代码更加简洁：</p>
+<p>因此，如果您的应用程序正在使用 <a href="/docs/laravel/10.x/routing#route-model-binding">路由模型绑定</a>，则可以通过将解析的模型作为请求从而让您的代码更加简洁：</p>
 <pre><code><span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;user()-&gt;can(<span class="string token">'update'</span>, <span class="variable token">$this</span>-&gt;comment);
 </code></pre>
 <p>如果 <code>authorize</code> 方法返回 <code>false</code>，则会自动返回一个包含 403 状态码的 HTTP 响应，也不会运行控制器的方法。</p>
-<p>如果您打算在应用程序的其它部分处理请求的授权逻辑，只需从 <code>authorize</code> 方法返回 <code>true</code>：</p>
+<p>如果您打算在应用程序的其它部分处理请求的授权逻辑，只需从 <code>authorize</code> 方法返回 <code>true</code>：</p>
 <pre><code><span class="comment token">/**
  * 判断用户是否有请求权限。
- *
- *<span class="phpdoc token"> @return</span> bool
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> authorize()
+<span class="keyword token">public</span> <span class="keyword token">function</span> authorize(): bool
 {
     <span class="keyword token">return</span> <span class="keyword token">true</span>;
 }
 </code></pre>
 <blockquote>
-<p>技巧：你可以向 <code>authorize</code> 方法传入所需的任何依赖项。它们会自动被 Laravel 提供的 <a href="container.html">服务容器</a> 自动解析。</p>
+<p><strong>注意</strong>
+你可以向 <code>authorize</code> 方法传入所需的任何依赖项。它们会自动被 Laravel 提供的 <a href="/docs/laravel/10.x/container">服务容器</a> 自动解析。</p>
 </blockquote>
 <p><a name="customizing-the-error-messages"></a></p>
-<h3 id="自定义错误消息-1">自定义错误消息</h3>
+<h3 id="自定义错误消息">自定义错误消息</h3>
 <p>你可以通过重写表单请求的 <code>messages</code> 方法来自定义错误消息。此方法应返回属性 / 规则对及其对应错误消息的数组：</p>
 <pre><code><span class="comment token">/**
  * 获取已定义验证规则的错误消息。
  *
- *<span class="phpdoc token"> @return</span> array
+ *<span class="phpdoc token"> @return</span> array&lt;string, string&gt;
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> messages()
+<span class="keyword token">public</span> <span class="keyword token">function</span> messages(): <span class="keyword token">array</span>
 {
     <span class="keyword token">return</span> [
         <span class="string token">'title.required'</span> =&gt; <span class="string token">'A title is required'</span>,
@@ -389,9 +416,9 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <pre><code><span class="comment token">/**
  * 获取验证错误的自定义属性
  *
- *<span class="phpdoc token"> @return</span> array
+ *<span class="phpdoc token"> @return</span> array&lt;string, string&gt;
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> attributes()
+<span class="keyword token">public</span> <span class="keyword token">function</span> attributes(): <span class="keyword token">array</span>
 {
     <span class="keyword token">return</span> [
         <span class="string token">'email'</span> =&gt; <span class="string token">'email address'</span>,
@@ -405,36 +432,43 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 
 <span class="comment token">/**
  * 准备验证数据。
- *
- *<span class="phpdoc token"> @return</span> void
  */</span>
-<span class="keyword token">protected</span> <span class="keyword token">function</span> prepareForValidation()
+<span class="keyword token">protected</span> <span class="keyword token">function</span> prepareForValidation(): void
 {
     <span class="variable token">$this</span>-&gt;merge([
         <span class="string token">'slug'</span> =&gt; Str::slug(<span class="variable token">$this</span>-&gt;slug),
     ]);
 }
 </code></pre>
+<p>同样地，如果您需要在验证完成后对任何请求数据进行规范化，您可以使用 <code>passedValidation</code> 方法：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Str;
+
+<span class="comment token">/**
+ * Handle a passed validation attempt.
+ */</span>
+<span class="keyword token">protected</span> <span class="keyword token">function</span> passedValidation(): void
+{
+    <span class="variable token">$this</span>-&gt;replace([<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor'</span>]);
+}
+</code></pre>
 <p><a name="manually-creating-validators"></a></p>
 <h2 id="手动创建验证器">手动创建验证器</h2>
-<p>如果您不想在请求中使用 <code>validate</code> 方法，您可以使用 <code>Validator</code> <a href="facades.html">门面</a> 手动创建一个验证器实例。门面中的 <code>make</code> 方法将会生成一个新的验证器实例：</p>
+<p>如果您不想在请求上使用 <code>validate</code> 方法，可以使用 <code>Validator</code>  <a href="/laravel/10.x/facades">门面</a> 手动创建一个验证器实例。门面上的 <code>make</code> 方法会生成一个新的验证器实例：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Http\Controllers;
 
 <span class="keyword token">use</span> App\Http\Controllers\Controller;
+<span class="keyword token">use</span> Illuminate\Http\RedirectResponse;
 <span class="keyword token">use</span> Illuminate\Http\Request;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="keyword token">class</span> PostController <span class="keyword token">extends</span> Controller
 {
     <span class="comment token">/**
-     * 存储一篇博客文章。
-     *
-     *<span class="phpdoc token"> @param</span>  Request  $request
-     *<span class="phpdoc token"> @return</span> Response
+     * 存储新的博客文章。
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> store(Request <span class="variable token">$request</span>): RedirectResponse
     {
         <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
             <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
@@ -447,55 +481,57 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
                         -&gt;withInput();
         }
 
-        <span class="comment token">// 获取通过验证的数据...</span>
+        <span class="comment token">// 获取验证后的输入...</span>
         <span class="variable token">$validated</span> = <span class="variable token">$validator</span>-&gt;validated();
 
-        <span class="comment token">// 获取部分通过验证的数据...</span>
+        <span class="comment token">// 获取验证后输入的一部分...</span>
         <span class="variable token">$validated</span> = <span class="variable token">$validator</span>-&gt;safe()-&gt;only([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
         <span class="variable token">$validated</span> = <span class="variable token">$validator</span>-&gt;safe()-&gt;except([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
 
-        <span class="comment token">//存储博客文章...</span>
+        <span class="comment token">// 存储博客文章...</span>
+
+        <span class="keyword token">return</span> redirect(<span class="string token">'/posts'</span>);
     }
 }
 </code></pre>
-<p><code>make</code> 方法中的第一个参数是期望校验的数据。第二个参数是应用到数据上的校验规则。</p>
-<p>如果校验失败，您可以使用 <code>withErrors</code> 方法将错误信息闪存至 session 中。使用该方法时，<code>$errors</code> 会自动与之后的视图共享，您可以很方便将其回显给用户。<code>withErrors</code> 方法接受验证器实例，<code>MessageBag</code> 或是 PHP <code>数组</code>。</p>
+<p>第一个参数传递给<code>make</code>方法的是要验证的数据。第二个参数是一个应用于数据的验证规则的数组。</p>
+<p>在确定请求验证是否失败之后，您可以使用<code>withErrors</code>方法将错误消息闪存到会话中。使用此方法后，<code>$errors</code>变量将自动在重定向后与您的视图共享，从而可以轻松地将其显示回用户。<code>withErrors</code>方法接受验证器、<code>MessageBag</code>或PHP数组。</p>
 <h4 id="单个验证规则失败后停止-1">单个验证规则失败后停止</h4>
-<p><code>stopOnFirstFailure</code> 方法将通知验证器，一旦发生单个验证失败，它应该停止验证所有属性</p>
+<p>通过向您的请求类添加 <code>stopOnFirstFailure</code> 属性，您可以通知验证器一旦发生单个验证失败后，停止验证所有规则。</p>
 <pre><code><span class="keyword token">if</span> (<span class="variable token">$validator</span>-&gt;stopOnFirstFailure()-&gt;fails()) {
     <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="automatic-redirection"></a></p>
 <h3 id="自动重定向">自动重定向</h3>
-<p>如果您想要在手动创建验证器实例的同时，使用请求的 <code>validate</code> 方法的自动重定向功能，那么您可以在现有的验证器实例上调用 <code>validate</code> 方法。如果校验失败，用户将被自动重定向，或在 XHR 请求下，将会返回一个 JSON 响应：</p>
+<p>如果您想手动创建验证器实例，但仍要利用HTTP请求的<code>validate</code>方法提供的自动重定向，可以在现有验证器实例上调用<code>validate</code>方法。如果验证失败，则会自动重定向用户，或者在XHR请求的情况下，将返回一个<a href="#validation-error-response-format">JSON响应</a></p>
 <pre><code>Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
     <span class="string token">'body'</span> =&gt; <span class="string token">'required'</span>,
 ])-&gt;validate();
 </code></pre>
-<p>如果校验失败，您可以使用 <code>validateWithBag</code> 方法将错误信息存储到 <a href="#named-error-bags">命名错误包</a> 中</p>
+<p>如果验证失败，您可以使用<code>validateWithBag</code>方法将错误消息存储在<a href="#named-error-bags">命名错误包</a>中：</p>
 <pre><code>Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'title'</span> =&gt; <span class="string token">'required|unique:posts|max:255'</span>,
     <span class="string token">'body'</span> =&gt; <span class="string token">'required'</span>,
 ])-&gt;validateWithBag(<span class="string token">'post'</span>);
 </code></pre>
 <p><a name="named-error-bags"></a></p>
-<h3 id="命名错误包">命名错误包</h3>
-<p>如果您的一个页面中存在多个表单，您可以为错误的 <code>MessageBag</code> 命名，用于检索指定表单的错误信息。只需将名称作为 <code>withErrors</code> 的第二个参数传递给它：</p>
+<h3 id="命名的错误包">命名的错误包</h3>
+<p>如果您在同一页上有多个表单，您可能希望为包含验证错误的<code>MessageBag</code>命名，以便检索特定表单的错误消息。为此，将名称作为第二个参数传递给<code>withErrors</code>：</p>
 <pre><code><span class="keyword token">return</span> redirect(<span class="string token">'register'</span>)-&gt;withErrors(<span class="variable token">$validator</span>, <span class="string token">'login'</span>);
 </code></pre>
-<p>您可以通过 <code>$errors</code> 变量访问命名后的 <code>MessageBag</code> 实例：</p>
+<p>你可以通过 <code>$errors</code> 变量访问命名后的 <code>MessageBag</code> 实例：</p>
 <pre><code class="language-blade">{{ <span class="variable token">$errors</span>-&gt;login-&gt;first(<span class="string token">'email'</span>) }}
 </code></pre>
 <p><a name="manual-customizing-the-error-messages"></a></p>
-<h3 id="自定义错误消息-2">自定义错误消息</h3>
-<p>如果需要，您可以提供验证程序实例使用的自定义错误消息，而不是 Laravel 提供的默认错误消息。有几种指定自定义消息的方法。首先，您可以将自定义消息作为第三个参数传递给 <code>Validator::make</code> 方法：</p>
+<h3 id="自定义错误消息-1">自定义错误消息</h3>
+<p>如果需要，你可以提供验证程序实例使用的自定义错误消息，而不是 Laravel 提供的默认错误消息。有几种指定自定义消息的方法。首先，您可以将自定义消息作为第三个参数传递给 <code>Validator::make</code> 方法：</p>
 <pre><code><span class="variable token">$validator</span> = Validator::make(<span class="variable token">$input</span>, <span class="variable token">$rules</span>, <span class="variable token">$messages</span> = [
     <span class="string token">'required'</span> =&gt; <span class="string token">'The :attribute field is required.'</span>,
 ]);
 </code></pre>
-<p>在此示例中，<code>:attribute</code> 占位符将被验证中的字段的实际名称替换。您也可以在验证消息中使用其它占位符。例如：</p>
+<p>在此示例中，<code>:attribute</code> 占位符将被验证中的字段的实际名称替换。您也可以在验证消息中使用其它占位符。例如：</p>
 <pre><code><span class="variable token">$messages</span> = [
     <span class="string token">'same'</span> =&gt; <span class="string token">'The :attribute and :other must match.'</span>,
     <span class="string token">'size'</span> =&gt; <span class="string token">'The :attribute must be exactly :size.'</span>,
@@ -505,24 +541,27 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="specifying-a-custom-message-for-a-given-attribute"></a></p>
 <h4 id="为给定属性指定自定义消息">为给定属性指定自定义消息</h4>
-<p>有时您可能希望只为特定属性指定自定义错误消息。您可以使用 <code>.</code> 表示法。首先指定属性名称，然后指定规则：</p>
+<p>有时你可能希望只为特定属性指定自定义错误消息。你可以使用 <code>.</code> 表示法。首先指定属性名称，然后指定规则：</p>
 <pre><code><span class="variable token">$messages</span> = [
     <span class="string token">'email.required'</span> =&gt; <span class="string token">'We need to know your email address!'</span>,
 ];
 </code></pre>
 <p><a name="specifying-custom-attribute-values"></a></p>
 <h4 id="指定自定义属性值">指定自定义属性值</h4>
-<p>Laravel 的许多内置错误消息都包含一个 <code>:attribute</code> 占位符，该占位符已被验证中的字段或属性的名称替换。为了自定义用于替换特定字段的这些占位符的值，你可以将自定义属性的数组作为第四个参数传递给 <code>Validator::make</code> 方法：</p>
+<p>Laravel 的许多内置错误消息都包含一个 <code>:attribute</code> 占位符，该占位符已被验证中的字段或属性的名称替换。为了自定义用于替换特定字段的这些占位符的值，你可以将自定义属性的数组作为第四个参数传递给 <code>Validator::make</code> 方法：</p>
 <pre><code><span class="variable token">$validator</span> = Validator::make(<span class="variable token">$input</span>, <span class="variable token">$rules</span>, <span class="variable token">$messages</span>, [
     <span class="string token">'email'</span> =&gt; <span class="string token">'email address'</span>,
 ]);
 </code></pre>
 <p><a name="after-validation-hook"></a></p>
 <h3 id="验证后钩子">验证后钩子</h3>
-<p>验证器允许您在完成验证操作后执行附加的回调。以便您处理下一步的验证，甚至是往信息集合中添加更多的错误信息。您可以在验证器实例上使用 <code>after</code> 方法实现：</p>
-<pre><code><span class="variable token">$validator</span> = Validator::make(...);
+<p>验证器允许你在完成验证操作后执行附加的回调。以便你处理下一步的验证，甚至是往信息集合中添加更多的错误信息。你可以在验证器实例上使用 <code>after</code> 方法实现：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades;
+<span class="keyword token">use</span> Illuminate\Validation\Validator;
 
-<span class="variable token">$validator</span>-&gt;after(<span class="keyword token">function</span> (<span class="variable token">$validator</span>) {
+<span class="variable token">$validator</span> = Facades\Validator::make(<span class="comment token">/* ... */</span>);
+
+<span class="variable token">$validator</span>-&gt;after(<span class="keyword token">function</span> (Validator <span class="variable token">$validator</span>) {
     <span class="keyword token">if</span> (<span class="variable token">$this</span>-&gt;somethingElseIsInvalid()) {
         <span class="variable token">$validator</span>-&gt;errors()-&gt;add(
             <span class="string token">'field'</span>, <span class="string token">'Something is wrong with this field!'</span>
@@ -531,27 +570,27 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 });
 
 <span class="keyword token">if</span> (<span class="variable token">$validator</span>-&gt;fails()) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="working-with-validated-input"></a></p>
 <h2 id="处理验证字段">处理验证字段</h2>
-<p>在使用表单请求或手动创建的验证器实例验证传入请求数据后，您可能希望检索经过验证的请求数据。 这可以通过多种方式实现。 首先，您可以在表单请求或验证器实例上调用 <code>validated</code> 方法。 此方法返回已验证的数据数组：</p>
+<p>在使用表单请求或手动创建的验证器实例验证传入请求数据后，你可能希望检索经过验证的请求数据。 这可以通过多种方式实现。 首先，你可以在表单请求或验证器实例上调用 <code>validated</code> 方法。 此方法返回已验证的数据数组：</p>
 <pre><code><span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;validated();
 
 <span class="variable token">$validated</span> = <span class="variable token">$validator</span>-&gt;validated();
 </code></pre>
-<p>或者，您可以在表单请求或验证器实例上调用 <code>safe</code> 方法。 此方法返回一个 <code>Illuminate\Support\ValidatedInput</code> 的实例。 该实例对象包含 <code>only</code>、<code>except</code> 和 <code>all</code> 方法来检索已验证数据的子集或整个已验证数据数组：</p>
+<p>或者，你可以在表单请求或验证器实例上调用 <code>safe</code> 方法。 此方法返回一个 <code>Illuminate\Support\ValidatedInput</code>的实例。 该实例对象包含 <code>only</code>、<code>except</code> 和 <code>all</code> 方法来检索已验证数据的子集或整个已验证数据数组：</p>
 <pre><code><span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;only([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
 
 <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;except([<span class="string token">'name'</span>, <span class="string token">'email'</span>]);
 
 <span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;all();
 </code></pre>
-<p>此外，<code>Illuminate\Support\ValidatedInput</code> 实例可以像数组一样被迭代和访问：</p>
+<p>此外， <code>Illuminate\Support\ValidatedInput</code> 实例可以像数组一样被迭代和访问：</p>
 <pre><code><span class="comment token">// 迭代验证数据...</span>
 <span class="keyword token">foreach</span> (<span class="variable token">$request</span>-&gt;safe() <span class="keyword token">as</span> <span class="variable token">$key</span> =&gt; <span class="variable token">$value</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 
 <span class="comment token">// 访问验证数据数组...</span>
@@ -559,55 +598,59 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 
 <span class="variable token">$email</span> = <span class="variable token">$validated</span>[<span class="string token">'email'</span>];
 </code></pre>
-<p>如果您想向已验证的数据添加其它字段，您可以调用 <code>merge</code> 方法：</p>
+<p><code>merge</code> 方法可以给验证过的数据添加额外的字段：</p>
 <pre><code><span class="variable token">$validated</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;merge([<span class="string token">'name'</span> =&gt; <span class="string token">'Taylor Otwell'</span>]);
 </code></pre>
-<p>如果您想将经过验证的数据作为 <a href="collections.html">collection</a> 实例检索，您可以调用 <code>collect</code> 方法：</p>
+<p><code>collect</code> 方法以 <a href="/docs/laravel/10.x/collections">collection</a> 实例的形式来检索验证的数据：</p>
 <pre><code><span class="variable token">$collection</span> = <span class="variable token">$request</span>-&gt;safe()-&gt;collect();
 </code></pre>
 <p><a name="working-with-error-messages"></a></p>
-<h2 id="处理错误信息">处理错误信息</h2>
-<p>通过 <code>Validator</code> 实例调用 <code>errors</code> 方法，它会返回一个 <code>Illuminate\Support\MessageBag</code> 实例，该实例包含了各种可以很方便地处理错误信息的方法。并自动给所有视图提供 <code>$errors</code> 变量，也是 <code>MessageBag</code> 类的一个实例。</p>
+<h2 id="使用错误消息">使用错误消息</h2>
+<p>在调用 <code>Validator</code> 实例的 <code>errors</code> 方法后，会收到一个 <code>Illuminate\Support\MessageBag</code> 实例，用于处理错误信息。自动提供给所有视图的 <code>$errors</code> 变量也是 <code>MessageBag</code> 类的一个实例。</p>
 <p><a name="retrieving-the-first-error-message-for-a-field"></a></p>
-<h4 id="检索特定字段的第一个错误信息">检索特定字段的第一个错误信息</h4>
-<p>您可以使用 <code>first</code> 方法检索给定字段的第一个错误信息：</p>
+<h4 id="检索字段的第一条错误消息">检索字段的第一条错误消息</h4>
+<p><code>first</code> 方法返回给定字段的第一条错误信息：</p>
 <pre><code><span class="variable token">$errors</span> = <span class="variable token">$validator</span>-&gt;errors();
 
 <span class="keyword token">echo</span> <span class="variable token">$errors</span>-&gt;first(<span class="string token">'email'</span>);
 </code></pre>
 <p><a name="retrieving-all-error-messages-for-a-field"></a></p>
-<h4 id="检索特定字段的所有错误信息">检索特定字段的所有错误信息</h4>
-<p>您可以使用 <code>get</code> 方法检索给定字段所有信息的数组：</p>
+<h4 id="检索一个字段的所有错误信息">检索一个字段的所有错误信息</h4>
+<p><code>get</code> 方法用于检索一个给定字段的所有错误信息，返回值类型为数组：</p>
 <pre><code><span class="keyword token">foreach</span> (<span class="variable token">$errors</span>-&gt;get(<span class="string token">'email'</span>) <span class="keyword token">as</span> <span class="variable token">$message</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
-<p>如果要验证表单的数组字段，您可以使用 <code>*</code> 字符来获取每一个数组元素的所有错误信息：</p>
+<p>对于数组表单字段，可以使用 <code>*</code> 来检索每个数组元素的所有错误信息：</p>
 <pre><code><span class="keyword token">foreach</span> (<span class="variable token">$errors</span>-&gt;get(<span class="string token">'attachments.*'</span>) <span class="keyword token">as</span> <span class="variable token">$message</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="retrieving-all-error-messages-for-all-fields"></a></p>
 <h4 id="检索所有字段的所有错误信息">检索所有字段的所有错误信息</h4>
-<p>您可以使用 all 方法获取所有字段的所有错误信息的数组：</p>
+<p><code>all</code> 方法用于检索所有字段的所有错误信息，返回值类型为数组：</p>
 <pre><code><span class="keyword token">foreach</span> (<span class="variable token">$errors</span>-&gt;all() <span class="keyword token">as</span> <span class="variable token">$message</span>) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="determining-if-messages-exist-for-a-field"></a></p>
-<h4 id="判断特定字段是否含有错误信息">判断特定字段是否含有错误信息</h4>
-<p><code>has</code> 方法可用于判断给定字段是否包含任何错误信息：</p>
+<h4 id="判断字段是否存在错误信息">判断字段是否存在错误信息</h4>
+<p><code>has</code> 方法可用于确定一个给定字段是否存在任何错误信息：</p>
 <pre><code><span class="keyword token">if</span> (<span class="variable token">$errors</span>-&gt;has(<span class="string token">'email'</span>)) {
-    <span class="comment token">//</span>
+    <span class="comment token">// ...</span>
 }
 </code></pre>
 <p><a name="specifying-custom-messages-in-language-files"></a></p>
-<h3 id="在语言文件中指定自定义消息">在语言文件中指定自定义消息</h3>
-<p>Laravel 的内置验证规则每个都对应一个错误消息，位于应用程序的 <code>lang/en/validation.php</code> 文件中。在此文件中，您将找到每个验证规则的翻译条目。您可以根据应用程序的需求随意更改或修改这些消息。</p>
-<p>此外，您可以将此文件复制到另一个翻译语言目录中，以翻译应用程序语言的消息。要了解有关 Laravel 本地化的更多信息，请查看完整的<a href="localization.html">本地化文档</a>。</p>
+<h3 id="在语言文件中指定自定义消息-1">在语言文件中指定自定义消息</h3>
+<p>Laravel 内置的验证规则都有一个错误信息，位于应用程序的 <code>lang/en/validation.php</code> 文件中。在这个文件中, 你会发现每个验证规则都有一个翻译条目。可以根据你的应用程序的需要，自由地改变或修改这些信息。</p>
+<p>此外, 你可以把这个文件复制到另一个语言目录，为你的应用程序的语言翻译信息。要了解更多关于Laravel本地化的信息, 请查看完整的 <a href="/docs/laravel/10.x/localization">本地化</a>。</p>
+<blockquote>
+<p><strong>Warning</strong>
+默认情况下, Laravel 应用程序的骨架不包括 <code>lang</code> 目录. 如果你想定制 Laravel 的语言文件, 可以通过 <code>lang:publish</code> Artisan 命令发布它们。</p>
+</blockquote>
 <p><a name="custom-messages-for-specific-attributes"></a></p>
-<h4 id="特定属性的自定义消息">特定属性的自定义消息</h4>
-<p>您可以在应用程序的验证语言文件中自定义用于指定属性和规则组合的错误消息。为此，请将消息自定义项添加到应用程序的 <code>lang/xx/validation.php</code> 语言文件的 <code>custom</code> 数组中：</p>
+<h4 id="针对特定属性的自定义信息">针对特定属性的自定义信息</h4>
+<p>可以在应用程序的验证语言文件中自定义用于指定属性和规则组合的错误信息。将自定义信息添加到应用程序的 <code>lang/xx/validation.php</code> 语言文件的  <code>custom</code> 数组中：</p>
 <pre><code>'custom' =&gt; [
     'email' =&gt; [
         'required' =&gt; 'We need to know your email address!',
@@ -617,42 +660,52 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 </code></pre>
 <p><a name="specifying-attribute-in-language-files"></a></p>
 <h3 id="在语言文件中指定属性">在语言文件中指定属性</h3>
-<p>Laravel 的许多内置错误消息都包含一个 <code>:attribute：</code> 占位符，该占位符已被验证中的字段或属性的名称替换。如果您希望将验证消息的 <code>:attribute</code> 部分替换为自定义值，则可以在 <code>lang/xx/validation.php</code> 语言文件的 <code>attributes</code> 数组中指定自定义属性名称：</p>
+<p>Laravel 内置的错误信息包括一个 <code>:attribute</code> 占位符，它被替换为验证中的字段或属性的名称。如果你希望你的验证信息中的 <code>:attribute</code> 部分被替换成一个自定义的值, 可以在 <code>lang/xx/validation.php</code> 文件的 <code>attributes</code> 数组中指定自定义属性名称:</p>
 <pre><code>'attributes' =&gt; [
     'email' =&gt; 'email address',
 ],
 </code></pre>
+<blockquote>
+<p><strong>Warning</strong>
+默认情况下, Laravel 应用程序的骨架不包括 <code>lang</code> 目录. 如果你想定制 Laravel 的语言文件, 可以通过 <code>lang:publish</code> Artisan 命令发布它们。</p>
+</blockquote>
 <p><a name="specifying-values-in-language-files"></a></p>
-<h3 id="在语言文件中指定值">在语言文件中指定值</h3>
-<p>Laravel 的一些内置验证规则错误消息中包含一个 <code>:value</code> 占位符，该占位符被 request 属性的当前值替换。但是，有时你可能需要将验证消息的 <code>:value</code> 部分替换为该值的自定义表示形式。例如，考虑以下规则，该规则指定如果 <code>payment_type</code> 的值为 <code>cc</code>，则要求提供信用卡号：</p>
+<h3 id="指定语言文件中的值">指定语言文件中的值</h3>
+<p>Laravel 内置的验证规则错误信息包含一个 <code>:value</code> 占位符，它被替换成请求属性的当前值。然而, 你可能偶尔需要在验证信息的 <code>:value</code> 部分替换成自定义的值。 例如，如果 <code>payment_type</code> 的值为 <code>cc</code> 则需要验证信用卡号码:</p>
 <pre><code>Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'credit_card_number'</span> =&gt; <span class="string token">'required_if:payment_type,cc'</span>
 ]);
 </code></pre>
-<p>如果此验证规则失败，将产生以下错误消息：</p>
+<p>如果这个验证规则失败了，它将产生以下错误信息:</p>
 <pre><code class="language-none">The credit card number field is required when payment type is cc.
 </code></pre>
-<p>你可以通过定义 <code>values</code> 数组在 <code>lang/xx/validation.php</code> 语言文件中指定更用户友好的提示，而不是将 <code>cc</code> 显示为支付类型值：</p>
+<p>你可以在 <code>lang/xx/validation.php</code> 语言文件中通过定义一个 <code>values</code> 数组来指定一个更友好的提示，而不是显示 <code>cc</code> 作为支付类型值：</p>
 <pre><code>'values' =&gt; [
     'payment_type' =&gt; [
         'cc' =&gt; 'credit card'
     ],
 ],
 </code></pre>
-<p>定义了 values 后，验证规则将产生以下错误消息：</p>
+<blockquote>
+<p><strong>Warning</strong>
+默认情况下, Laravel 应用程序的骨架不包括 <code>lang</code> 目录. 如果你想定制 Laravel 的语言文件, 你可以通过 <code>lang:publish</code> Artisan 命令发布它们。</p>
+</blockquote>
+<p>定义这个值后，验证规则将产生以下错误信息：</p>
 <pre><code class="language-none">The credit card number field is required when payment type is credit card.
 </code></pre>
 <p><a name="available-validation-rules"></a></p>
 <h2 id="可用的验证规则">可用的验证规则</h2>
-<p>下方列出了所有可用的验证规则及其功能：</p>
+<p>下面是所有可用的验证规则及其功能的列表:</p>
 <style>
     .collection-method-list > p {
-        column-count: 3; -moz-column-count: 3; -webkit-column-count: 3;
-        column-gap: 2em; -moz-column-gap: 2em; -webkit-column-gap: 2em;
+        columns: 10.8em 3; -moz-columns: 10.8em 3; -webkit-columns: 10.8em 3;
     }
 
     .collection-method-list a {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 </style>
 
@@ -667,6 +720,7 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <a href="#rule-alpha-dash">Alpha Dash</a>
 <a href="#rule-alpha-num">Alpha Numeric</a>
 <a href="#rule-array">Array</a>
+<a href="#rule-ascii">Ascii</a>
 <a href="#rule-bail">Bail</a>
 <a href="#rule-before">Before (Date)</a>
 <a href="#rule-before-or-equal">Before Or Equal (Date)</a>
@@ -677,6 +731,7 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <a href="#rule-date">Date</a>
 <a href="#rule-date-equals">Date Equals</a>
 <a href="#rule-date-format">Date Format</a>
+<a href="#rule-decimal">Decimal</a>
 <a href="#rule-declined">Declined</a>
 <a href="#rule-declined-if">Declined If</a>
 <a href="#rule-different">Different</a>
@@ -684,12 +739,15 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <a href="#rule-digits-between">Digits Between</a>
 <a href="#rule-dimensions">Dimensions (Image Files)</a>
 <a href="#rule-distinct">Distinct</a>
+<a href="#rule-doesnt-start-with">Doesnt Start With</a>
+<a href="#rule-doesnt-end-with">Doesnt End With</a>
 <a href="#rule-email">Email</a>
 <a href="#rule-ends-with">Ends With</a>
 <a href="#rule-enum">Enum</a>
 <a href="#rule-exclude">Exclude</a>
 <a href="#rule-exclude-if">Exclude If</a>
 <a href="#rule-exclude-unless">Exclude Unless</a>
+<a href="#rule-exclude-with">Exclude With</a>
 <a href="#rule-exclude-without">Exclude Without</a>
 <a href="#rule-exists">Exists (Database)</a>
 <a href="#rule-file">File</a>
@@ -701,15 +759,23 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <a href="#rule-in-array">In Array</a>
 <a href="#rule-integer">Integer</a>
 <a href="#rule-ip">IP Address</a>
-<a href="#rule-mac">MAC Address</a>
 <a href="#rule-json">JSON</a>
 <a href="#rule-lt">Less Than</a>
 <a href="#rule-lte">Less Than Or Equal</a>
+<a href="#rule-lowercase">Lowercase</a>
+<a href="#rule-mac">MAC Address</a>
 <a href="#rule-max">Max</a>
+<a href="#rule-max-digits">Max Digits</a>
 <a href="#rule-mimetypes">MIME Types</a>
 <a href="#rule-mimes">MIME Type By File Extension</a>
 <a href="#rule-min">Min</a>
-<a href="#multiple-of">Multiple Of</a>
+<a href="#rule-min-digits">Min Digits</a>
+<a href="#rule-missing">Missing</a>
+<a href="#rule-missing-if">Missing If</a>
+<a href="#rule-missing-unless">Missing Unless</a>
+<a href="#rule-missing-with">Missing With</a>
+<a href="#rule-missing-with-all">Missing With All</a>
+<a href="#rule-multiple-of">Multiple Of</a>
 <a href="#rule-not-in">Not In</a>
 <a href="#rule-not-regex">Not Regex</a>
 <a href="#rule-nullable">Nullable</a>
@@ -736,7 +802,9 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 <a href="#rule-string">String</a>
 <a href="#rule-timezone">Timezone</a>
 <a href="#rule-unique">Unique (Database)</a>
+<a href="#rule-uppercase">Uppercase</a>
 <a href="#rule-url">URL</a>
+<a href="#rule-ulid">ULID</a>
 <a href="#rule-uuid">UUID</a></p>
 </div>
 
@@ -744,37 +812,46 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 
 <p><a name="rule-accepted"></a></p>
 <h4 id="accepted">accepted</h4>
-<p>待验证字段必须是 <code>yes</code> ，<code>on</code> ，<code>1</code> 或 <code>true</code>。这对于验证「服务条款」的接受或类似字段时很有用。</p>
+<p>待验证字段必须是 <code>「yes」</code> ，<code>「on」</code> ，<code>1</code> 或 <code>true</code>。这对于验证「服务条款」的接受或类似字段时很有用。</p>
 <p><a name="rule-accepted-if"></a></p>
 <h4 id="accepted_ifanotherfieldvalue">accepted_if:anotherfield,value,...</h4>
-<p>如果另一个正在验证的字段等于指定的值，则验证中的字段必须为 <code>yes</code> ，<code>on</code> ，<code>1</code> 或 <code>true</code>。 这对于验证「服务条款」接受或类似字段很有用。</p>
+<p>如果另一个正在验证的字段等于指定的值，则验证中的字段必须为 <code>「yes」</code> ，<code>「on」</code> ，<code>1</code> 或 <code>true</code>。 这对于验证「服务条款」接受或类似字段很有用。</p>
 <p><a name="rule-active-url"></a></p>
 <h4 id="active_url">active_url</h4>
-<p>根据 <code>dns_get_record</code> PHP 函数，验证中的字段必须具有有效的 A 或 AAAA 记录。 提供的 URL 的主机名使用 <code>parse_url</code> PHP 函数提取，然后传递给 <code>dns_get_record</code>。</p>
+<p>根据 <code>dns_get_record</code> PHP 函数，验证中的字段必须具有有效的 A 或 AAAA 记录。 提供的 URL 的主机名使用 <code>parse_url</code> PHP 函数提取，然后传递给 <code>dns_get_record</code>。</p>
 <p><a name="rule-after"></a></p>
 <h4 id="afterdate">after:<em>date</em></h4>
-<p>验证中的字段必须是给定日期之后的值。日期将被传递给 <code>strtotime</code> PHP 函数中，以便转换为有效的 <code>DateTime</code> 实例：</p>
+<p>验证中的字段必须是给定日期之后的值。日期将被传递给 <code>strtotime</code> PHP 函数中，以便转换为有效的 <code>DateTime</code> 实例：</p>
 <pre><code>'start_date' =&gt; 'required|date|after:tomorrow'
 </code></pre>
-<p>你也可以指定另一个要与日期比较的字段，而不是传递要由 strtotime 处理的日期字符串：</p>
+<p>你也可以指定另一个要与日期比较的字段，而不是传递要由 <code>strtotime</code> 处理的日期字符串：</p>
 <pre><code>'finish_date' =&gt; 'required|date|after:start_date'
 </code></pre>
 <p><a name="rule-after-or-equal"></a></p>
 <h4 id="after_or_equaldate">after_or_equal:<em>date</em></h4>
-<p>待验证字段的值对应的日期必须在给定日期之后或与给定的日期相同。可参阅 <a href="#rule-after">after</a> 规则获取更多信息。</p>
+<p>待验证字段的值对应的日期必须在给定日期之后或与给定的日期相同。可参阅 <a href="#rule-after">after</a> 规则获取更多信息。</p>
 <p><a name="rule-alpha"></a></p>
 <h4 id="alpha">alpha</h4>
-<p>待验证字段只能由字母组成。</p>
+<p>待验证字段必须是包含在 <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AL%3A%5D&amp;g=&amp;i="><code>\p{L}</code></a> 和 <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AM%3A%5D&amp;g=&amp;i="><code>\p{M}</code></a> 中的Unicode字母字符。</p>
+<p>为了将此验证规则限制在 ASCII 范围内的字符（<code>a-z</code> 和<code>A-Z</code>），你可以为验证规则提供 <code>ascii</code> 选项：</p>
+<pre><code class="language-php">'username' =&gt; 'alpha:ascii',
+</code></pre>
 <p><a name="rule-alpha-dash"></a></p>
 <h4 id="alpha_dash">alpha_dash</h4>
-<p>待验证字段可以含有字母、数字，短破折号（-）和下划线（_）。</p>
+<p>被验证的字段必须完全是 Unicode 字母数字字符中的 <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AL%3A%5D&amp;g=&amp;i="><code>\p{L}</code></a>、<a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AM%3A%5D&amp;g=&amp;i="><code>\p{M}</code></a>、<a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AN%3A%5D&amp;g=&amp;i="><code>\p{N}</code></a>，以及 ASCII 破折号（<code>-</code>）和 ASCII 下划线（<code>_</code>）。</p>
+<p>为了将此验证规则限制在 ASCII 范围内的字符（<code>a-z</code> 和<code>A-Z</code>），你可以为验证规则提供 <code>ascii</code> 选项：</p>
+<pre><code class="language-php">'username' =&gt; 'alpha_dash:ascii',
+</code></pre>
 <p><a name="rule-alpha-num"></a></p>
 <h4 id="alpha_num">alpha_num</h4>
-<p>待验证字段只能由字母和数字组成。</p>
+<p>被验证的字段必须完全是 Unicode 字母数字字符中的 <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AL%3A%5D&amp;g=&amp;i="><code>\p{L}</code></a>, <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AM%3A%5D&amp;g=&amp;i="><code>\p{M}</code></a> 和 <a href="https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3AN%3A%5D&amp;g=&amp;i="><code>\p{N}</code></a>。</p>
+<p>为了将此验证规则限制在 ASCII 范围内的字符（<code>a-z</code> 和<code>A-Z</code>），你可以为验证规则提供 <code>ascii</code> 选项：</p>
+<pre><code class="language-php">'username' =&gt; 'alpha_num:ascii',
+</code></pre>
 <p><a name="rule-array"></a></p>
 <h4 id="array">array</h4>
-<p>待验证字段必须是有效的 PHP 数组。</p>
-<p>当向 <code>array</code> 规则提供附加值时，输入数组中的每个键都必须出现在提供给规则的值列表中。在以下示例中，输入数组中的 <code>admin</code> 键无效，因为它不包含在提供给 <code>array</code> 规则的值列表中：</p>
+<p>待验证字段必须是有效的 PHP <code>数组</code>。</p>
+<p>当向 <code>array</code>  规则提供附加值时，输入数组中的每个键都必须出现在提供给规则的值列表中。在以下示例中，输入数组中的 <code>admin</code> 键无效，因为它不包含在提供给  <code>array</code> 规则的值列表中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$input</span> = [
@@ -786,72 +863,79 @@ Route::post(<span class="string token">'/post'</span>, [PostController::<span cl
 ];
 
 Validator::make(<span class="variable token">$input</span>, [
-    <span class="string token">'user'</span> =&gt; <span class="string token">'array:username,locale'</span>,
+    <span class="string token">'user'</span> =&gt; <span class="string token">'array:name,username'</span>,
 ]);
 </code></pre>
 <p>通常，你应该始终指定允许出现在数组中的数组键。</p>
-<p><a name="rule-bail"></a></p>
+<h4 id="ascii">ascii</h4>
+<p>正在验证的字段必须完全是 7 位的 ASCII 字符。</p>
 <h4 id="bail">bail</h4>
 <p>在首次验证失败后立即终止验证。</p>
-<p>虽然 <code>bail</code> 规则只会在遇到验证失败时停止验证特定字段，但 <code>stopOnFirstFailure</code> 方法会通知验证器，一旦发生单个验证失败，它应该停止验证所有属性：</p>
+<p>虽然 <code>bail</code> 规则只会在遇到验证失败时停止验证特定字段，但 <code>stopOnFirstFailure</code> 方法会通知验证器，一旦发生单个验证失败，它应该停止验证所有属性:</p>
 <pre><code><span class="keyword token">if</span> (<span class="variable token">$validator</span>-&gt;stopOnFirstFailure()-&gt;fails()) {
     <span class="comment token">// ...</span>
 }
 </code></pre>
-<p><a name="rule-before"></a></p>
 <h4 id="beforedate">before:<em>date</em></h4>
-<p>待验证字段的值对应的日期必须在给定的日期之前。日期将会传递给 PHP 函数 <code>strtotime</code>。此外，与 <a href="#rule-after"><code>after</code></a> 规则一致，可以将另外一个待验证的字段作为 <code>date</code> 的值。</p>
-<p><a name="rule-before-or-equal"></a></p>
+<p>待验证字段的值对应的日期必须在给定的日期之前。这个日期将被传递给 PHP 函数 <code>strtotime</code> 以便转化为有效的 <code>DateTime</code> 实例。此外，与 <a href="#rule-after"><code>after</code></a> 规则一致，可以将另外一个待验证的字段作为 <code>date</code> 的值。</p>
 <h4 id="before_or_equaldate">before_or_equal:<em>date</em></h4>
-<p>待验证字段的值对应的日期必须在给定的日期之前。日期将会传递给 PHP 函数 <code>strtotime</code>。此外，与 <a href="#rule-after"><code>after</code></a>规则一致，可以将另外一个待验证的字段作为 <code>date</code> 的值。 </p>
-<p><a name="rule-between"></a></p>
+<p>待验证字段的值必须是给定日期之前或等于给定日期的值。这个日期将被传递给 PHP 函数 <code>strtotime</code> 以便转化为有效的 <code>DateTime</code> 实例。此外，与 <a href="#rule-after"><code>after</code></a> 规则一致， 可以将另外一个待验证的字段作为 <code>date</code> 的值。</p>
 <h4 id="betweenminmax">between:<em>min</em>,<em>max</em></h4>
-<p>验证字段的大小必须在给定的 min 和 max 之间。字符串、数字、数组和文件的计算方式都使用 <a href="#rule-size"><code>size</code></a> 方法。</p>
+<p>待验证字段值的大小必须介于给定的最小值和最大值（含）之间。字符串、数字、数组和文件的计算方式都使用 <a href="#rule-size"><code>size</code></a> 方法。</p>
 <p><a name="rule-boolean"></a></p>
 <h4 id="boolean">boolean</h4>
-<p>验证的字段必须可以转换为 Boolean 类型。 可接受的输入为 <code>true</code>, <code>false</code>, <code>1</code>, <code>0</code>, <code>&quot;1&quot;</code>, 和 <code>&quot;0&quot;</code>。</p>
+<p>验证的字段必须可以转换为 Boolean 类型。 可接受的输入为 <code>true</code>, <code>false</code>, <code>1</code>, <code>0</code>, <code>「1」</code>, 和 <code>「0」</code>。</p>
 <p><a name="rule-confirmed"></a></p>
 <h4 id="confirmed">confirmed</h4>
-<p>confirmed可以验证密码和确认密码是否相同，验证字段必须具有匹配字段 <code>{field}_confirmation</code> 。例如，验证字段为 <code>password</code> ，输入中必须存在与之匹配的 <code>password_confirmation</code> 字段。</p>
+<p>验证字段必须与 <code>{field}_confirmation</code> 字段匹配。例如，如果验证字段是 <code>password</code>，则输入中必须存在相应的 <code>password_confirmation</code> 字段。</p>
 <p><a name="rule-current-password"></a></p>
 <h4 id="current_password">current_password</h4>
-<p>验证字段必须与已验证用户的密码匹配。 您可以使用规则的第一个参数指定 <a href="authentication.html#eaa0d4">authentication guard</a>：</p>
+<p>验证字段必须与已认证用户的密码匹配。 您可以使用规则的第一个参数指定 <a href="/docs/laravel/10.x/authentication">authentication guard</a>:</p>
 <pre><code>'password' =&gt; 'current_password:api'
 </code></pre>
 <p><a name="rule-date"></a></p>
 <h4 id="date">date</h4>
-<p>根据 PHP <code>strtotime</code> 函数，验证的字段必须是有效的日期。</p>
+<p>验证字段必须是 <code>strtotime</code> PHP 函数可识别的有效日期。</p>
 <p><a name="rule-date-equals"></a></p>
 <h4 id="date_equalsdate">date_equals:<em>date</em></h4>
-<p>验证字段必须等于给定日期。日期将传递到 PHP <code>strtotime</code> 函数中，以便转换为有效的 <code>DateTime</code> 实例。</p>
+<p>验证字段必须等于给定日期。日期将传递到 PHP <code>strtotime</code> 函数中，以转换为有效的 <code>DateTime</code> 实例。</p>
 <p><a name="rule-date-format"></a></p>
-<h4 id="date_formatformat">date_format:<em>format</em></h4>
-<p>验证字段必须匹配给定的 <em>format</em> （日期格式）。当验证某个字段的时候，你应该只使用 <code>date</code>  或者 <code>date_format</code>  <strong>其中一个</strong> ，而不是同时使用。此验证规则支持 PHP 所有的 <a href="https://www.php.net/manual/en/class.datetime.php">DateTime</a> 类。</p>
+<h4 id="date_formatformat">date_format:<em>format</em>,...</h4>
+<p>验证字段必须匹配给定的 <em>format</em> 。在验证字段时，您应该只使用 <code>date</code> 或 <code>date_format</code> 中的<strong>其中一个</strong>，而不是同时使用。该验证规则支持 PHP 的 <a href="https://www.php.net/manual/en/class.datetime.php">DateTime</a> 类支持的所有格式。</p>
+<p><a name="rule-decimal"></a></p>
+<h4 id="decimalminmax">decimal:<em>min</em>,<em>max</em></h4>
+<p>验证字段必须是数值类型，并且必须包含指定的小数位数：</p>
+<pre><code><span class="comment token">// 必须正好有两位小数（例如 9.99）...</span>
+<span class="string token">'price'</span> =&gt; <span class="string token">'decimal:2'</span>
+
+<span class="comment token">// 必须有 2 到 4 位小数...</span>
+<span class="string token">'price'</span> =&gt; <span class="string token">'decimal:2,4'</span>
+</code></pre>
 <p><a name="rule-declined"></a></p>
 <h4 id="declined">declined</h4>
-<p>正在验证的字段必须是 <code>&quot;no&quot;</code>，<code>&quot;off&quot;</code>，<code>0</code>或者 <code>false</code>。</p>
+<p>正在验证的字段必须是 <code>「no」</code>，<code>「off」</code>，<code>0</code> 或者 <code>false</code>。</p>
 <p><a name="rule-declined-if"></a></p>
 <h4 id="declined_ifanotherfieldvalue">declined_if:anotherfield,value,...</h4>
-<p>正在验证的字段必须是 <code>&quot;no&quot;</code>，<code>&quot;off&quot;</code>，<code>0</code>或者 <code>false</code>。 如果正在验证的另一个字段等于指定值。</p>
+<p>如果另一个验证字段的值等于指定值，则验证字段的值必须为<code>「no」</code>、<code>「off」</code>、<code>0</code>或<code>false</code>。</p>
 <p><a name="rule-different"></a></p>
 <h4 id="differentfield">different:<em>field</em></h4>
 <p>验证的字段值必须与字段 <em>field</em> 的值不同。</p>
 <p><a name="rule-digits"></a></p>
 <h4 id="digitsvalue">digits:<em>value</em></h4>
-<p>验证的字段必须为 <em>numeric</em> ，并且必须具有确切长度 <em>value</em> 。</p>
+<p>验证的整数必须具有确切长度 <em>value</em> 。</p>
 <p><a name="rule-digits-between"></a></p>
 <h4 id="digits_betweenminmax">digits_between:<em>min</em>,<em>max</em></h4>
-<p>验证的字段必须为 <em>numeric</em> ，并且长度必须在给定的 <em>min</em> 和 <em>max</em> 之间。</p>
+<p>验证的整数长度必须在给定的 <em>min</em> 和 <em>max</em> 之间。</p>
 <p><a name="rule-dimensions"></a></p>
 <h4 id="dimensions">dimensions</h4>
-<p>验证的文件必须是图片并且图片比例必须符合规则:</p>
+<p>验证的文件必须是符合规则参数指定尺寸限制的图像：</p>
 <pre><code>'avatar' =&gt; 'dimensions:min_width=100,min_height=200'
 </code></pre>
-<p>可用的规则为: <em>min_width</em> ，<em>max_width</em> ，<em>min_height</em> ，<em>max_height</em> ，<em>width</em> ，<em>height</em> ，<em>ratio</em> 。</p>
-<p> <em>ratio</em> 约束应该表示为宽度除以高度。 这可以通过像 <code>3/2</code> 这样的语句或像 <code>1.5</code>这样的 <code>float</code> 来指定：</p>
+<p>可用的限制条件有: <em>min_width</em> , <em>max_width</em> , <em>min_height</em> , <em>max_height</em> , <em>width</em> , <em>height</em> , <em>ratio</em> .</p>
+<p><em>ratio</em> 约束应该表示为宽度除以高度。 这可以通过像 <code>3/2</code> 这样的语句或像 <code>1.5</code> 这样的浮点数来指定：</p>
 <pre><code>'avatar' =&gt; 'dimensions:ratio=3/2'
 </code></pre>
-<p>由于此规则需要多个参数，因此你可以 <code>Rule::dimensions</code> 方法来构造可读性高的规则：</p>
+<p>由于此规则需要多个参数，因此你可以 <code>Rule::dimensions</code> 方法来构造可读性高的规则：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
@@ -864,21 +948,27 @@ Validator::make(<span class="variable token">$data</span>, [
 </code></pre>
 <p><a name="rule-distinct"></a></p>
 <h4 id="distinct">distinct</h4>
-<p>验证数组时，指定的字段不能有任何重复值：</p>
+<p>验证数组时，正在验证的字段不能有任何重复值：</p>
 <pre><code>'foo.*.id' =&gt; 'distinct'
 </code></pre>
-<p>Distinct 默认使用松散的变量比较。要使用严格比较，您可以将<code>strict</code>参数添加到验证规则定义中：</p>
+<p>默认情况下，Distinct 使用松散的变量比较。要使用严格比较，您可以在验证规则定义中添加 <code>strict</code> 参数：</p>
 <pre><code>'foo.*.id' =&gt; 'distinct:strict'
 </code></pre>
-<p>你可以在验证规则的参数中添加 <code>ignore_case</code> ，以使规则忽略大小写差异：</p>
+<p>你可以在验证规则的参数中添加 <code>ignore_case</code> ，以使规则忽略大小写差异：</p>
 <pre><code>'foo.*.id' =&gt; 'distinct:ignore_case'
 </code></pre>
+<p><a name="rule-doesnt-start-with"></a></p>
+<h4 id="doesnt_start_withfoobar">doesnt_start_with:<em>foo</em>,<em>bar</em>,...</h4>
+<p>验证的字段不能以给定值之一开头。</p>
+<p><a name="rule-doesnt-end-with"></a></p>
+<h4 id="doesnt_end_withfoobar">doesnt_end_with:<em>foo</em>,<em>bar</em>,...</h4>
+<p>验证的字段不能以给定值之一结尾。</p>
 <p><a name="rule-email"></a></p>
 <h4 id="email">email</h4>
-<p>验证的字段必须符合 <code>e-mail</code> 地址格式。当前版本，此种验证规则由<a href="https://github.com/egulias/EmailValidator"><code>egulias/email-validator</code></a> 提供支持。默认情况下，使用 <code>RFCValidation</code> 验证样式，但你也可以应用其他验证样式：</p>
+<p>验证的字段必须符合 <code>e-mail</code> 地址格式。当前版本，此种验证规则由 <a href="https://github.com/egulias/EmailValidator"><code>egulias/email-validator</code></a> 提供支持。默认情况下，使用 <code>RFCValidation</code> 验证样式，但你也可以应用其他验证样式：</p>
 <pre><code>'email' =&gt; 'email:rfc,dns'
 </code></pre>
-<p>上面的示例将应用 <code>RFCValidation</code> 和 <code>DNSCheckValidation</code> 验证。以下是你可以应用的验证样式的完整列表：</p>
+<p>上面的示例将应用 <code>RFCValidation</code> 和 <code>DNSCheckValidation</code> 验证。以下是你可以应用的验证样式的完整列表：</p>
 <div class="content-list" markdown="1">
 
 <ul>
@@ -887,19 +977,20 @@ Validator::make(<span class="variable token">$data</span>, [
 <li><code>dns</code>: <code>DNSCheckValidation</code></li>
 <li><code>spoof</code>: <code>SpoofCheckValidation</code></li>
 <li><code>filter</code>: <code>FilterEmailValidation</code></li>
+<li><code>filter_unicode</code>: <code>FilterEmailValidation::unicode()</code></li>
 </ul>
 </div>
 
-<p>当下版本 <code>filter</code> 验证规则使用 PHP 的 <code>filter_var</code> 方法进行验证，在 5.8 版本接入 Laravel 。</p>
+<p><code>filter</code> 验证器是 Laravel 内置的一个验证器，它使用 PHP 的 <code>filter_var</code> 函数实现。在 Laravel 5.8 版本之前，它是 Laravel 默认的电子邮件验证行为。</p>
 <blockquote>
-<p>注意： <code>dns</code> 和 <code>spoof</code> 验证器需要PHP的 <code>intl</code> 扩展。</p>
+<p><strong>注意</strong><br><code>dns</code> 和 <code>spoof</code> 验证器需要 PHP 的 <code>intl</code> 扩展。</p>
 </blockquote>
 <p><a name="rule-ends-with"></a></p>
 <h4 id="ends_withfoobar">ends_with:<em>foo</em>,<em>bar</em>,...</h4>
 <p>被验证的字段必须以给定值之一结尾。</p>
 <p><a name="rule-enum"></a></p>
 <h4 id="enum">enum</h4>
-<p><code>Enum</code> 规则是一个基于类的规则，验证指定的字段是否包含一个有效的枚举值。<code>Enum</code> 规则接受枚举的名称作为其唯一的构造函数参数：</p>
+<p><code>Enum</code> 规则是一种基于类的规则，用于验证被验证字段是否包含有效的枚举值。 <code>Enum</code> 规则的构造函数只接受枚举的名称作为参数：</p>
 <pre><code><span class="keyword token">use</span> App\Enums\ServerStatus;
 <span class="keyword token">use</span> Illuminate\Validation\Rules\Enum;
 
@@ -907,21 +998,33 @@ Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'status'</span> =&gt; [<span class="keyword token">new</span> Enum(ServerStatus::<span class="keyword token">class</span>)],
 ]);
 </code></pre>
-<blockquote>
-<p>注意：枚举仅适用于PHP 8.1+。</p>
-</blockquote>
 <p><a name="rule-exclude"></a></p>
 <h4 id="exclude">exclude</h4>
-<p><code>validate</code> 和 <code>validated</code> 方法中将会排除掉当前验证的字段。</p>
+<p> <code>validate</code> 和 <code>validated</code> 方法中会排除掉当前验证的字段。</p>
 <p><a name="rule-exclude-if"></a></p>
 <h4 id="exclude_ifanotherfieldvalue">exclude_if:<em>anotherfield</em>,<em>value</em></h4>
-<p>如果 <em>anotherfield</em> 等于 <em>value</em> ，<code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。</p>
+<p>如果 <em>anotherfield</em> 等于 <em>value</em> ，<code>validate</code> 和 <code>validated</code> 方法中会排除掉当前验证的字段。</p>
+<p>在一些复杂的场景，也可以使用 <code>Rule::excludeIf</code> 方法，这个方法需要返回一个布尔值或者一个匿名函数。如果返回的是匿名函数，那么这个函数应该返回 <code>true</code> 或 <code>false</code>去决定被验证的字段是否应该被排除掉：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+<span class="keyword token">use</span> Illuminate\Validation\Rule;
+
+Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+    <span class="string token">'role_id'</span> =&gt; Rule::excludeIf(<span class="variable token">$request</span>-&gt;user()-&gt;is_admin),
+]);
+
+Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+    <span class="string token">'role_id'</span> =&gt; Rule::excludeIf(fn () =&gt; <span class="variable token">$request</span>-&gt;user()-&gt;is_admin),
+]);
+</code></pre>
 <p><a name="rule-exclude-unless"></a></p>
 <h4 id="exclude_unlessanotherfieldvalue">exclude_unless:<em>anotherfield</em>,<em>value</em></h4>
-<p>除非 <em>anotherfield</em> 等于 <em>value</em> ，否则 <code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。如果 <em>value</em> 为 <code>null</code> （<code>exclude_unless:name,null</code>），那么成立的条件就是被比较的字段（对应规则中的 <code>name</code> ）为 <code>null</code> 或者表单中没有该字段（对应规则中的 <code>name</code> ）。</p>
+<p>除非 <em>anotherfield</em> 等于 <em>value</em> ，否则 <code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。如果 <em>value</em> 为 <code>null</code> （<code>exclude_unless:name,null</code>），那么成立的条件就是被比较的字段为 <code>null</code> 或者表单中没有该字段。</p>
+<p><a name="rule-exclude-with"></a></p>
+<h4 id="exclude_withanotherfield">exclude_with:<em>anotherfield</em></h4>
+<p>如果表单数据中有 <em>anotherfield</em> ，<code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。</p>
 <p><a name="rule-exclude-without"></a></p>
 <h4 id="exclude_withoutanotherfield">exclude_without:<em>anotherfield</em></h4>
-<p>如果 <em>anotherfield</em> 不在表单数据中，<code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。</p>
+<p>如果表单数据中没有 <em>anotherfield</em> ，<code>validate</code> 和 <code>validated</code> 方法中会排除掉当前的字段。</p>
 <p><a name="rule-exists"></a></p>
 <h4 id="existstablecolumn">exists:<em>table</em>,<em>column</em></h4>
 <p>验证的字段值必须存在于指定的表中。</p>
@@ -935,24 +1038,28 @@ Validator::make(<span class="variable token">$data</span>, [
 <p>你可以将验证规则使用的数据库列名称指定在数据库表名称之后：</p>
 <pre><code>'state' =&gt; 'exists:states,abbreviation'
 </code></pre>
-<p>有时候，你或许需要去明确指定一个具体的数据库连接，用于<code>exists</code>查询。你可以通过在表名前面添加一个连接名称来实现这个效果。</p>
+<p>有时候，你或许需要去明确指定一个具体的数据库连接，用于 <code>exists</code> 查询。你可以通过在表名前面添加一个连接名称来实现这个效果。</p>
 <pre><code>'email' =&gt; 'exists:connection.staff,email'
 </code></pre>
-<p>你可以明确指定 Eloquent 模型，这个模型将被用来确定表名，这样可以代替直接指定表名的方式。</p>
+<p>你可以明确指定 Eloquent 模型，而不是直接指定表名：</p>
 <pre><code>'user_id' =&gt; 'exists:App\Models\User,id'
 </code></pre>
-<p>如果你想要自定义一个执行查询的验证规则，你可以使用 <code>Rule</code> 类去流畅地定义规则。在这个例子中，我们也将指定验证规则为一个数组，而不再是使用 <code>|</code> 分割他们：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+<p>如果你想要自定义一个执行查询的验证规则，你可以使用 <code>Rule</code> 类去流畅地定义规则。在这个例子中，我们也将指定验证规则为一个数组，而不再是使用 <code>|</code> 分割他们：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Query\Builder;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
 Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'email'</span> =&gt; [
         <span class="string token">'required'</span>,
-        Rule::exists(<span class="string token">'staff'</span>)-&gt;where(<span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+        Rule::exists(<span class="string token">'staff'</span>)-&gt;where(<span class="keyword token">function</span> (Builder <span class="variable token">$query</span>) {
             <span class="keyword token">return</span> <span class="variable token">$query</span>-&gt;where(<span class="string token">'account_id'</span>, <span class="number token">1</span>);
         }),
     ],
 ]);
+</code></pre>
+<p>您可以通过将列名作为 <code>exists</code> 方法的第二个参数来明确指定 <code>Rule::exists</code> 方法生成的 <code>exists</code> 规则应该使用的数据库列名：</p>
+<pre><code>'state' =&gt; Rule::exists('states', 'abbreviation'),
 </code></pre>
 <p><a name="rule-file"></a></p>
 <h4 id="file">file</h4>
@@ -962,16 +1069,16 @@ Validator::make(<span class="variable token">$data</span>, [
 <p>当字段存在时，要验证的字段必须是一个非空的。</p>
 <p><a name="rule-gt"></a></p>
 <h4 id="gtfield">gt:<em>field</em></h4>
-<p>要验证的字段必须要大于被给的字段。这两个字段必须是同一个类型。字符串、数字、数组和文件都使用 <a href="#rule-size"><code>size</code></a> 进行相同的评估。</p>
+<p>要验证的字段必须要大于给定的字段。这两个字段必须是同一个类型。字符串、数字、数组和文件都使用 <a href="#rule-size"><code>size</code></a> 进行相同的评估。</p>
 <p><a name="rule-gte"></a></p>
 <h4 id="gtefield">gte:<em>field</em></h4>
-<p>要验证的字段必须要大于或等于被给的字段。这两个字段必须是同一个类型。字符串、数字、数组和文件都使用 <a href="#rule-size"><code>size</code></a> 进行相同的评估。</p>
+<p>要验证的字段必须要大于或等于给定的字段。这两个字段必须是同一个类型。字符串、数字、数组和文件都使用 <a href="#rule-size"><code>size</code></a> 进行相同的评估。</p>
 <p><a name="rule-image"></a></p>
 <h4 id="image">image</h4>
 <p>正在验证的文件必须是图像（jpg、jpeg、png、bmp、gif、svg 或 webp）。</p>
 <p><a name="rule-in"></a></p>
 <h4 id="infoobar">in:<em>foo</em>,<em>bar</em>,...</h4>
-<p>验证字段必须包含在给定的值列表中。由于此规则通常要求你 <code>implode</code> 数组，因此可以使用<code>Rule::in</code> 方法来流畅地构造规则：</p>
+<p>验证字段必须包含在给定的值列表中。由于此规则通常要求你 <code>implode</code> 数组，因此可以使用 <code>Rule::in</code> 方法来流畅地构造规则:</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
@@ -982,7 +1089,7 @@ Validator::make(<span class="variable token">$data</span>, [
     ],
 ]);
 </code></pre>
-<p>当 <code>in</code> 规则与 <code>array</code> 规则结合使用时，输入数组中的每个值都必须出现在提供给 <code>in</code> 规则的值列表中。 在以下示例中，输入数组中的「LAS」机场代码无效，因为它不包含在提供给 <code>in</code> 规则的机场列表中：</p>
+<p>当 <code>in</code> 规则与 <code>array</code> 规则组合使用时，输入数组中的每个值都必须出现在提供给 <code>in</code> 规则的值列表中。 在以下示例中，输入数组中的<code>LAS</code> 机场代码无效，因为它不包含在提供给 <code>in</code> 规则的机场列表中：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
@@ -994,70 +1101,90 @@ Validator::make(<span class="variable token">$input</span>, [
     <span class="string token">'airports'</span> =&gt; [
         <span class="string token">'required'</span>,
         <span class="string token">'array'</span>,
-        Rule::in([<span class="string token">'NYC'</span>, <span class="string token">'LIT'</span>]),
     ],
+    <span class="string token">'airports.*'</span> =&gt; Rule::in([<span class="string token">'NYC'</span>, <span class="string token">'LIT'</span>]),
 ]);
 </code></pre>
 <p><a name="rule-in-array"></a></p>
 <h4 id="in_arrayanotherfield">in_array:<em>anotherfield</em>.*</h4>
-<p>正在验证的字段必须存在于<em>anotherfield</em> 的值中。</p>
+<p>验证的字段必须存在于_anotherfield_的值中。</p>
 <p><a name="rule-integer"></a></p>
 <h4 id="integer">integer</h4>
-<p>验证字段必须是整数。</p>
-<blockquote>
-<p>注意：此验证规则不会验证输入是否为“整数”变量类型，仅验证输入是否为 PHP 的 <code>FILTER_VALIDATE_INT</code> 规则所接受的类型。 如果您需要将输入验证为数字，请将此规则与 <a href="#rule-numeric"><code>numeric</code> 验证规则</a> 结合使用。</p>
-</blockquote>
+<p>验证的字段必须是一个整数。</p>
+<p><strong>警告</strong>
+这个验证规则并不会验证输入是否为&quot;integer&quot;变量类型，它只会验证输入是否为 PHP 的 <code>FILTER_VALIDATE_INT</code> 规则接受的类型。如果你需要验证输入是否为数字，请结合 <a href="#rule-numeric">numeric</a> 验证规则使用。</p>
 <p><a name="rule-ip"></a></p>
 <h4 id="ip">ip</h4>
-<p>验证的字段必须是 IP 地址。</p>
+<p>验证的字段必须是一个 IP 地址。</p>
 <p><a name="ipv4"></a></p>
 <h4 id="ipv4">ipv4</h4>
-<p>验证的字段必须是 IPv4 地址。</p>
+<p>验证的字段必须是一个 IPv4 地址。</p>
 <p><a name="ipv6"></a></p>
 <h4 id="ipv6">ipv6</h4>
-<p>验证的字段必须是 IPv6 地址。</p>
-<p><a name="rule-mac"></a></p>
-<h4 id="mac_address">mac_address</h4>
-<p>验证字段必须是 MAC 地址。</p>
+<p>验证的字段必须是一个 IPv6 地址。</p>
 <p><a name="rule-json"></a></p>
 <h4 id="json">json</h4>
-<p>验证的字段必须是有效的 JSON 字符串。</p>
+<p>验证的字段必须是一个有效的 JSON 字符串。</p>
 <p><a name="rule-lt"></a></p>
 <h4 id="ltfield">lt:<em>field</em></h4>
-<p>验证的字段必须小于给定的字段。这两个字段必须是相同的类型。字符串、数值、数组和文件大小的计算方式与  <a href="#rule-size"><code>size</code></a> 方法进行评估。</p>
+<p>验证的字段必须小于给定的 <em>field</em> 字段。两个字段必须是相同的类型。字符串、数字、数组和文件的处理方式与 <a href="#rule-size"><code>size</code></a> 规则相同。</p>
 <p><a name="rule-lte"></a></p>
 <h4 id="ltefield">lte:<em>field</em></h4>
-<p>验证中的字段必须小于或等于给定的字段 。这两个字段必须是相同的类型。字符串、数值、数组和文件大小的计算方式与 <a href="#rule-size"><code>size</code></a> 方法进行评估。</p>
+<p>验证的字段必须小于或等于给定的 <em>field</em> 字段。两个字段必须是相同的类型。字符串、数字、数组和文件的处理方式与 <a href="#rule-size"><code>size</code></a> 规则相同。</p>
+<p><a name="rule-lowercase"></a></p>
+<h4 id="lowercase">lowercase</h4>
+<p>验证的字段必须是小写的。</p>
+<p><a name="rule-mac"></a></p>
+<h4 id="mac_address">mac_address</h4>
+<p>验证的字段必须是一个 MAC 地址。</p>
 <p><a name="rule-max"></a></p>
 <h4 id="maxvalue">max:<em>value</em></h4>
-<p>验证中的字段必须小于或等于 <em>value</em> 。字符串、数字、数组或是文件大小的计算方式都用 <a href="#rule-size"><code>size</code></a> 规则。</p>
+<p>验证的字段的值必须小于或等于最大值 <em>value</em>。字符串、数字、数组和文件的处理方式与 <a href="#rule-size"><code>size</code></a> 规则相同。</p>
+<p><a name="rule-max-digits"></a></p>
+<h4 id="max_digitsvalue">max_digits:<em>value</em></h4>
+<p>验证的整数必须具有最大长度 value。</p>
 <p><a name="rule-mimetypes"></a></p>
 <h4 id="mimetypestextplain">mimetypes:<em>text/plain</em>,...</h4>
-<p>验证的文件必须具备与列出的其中一个扩展相匹配的 MIME 类型：</p>
+<p>验证的文件必须匹配给定的 MIME 类型之一：</p>
 <pre><code>'video' =&gt; 'mimetypes:video/avi,video/mpeg,video/quicktime'
 </code></pre>
-<p>为了确定上传文件的 MIME，框架将会读取文件，然后自动推测文件 MIME 类型，这可能与客户端提供的 MIME 类型不一致。</p>
+<p>为了确定上传文件的 MIME 类型，将读取文件内容并尝试猜测 MIME 类型，这可能与客户端提供的 MIME 类型不同。</p>
 <p><a name="rule-mimes"></a></p>
 <h4 id="mimesfoobar">mimes:<em>foo</em>,<em>bar</em>,...</h4>
-<p>验证的文件必须具有与列出的其中一个扩展名相对应的 MIME 类型。</p>
+<p>验证的文件必须具有与列出的扩展名之一对应的 MIME 类型。</p>
 <p><a name="basic-usage-of-mime-rule"></a></p>
-<h4 id="mime-规则基本用法">MIME 规则基本用法</h4>
+<h4 id="mime-规则的基本用法">MIME 规则的基本用法</h4>
 <pre><code>'photo' =&gt; 'mimes:jpg,bmp,png'
 </code></pre>
-<p>即使你可能只需要验证指定扩展名，但此规则实际上会去验证文件的 MIME 类型，其通过读取文件内容来推测它的 MIME 类型。可以在以下链接中找到完整的 MIME 类型列表及相对应的扩展名：</p>
+<p>尽管您只需要指定扩展名，但该规则实际上通过读取文件内容并猜测其 MIME 类型来验证文件的 MIME 类型。可以在以下位置找到 MIME 类型及其相应扩展名的完整列表：</p>
 <p><a href="https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types">https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types</a></p>
 <p><a name="rule-min"></a></p>
 <h4 id="minvalue">min:<em>value</em></h4>
-<p>验证字段必须具有最小值 <em>value</em> 。字符串，数值，数组，文件大小的计算方式都与  <a href="#rule-size"><code>size</code></a> 规则一致。</p>
-<p><a name="multiple-of"></a></p>
+<p>验证的字段的值必须大于或等于最小值 <em>value</em>。字符串、数字、数组和文件的处理方式与 <a href="#rule-size"><code>size</code></a> 规则相同。</p>
+<p><a name="rule-min-digits"></a></p>
+<h4 id="min_digitsvalue">min_digits:<em>value</em></h4>
+<p> 验证的整数必须具有至少_value_位数。</p>
+<p><a name="rule-multiple-of"></a></p>
 <h4 id="multiple_ofvalue">multiple_of:<em>value</em></h4>
-<p>验证字段必须是 <em>value</em> 的倍数。</p>
-<blockquote>
-<p>注意：使用 <code>multiple_of</code> 规则时，需要安装 <a href="https://www.php.net/manual/en/book.bc.php"><code>bcmath</code> PHP 扩展</a> </p>
-</blockquote>
+<p> 验证的字段必须是_value_的倍数。</p>
+<p><a name="rule-missing"></a></p>
+<h4 id="missing">missing</h4>
+<p> 验证的字段在输入数据中必须不存在。</p>
+<p> <a name="rule-missing-if"></a></p>
+<h4 id="missing_ifanotherfieldvalue">missing_if:<em>anotherfield</em>,<em>value</em>,...</h4>
+<p> 如果_anotherfield_字段等于任何_value_，则验证的字段必须不存在。</p>
+<p> <a name="rule-missing-unless"></a></p>
+<h4 id="missing_unlessanotherfieldvalue">missing_unless:<em>anotherfield</em>,<em>value</em></h4>
+<p> 验证的字段必须不存在，除非_anotherfield_字段等于任何_value_。</p>
+<p> <a name="rule-missing-with"></a></p>
+<h4 id="missing_withfoobar">missing_with:<em>foo</em>,<em>bar</em>,...</h4>
+<p> 如果任何其他指定的字段存在，则验证的字段必须不存在。</p>
+<p> <a name="rule-missing-with-all"></a></p>
+<h4 id="missing_with_allfoobar">missing_with_all:<em>foo</em>,<em>bar</em>,...</h4>
+<p> 如果所有其他指定的字段都存在，则验证的字段必须不存在。</p>
 <p><a name="rule-not-in"></a></p>
 <h4 id="not_infoobar">not_in:<em>foo</em>,<em>bar</em>,...</h4>
-<p>验证字段不能包含在给定的值的列表中。 使用 <code>Rule::notIn</code> 方法可以更流畅的构建这个规则：</p>
+<p>验证的字段不能包含在给定值列表中。可以使用<code>Rule::notIn</code>方法流畅地构建规则：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Validation\Rule;
 
 Validator::make(<span class="variable token">$data</span>, [
@@ -1069,62 +1196,116 @@ Validator::make(<span class="variable token">$data</span>, [
 </code></pre>
 <p><a name="rule-not-regex"></a></p>
 <h4 id="not_regexpattern">not_regex:<em>pattern</em></h4>
-<p>验证字段必须与给定的正则表达式不匹配。</p>
-<p>验证时，这个规则使用 PHP <code>preg_match</code> 函数。指定的模式应遵循 <code>preg_match</code> 所需的相同格式，也包括有效的分隔符。 例如： <code>&#39;email&#39; =&gt; &#39;not_regex:/^.+$/i&#39;</code>。</p>
-<blockquote>
-<p>注意：当使用 <code>regex</code> / <code>not_regex</code> 模式时， 可能需要在数组中指定规则，而不是使用 <code>|</code> 分隔符 ，特别是在正则表达式包含 <code>|</code> 字符 的情况下。</p>
-</blockquote>
+<p>验证的字段必须不匹配给定的正则表达式。</p>
+<p>在内部，此规则使用PHP的<code>preg_match</code>函数。指定的模式应遵守<code>preg_match</code>所需的相同格式要求，因此也应包括有效的分隔符。例如：<code>&#39;email&#39; =&gt; &#39;not_regex:/^.+$/i&#39;</code>。</p>
+<p><strong>警告</strong> 使用<code>regex</code> / <code>not_regex</code>模式时，可能需要使用数组指定验证规则，而不是使用<code>|</code>分隔符，特别是如果正则表达式包含<code>|</code>字符。</p>
 <p><a name="rule-nullable"></a></p>
 <h4 id="nullable">nullable</h4>
-<p>验证字段可以为 <code>null</code>。</p>
+<p>需要验证的字段可以为 null。</p>
 <p><a name="rule-numeric"></a></p>
 <h4 id="numeric">numeric</h4>
-<p>验证字段必须为 <a href="https://www.php.net/manual/en/function.is-numeric.php">数值</a>。</p>
+<p>需要验证的字段必须是<a href="https://www.php.net/manual/en/function.is-numeric.php">数字类型</a>。</p>
 <p><a name="rule-password"></a></p>
 <h4 id="password">password</h4>
-<p>验证字段必须与当前登录用户的密码相同。</p>
+<p>需要验证的字段必须与已认证用户的密码相匹配。</p>
 <blockquote>
-<p>注意：此规则已重命名为 <code>current_password</code> ，目的是在 Laravel 9 中将其删除。请改用 <a href="#rule-current-password">当前密码</a> 规则。</p>
+<p><strong>警告</strong>
+这个规则在 Laravel 9 中被重命名为 <code>current_password</code> 并计划删除，请改用 <a href="#rule-current-password">Current Password</a> 规则。</p>
 </blockquote>
 <p><a name="rule-present"></a></p>
 <h4 id="present">present</h4>
-<p>验证字段必须存在于输入数据中，但可以为空。</p>
+<p>需要验证的字段必须存在于输入数据中。</p>
 <p><a name="rule-prohibited"></a></p>
 <h4 id="prohibited">prohibited</h4>
-<p>验证字段必须为空或不存在。</p>
-<p><a name="rule-prohibited-if"></a></p>
-<h4 id="prohibited_ifanotherfieldvalue">prohibited_if:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>如果 <em>anotherfield</em> 字段等于任何值，则验证中的字段必须为空或不存在。</p>
-<p><a name="rule-prohibited-unless"></a></p>
-<h4 id="prohibited_unlessanotherfieldvalue">prohibited_unless:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>验证中的字段必须为空或不存在，除非 <em>anotherfield</em> 字段等于 <em>value</em> 。</p>
-<p><a name="rule-prohibits"></a></p>
-<h4 id="prohibitsanotherfield">prohibits:<em>anotherfield</em>,...</h4>
-<p>如果验证中的字段存在，则 <em>anotherfield</em> 中不能存在任何字段，即使该字段为空。</p>
-<p><a name="rule-regex"></a></p>
-<h4 id="regexpattern">regex:<em>pattern</em></h4>
-<p>验证字段必须与给定的正则表达式匹配。</p>
-<p>验证时，这个规则使用 PHP 的 <code>preg_match</code>  函数。 指定的模式应遵循 <code>preg_match</code> 所需的相同格式，也包括有效的分隔符。 例如： <code>&#39;email&#39; =&gt; &#39;regex:/^.+@.+$/i&#39;</code>.</p>
-<blockquote>
-<p>注意：当使用  <code>regex</code> / <code>not_regex</code> 模式时， 可能需要在数组中指定规则，而不是使用 <code>|</code> 分隔符 ，特别是在正则表达式包含 <code>|</code> 字符 的情况下。</p>
-</blockquote>
-<p><a name="rule-required"></a></p>
-<h4 id="required">required</h4>
-<p>验证中的字段必须存在于输入数据中，并且不能为空。如果以下条件之一为真，则字段被视为「空」：</p>
+<p>需要验证的字段必须不存在或为空。如果符合以下条件之一，字段将被认为是“空”：</p>
 <div class="content-list" markdown="1">
 
 <ul>
-<li>值为 <code>null</code>。</li>
-<li>该值为空字符串。</li>
-<li>该值是一个空数组或空的 <code>Countable</code> 对象。</li>
-<li>该值是一个没有路径的上传文件。</li>
+<li>  值为 <code>null</code>。</li>
+<li>  值为空字符串。</li>
+<li>  值为空数组或空的可计数对象。</li>
+<li>  值为上传文件，但文件路径为空。</li>
 </ul>
 </div>
 
+<p><a name="rule-prohibited-if"></a></p>
+<h4 id="prohibited_ifanotherfieldvalue">prohibited_if:<em>anotherfield</em>,<em>value</em>,...</h4>
+<p>如果 anotherfield 字段等于任何 value，则需要验证的字段必须不存在或为空。如果符合以下条件之一，字段将被认为是“空”：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>  值为 <code>null</code>。</li>
+<li>  值为空字符串。</li>
+<li>  值为空数组或空的可计数对象。</li>
+<li>  值为上传文件，但文件路径为空。</li>
+</ul>
+</div>
+
+<p>如果需要复杂的条件禁止逻辑，则可以使用 <code>Rule::prohibitedIf</code> 方法。该方法接受一个布尔值或一个闭包。当给定一个闭包时，闭包应返回 <code>true</code> 或 <code>false</code>，以指示是否应禁止验证字段：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+<span class="keyword token">use</span> Illuminate\Validation\Rule;
+
+Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+    <span class="string token">'role_id'</span> =&gt; Rule::prohibitedIf(<span class="variable token">$request</span>-&gt;user()-&gt;is_admin),
+]);
+
+Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+    <span class="string token">'role_id'</span> =&gt; Rule::prohibitedIf(fn () =&gt; <span class="variable token">$request</span>-&gt;user()-&gt;is_admin),
+]);
+</code></pre>
+<p><a name="rule-prohibited-unless"></a></p>
+<h4 id="prohibited_unlessanotherfieldvalue">prohibited_unless:<em>anotherfield</em>,<em>value</em>,...</h4>
+<p>在 anotherfield 字段等于任何 value 时，验证的字段必须为空或缺失。如果一个字段符合以下任一标准，则它被认为是“空”的：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>  值为 <code>null</code>。</li>
+<li>  值为空字符串。</li>
+<li>  值为一个空数组或一个空的 <code>Countable</code> 对象。</li>
+<li>  值为上传文件且路径为空。</li>
+</ul>
+</div>
+
+<p><a name="rule-prohibits"></a></p>
+<h4 id="prohibitsanotherfield">prohibits:<em>anotherfield</em>,...</h4>
+<p>如果验证的字段不为空或缺失，则 anotherfield 中的所有字段都必须为空或缺失。如果一个字段符合以下任一标准，则它被认为是“空”的：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>  值为 <code>null</code>。</li>
+<li>  值为空字符串。</li>
+<li>  值为一个空数组或一个空的 <code>Countable</code> 对象。</li>
+<li>  值为上传文件且路径为空。</li>
+</ul>
+</div>
+
+<p><a name="rule-regex"></a></p>
+<h4 id="regexpattern">regex:<em>pattern</em></h4>
+<p>验证的字段必须匹配给定的正则表达式。</p>
+<p>在内部，此规则使用 PHP 的 <code>preg_match</code> 函数。指定的模式应遵循 <code>preg_match</code> 所需的相同格式，并且也包括有效的分隔符。例如：<code>&#39;email&#39; =&gt; &#39;regex:/^.+@.+$/i&#39;</code>。</p>
+<blockquote>
+<p><strong>警告</strong>
+当使用 <code>regex</code> / <code>not_regex</code> 模式时，可能需要使用数组指定规则而不是使用 <code>|</code> 分隔符，特别是如果正则表达式包含 <code>|</code> 字符。</p>
+</blockquote>
+<p><a name="rule-required"></a></p>
+<h4 id="required">required</h4>
+<p>验证的字段必须出现在输入数据中且不为空。如果一个字段符合以下任一标准，则它被认为是“空”的：</p>
+<div class="content-list" markdown="1">
+
+<ul>
+<li>  值为 <code>null</code>。</li>
+<li>  值为空字符串。</li>
+<li>  值为一个空数组或一个空的 <code>Countable</code> 对象。</li>
+<li>  值为上传文件且路径为空。</li>
+</ul>
+</div>
+
+
+
 <p><a name="rule-required-if"></a></p>
 <h4 id="required_ifanotherfieldvalue">required_if:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>如果 <em>anotherfield</em> 字段等于任何 <em>value</em> ，则验证中的字段必须存在且不为空。</p>
-<p>如果你想为 <code>required_if</code> 规则构造一个更复杂的条件，你可以使用 <code>Rule::requiredIf</code> 方法。 此方法接受布尔值或闭包。 当传递一个闭包时，闭包应该返回 <code>true</code> 或 <code>false</code> 以指示是否需要验证字段：</p>
+<p>如果 anotherfield 字段的值等于任何 value 值，则验证的字段必须存在且不为空。</p>
+<p>如果您想要构建更复杂的 <code>required_if</code> 规则条件，可以使用 <code>Rule::requiredIf</code> 方法。该方法接受一个布尔值或闭包。当传递一个闭包时，闭包应返回 <code>true</code> 或 <code>false</code> 来指示是否需要验证的字段：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
@@ -1133,74 +1314,73 @@ Validator::make(<span class="variable token">$request</span>-&gt;all(), [
 ]);
 
 Validator::make(<span class="variable token">$request</span>-&gt;all(), [
-    <span class="string token">'role_id'</span> =&gt; Rule::requiredIf(<span class="keyword token">function</span> () <span class="keyword token">use</span> (<span class="variable token">$request</span>) {
-        <span class="keyword token">return</span> <span class="variable token">$request</span>-&gt;user()-&gt;is_admin;
-    }),
+    <span class="string token">'role_id'</span> =&gt; Rule::requiredIf(fn () =&gt; <span class="variable token">$request</span>-&gt;user()-&gt;is_admin),
 ]);
 </code></pre>
 <p><a name="rule-required-unless"></a></p>
 <h4 id="required_unlessanotherfieldvalue">required_unless:<em>anotherfield</em>,<em>value</em>,...</h4>
-<p>除非<em>anotherfield</em> 字段等于任何 <em>value</em> ，否则验证中的字段必须存在且不为空。 这也意味着 <em>anotherfield</em> 必须存在于请求数据中，除非 <em>value</em> 为 <code>null</code>。 如果 <em>value</em> 为 <code>null</code> (<code>required_unless:name,null</code>)，则需要验证的字段，除非比较字段为 <code>null</code> 或请求数据中缺少比较字段。</p>
+<p>如果 <em>anotherfield</em> 字段的值不等于任何 <em>value</em> 值，则验证的字段必须存在且不为空。这也意味着，除非 <em>anotherfield</em> 字段等于任何 <em>value</em> 值，否则必须在请求数据中包含 <em>anotherfield</em> 字段。如果 <em>value</em> 的值为 <code>null</code> （<code>required_unless:name,null</code>），则必须验证该字段，除非比较字段是 <code>null</code> 或比较字段不存在于请求数据中。</p>
 <p><a name="rule-required-with"></a></p>
 <h4 id="required_withfoobar">required_with:<em>foo</em>,<em>bar</em>,...</h4>
-<p>仅当任何指定的字段存在且不为空时，验证下的字段才必须存在且不为空。</p>
+<p>仅当任何其他指定字段存在且不为空时，才需要验证字段存在且不为空。</p>
 <p><a name="rule-required-with-all"></a></p>
 <h4 id="required_with_allfoobar">required_with_all:<em>foo</em>,<em>bar</em>,...</h4>
-<p>仅当所有指定的字段存在且不为空时，验证下的字段才必须存在且不为空。</p>
+<p>仅当所有其他指定字段存在且不为空时，才需要验证字段存在且不为空。</p>
 <p><a name="rule-required-without"></a></p>
 <h4 id="required_withoutfoobar">required_without:<em>foo</em>,<em>bar</em>,...</h4>
-<p>仅当任何指定的字段不存在或为空时，验证下的字段才必须存在且不为空。</p>
+<p>验证的字段仅在任一其他指定字段为空或不存在时，必须存在且不为空。</p>
 <p><a name="rule-required-without-all"></a></p>
 <h4 id="required_without_allfoobar">required_without_all:<em>foo</em>,<em>bar</em>,...</h4>
-<p>仅当所有指定的字段不存在或为空时，验证下的字段才必须存在且不为空。</p>
+<p>验证的字段仅在所有其他指定字段为空或不存在时，必须存在且不为空。</p>
 <p><a name="rule-required-array-keys"></a></p>
 <h4 id="required_array_keysfoobar">required_array_keys:<em>foo</em>,<em>bar</em>,...</h4>
 <p>验证的字段必须是一个数组，并且必须至少包含指定的键。</p>
 <p><a name="rule-same"></a></p>
 <h4 id="samefield">same:<em>field</em></h4>
-<p>给定的 <em>field</em> 必须与正在验证的字段匹配。</p>
+<p>给定的字段必须与验证的字段匹配。</p>
 <p><a name="rule-size"></a></p>
 <h4 id="sizevalue">size:<em>value</em></h4>
-<p>验证字段的大小必须与给定的 <em>value</em> 匹配。对于字符串数据，<em>value</em> 对应于字符数。 对于数字数据，<em>value</em> 对应于给定的整数值（属性还必须具有 <code>numeric</code> 或 <code>integer</code> 规则）。 对于数组，<em>size</em> 对应于数组的 <code>count</code>。 对于文件，<em>size</em> 对应于以千字节为单位的文件大小。 让我们看一些例子：</p>
-<pre><code><span class="comment token">// 验证一个字符串是否正好是 12 个字符长...</span>
+<p>验证的字段必须具有与给定的_value相匹配的大小。对于字符串数据，value 对应于字符数。对于数字数据，value 对应于给定的整数值（该属性还必须具有 numeric 或 integer 规则）。对于数组，size 对应于数组的 count。对于文件，size 对应于文件大小（以千字节为单位）。让我们看一些例子：</p>
+<pre><code><span class="comment token">// Validate that a string is exactly 12 characters long...</span>
 <span class="string token">'title'</span> =&gt; <span class="string token">'size:12'</span>;
 
-<span class="comment token">// 验证提供的整数是否等于 10...</span>
+<span class="comment token">// Validate that a provided integer equals 10...</span>
 <span class="string token">'seats'</span> =&gt; <span class="string token">'integer|size:10'</span>;
 
-<span class="comment token">// 验证一个数组正好有 5 个元素...</span>
+<span class="comment token">// Validate that an array has exactly 5 elements...</span>
 <span class="string token">'tags'</span> =&gt; <span class="string token">'array|size:5'</span>;
 
-<span class="comment token">// 验证上传的文件是否正好为 512 KB...</span>
+<span class="comment token">// Validate that an uploaded file is exactly 512 kilobytes...</span>
 <span class="string token">'image'</span> =&gt; <span class="string token">'file|size:512'</span>;
 </code></pre>
 <p><a name="rule-starts-with"></a></p>
 <h4 id="starts_withfoobar">starts_with:<em>foo</em>,<em>bar</em>,...</h4>
-<p>验证字段必须以给定值之一开头。</p>
+<p>验证的字段必须以给定值之一开头。</p>
 <p><a name="rule-string"></a></p>
 <h4 id="string">string</h4>
-<p>验证字段必须是字符串。 如果您想允许该字段也为 <code>null</code>，则应为该字段分配 <code>nullable</code> 规则。</p>
+<p>验证的字段必须是一个字符串。如果您希望允许字段也可以为 <code>null</code>，则应将 <code>nullable</code> 规则分配给该字段。</p>
 <p><a name="rule-timezone"></a></p>
-<h4 id="timezone">timezone</h4>
-<p>根据 <code>timezone_identifiers_list</code> PHP 函数，验证中的字段必须是有效的时区标识符。</p>
+<h4 id="时区">时区</h4>
+<p>验证字段必须是一个有效的时区标识符，符合 <code>timezone_identifiers_list</code> PHP 函数的要求。</p>
 <p><a name="rule-unique"></a></p>
 <h4 id="uniquetablecolumn">unique:<em>table</em>,<em>column</em></h4>
-<p>验证中的字段不能存在于给定的数据库表中。</p>
-<p><strong>指定自定义表/列名称：</strong></p>
-<p>您可以指定 Eloquent 模型来确定表名，而不是直接指定表名：</p>
+<p>验证字段在给定的数据库表中必须不存在。</p>
+<p><strong>指定自定义表/列名:</strong></p>
+<p>可以指定应使用哪个 Eloquent 模型来确定表名，而不是直接指定表名：</p>
 <pre><code>'email' =&gt; 'unique:App\Models\User,email_address'
 </code></pre>
-<p><code>column</code> 选项可用于指定字段对应的数据库列。 如果未指定 <code>column</code> 选项，将使用正在验证的字段的名称。</p>
+<p><code>column</code> 选项可用于指定字段对应的数据库列。如果未指定 <code>column</code> 选项，则使用验证字段的名称。</p>
 <pre><code>'email' =&gt; 'unique:users,email_address'
 </code></pre>
 <p><strong>指定自定义数据库连接</strong></p>
-<p>有时，您可能需要为验证器进行的数据库查询设置自定义连接。 为此，您可以将连接名称添加到表名称之前：</p>
+<p>有时，您可能需要为 Validator 执行的数据库查询设置自定义连接。为此，可以在表名之前添加连接名称：</p>
 <pre><code>'email' =&gt; 'unique:connection.users,email_address'
 </code></pre>
-<p><strong>强制唯一规则忽略给定 ID：</strong></p>
-<p>有时，您可能希望在唯一验证期间忽略给定的 ID。 例如，考虑一个包含用户姓名、电子邮件地址和位置的“更新个人资料”屏幕。 您可能需要验证电子邮件地址是否唯一。 但是，如果用户只更改名称字段而不更改电子邮件字段，则您不希望引发验证错误，因为用户已经是相关电子邮件地址的所有者。</p>
-<p>为了指示验证器忽略用户 ID，我们将使用 <code>Rule</code> 类来流畅地定义规则。 在这个例子中，我们还将验证规则指定为一个数组，而不是使用 <code>|</code> 字符来分隔规则：</p>
-<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+<p><strong>强制唯一规则忽略给定的 ID:</strong></p>
+<p>有时，您可能希望在唯一验证期间忽略给定的 ID。例如，考虑一个“更新个人资料”屏幕，其中包括用户的姓名、电子邮件地址和位置。您可能希望验证电子邮件地址是否唯一。但是，如果用户仅更改了名称字段而未更改电子邮件字段，则不希望因为用户已经拥有相关电子邮件地址而抛出验证错误。</p>
+<p>要指示验证器忽略用户的 ID，我们将使用 <code>Rule</code> 类来流畅地定义规则。在此示例中，我们还将指定验证规则作为数组，而不是使用 <code>|</code> 字符来分隔规则：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Database\Eloquent\Builder;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
 Validator::make(<span class="variable token">$data</span>, [
@@ -1211,34 +1391,39 @@ Validator::make(<span class="variable token">$data</span>, [
 ]);
 </code></pre>
 <blockquote>
-<p>注意：你不应该将任何用户控制的请求输入传递给 <code>ignore</code> 方法。相反，您应该只传递系统生成的唯一 ID，例如来自 Eloquent 模型实例的自动递增 ID 或 UUID。否则，您的应用程序将容易受到 SQL 注入攻击。</p>
+<p><strong>警告</strong>
+您不应将任何用户控制的请求输入传递到 <code>ignore</code> 方法中。相反，您应仅传递系统生成的唯一 ID，例如 Eloquent 模型实例的自增 ID 或 UUID。否则，您的应用程序将容易受到 SQL 注入攻击。</p>
 </blockquote>
-<p>除了将模型键的值传递给 <code>ignore</code> 方法，您还可以传递整个模型实例。 Laravel 会自动从模型中提取密钥：</p>
+<p>不需要将模型键的值传递给 <code>ignore</code> 方法，您也可以传递整个模型实例。Laravel 将自动从模型中提取键：</p>
 <pre><code>Rule::unique(<span class="string token">'users'</span>)-&gt;ignore(<span class="variable token">$user</span>)
 </code></pre>
-<p>如果您的表使用 <code>id</code> 以外的主键列名，则可以在调用 <code>ignore</code> 方法时指定列名：</p>
+<p>如果您的表使用的是除 <code>id</code> 以外的主键列名，可以在调用 <code>ignore</code> 方法时指定列的名称：</p>
 <pre><code>Rule::unique(<span class="string token">'users'</span>)-&gt;ignore(<span class="variable token">$user</span>-&gt;id, <span class="string token">'user_id'</span>)
 </code></pre>
-<p>默认情况下，<code>unique</code> 规则将检查与正在验证的属性名称匹配的列的唯一性。但是，您可以将不同的列名作为第二个参数传递给 <code>unique</code> 方法：</p>
-<pre><code>Rule::unique(<span class="string token">'users'</span>, <span class="string token">'email_address'</span>)-&gt;ignore(<span class="variable token">$user</span>-&gt;id),
+<p>默认情况下，<code>unique</code> 规则将检查与正在验证的属性名称匹配的列的唯一性。但是，您可以将不同的列名称作为第二个参数传递给 <code>unique</code> 方法：</p>
+<pre><code>Rule::unique(<span class="string token">'users'</span>, <span class="string token">'email_address'</span>)-&gt;ignore(<span class="variable token">$user</span>-&gt;id)
 </code></pre>
-<p><strong>添加额外的 Where 子句：</strong></p>
-<p>您可以通过使用 <code>where</code> 方法自定义查询来指定其他查询条件。例如，让我们添加一个查询条件，将查询范围限定为仅搜索 <code>account_id</code> 列值为 <code>1</code> 的记录：</p>
-<pre><code><span class="string token">'email'</span> =&gt; Rule::unique(<span class="string token">'users'</span>)-&gt;where(<span class="keyword token">function</span> (<span class="variable token">$query</span>) {
-    <span class="keyword token">return</span> <span class="variable token">$query</span>-&gt;where(<span class="string token">'account_id'</span>, <span class="number token">1</span>);
-})
+<p><strong>添加额外的查询条件：</strong></p>
+<p>您可以通过自定义查询并使用 <code>where</code> 方法来指定其他查询条件。例如，让我们添加一个查询条件，将查询范围限定为仅搜索具有 <code>account_id</code> 列值为 <code>1</code> 的记录：</p>
+<pre><code><span class="string token">'email'</span> =&gt; Rule::unique(<span class="string token">'users'</span>)-&gt;where(fn (Builder <span class="variable token">$query</span>) =&gt; <span class="variable token">$query</span>-&gt;where(<span class="string token">'account_id'</span>, <span class="number token">1</span>))
 </code></pre>
+<p><a name="rule-uppercase"></a></p>
+<h4 id="uppercase">uppercase</h4>
+<p>验证字段必须为大写。</p>
 <p><a name="rule-url"></a></p>
 <h4 id="url">url</h4>
-<p>验证字段必须是有效的 URL。</p>
+<p>验证字段必须为有效的 URL。</p>
+<p><a name="rule-ulid"></a></p>
+<h4 id="ulid">ulid</h4>
+<p>验证字段必须为有效的<a href="https://github.com/ulid/spec">通用唯一词典排序标识符</a>（ULID）。</p>
 <p><a name="rule-uuid"></a></p>
 <h4 id="uuid">uuid</h4>
-<p>验证字段必须是有效的 RFC 4122（版本 1、3、4 或 5）通用唯一标识符 (UUID)。</p>
+<p>验证字段必须为有效的 RFC 4122（版本1、3、4或5）通用唯一标识符（UUID）。</p>
 <p><a name="conditionally-adding-rules"></a></p>
-<h2 id="有条件地添加规则">有条件地添加规则</h2>
+<h2 id="有条件添加规则">有条件添加规则</h2>
 <p><a name="skipping-validation-when-fields-have-certain-values"></a></p>
 <h4 id="当字段具有特定值时跳过验证">当字段具有特定值时跳过验证</h4>
-<p>如果另一个字段具有给定值，您有时可能希望不验证给定字段。 您可以使用 <code>exclude_if</code> 验证规则来完成此操作。 在此示例中，如果 <code>has_appointment</code> 字段的值为 <code>false</code>，则不会验证 <code>appointment_date</code> 和 <code>doctor_name</code> 字段：</p>
+<p>有时，您可能希望在给定字段具有特定值时不验证另一个字段。您可以使用<code>exclude_if</code>验证规则来实现这一点。在下面的示例中，如果<code>has_appointment</code>字段的值为<code>false</code>，则不会验证<code>appointment_date</code>和<code>doctor_name</code>字段：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$data</span>, [
@@ -1247,7 +1432,7 @@ Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'doctor_name'</span> =&gt; <span class="string token">'exclude_if:has_appointment,false|required|string'</span>,
 ]);
 </code></pre>
-<p>或者，您可以使用 <code>exclude_unless</code> 规则不验证给定字段，除非另一个字段具有给定值：</p>
+<p>或者，您可以使用<code>exclude_unless</code>规则，除非另一个字段具有给定值，否则不验证给定字段：</p>
 <pre><code><span class="variable token">$validator</span> = Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'has_appointment'</span> =&gt; <span class="string token">'required|boolean'</span>,
     <span class="string token">'appointment_date'</span> =&gt; <span class="string token">'exclude_unless:has_appointment,true|required|date'</span>,
@@ -1255,19 +1440,20 @@ Validator::make(<span class="variable token">$data</span>, [
 ]);
 </code></pre>
 <p><a name="validating-when-present"></a></p>
-<h4 id="验证是否存在">验证是否存在</h4>
-<p>在某些情况下，您可能希望<strong>仅</strong>如果该字段存在于正在验证的数据中，则对该字段运行验证检查。 要快速完成此操作，请将 <code>sometimes</code> 规则添加到您的规则列表中：</p>
+<h4 id="仅在字段存在时验证">仅在字段存在时验证</h4>
+<p>在某些情况下，您可能希望仅在验证数据中存在该字段时才对该字段运行验证检查。要快速实现此操作，请将<code>sometimes</code>规则添加到您的规则列表中：</p>
 <pre><code><span class="variable token">$v</span> = Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'email'</span> =&gt; <span class="string token">'sometimes|required|email'</span>,
 ]);
 </code></pre>
-<p>在上面的示例中，只有在 <code>$data</code> 数组中存在 <code>email</code> 字段时才会对其进行验证。</p>
+<p>在上面的示例中，如果<code>$data</code>数组中存在<code>email</code>字段，则仅对其进行验证。</p>
 <blockquote>
-<p>技巧：如果您尝试验证应始终存在但可能为空的字段，请查看 <a href="#a-note-on-optional-fields">关于可选字段的此注释</a>。</p>
+<p><strong>注意</strong>
+如果您尝试验证始终应存在但可能为空的字段，请查看<a href="#a-note-on-optional-fields">有关可选字段的说明</a>。</p>
 </blockquote>
 <p><a name="complex-conditional-validation"></a></p>
-<h4 id="复杂的条件验证">复杂的条件验证</h4>
-<p>有时您可能希望基于更复杂的条件逻辑添加验证规则。例如，您可能希望仅当另一个字段的值大于 100 时才需要给定字段。或者，您可能需要两个字段才能仅在另一个字段存在时才具有给定值。 添加这些验证规则并不一定很痛苦。首先，使用您的 <em>静态规则</em> 创建一个永远不会改变的 <code>Validator</code> 实例：</p>
+<h4 id="复杂条件验证">复杂条件验证</h4>
+<p>有时，您可能希望根据更复杂的条件逻辑添加验证规则。例如，您可能只希望在另一个字段的值大于100时要求给定字段。或者，只有在存在另一个字段时，两个字段才需要具有给定值。添加这些验证规则不必是痛苦的。首先，使用永不改变的静态规则创建一个<code>Validator</code>实例：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
@@ -1275,22 +1461,25 @@ Validator::make(<span class="variable token">$data</span>, [
     <span class="string token">'games'</span> =&gt; <span class="string token">'required|numeric'</span>,
 ]);
 </code></pre>
-<p>假设我们的 Web 应用程序是面向游戏收藏家的。如果游戏收藏家在我们的应用程序中注册并且他们拥有超过 100 款游戏，我们希望他们解释为什么他们拥有这么多游戏。 例如，他们可能经营一家游戏转售店，或者他们只是喜欢收集游戏。要有条件地添加此要求，我们可以在 <code>Validator</code> 实例上使用 <code>sometimes</code> 方法。</p>
-<pre><code><span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'reason'</span>, <span class="string token">'required|max:500'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+<p>假设我们的 Web 应用是给游戏收藏家使用的。如果一个游戏收藏家在我们的应用上注册，并且他们拥有超过 100 个游戏，我们想要让他们解释为什么拥有这么多游戏。例如，也许他们经营着一家游戏转售店，或者他们只是喜欢收集游戏。为了有条件地添加这个要求，我们可以在 <code>Validator</code> 实例上使用 <code>sometimes</code> 方法。</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Fluent;
+
+<span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'reason'</span>, <span class="string token">'required|max:500'</span>, <span class="keyword token">function</span> (Fluent <span class="variable token">$input</span>) {
     <span class="keyword token">return</span> <span class="variable token">$input</span>-&gt;games &gt;= <span class="number token">100</span>;
 });
 </code></pre>
-<p>传递给 <code>sometimes</code> 方法的第一个参数是我们有条件地验证的字段的名称。 第二个参数是我们要添加的规则列表。 如果作为第三个参数传递的闭包返回 <code>true</code>，则将添加规则。 这种方法使构建复杂的条件验证变得轻而易举。 您甚至可以一次为多个字段添加条件验证：</p>
-<pre><code><span class="variable token">$validator</span>-&gt;sometimes([<span class="string token">'reason'</span>, <span class="string token">'cost'</span>], <span class="string token">'required'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>) {
+<p>传递给 <code>sometimes</code> 方法的第一个参数是我们有条件验证的字段的名称。第二个参数是我们想要添加的规则列表。如果传递作为第三个参数的闭包返回 <code>true</code>，这些规则将被添加。使用此方法可以轻松构建复杂的条件验证。您甚至可以同时为多个字段添加条件验证：</p>
+<pre><code><span class="variable token">$validator</span>-&gt;sometimes([<span class="string token">'reason'</span>, <span class="string token">'cost'</span>], <span class="string token">'required'</span>, <span class="keyword token">function</span> (Fluent <span class="variable token">$input</span>) {
     <span class="keyword token">return</span> <span class="variable token">$input</span>-&gt;games &gt;= <span class="number token">100</span>;
 });
 </code></pre>
 <blockquote>
-<p>技巧：传递给闭包的 <code>$input</code> 参数将是 <code>Illuminate\Support\Fluent</code> 的一个实例，可用于访问您的输入和正在验证的文件。</p>
+<p><strong>注意</strong>
+传递给您的闭包的 <code>$input</code> 参数将是 <code>Illuminate\Support\Fluent</code> 的一个实例，可用于访问您正在验证的输入和文件。</p>
 </blockquote>
 <p><a name="complex-conditional-array-validation"></a></p>
-<h4 id="复杂的条件数组验证">复杂的条件数组验证</h4>
-<p>有时您可能希望根据同一嵌套数组中的另一个字段来验证一个字段，该数组的索引您不知道。在这些情况下，您可以允许您的闭包接收第二个参数，该参数将是正在验证的数组中的当前单个项目：</p>
+<h4 id="复杂条件数组验证">复杂条件数组验证</h4>
+<p>有时，您可能想要基于同一嵌套数组中的另一个字段验证一个字段，而您不知道其索引。在这种情况下，您可以允许您的闭包接收第二个参数，该参数将是正在验证的当前个体数组项：</p>
 <pre><code><span class="variable token">$input</span> = [
     <span class="string token">'channels'</span> =&gt; [
         [
@@ -1304,18 +1493,18 @@ Validator::make(<span class="variable token">$data</span>, [
     ],
 ];
 
-<span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'channels.*.address'</span>, <span class="string token">'email'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>, <span class="variable token">$item</span>) {
+<span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'channels.*.address'</span>, <span class="string token">'email'</span>, <span class="keyword token">function</span> (Fluent <span class="variable token">$input</span>, Fluent <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span>-&gt;type === <span class="string token">'email'</span>;
 });
 
-<span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'channels.*.address'</span>, <span class="string token">'url'</span>, <span class="keyword token">function</span> (<span class="variable token">$input</span>, <span class="variable token">$item</span>) {
+<span class="variable token">$validator</span>-&gt;sometimes(<span class="string token">'channels.*.address'</span>, <span class="string token">'url'</span>, <span class="keyword token">function</span> (Fluent <span class="variable token">$input</span>, Fluent <span class="variable token">$item</span>) {
     <span class="keyword token">return</span> <span class="variable token">$item</span>-&gt;type !== <span class="string token">'email'</span>;
 });
 </code></pre>
-<p>与传递给闭包的 <code>$input</code> 参数一样，当属性数据是数组时，<code>$item</code> 参数是 <code>Illuminate\Support\Fluent</code> 的实例；否则，它是一个字符串。</p>
+<p>像传递给闭包的 <code>$input</code> 参数一样，当属性数据是数组时，<code>$item</code> 参数是 <code>Illuminate\Support\Fluent</code> 的实例；否则，它是一个字符串。</p>
 <p><a name="validating-arrays"></a></p>
 <h2 id="验证数组">验证数组</h2>
-<p>正如 <a href="#rule-array"><code>array</code> 验证规则文档</a> 中所讨论的，<code>array</code> 规则接受允许的数组键列表。如果数组中存在任何其他键，则验证将失败：</p>
+<p>正如在 <a href="#rule-array"><code>array</code> 验证规则文档</a> 中讨论的那样，<code>array</code> 规则接受允许的数组键列表。如果数组中存在任何额外的键，则验证将失败：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$input</span> = [
@@ -1330,23 +1519,23 @@ Validator::make(<span class="variable token">$input</span>, [
     <span class="string token">'user'</span> =&gt; <span class="string token">'array:username,locale'</span>,
 ]);
 </code></pre>
-<p>通常，您应该始终指定允许出现在数组中的数组键。否则，验证器的 <code>validate</code> 和 <code>validated</code> 方法将返回所有经过验证的数据，包括数组及其所有键，即使这些键没有被其他嵌套数组验证规则验证。</p>
+<p>通常情况下，您应该始终指定允许出现在数组中的键。否则，验证器的 <code>validate</code> 和 <code>validated</code> 方法将返回所有经过验证的数据，包括数组及其所有键，即使这些键没有通过其他嵌套数组验证规则进行验证。</p>
 <p><a name="validating-nested-array-input"></a></p>
 <h3 id="验证嵌套数组输入">验证嵌套数组输入</h3>
-<p>验证基于嵌套数组的表单输入字段并不一定很痛苦。 您可以使用“点表示法”来验证数组中的属性。 例如，如果传入的 HTTP 请求包含 <code>photos[profile]</code> 字段，您可以像这样验证它：</p>
+<p>验证基于嵌套数组的表单输入字段并不需要很痛苦。您可以使用 &quot;点符号&quot; 来验证数组中的属性。例如，如果传入的 HTTP 请求包含一个 <code>photos[profile]</code> 字段，您可以像这样验证它：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'photos.profile'</span> =&gt; <span class="string token">'required|image'</span>,
 ]);
 </code></pre>
-<p>您还可以验证数组的每个元素。例如，要验证给定数组输入字段中的每封电子邮件是否唯一，您可以执行以下操作：</p>
+<p>您还可以验证数组中的每个元素。例如，要验证给定数组输入字段中的每个电子邮件是否唯一，可以执行以下操作：</p>
 <pre><code><span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'person.*.email'</span> =&gt; <span class="string token">'email|unique:users'</span>,
     <span class="string token">'person.*.first_name'</span> =&gt; <span class="string token">'required_with:person.*.last_name'</span>,
 ]);
 </code></pre>
-<p>同样，在指定 <a href="#custom-messages-for-specific-attributes">语言文件中的自定义验证消息</a> 时，您可以使用 <code>*</code> 字符，从而轻松为基于数组的字段使用单个验证消息：</p>
+<p>同样，您可以在语言文件中指定<a href="#custom-messages-for-specific-attributes">自定义验证消息</a>时使用 <code>*</code> 字符，使得针对基于数组的字段使用单个验证消息变得非常简单：</p>
 <pre><code>'custom' =&gt; [
     'person.*.email' =&gt; [
         'unique' =&gt; 'Each person must have a unique email address',
@@ -1355,13 +1544,13 @@ Validator::make(<span class="variable token">$input</span>, [
 </code></pre>
 <p><a name="accessing-nested-array-data"></a></p>
 <h4 id="访问嵌套数组数据">访问嵌套数组数据</h4>
-<p>有时，在为属性分配验证规则时，您可能需要访问给定嵌套数组元素的值。您可以使用 <code>Rule::foreEach</code> 方法完成此操作。 <code>forEach</code> 方法接受一个闭包，该闭包将为验证中的数组属性的每次迭代调用，并将接收属性的值和显式的、完全扩展的属性名称。闭包应该返回一个规则数组来分配给数组元素：</p>
+<p>有时，当为属性分配验证规则时，您可能需要访问给定嵌套数组元素的值。您可以使用 <code>Rule::forEach</code> 方法来实现此目的。<code>forEach</code> 方法接受一个闭包，在验证数组属性的每次迭代中调用该闭包，并接收属性的值和显式的完全展开的属性名称。闭包应该返回要分配给数组元素的规则数组：</p>
 <pre><code><span class="keyword token">use</span> App\Rules\HasPermission;
 <span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 <span class="keyword token">use</span> Illuminate\Validation\Rule;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
-    <span class="string token">'companies.*.id'</span> =&gt; Rule::<span class="keyword token">forEach</span>(<span class="keyword token">function</span> (<span class="variable token">$value</span>, <span class="variable token">$attribute</span>) {
+    <span class="string token">'companies.*.id'</span> =&gt; Rule::<span class="keyword token">forEach</span>(<span class="keyword token">function</span> (string|<span class="keyword token">null</span> <span class="variable token">$value</span>, string <span class="variable token">$attribute</span>) {
         <span class="keyword token">return</span> [
             Rule::exists(Company::<span class="keyword token">class</span>, <span class="string token">'id'</span>),
             <span class="keyword token">new</span> HasPermission(<span class="string token">'manage-company'</span>, <span class="variable token">$value</span>),
@@ -1369,59 +1558,119 @@ Validator::make(<span class="variable token">$input</span>, [
     }),
 ]);
 </code></pre>
-<p><a name="validating-passwords"></a></p>
-<h2 id="验证密码">验证密码</h2>
-<p>为确保密码具有足够的复杂性，您可以使用 Laravel 的 <code>password</code> 规则对象：</p>
+<p><a name="error-message-indexes-and-positions"></a></p>
+<h3 id="错误消息索引和位置">错误消息索引和位置</h3>
+<p>在验证数组时，您可能希望在应用程序显示的错误消息中引用失败验证的特定项的索引或位置。为了实现这一点，您可以在<a href="#manual-customizing-the-error-messages">自定义验证消息</a>中包含 <code>:index</code>（从 <code>0</code> 开始）和 <code>:position</code>（从 <code>1</code> 开始）占位符：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
-<span class="keyword token">use</span> Illuminate\Validation\Rules\Password;
 
-<span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
-    <span class="string token">'password'</span> =&gt; [<span class="string token">'required'</span>, <span class="string token">'confirmed'</span>, Password::min(<span class="number token">8</span>)],
+<span class="variable token">$input</span> = [
+    <span class="string token">'photos'</span> =&gt; [
+        [
+            <span class="string token">'name'</span> =&gt; <span class="string token">'BeachVacation.jpg'</span>,
+            <span class="string token">'description'</span> =&gt; <span class="string token">'我的海滩假期照片！'</span>,
+        ],
+        [
+            <span class="string token">'name'</span> =&gt; <span class="string token">'GrandCanyon.jpg'</span>,
+            <span class="string token">'description'</span> =&gt; <span class="string token">''</span>,
+        ],
+    ],
+];
+
+Validator::validate(<span class="variable token">$input</span>, [
+    <span class="string token">'photos.*.description'</span> =&gt; <span class="string token">'required'</span>,
+], [
+    <span class="string token">'photos.*.description.required'</span> =&gt; <span class="string token">'请描述第 :position 张照片。'</span>,
 ]);
 </code></pre>
-<p><code>Password</code> 规则对象允许您轻松自定义应用程序的密码复杂性要求，例如指定密码至少需要一个字母、数字、符号或混合大小写的字符：</p>
-<pre><code><span class="comment token">// 至少需要 8 个字符...</span>
-Password::min(<span class="number token">8</span>)
+<p>上述示例将验证失败，并且用户会看到以下错误：“请描述第 2 张照片。”</p>
+<p><a name="validating-files"></a></p>
+<h2 id="验证文件">验证文件</h2>
+<p>Laravel提供了多种上传文件的验证规则，如<code>mimes</code>、<code>image</code>、<code>min</code>和<code>max</code>。虽然你可以在验证文件时单独指定这些规则，但Laravel还是提供了一个流畅的文件验证规则生成器，你可能会觉得更方便：</p>
+<pre><code>    <span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+    <span class="keyword token">use</span> Illuminate\Validation\Rules\File;
 
-<span class="comment token">// 至少需要一个字母...</span>
-Password::min(<span class="number token">8</span>)-&gt;letters()
-
-<span class="comment token">// 至少需要一个大写字母和一个小写字母...</span>
-Password::min(<span class="number token">8</span>)-&gt;mixedCase()
-
-<span class="comment token">// 至少需要一个数字...</span>
-Password::min(<span class="number token">8</span>)-&gt;numbers()
-
-<span class="comment token">// 至少需要一个符号...</span>
-Password::min(<span class="number token">8</span>)-&gt;symbols()
+    Validator::validate(<span class="variable token">$input</span>, [
+        <span class="string token">'attachment'</span> =&gt; [
+            <span class="string token">'required'</span>,
+            File::types([<span class="string token">'mp3'</span>, <span class="string token">'wav'</span>])
+                -&gt;min(<span class="number token">1024</span>)
+                -&gt;max(<span class="number token">12</span> * <span class="number token">1024</span>),
+        ],
+    ]);
 </code></pre>
-<p>此外，您可以使用 <code>uncompromised</code> 方法确保密码没有在公共密码数据泄露事件中被泄露：</p>
-<pre><code>Password::min(8)-&gt;uncompromised()
+<p>如果你的程序允许用户上传图片，那么可以使用<code>File</code> 规则的 <code>image</code> 构造方法来指定上传的文件应该是图片。另外， <code>dimensions</code> 规则可用于限制图片的尺寸：</p>
+<pre><code>    <span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+    <span class="keyword token">use</span> Illuminate\Validation\Rules\File;
+
+    Validator::validate(<span class="variable token">$input</span>, [
+        <span class="string token">'photo'</span> =&gt; [
+            <span class="string token">'required'</span>,
+            File::image()
+                -&gt;min(<span class="number token">1024</span>)
+                -&gt;max(<span class="number token">12</span> * <span class="number token">1024</span>)
+                -&gt;dimensions(Rule::dimensions()-&gt;maxWidth(<span class="number token">1000</span>)-&gt;maxHeight(<span class="number token">500</span>)),
+        ],
+    ]);
 </code></pre>
-<p>在内部，<code>Password</code> 规则对象使用 <a href="https://en.wikipedia.org/wiki/K-anonymity">k-Anonymity</a> 模型来确定密码是否已通过 <a href="https://haveibeenpwned.com">haveibeenpwned.com</a> 服务而不牺牲用户的隐私或安全。</p>
-<p>默认情况下，如果密码在数据泄露中至少出现一次，则会被视为已泄露。您可以使用 <code>uncompromised</code> 方法的第一个参数自定义此阈值：</p>
-<pre><code><span class="comment token">// 确保密码在同一数据泄露中出现少于 3 次...</span>
-Password::min(<span class="number token">8</span>)-&gt;uncompromised(<span class="number token">3</span>);
+<blockquote>
+<p><strong>技巧</strong>
+更多验证图片尺寸的信息，请参见<a href="#rule-dimensions">尺寸规则文档</a>。</p>
+</blockquote>
+<p><a name="validating-files-file-types"></a></p>
+<h4 id="文件类型">文件类型</h4>
+<p>尽管在调用 <code>types</code> 方法时只需要指定扩展名，但该方法实际上是通过读取文件的内容并猜测其MIME类型来验证文件的MIME类型的。MIME类型及其相应扩展的完整列表可以在以下链接中找到：</p>
+<p><a href="https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types">https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types</a></p>
+<p><a name="validating-passwords"></a></p>
+<h2 id="验证密码">验证密码</h2>
+<p>为确保密码具有足够的复杂性，你可以使用 Laravel 的 <code>password</code> 规则对象：</p>
+<pre><code>    <span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
+    <span class="keyword token">use</span> Illuminate\Validation\Rules\Password;
+
+    <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
+        <span class="string token">'password'</span> =&gt; [<span class="string token">'required'</span>, <span class="string token">'confirmed'</span>, Password::min(<span class="number token">8</span>)],
+    ]);
 </code></pre>
-<p>当然，您可以将上面示例中的所有方法链接起来：</p>
-<pre><code>Password::min(8)
-    -&gt;letters()
-    -&gt;mixedCase()
-    -&gt;numbers()
-    -&gt;symbols()
-    -&gt;uncompromised()
+<p><code>Password</code> 规则对象允许你轻松自定义应用程序的密码复杂性要求，例如指定密码至少需要一个字母、数字、符号或混合大小写的字符：</p>
+<pre><code>    <span class="comment token">// 至少需要 8 个字符...</span>
+    Password::min(<span class="number token">8</span>)
+
+    <span class="comment token">// 至少需要一个字母...</span>
+    Password::min(<span class="number token">8</span>)-&gt;letters()
+
+    <span class="comment token">// 至少需要一个大写字母和一个小写字母...</span>
+    Password::min(<span class="number token">8</span>)-&gt;mixedCase()
+
+    <span class="comment token">// 至少需要一个数字...</span>
+    Password::min(<span class="number token">8</span>)-&gt;numbers()
+
+    <span class="comment token">// 至少需要一个符号...</span>
+    Password::min(<span class="number token">8</span>)-&gt;symbols()
+</code></pre>
+<p>此外，你可以使用 <code>uncompromised</code> 方法确保密码没有在公共密码数据泄露事件中被泄露：</p>
+<pre><code>    Password::min(8)-&gt;uncompromised()
+</code></pre>
+<p>在内部，<code>Password</code> 规则对象使用 <a href="https://en.wikipedia.org/wiki/K-anonymity">k-Anonymity</a> 模型来确定密码是否已通过 <a href="https://haveibeenpwned.com">haveibeenpwned.com</a>  服务而不牺牲用户的隐私或安全。</p>
+<p>默认情况下，如果密码在数据泄露中至少出现一次，则会被视为已泄露。你可以使用 <code>uncompromised</code> 方法的第一个参数自定义此阈值</p>
+<pre><code>    <span class="comment token">// Ensure the password appears less than 3 times in the same data leak...</span>
+    Password::min(<span class="number token">8</span>)-&gt;uncompromised(<span class="number token">3</span>);
+</code></pre>
+<p>当然，你可以将上面示例中的所有方法链接起来：</p>
+<pre><code>    Password::min(8)
+        -&gt;letters()
+        -&gt;mixedCase()
+        -&gt;numbers()
+        -&gt;symbols()
+        -&gt;uncompromised()
 </code></pre>
 <p><a name="defining-default-password-rules"></a></p>
 <h4 id="定义默认密码规则">定义默认密码规则</h4>
-<p>您可能会发现在应用程序的单个位置指定密码的默认验证规则很方便。 您可以使用接受闭包的 <code>Password::defaults</code> 方法轻松完成此操作。 给<code>defaults</code> 方法的闭包应该返回密码规则的默认配置。 通常，应该在应用程序的服务提供者之一的 <code>boot</code> 方法中调用 <code>defaults</code> 规则：</p>
+<p>你可能会发现在应用程序的单个位置指定密码的默认验证规则很方便。你可以使用接受闭包的 <code>Password::defaults</code> 方法轻松完成此操作。给 <code>defaults</code> 方法的闭包应该返回密码规则的默认配置。通常，应该在应用程序服务提供者之一的 <code>boot</code> 方法中调用 <code>defaults</code> 规则：</p>
 <pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Validation\Rules\Password;
 
 <span class="comment token">/**
- * 引导任何应用程序服务。
- *
- *<span class="phpdoc token"> @return</span> void
+ * 引导任何应用程序服务
  */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> boot()
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
 {
     Password::defaults(<span class="keyword token">function</span> () {
         <span class="variable token">$rule</span> = Password::min(<span class="number token">8</span>);
@@ -1432,10 +1681,10 @@ Password::min(<span class="number token">8</span>)-&gt;uncompromised(<span class
     });
 }
 </code></pre>
-<p>然后，当您想将默认规则应用于正在验证的特定密码时，您可以调用不带参数的 <code>defaults</code> 方法：</p>
+<p>然后，当你想将默认规则应用于正在验证的特定密码时，你可以调用不带参数的 <code>defaults</code> 方法：</p>
 <pre><code>'password' =&gt; ['required', Password::defaults()],
 </code></pre>
-<p>有时，您可能希望将其他验证规则附加到默认密码验证规则。 您可以使用 <code>rules</code> 方法来完成此操作：</p>
+<p>有时，你可能希望将其他验证规则附加到默认密码验证规则。 你可以使用 <code>rules</code> 方法来完成此操作：</p>
 <pre><code><span class="keyword token">use</span> App\Rules\ZxcvbnRule;
 
 Password::defaults(<span class="keyword token">function</span> () {
@@ -1448,86 +1697,74 @@ Password::defaults(<span class="keyword token">function</span> () {
 <h2 id="自定义验证规则">自定义验证规则</h2>
 <p><a name="using-rule-objects"></a></p>
 <h3 id="使用规则对象">使用规则对象</h3>
-<p>Laravel 提供了各种有用的验证规则； 但是，您可能希望指定一些您自己的。 注册自定义验证规则的一种方法是使用规则对象。 要生成新的规则对象，您可以使用 <code>make:rule</code> Artisan 命令。 让我们使用这个命令生成一个验证字符串是否为大写的规则。 Laravel 会将新规则放在 <code>app/Rules</code> 目录中。 如果此目录不存在，Laravel 将在您执行 Artisan 命令创建规则时创建它：</p>
+<p>Laravel 提供了各种有用的验证规则；但是，你可能希望指定一些你自己的。 注册自定义验证规则的一种方法是使用规则对象。 要生成新的规则对象，你可以使用 <code>make:rule</code> Artisan 命令。 让我们使用这个命令生成一个规则来验证字符串是否为大写。 Laravel 会将新规则放在 <code>app/Rules</code> 目录中。 如果这个目录不存在，Laravel 会在你执行 Artisan 命令创建规则时创建它：</p>
 <pre><code class="language-shell">php artisan make:rule Uppercase
 </code></pre>
-<p>创建规则后，我们就可以定义其行为了。 一个规则对象包含两个方法：<code>passes</code> 和 <code>message</code>。 <code>passes</code> 方法接收属性值和名称，应该根据属性值是否有效返回 <code>true</code> 或 <code>false</code>。 <code>message</code> 方法应该返回验证失败时应该使用的验证错误消息：</p>
+<p>一旦规则被创建，我们就可以定义其行为。一个规则对象包含一个单一的方法：<code>validate</code>。该方法接收属性名、其值和一个回调函数，如果验证失败应该调用该回调函数并传入验证错误消息：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Rules;
 
-<span class="keyword token">use</span> Illuminate\Contracts\Validation\Rule;
+<span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Contracts\Validation\ValidationRule;
 
-<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> Rule
+<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> ValidationRule
 {
     <span class="comment token">/**
-     * 确定验证规则是否通过。
-     *
-     *<span class="phpdoc token"> @param</span>  string  $attribute
-     *<span class="phpdoc token"> @param</span>  mixed  $value
-     *<span class="phpdoc token"> @return</span> bool
+     * Run the validation rule.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> passes(<span class="variable token">$attribute</span>, <span class="variable token">$value</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> validate(string <span class="variable token">$attribute</span>, mixed <span class="variable token">$value</span>, Closure <span class="variable token">$fail</span>): void
     {
-        <span class="keyword token">return</span> strtoupper(<span class="variable token">$value</span>) === <span class="variable token">$value</span>;
-    }
-
-    <span class="comment token">/**
-     * 获取验证错误消息。
-     *
-     *<span class="phpdoc token"> @return</span> string
-     */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> message()
-    {
-        <span class="keyword token">return</span> <span class="string token">'The :attribute must be uppercase.'</span>;
+        <span class="keyword token">if</span> (strtoupper(<span class="variable token">$value</span>) !== <span class="variable token">$value</span>) {
+            <span class="variable token">$fail</span>(<span class="string token">'The :attribute must be uppercase.'</span>);
+        }
     }
 }
 </code></pre>
-<p>如果您想从翻译文件中返回错误消息，您可以从您的 <code>message</code> 方法中调用 <code>trans</code> 助手：</p>
-<pre><code><span class="comment token">/**
- * 获取验证错误消息。
- *
- *<span class="phpdoc token"> @return</span> string
- */</span>
-<span class="keyword token">public</span> <span class="keyword token">function</span> message()
-{
-    <span class="keyword token">return</span> trans(<span class="string token">'validation.uppercase'</span>);
-}
-</code></pre>
-<p>定义规则后，您可以通过将规则对象的实例与其他验证规则一起传递来将其附加到验证器：</p>
+<p>一旦定义了规则，您可以通过将规则对象的实例与其他验证规则一起传递来将其附加到验证器：</p>
 <pre><code><span class="keyword token">use</span> App\Rules\Uppercase;
 
 <span class="variable token">$request</span>-&gt;validate([
     <span class="string token">'name'</span> =&gt; [<span class="string token">'required'</span>, <span class="string token">'string'</span>, <span class="keyword token">new</span> Uppercase],
 ]);
 </code></pre>
-<h4 id="访问附加数据">访问附加数据</h4>
-<p>如果您的自定义验证规则类需要访问所有其他正在验证的数据，您的规则类可以实现 <code>Illuminate\Contracts\Validation\DataAwareRule</code> 接口。这个接口需要你的类定义一个 <code>setData</code> 方法。Laravel 将自动调用此方法（在验证进行之前），<code>$data</code> 包含所有即将验证的数据：</p>
+<h4 id="验证消息">验证消息</h4>
+<p>您可以不提供 <code>$fail</code> 闭包的字面错误消息，而是提供一个<a href="https://chat.openai.com/docs/laravel/10.x/localization">翻译字符串键</a>，并指示 Laravel 翻译错误消息：</p>
+<pre><code><span class="keyword token">if</span> (strtoupper(<span class="variable token">$value</span>) !== <span class="variable token">$value</span>) {
+    <span class="variable token">$fail</span>(<span class="string token">'validation.uppercase'</span>)-&gt;translate();
+}
+</code></pre>
+<p>如有必要，您可以通过第一个和第二个参数分别提供占位符替换和首选语言来调用 <code>translate</code> 方法：</p>
+<pre><code><span class="variable token">$fail</span>(<span class="string token">'validation.location'</span>)-&gt;translate([
+    <span class="string token">'value'</span> =&gt; <span class="variable token">$this</span>-&gt;value,
+], <span class="string token">'fr'</span>)
+</code></pre>
+<h4 id="访问额外数据">访问额外数据</h4>
+<p>如果您的自定义验证规则类需要访问正在验证的所有其他数据，则规则类可以实现 <code>Illuminate\Contracts\Validation\DataAwareRule</code> 接口。此接口要求您的类定义一个 <code>setData</code> 方法。Laravel 会自动调用此方法（在验证继续之前）并传入所有正在验证的数据：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Rules;
 
-<span class="keyword token">use</span> Illuminate\Contracts\Validation\Rule;
 <span class="keyword token">use</span> Illuminate\Contracts\Validation\DataAwareRule;
+<span class="keyword token">use</span> Illuminate\Contracts\Validation\ValidationRule;
 
-<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> Rule, DataAwareRule
+<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> DataAwareRule, ValidationRule
 {
     <span class="comment token">/**
-     * 即将进行验证的所有数据
+     * 正在验证的所有数据。
      *
-     *<span class="phpdoc token"> @var</span> array
+     *<span class="phpdoc token"> @var</span> array&lt;string, mixed&gt;
      */</span>
     <span class="keyword token">protected</span> <span class="variable token">$data</span> = [];
 
     <span class="comment token">// ...</span>
 
     <span class="comment token">/**
-     * 设置即将进行验证的所有数据。
+     * 设置正在验证的数据。
      *
-     *<span class="phpdoc token"> @param</span>  array  $data
-     *<span class="phpdoc token"> @return</span> $this
+     *<span class="phpdoc token"> @param</span>  array&lt;string, mixed&gt;  $data
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> setData(<span class="variable token">$data</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> setData(<span class="keyword token">array</span> <span class="variable token">$data</span>): <span class="keyword token">static</span>
     {
         <span class="variable token">$this</span>-&gt;data = <span class="variable token">$data</span>;
 
@@ -1535,18 +1772,19 @@ Password::defaults(<span class="keyword token">function</span> () {
     }
 }
 </code></pre>
-<p>或者，如果您的验证规则需要访问执行验证的验证器实例，您可以实现 <code>ValidatorAwareRule</code> 接口：</p>
+<p>或者，如果您的验证规则需要访问执行验证的验证器实例，则可以实现<code>ValidatorAwareRule</code>接口：</p>
 <pre><code><span class="preprocessor token">&lt;?php</span>
 
 <span class="keyword token">namespace</span> App\Rules;
 
-<span class="keyword token">use</span> Illuminate\Contracts\Validation\Rule;
+<span class="keyword token">use</span> Illuminate\Contracts\Validation\ValidationRule;
 <span class="keyword token">use</span> Illuminate\Contracts\Validation\ValidatorAwareRule;
+<span class="keyword token">use</span> Illuminate\Validation\Validator;
 
-<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> Rule, ValidatorAwareRule
+<span class="keyword token">class</span> Uppercase <span class="keyword token">implements</span> ValidationRule, ValidatorAwareRule
 {
     <span class="comment token">/**
-     * 验证器实例。
+     * 验证器实例.
      *
      *<span class="phpdoc token"> @var</span> \Illuminate\Validation\Validator
      */</span>
@@ -1555,12 +1793,9 @@ Password::defaults(<span class="keyword token">function</span> () {
     <span class="comment token">// ...</span>
 
     <span class="comment token">/**
-     * 设置当前验证器。
-     *
-     *<span class="phpdoc token"> @param</span>  \Illuminate\Validation\Validator  $validator
-     *<span class="phpdoc token"> @return</span> $this
+     * 设置当前验证器.
      */</span>
-    <span class="keyword token">public</span> <span class="keyword token">function</span> setValidator(<span class="variable token">$validator</span>)
+    <span class="keyword token">public</span> <span class="keyword token">function</span> setValidator(Validator <span class="variable token">$validator</span>): <span class="keyword token">static</span>
     {
         <span class="variable token">$this</span>-&gt;validator = <span class="variable token">$validator</span>;
 
@@ -1569,17 +1804,17 @@ Password::defaults(<span class="keyword token">function</span> () {
 }
 </code></pre>
 <p><a name="using-closures"></a></p>
-<h3 id="使用闭包">使用闭包</h3>
-<p>如果您在整个应用程序中只需要一次自定义规则的功能，您可以使用闭包而不是规则对象。闭包接收属性的名称、属性的值和一个在验证失败时应该调用的 <code>$fail</code> 回调：</p>
+<h3 id="使用闭包函数">使用闭包函数</h3>
+<p>如果您只需要在应用程序中一次使用自定义规则的功能，可以使用闭包函数而不是规则对象。闭包函数接收属性名称、属性值和 $fail 回调函数，如果验证失败，应该调用该函数：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$validator</span> = Validator::make(<span class="variable token">$request</span>-&gt;all(), [
     <span class="string token">'title'</span> =&gt; [
         <span class="string token">'required'</span>,
         <span class="string token">'max:255'</span>,
-        <span class="keyword token">function</span> (<span class="variable token">$attribute</span>, <span class="variable token">$value</span>, <span class="variable token">$fail</span>) {
+        <span class="keyword token">function</span> (string <span class="variable token">$attribute</span>, mixed <span class="variable token">$value</span>, Closure <span class="variable token">$fail</span>) {
             <span class="keyword token">if</span> (<span class="variable token">$value</span> === <span class="string token">'foo'</span>) {
-                <span class="variable token">$fail</span>(<span class="string token">'The '</span>.<span class="variable token">$attribute</span>.<span class="string token">' is invalid.'</span>);
+                <span class="variable token">$fail</span>(<span class="string token">"The {$attribute} is invalid."</span>);
             }
         },
     ],
@@ -1587,7 +1822,7 @@ Password::defaults(<span class="keyword token">function</span> () {
 </code></pre>
 <p><a name="implicit-rules"></a></p>
 <h3 id="隐式规则">隐式规则</h3>
-<p>默认情况下，当正在验证的属性不存在或包含空字符串时，不会运行正常的验证规则，包括自定义规则。例如，<a href="#rule-unique"><code>unique</code></a> 规则不会针对空字符串运行：</p>
+<p>默认情况下，当要验证的属性不存在或包含空字符串时，正常的验证规则，包括自定义规则，都不会执行。例如，<a href="#rule-unique"><code>unique</code></a> 规则不会针对空字符串运行：</p>
 <pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Validator;
 
 <span class="variable token">$rules</span> = [<span class="string token">'name'</span> =&gt; <span class="string token">'unique:users,name'</span>];
@@ -1596,12 +1831,11 @@ Password::defaults(<span class="keyword token">function</span> () {
 
 Validator::make(<span class="variable token">$input</span>, <span class="variable token">$rules</span>)-&gt;passes(); <span class="comment token">// true</span>
 </code></pre>
-<p>要使自定义规则即使在属性为空时也能运行，该规则必须暗示该属性是必需的。要创建「隐式」规则，请实现 Illuminate\Contracts\Validation\ImplicitRule 接口。 该接口用作验证器的「标识接口」；因此，除了典型的 <code>Rule</code> 接口所需的方法之外，它不包含您需要实现的任何其他方法。</p>
-<p>要生成新的隐式规则对象，您可以使用带有 <code>--implicit</code> 选项的 <code>make:rule</code> Artisan 命令：</p>
+<p>为了使自定义规则在属性为空时也运行，规则必须暗示该属性是必需的。您可以使用 make:rule Artisan 命令的 --implicit 选项快速生成新的隐式规则对象：</p>
 <pre><code class="language-shell">php artisan make:rule Uppercase --implicit
 </code></pre>
 <blockquote>
-<p>注意：「隐式」规则仅 <em>implicit</em> 该属性是必需的。 它是否实际上使缺失或空属性无效取决于您。</p>
+<p>**警告 **<br>隐式规则仅 暗示 该属性是必需的。实际上，缺少或空属性是否无效取决于您。</p>
 </blockquote>
 </div>
     <blockquote style="font-size: 0.9em;">
