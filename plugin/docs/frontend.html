@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="前端">前端</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#using-php">使用 PHP</a><ul>
+<li><a href="#php-and-blade">PHP 和 Blade</a></li>
+<li><a href="#livewire">Livewire</a></li>
+<li><a href="#php-starter-kits">入门套件</a></li>
+</ul>
+</li>
+<li><a href="#using-vue-react">使用 Vue / React</a><ul>
+<li><a href="#inertia">Inertia</a></li>
+<li><a href="#inertia-starter-kits">入门套件</a></li>
+</ul>
+</li>
+<li><a href="#bundling-assets">打包资源</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>Laravel 是一个后端框架，提供了构建现代 Web 应用所需的所有功能，例如 <a href="/docs/laravel/10.x/routing">路由</a>、<a href="/docs/laravel/10.x/validation">验证</a>、<a href="/docs/laravel/10.x/cache">缓存</a>、<a href="/docs/laravel/10.x/queues">队列</a>、<a href="/docs/laravel/10.x/filesystem">文件存储</a> 等等。然而，我们认为为开发人员提供美观的全栈体验，包括构建应用前端的强大方法，是非常重要的。</p>
+<p>在使用 Laravel 构建应用时，有两种主要的方式来解决前端开发问题，选择哪种方式取决于你是否想通过 PHP 或使用像 Vue 和 React 这样的 JavaScript 框架来构建前端。我们将在下面讨论这两种选项，以便你可以做出有关应用程序前端开发的最佳方法的明智决策。</p>
+<p><a name="using-php"></a></p>
+<h2 id="使用-php">使用 PHP</h2>
+<p><a name="php-and-blade"></a></p>
+<h3 id="php-和-blade">PHP 和 Blade</h3>
+<p>过去，大多数 PHP 应用程序使用简单的 HTML 模板和 PHP <code>echo</code> 语句将数据呈现给浏览器，这些语句在请求期间从数据库检索数据：</p>
+<pre><code class="language-blade">&lt;div&gt;
+    <span class="preprocessor token">&lt;?php</span> <span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>): <span class="preprocessor token">?&gt;</span>
+        Hello, <span class="preprocessor token">&lt;?php</span> <span class="keyword token">echo</span> <span class="variable token">$user</span>-&gt;name; <span class="preprocessor token">?&gt;</span> &lt;br /&gt;
+    <span class="preprocessor token">&lt;?php</span> <span class="keyword token">endforeach</span>; <span class="preprocessor token">?&gt;</span>
+&lt;/div&gt;
+</code></pre>
+<p>在 Laravel 中，仍可以使用 视图 和 Blade 来实现呈现 HTML 的这种方法。Blade 是一种非常轻量级的模板语言，提供方便、简短的语法，用于显示数据、迭代数据等：</p>
+<pre><code class="language-blade">&lt;div&gt;
+    @<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
+        Hello, {{ <span class="variable token">$user</span>-&gt;name }} &lt;br /&gt;
+    @<span class="keyword token">endforeach</span>
+&lt;/div&gt;
+</code></pre>
+<p>当使用这种方法构建应用程序时，表单提交和其他页面交互通常会从服务器接收一个全新的 HTML 文档，整个页面将由浏览器重新渲染。即使今天，许多应用程序也可能非常适合使用简单的 Blade 模板构建其前端。</p>
+<p><a name="growing-expectations"></a></p>
+<h4 id="不断提高的期望">不断提高的期望</h4>
+<p>然而，随着用户对 Web 应用程序的期望不断提高，许多开发人员发现需要构建更具有互动性和更具现代感的动态前端。为此，一些开发人员选择使用诸如 Vue 和 React 等 JavaScript 框架开始构建应用程序的前端。</p>
+<p>其他人则更喜欢使用他们熟悉的后端语言，开发出可利用他们首选的后端语言构建现代 Web 应用程序 UI 的解决方案。例如，在<a href="https://rubyonrails.org/">Rails</a>生态系统中，这促使了诸如<a href="https://turbo.hotwired.dev/">Turbo</a>、<a href="https://hotwired.dev/">Hotwire</a>和<a href="https://stimulus.hotwired.dev/">Stimulus</a>等库的创建。</p>
+<p>在 Laravel 生态系统中，需要主要使用PHP创建现代动态前端已经导致了<a href="https://laravel-livewire.com/">Laravel Livewire</a>和<a href="https://alpinejs.dev/">Alpine.js</a>的创建。</p>
+<p><a name="livewire"></a></p>
+<h3 id="livewire">Livewire</h3>
+<p><a href="https://laravel-livewire.com/">Laravel Livewire</a>是一个用于构建 Laravel 前端的框架，具有与使用现代 JavaScript 框架（如 Vue 和 React ）构建的前端一样的动态、现代和生动的感觉。</p>
+<p>在使用 Livewire 时，你将创建 Livewire &quot;组件&quot;，这些组件将呈现 UI 的一个离散部分，并公开可以从应用程序的前端调用和互动的方法和数据。例如，一个简单的&quot;计数器&quot;组件可能如下所示：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Livewire;
+
+<span class="keyword token">use</span> Livewire\Component;
+
+<span class="keyword token">class</span> Counter <span class="keyword token">extends</span> Component
+{
+    <span class="keyword token">public</span> <span class="variable token">$count</span> = <span class="number token">0</span>;
+
+    <span class="keyword token">public</span> <span class="keyword token">function</span> increment()
+    {
+        <span class="variable token">$this</span>-&gt;count++;
+    }
+
+    <span class="keyword token">public</span> <span class="keyword token">function</span> render()
+    {
+        <span class="keyword token">return</span> view(<span class="string token">'livewire.counter'</span>);
+    }
+}
+</code></pre>
+<p>对于计数器，相应的模板将会像这样写：</p>
+<pre><code class="language-blade">&lt;div&gt;
+    &lt;button wire:click=<span class="string token">"increment"</span>&gt;+&lt;/button&gt;
+    &lt;h1&gt;{{ <span class="variable token">$count</span> }}&lt;/h1&gt;
+&lt;/div&gt;
+</code></pre>
+<p>正如你所见，Livewire 使你能够编写新的 HTML 属性，例如 <code>wire:click</code>，以连接 Laravel 应用程序的前端和后端。此外，你可以使用简单的 Blade 表达式呈现组件的当前状态。</p>
+<p>对于许多人来说，Livewire 改变了 Laravel 的前端开发方式，使他们可以在 Laravel 的舒适环境下构建现代、动态的 Web 应用程序。通常，使用 Livewire 的开发人员也会利用 <a href="https://alpinejs.dev/">Alpine.js</a> 仅在需要时 &quot;适度地添加&quot; JavaScript 到他们的前端，比如为了渲染对话框窗口。</p>
+<p>如果你是 Laravel 新手，我们建议你先了解 <a href="/docs/laravel/10.x/views">views</a> 和 <a href="/docs/laravel/10.x/blade">Blade</a> 的基本用法。然后，查阅官方的 <a href="https://laravel-livewire.com/docs">Laravel Livewire 文档</a>，学习如何通过交互式 Livewire 组件将你的应用程序提升到新的水平。</p>
+<p><a name="php-starter-kits"></a></p>
+<h3 id="入门套件">入门套件</h3>
+<p>如果你想使用 PHP 和 Livewire 构建你的前端，你可以利用我们的 Breeze 或 Jetstream <a href="/docs/laravel/10.x/starter-kits">入门套件</a> 来快速启动你的应用程序开发。这两个入门套件都使用 <a href="/docs/laravel/10.x/blade">Blade</a> 和 <a href="https://tailwindcss.com/">Tailwind</a> 构建你的应用程序后端和前端身份验证流程，让你可以轻松开始构建你的下一个大项目。</p>
+<p><a name="using-vue-react"></a></p>
+<h2 id="使用-vue--react">使用 Vue / React</h2>
+<p>尽管使用 Laravel 和 Livewire 可以构建现代的前端，但许多开发人员仍然喜欢利用像 Vue 或 React 这样的 JavaScript 框架的强大功能。这使开发人员能够利用通过 NPM 可用的丰富的 JavaScript 包和工具生态系统。</p>
+<p>然而，如果没有额外的工具支持，将 Laravel 与 Vue 或 React 配对会遇到各种复杂的问题，例如客户端路由、数据注入和身份验证。使用诸如 <a href="https://nuxtjs.org/">Nuxt</a> 和 <a href="https://nextjs.org/">Next</a> 等具有观点的 Vue / React 框架可以简化客户端路由；但是，当将类似 Laravel 这样的后端框架与这些前端框架配对时，数据注入和身份验证仍然是复杂而麻烦的问题。</p>
+<p>此外，开发人员需要维护两个单独的代码存储库，通常需要在两个存储库之间协调维护、发布和部署。虽然这些问题并非不可解决，但我们认为这不是开发应用程序的一种有成效或令人愉快的方式。</p>
+<p><a name="inertia"></a></p>
+<h3 id="inertia">Inertia</h3>
+<p>值得庆幸的是，Laravel 提供了两全其美的解决方案。<a href="https://inertiajs.com/">Inertia</a> 可以桥接你的 Laravel 应用程序和现代 Vue 或 React 前端，使你可以使用 Vue 或 React 构建完整的现代前端，同时利用 Laravel 路由和控制器进行路由、数据注入和身份验证 - 所有这些都在单个代码存储库中完成。使用这种方法，你可以同时享受 Laravel 和 Vue / React 的全部功能，而不会破坏任何一种工具的能力。</p>
+<p>在将 Inertia 安装到你的 Laravel 应用程序后，你将像平常一样编写路由和控制器。但是，你将返回 Inertia 页面而不是从控制器返回 Blade 模板：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> App\Http\Controllers\Controller;
+<span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Inertia\Inertia;
+<span class="keyword token">use</span> Inertia\Response;
+
+<span class="keyword token">class</span> UserController <span class="keyword token">extends</span> Controller {
+    <span class="comment token">/**
+     * 显示给定用户的个人资料
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> show(string <span class="variable token">$id</span>): Response {
+        <span class="keyword token">return</span> Inertia::render(<span class="string token">'Users/Profile'</span>, [
+            <span class="string token">'user'</span> =&gt; User::findOrFail(<span class="variable token">$id</span>)
+        ]);
+    }
+}
+</code></pre>
+<p>Inertia 页面对应于 Vue 或 React 组件，通常存储在应用程序的 <code>resources/js/Pages</code> 目录中。通过 <code>Inertia::render</code> 方法传递给页面的数据将用于填充页面组件的 &quot;props&quot;：</p>
+<pre><code class="language-vue">&lt;script setup&gt;
+import Layout from <span class="string token">'@/Layouts/Authenticated.vue'</span>;
+import { Head } from <span class="string token">'@inertiajs/inertia-vue3'</span>;
+
+<span class="keyword token">const</span> props = defineProps([<span class="string token">'user'</span>]);
+&lt;/script&gt;
+
+&lt;template&gt;
+    &lt;Head title=<span class="string token">"用户资料"</span> /&gt;
+
+    &lt;Layout&gt;
+        &lt;template <span class="comment token">#header&gt;</span>
+            &lt;h2 <span class="keyword token">class</span>=<span class="string token">"font-semibold text-xl text-gray-800 leading-tight"</span>&gt;
+                资料
+            &lt;/h2&gt;
+        &lt;/template&gt;
+
+        &lt;div <span class="keyword token">class</span>=<span class="string token">"py-12"</span>&gt;
+            你好，{{ user.name }}
+        &lt;/div&gt;
+    &lt;/Layout&gt;
+&lt;/template&gt;
+</code></pre>
+<p>正如你所看到的，使用 Inertia 可以在构建前端时充分利用 Vue 或 React 的强大功能，同时为 Laravel 驱动的后端和 JavaScript 驱动的前端提供了轻量级的桥梁。</p>
+<h4 id="服务器端渲染">服务器端渲染</h4>
+<p>如果你因为应用程序需要服务器端渲染而担心使用 Inertia，不用担心。Inertia 提供了 <a href="https://inertiajs.com/server-side-rendering">服务器端渲染支持</a>。并且，在通过 <a href="https://forge.laravel.com/">Laravel Forge</a> 部署应用程序时，轻松确保 Inertia 的服务器端渲染过程始终运行。</p>
+<p><a name="inertia-starter-kits"></a></p>
+<h3 id="入门套件-1">入门套件</h3>
+<p>如果你想使用 Inertia 和 Vue / React 构建前端，可以利用我们的 Breeze 或 Jetstream <a href="/docs/laravel/10.x/starter-kits">入门套件</a> 来加速应用程序的开发。这两个入门套件使用 Inertia、Vue / React、<a href="https://tailwindcss.com/">Tailwind</a> 和 <a href="https://vitejs.dev/">Vite</a> 构建应用程序的后端和前端身份验证流程，让你可以开始构建下一个大型项目。</p>
+<p><a name="bundling-assets"></a></p>
+<h2 id="打包资源">打包资源</h2>
+<p>无论你选择使用 Blade 和 Livewire 还是 Vue/React 和 Inertia 来开发你的前端，你都可能需要将你的应用程序的 CSS 打包成生产就绪的资源。当然，如果你选择用 Vue 或 React 来构建你的应用程序的前端，你也需要将你的组件打包成浏览器准备好的 JavaScript 资源。</p>
+<p>默认情况下，Laravel 利用 <a href="https://vitejs.dev">Vite</a> 来打包你的资源。Vite 在本地开发过程中提供了闪电般的构建时间和接近即时的热模块替换（HMR）。在所有新的 Laravel 应用程序中，包括那些使用我们的 <a href="/docs/laravel/10.x/starter-kit">入门套件</a>，你会发现一个 <code>vite.config.js</code> 文件，加载我们轻量级的 Laravel Vite 插件，使 Vite 在 Laravel 应用程序中使用起来非常愉快。</p>
+<p>开始使用 Laravel 和 Vite 的最快方法是使用 <a href="/docs/laravel/10.x/starter-kitsmd#laravel-breeze">Laravel Breeze</a> 开始你的应用程序的开发，我们最简单的入门套件，通过提供前端和后端的认证支架来启动你的应用程序。</p>
+<blockquote>
+<p><strong>注意</strong>
+关于利用 Vite 和 Laravel 的更多详细文档，请看我们的 <a href="/docs/laravel/10.x/vite">关于打包和编译资源的专用文档</a>。</p>
+</blockquote>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
