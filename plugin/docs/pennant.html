@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="laravel-pennant">Laravel Pennant</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#installation">安装</a></li>
+<li><a href="#configuration">配置 </a></li>
+<li><a href="#defining-features">定义特性</a>
+    - <a href="#class-based-features">基于类的特性</a></li>
+<li><a href="#checking-features">检查特性</a>
+    - <a href="#conditional-execution">条件执行</a>
+    - <a href="#the-has-features-trait">HasFeatures Trait</a>
+    - <a href="#blade-directive">Blade 指令</a>
+    - <a href="#middleware">中间件</a>
+    - <a href="#in-memory-cache">内存缓存</a></li>
+<li><a href="#scope">作用域</a>
+    - <a href="#specifying-the-scope">指定作用域</a>
+    - <a href="#default-scope">默认作用域</a>
+    - <a href="#nullable-scope">空作用域</a>
+    - <a href="#identifying-scope">标识作用域</a></li>
+<li><a href="#rich-feature-values">富特征值</a></li>
+<li><a href="#retrieving-multiple-features">获取多个特性</a></li>
+<li><a href="#eager-loading">预加载</a></li>
+<li><a href="#updating-values">更新特征值</a>
+    - <a href="#bulk-updates">批量更新</a>
+    - <a href="#purging-features">清除特性</a></li>
+<li><a href="#testing">测试 </a></li>
+<li><a href="#adding-custom-pennant-drivers">添加自定义 Pennant 驱动</a>
+    - <a href="#implementing-the-driver">实现驱动</a>
+    - <a href="#registering-the-driver">注册驱动</a></li>
+<li><a href="#events">事件</a></li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p><a href="https://github.com/laravel/pennant">Laravel Pennant</a> 是一个简单轻量的特性标志包，没有臃肿。特性标志使你可以有信心地逐步推出新的应用程序功能，测试新的界面设计，支持基干开发策略等等。</p>
+<p><a name="installation"></a></p>
+<h2 id="安装">安装</h2>
+<p>首先，使用 Composer 包管理器将 Pennant 安装到你的项目中：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/pennant
+</code></pre>
+<p>接下来，你应该使用 <code>vendor:publish</code> Artisan 命令发布 Pennant 配置和迁移文件： <code>vendor:publish</code> Artisan command:</p>
+<pre><code class="language-shell">php artisan vendor:publish --provider=&quot;Laravel\Pennant\PennantServiceProvider&quot;
+</code></pre>
+<p>最后，你应该运行应用程序的数据库迁移。这将创建一个 <code>features</code> 表，<code>Pennant</code> 使用它来驱动其 <code>database</code> 驱动程序：</p>
+<pre><code class="language-shell">php artisan migrate
+</code></pre>
+<p><a name="configuration"></a></p>
+<h2 id="配置">配置</h2>
+<p>在发布 Pennant 资源之后，配置文件将位于 <code>config/pennant.php</code>。此配置文件允许你指定 Pennant 用于存储已解析的特性标志值的默认存储机制。</p>
+<p>Pennant 支持使用 <code>array</code> 驱动程序在内存数组中存储已解析的特性标志值。或者，Pennant 可以使用 <code>database</code> 驱动程序在关系数据库中持久存储已解析的特性标志值，这是 Pennant 使用的默认存储机制。</p>
+<p><a name="defining-features"></a></p>
+<h2 id="定义特性">定义特性</h2>
+<p>要定义特性，你可以使用 <code>Feature</code> 门面提供的 <code>define</code> 方法。你需要为该特性提供一个名称以及一个闭包，用于解析该特性的初始值。</p>
+<p>通常，特性是在服务提供程序中使用 <code>Feature</code> 门面定义的。闭包将接收特性检查的“作用域”。最常见的是，作用域是当前已认证的用户。在此示例中，我们将定义一个功能，用于逐步向应用程序用户推出新的 API：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Support\Lottery;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* Bootstrap any application services.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; Feature::define(<span class="string token">'new-api'</span>, fn (User <span class="variable token">$user</span>) =&gt; match (<span class="keyword token">true</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isInternalTeamMember() =&gt; <span class="keyword token">true</span>,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isHighTrafficCustomer() =&gt; <span class="keyword token">false</span>,
+            <span class="keyword token">default</span> =&gt; Lottery::odds(<span class="number token">1</span> / <span class="number token">100</span>),
+&nbsp; &nbsp; &nbsp; &nbsp; });
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p>正如你所看到的，我们对我们的特性有以下规则：</p>
+<ul>
+<li>所有内部团队成员应使用新 API。</li>
+<li>任何高流量客户不应使用新 API。</li>
+<li>否则，该特性应在具有 1/100 概率激活的用户中随机分配。</li>
+</ul>
+<p>首次检查给定用户的 <code>new-api</code>特性时，存储驱动程序将存储闭包的结果。下一次针对相同用户检查特性时，将从存储中检索该值，不会调用闭包。</p>
+<p>为方便起见，如果特性定义仅返回一个 Lottery，你可以完全省略闭包：</p>
+<p>    Feature::define(&#39;site-redesign&#39;, Lottery::odds(1, 1000));</p>
+<p><a name="class-based-features"></a></p>
+<h3 id="基于类的特性">基于类的特性</h3>
+<p>Pennant 还允许你定义基于类的特性。不像基于闭包的特性定义，不需要在服务提供者中注册基于类的特性。为了创建一个基于类的特性，你可以调用 <code>pennant:feature</code> Artisan 命令。默认情况下，特性类将被放置在你的应用程序的 <code>app/Features</code> 目录中：</p>
+<pre><code class="language-shell">php artisan pennant:feature NewApi
+</code></pre>
+<p>在编写特性类时，你只需要定义一个 <code>resolve</code> 方法，用于为给定的范围解析特性的初始值。同样，范围通常是当前经过身份验证的用户：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Features;
+
+<span class="keyword token">use</span> Illuminate\Support\Lottery;
+
+<span class="keyword token">class</span> NewApi
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 解析特性的初始值.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> resolve(User <span class="variable token">$user</span>): mixed
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> match (<span class="keyword token">true</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isInternalTeamMember() =&gt; <span class="keyword token">true</span>,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isHighTrafficCustomer() =&gt; <span class="keyword token">false</span>,
+            <span class="keyword token">default</span> =&gt; Lottery::odds(<span class="number token">1</span> / <span class="number token">100</span>),
+&nbsp; &nbsp; &nbsp; &nbsp; };
+&nbsp; &nbsp; }
+}
+</code></pre>
+<blockquote>
+<p><strong>注</strong> 特性类是通过<a href="/docs/laravel/10.x/container">容器</a>,解析的，因此在需要时可以在特性类的构造函数中注入依赖项。</p>
+</blockquote>
+<p><a name="checking-features"></a></p>
+<h2 id="检查特性">检查特性</h2>
+<p>要确定一个特性是否处于活动状态，你可以在 <code>Feature</code> 门面上使用 <code>active</code> 方法。默认情况下，特性针对当前已认证的用户进行检查：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Http\Response;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> PodcastController
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 显示资源的列表.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>): Response
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> Feature::active(<span class="string token">'new-api'</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ? <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; : <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>);
+&nbsp; &nbsp; }
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>为了方便起见，如果一个特征定义只返回一个抽奖结果，你可以完全省略闭包:</p>
+<p>    Feature::define(&#39;site-redesign&#39;, Lottery::odds(1, 1000));</p>
+<p><a name="class-based-features"></a></p>
+<h3 id="基于类的特征">基于类的特征</h3>
+<p>Pennant 还允许你定义基于类的特征。与基于闭包的特征定义不同，无需在服务提供者中注册基于类的特征。要创建基于类的特征，你可以调用 pennant:feature Artisan 命令。默认情况下，特征类将被放置在你的应用程序的 app/Features 目录中。:</p>
+<pre><code class="language-php">php artisan pennant:feature NewApi
+</code></pre>
+<p>编写特征类时，你只需要定义一个 <code>resolve</code> 方法，该方法将被调用以解析给定作用域的特征的初始值。同样，该作用域通常是当前已验证的用户。:</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Features;
+
+<span class="keyword token">use</span> Illuminate\Support\Lottery;
+
+<span class="keyword token">class</span> NewApi
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 解析特征的初始值.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> resolve(User <span class="variable token">$user</span>): mixed
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> match (<span class="keyword token">true</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isInternalTeamMember() =&gt; <span class="keyword token">true</span>,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isHighTrafficCustomer() =&gt; <span class="keyword token">false</span>,
+            <span class="keyword token">default</span> =&gt; Lottery::odds(<span class="number token">1</span> / <span class="number token">100</span>),
+&nbsp; &nbsp; &nbsp; &nbsp; };
+&nbsp; &nbsp; }
+}
+</code></pre>
+<blockquote>
+<p><strong>注意</strong> 特征类通过 <a href="/docs/laravel/10.x/container">容器</a>, 解析，因此在需要时，你可以将依赖项注入到特征类的构造函数中.</p>
+</blockquote>
+<p><a name="checking-features"></a></p>
+<h2 id="checking-features">Checking Features</h2>
+<p>要确定特征是否处于活动状态，你可以在 Feature 门面上使用 <code>active</code> 方法。默认情况下，特征将针对当前已验证的用户进行检查。:</p>
+<pre><code class="language-php">
+<span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Http\Response;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> PodcastController
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;*显示资源的列表.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>): Response
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> Feature::active(<span class="string token">'new-api'</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ? <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; : <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>);
+&nbsp; &nbsp; }
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>虽然默认情况下特性针对当前已认证的用户进行检查，但你可以轻松地针对其他用户或范围检查特性。为此，使用 <code>Feature</code> 门面提供的 <code>for</code> 方法：</p>
+<pre><code class="language-php"><span class="keyword token">return</span> Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>)-&gt;active(<span class="string token">'new-api'</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; ? <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; : <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>);
+</code></pre>
+<p>Pennant 还提供了一些额外的方便方法，在确定特性是否活动或不活动时可能非常有用：</p>
+<pre><code class="language-php"><span class="comment token">//确定所有给定的特性是否都活动...</span>
+Feature::allAreActive([<span class="string token">'new-api'</span>, <span class="string token">'site-redesign'</span>]);
+
+<span class="comment token">// 确定任何给定的特性是否都活动...</span>
+Feature::someAreActive([<span class="string token">'new-api'</span>, <span class="string token">'site-redesign'</span>]);
+
+<span class="comment token">// 确定特性是否处于非活动状态...</span>
+Feature::inactive(<span class="string token">'new-api'</span>);
+
+<span class="comment token">// 确定所有给定的特性是否都处于非活动状态...</span>
+Feature::allAreInactive([<span class="string token">'new-api'</span>, <span class="string token">'site-redesign'</span>]);
+
+<span class="comment token">// 确定任何给定的特性是否都处于非活动状态...</span>
+Feature::someAreInactive([<span class="string token">'new-api'</span>, <span class="string token">'site-redesign'</span>]);
+</code></pre>
+<blockquote>
+<p><strong>注</strong></p>
+</blockquote>
+<blockquote>
+<p>当在 HTTP 上下文之外使用 Pennant（例如在 Artisan 命令或排队作业中）时，你通常应<a href="#specifying-the-scope">明确指定特性的作用域</a>。或者，你可以定义一个<a href="#default-scope">默认作用域</a>，该作用域考虑到已认证的 HTTP 上下文和未经身份验证的上下文。</p>
+</blockquote>
+<p><a name="checking-class-based-features"></a></p>
+<h4 id="检查基于类的特性">检查基于类的特性</h4>
+<p>对于基于类的特性，应该在检查特性时提供类名：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> App\Features\NewApi;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Http\Response;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> PodcastController
+{
+
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 显示资源的列表.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>): Response
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> Feature::active(NewApi::<span class="keyword token">class</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ? <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; : <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>);
+&nbsp; &nbsp; }
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p><a name="conditional-execution"></a></p>
+<h3 id="条件执行">条件执行</h3>
+<p><code>when</code> 方法可用于在特性激活时流畅地执行给定的闭包。此外，可以提供第二个闭包，如果特性未激活，则将执行它：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Controllers;
+
+<span class="keyword token">use</span> App\Features\NewApi;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Http\Response;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> PodcastController
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 显示资源的列表.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> index(Request <span class="variable token">$request</span>): Response
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> Feature::when(NewApi::<span class="keyword token">class</span>,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; fn () =&gt; <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; fn () =&gt; <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>),
+&nbsp; &nbsp; &nbsp; &nbsp; );
+&nbsp; &nbsp; }
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p><code>unless</code> 方法是 <code>when</code> 方法的相反，如果特性未激活，则执行第一个闭包：</p>
+<p>    return Feature::unless(NewApi::class,</p>
+<p>        fn () =&gt; $this-&gt;resolveLegacyApiResponse($request),</p>
+<p>        fn () =&gt; $this-&gt;resolveNewApiResponse($request),</p>
+<p>    );</p>
+<p><a name="the-has-features-trait"></a></p>
+<h3 id="hasfeatures-trait">HasFeatures Trait</h3>
+<p>Pennant 的 <code>HasFeatures</code> Trait 可以添加到你的应用的 <code>User</code> 模型（或其他具有特性的模型）中，以提供一种流畅、方便的方式从模型直接检查特性：</p>
+<pre><code class="language-php">
+<span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> Illuminate\Foundation\Auth\User <span class="keyword token">as</span> Authenticatable;
+<span class="keyword token">use</span> Laravel\Pennant\Concerns\HasFeatures;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Authenticatable
+{
+&nbsp; &nbsp; <span class="keyword token">use</span> HasFeatures;
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>一旦将 HasFeatures Trait 添加到你的模型中，你可以通过调用 <code>features</code> 方法轻松检查特性：</p>
+<pre><code class="language-php"><span class="keyword token">if</span> (<span class="variable token">$user</span>-&gt;features()-&gt;active(<span class="string token">'new-api'</span>)) {
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p>当然，<code>features</code> 方法提供了许多其他方便的方法来与特性交互：</p>
+<pre><code class="language-php"><span class="comment token">// 值...</span>
+<span class="variable token">$value</span> = <span class="variable token">$user</span>-&gt;features()-&gt;value(<span class="string token">'purchase-button'</span>)
+<span class="variable token">$values</span> = <span class="variable token">$user</span>-&gt;features()-&gt;values([<span class="string token">'new-api'</span>, <span class="string token">'purchase-button'</span>]);
+
+<span class="comment token">// 状态...</span>
+<span class="variable token">$user</span>-&gt;features()-&gt;active(<span class="string token">'new-api'</span>);
+<span class="variable token">$user</span>-&gt;features()-&gt;allAreActive([<span class="string token">'new-api'</span>, <span class="string token">'server-api'</span>]);
+<span class="variable token">$user</span>-&gt;features()-&gt;someAreActive([<span class="string token">'new-api'</span>, <span class="string token">'server-api'</span>]);
+<span class="variable token">$user</span>-&gt;features()-&gt;inactive(<span class="string token">'new-api'</span>);
+<span class="variable token">$user</span>-&gt;features()-&gt;allAreInactive([<span class="string token">'new-api'</span>, <span class="string token">'server-api'</span>]);
+<span class="variable token">$user</span>-&gt;features()-&gt;someAreInactive([<span class="string token">'new-api'</span>, <span class="string token">'server-api'</span>]);
+
+<span class="comment token">// 条件执行...</span>
+<span class="variable token">$user</span>-&gt;features()-&gt;when(<span class="string token">'new-api'</span>,
+&nbsp; &nbsp; fn () =&gt; <span class="comment token">/* ... */</span>,
+&nbsp; &nbsp; fn () =&gt; <span class="comment token">/* ... */</span>,
+);
+
+<span class="variable token">$user</span>-&gt;features()-&gt;unless(<span class="string token">'new-api'</span>,
+&nbsp; &nbsp; fn () =&gt; <span class="comment token">/* ... */</span>,
+&nbsp; &nbsp; fn () =&gt; <span class="comment token">/* ... */</span>,
+);
+</code></pre>
+<p><a name="blade-directive"></a></p>
+<h3 id="blade-指令">Blade 指令</h3>
+<p>为了使在 Blade 中检查特性的体验更加流畅，Pennant提供了一个 <code>@feature</code> 指令：</p>
+<pre><code class="language-blade">@feature(<span class="string token">'site-redesign'</span>)
+&lt;!-- <span class="string token">'site-redesign'</span> 活跃中 --&gt;
+@<span class="keyword token">else</span>
+&lt;!-- <span class="string token">'site-redesign'</span> 不活跃--&gt;
+@endfeature
+</code></pre>
+<p><a name="middleware"></a></p>
+<h3 id="中间件">中间件</h3>
+<p>Pennant 还包括一个<a href="/docs/laravel/10.x/middleware">中间件</a>，它可以在路由调用之前验证当前认证用户是否有访问功能的权限。首先，你应该将 <code>EnsureFeaturesAreActive</code> 中间件的别名添加到你的应用程序的 <code>app/Http/Kernel.php</code> 文件中：</p>
+<pre><code class="language-php">
+<span class="keyword token">use</span> Laravel\Pennant\Middleware\EnsureFeaturesAreActive;
+
+<span class="keyword token">protected</span> <span class="variable token">$middlewareAliases</span> = [
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+ <span class="string token">'features'</span> =&gt; EnsureFeaturesAreActive::<span class="keyword token">class</span>,
+];
+</code></pre>
+<p>接下来，你可以将中间件分配给一个路由并指定需要访问该路由的功能。如果当前认证用户的任何指定功能未激活，则路由将返回 <code>400 Bad Request</code> HTTP 响应。可以使用逗号分隔的列表指定多个功能：</p>
+<pre><code class="language-php">Route::get(<span class="string token">'/api/servers'</span>, <span class="keyword token">function</span> () {
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+})-&gt;middleware([<span class="string token">'features:new-api,servers-api'</span>]);
+</code></pre>
+<p><a name="customizing-the-response"></a></p>
+<h4 id="自定义响应">自定义响应</h4>
+<p>如果你希望在未激活列表中的任何一个功能时自定义中间件返回的响应，可以使用 <code>EnsureFeaturesAreActive</code> 中间件提供的 <code>whenInactive</code> 方法。通常，这个方法应该在应用程序的服务提供者的 boot 方法中调用：</p>
+<pre><code class="language-php">
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Http\Response;
+<span class="keyword token">use</span> Laravel\Pennant\Middleware\EnsureFeaturesAreActive;
+
+<span class="comment token">/**
+&nbsp;* 加载服务.
+&nbsp;*/</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+{
+&nbsp; &nbsp; EnsureFeaturesAreActive::whenInactive(
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">function</span> (Request <span class="variable token">$request</span>, <span class="keyword token">array</span> <span class="variable token">$features</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> <span class="keyword token">new</span> Response(status: <span class="number token">403</span>);
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; );
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+}
+</code></pre>
+<p><a name="in-memory-cache"></a></p>
+<h3 id="内存缓存">内存缓存</h3>
+<p>当检查特性时，Pennant 将创建一个内存缓存以存储结果。如果你使用的是 <code>database</code> 驱动程序，则在单个请求中重新检查相同的功能标志将不会触发额外的数据库查询。这也确保了该功能在请求的持续时间内具有一致的结果。</p>
+<p>如果你需要手动刷新内存缓存，可以使用 <code>Feature</code> 门面提供的 <code>flushCache</code> 方法：</p>
+<p>    Feature::flushCache();</p>
+<p><a name="scope"></a></p>
+<h2 id="作用域">作用域</h2>
+<p><a name="specifying-the-scope"></a></p>
+<h3 id="指定作用域">指定作用域</h3>
+<p>如前所述，特性通常会针对当前已验证的用户进行检查。但这可能并不总是适合你的需求。因此，你可以通过 <code>Feature</code> 门面的 <code>for</code> 方法来指定要针对哪个作用域检查给定的特性：</p>
+<pre><code class="language-php"><span class="keyword token">return</span> Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>)-&gt;active(<span class="string token">'new-api'</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; ? <span class="variable token">$this</span>-&gt;resolveNewApiResponse(<span class="variable token">$request</span>)
+&nbsp; &nbsp; &nbsp; &nbsp; : <span class="variable token">$this</span>-&gt;resolveLegacyApiResponse(<span class="variable token">$request</span>);
+</code></pre>
+<p>当然，特性作用域不限于“用户”。假设你构建了一个新的结算体验，你要将其推出给整个团队而不是单个用户。也许你希望年龄最大的团队的推出速度比年轻的团队慢。你的特性解析闭包可能如下所示：</p>
+<pre><code class="language-php">
+<span class="keyword token">use</span> App\Models\Team;
+<span class="keyword token">use</span> Carbon\Carbon;
+<span class="keyword token">use</span> Illuminate\Support\Lottery;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+Feature::define(<span class="string token">'billing-v2'</span>, <span class="keyword token">function</span> (Team <span class="variable token">$team</span>) {
+&nbsp; &nbsp; <span class="keyword token">if</span> (<span class="variable token">$team</span>-&gt;created_at-&gt;isAfter(<span class="keyword token">new</span> Carbon(<span class="string token">'1st Jan, 2023'</span>))) {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> <span class="keyword token">true</span>;
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; <span class="keyword token">if</span> (<span class="variable token">$team</span>-&gt;created_at-&gt;isAfter(<span class="keyword token">new</span> Carbon(<span class="string token">'1st Jan, 2019'</span>))) {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> Lottery::odds(<span class="number token">1</span> / <span class="number token">100</span>);
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; <span class="keyword token">return</span> Lottery::odds(<span class="number token">1</span> / <span class="number token">1000</span>);
+});
+</code></pre>
+<p>你会注意到，我们定义的闭包不需要 <code>User</code>，而是需要一个 <code>Team</code> 模型。要确定该特性是否对用户的团队可用，你应该将团队传递给 <code>Feature</code> 门面提供的 <code>for</code> 方法：</p>
+<pre><code class="language-php"><span class="keyword token">if</span> (Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>-&gt;team)-&gt;active(<span class="string token">'billing-v2'</span>)) {
+&nbsp; &nbsp; <span class="keyword token">return</span> redirect()-&gt;to(<span class="string token">'/billing/v2'</span>);
+}
+<span class="comment token">// ...</span>
+</code></pre>
+<p><a name="default-scope"></a></p>
+<h3 id="默认作用域">默认作用域</h3>
+<p>还可以自定义 Pennant 用于检查特性的默认作用域。例如，你可能希望所有特性都针对当前认证用户的团队进行检查，而不是针对用户。你可以在应用程序的服务提供程序中指定此作用域。通常，应该在一个应用程序的服务提供程序中完成这个过程:</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> Illuminate\Support\Facades\Auth;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 加载程序服务.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; Feature::resolveScopeUsing(fn (<span class="variable token">$driver</span>) =&gt; Auth::user()?-&gt;team);
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="comment token">// ...</span>
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p>如果没有通过 <code>for</code> 方法显式提供作用域，则特性检查将使用当前认证用户的团队作为默认作用域：</p>
+<pre><code class="language-php">Feature::active(<span class="string token">'billing-v2'</span>);
+
+<span class="comment token">// 目前等价于...</span>
+Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>-&gt;team)-&gt;active(<span class="string token">'billing-v2'</span>);
+</code></pre>
+<p><a name="nullable-scope"></a></p>
+<h3 id="空作用域">空作用域</h3>
+<p>如果你检查特性时提供的作用域范围为 <code>null</code>，且特性定义中不支持 <code>null</code>（即不是 nullable type 或者没有在 union type 中包含<code>null</code>），那么 Pennant 将自动返回 <code>false</code> 作为特性的结果值。</p>
+<p>因此，如果你传递给特性的作用域可能为 null 并且你想要特性值的解析器被调用，你应该在特性定义逻辑中处理 <code>null</code> 范围值。在一个 Artisan 命令、排队作业或未经身份验证的路由中检查特性可能会出现 <code>null</code> 作用域。因为在这些情况下通常没有经过身份验证的用户，所以默认的作用域将为 <code>null</code>。</p>
+<p>如果你不总是<a href="#specifying-the-scope">明确指定特性作用域</a>，则应确保范围类型为&quot;nullable&quot;，并在特性定义逻辑中处理 <code>null</code> 范围值:</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Models\User;
+<span class="keyword token">use</span> Illuminate\Support\Lottery;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+Feature::define(<span class="string token">'new-api'</span>, fn (User <span class="variable token">$user</span>) =&gt; match (<span class="keyword token">true</span>) {<span class="comment token">// [tl! remove]</span>
+Feature::define(<span class="string token">'new-api'</span>, fn (User|<span class="keyword token">null</span> <span class="variable token">$user</span>) =&gt; match (<span class="keyword token">true</span>) {<span class="comment token">// [tl! add]</span>
+&nbsp; &nbsp; <span class="variable token">$user</span> === <span class="keyword token">null</span> =&gt; <span class="keyword token">true</span>,<span class="comment token">// [tl! add]</span>
+&nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isInternalTeamMember() =&gt; <span class="keyword token">true</span>,
+&nbsp; &nbsp; <span class="variable token">$user</span>-&gt;isHighTrafficCustomer() =&gt; <span class="keyword token">false</span>,
+    <span class="keyword token">default</span> =&gt; Lottery::odds(<span class="number token">1</span> / <span class="number token">100</span>),
+});
+</code></pre>
+<p><a name="identifying-scope"></a></p>
+<h3 id="标识作用域">标识作用域</h3>
+<p>Pennant 的内置 <code>array</code> 和 <code>database</code> 存储驱动程序可以正确地存储所有 PHP 数据类型以及 Eloquent 模型的作用域标识符。但是，如果你的应用程序使用第三方的 Pennant 驱动程序，该驱动程序可能不知道如何正确地存储 Eloquent 模型或应用程序中其他自定义类型的标识符。</p>
+<p>因此，Pennant 允许你通过在应用程序中用作 Pennant 作用域的对象上实现 <code>FeatureScopeable</code> 协议来格式化存储范围值。</p>
+<p>例如，假设你在单个应用程序中使用了两个不同的特性驱动程序：内置 <code>database</code> 驱动程序和第三方的“Flag Rocket”驱动程序。 &quot;Flag Rocket&quot;驱动程序不知道如何正确地存储 Eloquent 模型。相反，它需要一个<code>FlagRocketUser</code> 实例。通过实现 <code>FeatureScopeable</code> 协议中的 <code>toFeatureIdentifier</code> 方法，我们可以自定义提供给应用程序中每个驱动程序的可存储范围值：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Models;
+
+<span class="keyword token">use</span> FlagRocket\FlagRocketUser;
+<span class="keyword token">use</span> Illuminate\Database\Eloquent\Model;
+<span class="keyword token">use</span> Laravel\Pennant\Contracts\FeatureScopeable;
+
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model <span class="keyword token">implements</span> FeatureScopeable
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 将对象强制转换为给定驱动程序的功能范围标识符.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> toFeatureIdentifier(string <span class="variable token">$driver</span>): mixed
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> match(<span class="variable token">$driver</span>) {
+         <span class="string token">'database'</span> =&gt; <span class="variable token">$this</span>,
+         <span class="string token">'flag-rocket'</span> =&gt; FlagRocketUser::fromId(<span class="variable token">$this</span>-&gt;flag_rocket_id),
+&nbsp; &nbsp; &nbsp; &nbsp; };
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p><a name="rich-feature-values"></a></p>
+<h2 id="丰富的特征值">丰富的特征值</h2>
+<p>到目前为止，我们主要展示了特性的二进制状态，即它们是「活动的」还是「非活动的」，但是 Pennant 也允许你存储丰富的值。</p>
+<p>例如，假设你正在测试应用程序的「立即购买」按钮的三种新颜色。你可以从特性定义中返回一个字符串，而不是 <code>true</code> 或 <code>false</code>：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Arr;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+Feature::define(<span class="string token">'purchase-button'</span>, fn (User <span class="variable token">$user</span>) =&gt; Arr::random([
+ <span class="string token">'blue-sapphire'</span>,
+ <span class="string token">'seafoam-green'</span>,
+ <span class="string token">'tart-orange'</span>,
+]));
+</code></pre>
+<p>你可以使用 <code>value</code> 方法检索 <code>purchase-button</code> 特性的值：</p>
+<pre><code class="language-php"><span class="variable token">$color</span> = Feature::value(<span class="string token">'purchase-button'</span>);
+</code></pre>
+<p>Pennant 提供的 Blade 指令也使得根据特性的当前值条件性地呈现内容变得容易：</p>
+<pre><code class="language-blade">@feature('purchase-button', 'blue-sapphire')
+&lt;!-- 'blue-sapphire' is active --&gt;
+@elsefeature('purchase-button', 'seafoam-green')
+&lt;!-- 'seafoam-green' is active --&gt;
+@elsefeature('purchase-button', 'tart-orange')
+&lt;!-- 'tart-orange' is active --&gt;
+@endfeature
+</code></pre>
+<blockquote>
+<p>使用丰富值时，重要的是要知道，只要特性具有除 <code>false</code> 以外的任何值，它就被视为「活动」。</p>
+</blockquote>
+<p>在调用<a href="#conditional-execution">条件</a> <code>when</code> 方法时，特性的丰富值将提供给第一个闭包：</p>
+<p>    Feature::when(&#39;purchase-button&#39;,
+        fn ($color) =&gt; /* ... <em>/,
+        fn () =&gt; /</em> ... */,
+    );</p>
+<p>同样，当调用条件 <code>unless</code> 方法时，特性的丰富值将提供给可选的第二个闭包：</p>
+<p>    Feature::unless(&#39;purchase-button&#39;,
+        fn () =&gt; /* ... <em>/,
+        fn ($color) =&gt; /</em> ... */,
+    );</p>
+<p><a name="retrieving-multiple-features"></a></p>
+<h2 id="获取多个特性">获取多个特性</h2>
+<p><code>values</code> 方法允许检索给定作用域的多个特征：</p>
+<pre><code class="language-php">Feature::values([<span class="string token">'billing-v2'</span>, <span class="string token">'purchase-button'</span>]);
+
+<span class="comment token">// [</span>
+<span class="comment token">// 'billing-v2' =&gt; false,</span>
+<span class="comment token">// 'purchase-button' =&gt; 'blue-sapphire',</span>
+<span class="comment token">// ]</span>
+</code></pre>
+<p>或者，你可以使用 <code>all</code> 方法检索给定范围内所有已定义功能的值：</p>
+<pre><code class="language-php">Feature::all();
+
+<span class="comment token">// [</span>
+<span class="comment token">// 'billing-v2' =&gt; false,</span>
+<span class="comment token">// 'purchase-button' =&gt; 'blue-sapphire',</span>
+<span class="comment token">// 'site-redesign' =&gt; true,</span>
+<span class="comment token">// ]</span>
+</code></pre>
+<p>但是，基于类的功能是动态注册的，直到它们被显式检查之前，Pennant并不知道它们的存在。这意味着，如果在当前请求期间尚未检查过应用程序的基于类的功能，则这些功能可能不会出现在 <code>all</code> 方法返回的结果中。</p>
+<p>如果你想确保使用 <code>all</code> 方法时始终包括功能类，你可以使用Pennant的功能发现功能。要开始使用，请在你的应用程序的任何服务提供程序之一中调用 <code>discover</code> 方法：</p>
+<p>    &lt;?php</p>
+<p>    namespace App\Providers;</p>
+<p>    use Illuminate\Support\ServiceProvider;
+    use Laravel\Pennant\Feature;</p>
+<p>    class AppServiceProvider extends ServiceProvider
+    {
+        /**
+         * Bootstrap any application services.
+         */
+        public function boot(): void
+        {
+            Feature::discover();
+            // ...
+        }
+    }</p>
+<p><code>discover</code> 方法将注册应用程序 <code>app/Features</code> 目录中的所有功能类。<code>all</code> 方法现在将在其结果中包括这些类，无论它们是否在当前请求期间进行了检查：</p>
+<pre><code class="language-php">Feature::all();
+
+<span class="comment token">// [</span>
+<span class="comment token">// 'App\Features\NewApi' =&gt; true,</span>
+<span class="comment token">// 'billing-v2' =&gt; false,</span>
+<span class="comment token">// 'purchase-button' =&gt; 'blue-sapphire',</span>
+<span class="comment token">// 'site-redesign' =&gt; true,</span>
+<span class="comment token">// ]</span>
+</code></pre>
+<p><a name="eager-loading"></a></p>
+<h2 id="预加载">预加载</h2>
+<p>尽管 Pennant 在单个请求中保留了所有已解析功能的内存缓存，但仍可能遇到性能问题。为了缓解这种情况，Pennant 提供了预加载功能。</p>
+<p>为了说明这一点，想象一下我们正在循环中检查功能是否处于活动状态：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>) {
+&nbsp; &nbsp; <span class="keyword token">if</span> (Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>)-&gt;active(<span class="string token">'notifications-beta'</span>)) {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;notify(<span class="keyword token">new</span> RegistrationSuccess);
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p>假设我们正在使用数据库驱动程序，此代码将为循环中的每个用户执行数据库查询-执行潜在的数百个查询。但是，使用 Pennant 的 <code>load</code> 方法，我们可以通过预加载一组用户或作用域的功能值来消除这种潜在的性能瓶颈：</p>
+<pre><code class="language-php">Feature::<span class="keyword token">for</span>(<span class="variable token">$users</span>)-&gt;load([<span class="string token">'notifications-beta'</span>]);
+
+<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>) {
+&nbsp; &nbsp; <span class="keyword token">if</span> (Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>)-&gt;active(<span class="string token">'notifications-beta'</span>)) {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="variable token">$user</span>-&gt;notify(<span class="keyword token">new</span> RegistrationSuccess);
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p>为了仅在尚未加载功能值时加载它们，你可以使用 <code>loadMissing</code> 方法：</p>
+<pre><code class="language-php">Feature::<span class="keyword token">for</span>(<span class="variable token">$users</span>)-&gt;loadMissing([
+ <span class="string token">'new-api'</span>,
+ <span class="string token">'purchase-button'</span>,
+ <span class="string token">'notifications-beta'</span>,
+]);
+</code></pre>
+<p><a name="updating-values"></a></p>
+<h2 id="更新值">更新值</h2>
+<p>当首次解析功能的值时，底层驱动程序将把结果存储在存储中。这通常是为了确保在请求之间为你的用户提供一致的体验。但是，有时你可能想手动更新功能的存储值。</p>
+<p>为了实现这一点，你可以使用 <code>activate</code> 和 <code>deactivate</code> 方法来切换功能的 「打开」或「关闭」状态：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="comment token">// 激活默认作用域的功能...</span>
+Feature::activate(<span class="string token">'new-api'</span>);
+
+<span class="comment token">// 在给定的范围中停用功能...</span>
+Feature::<span class="keyword token">for</span>(<span class="variable token">$user</span>-&gt;team)-&gt;deactivate(<span class="string token">'billing-v2'</span>);
+</code></pre>
+<p>还可以通过向 <code>activate</code> 方法提供第二个参数来手动设置功能的丰富值：</p>
+<pre><code class="language-php">Feature::activate(&#39;purchase-button&#39;, &#39;seafoam-green&#39;);
+</code></pre>
+<p>要指示 Pennant 忘记功能的存储值，你可以使用 <code>forget</code> 方法。当再次检查功能时，Pennant 将从其功能定义中解析功能的值：</p>
+<pre><code class="language-php">Feature::forget(&#39;purchase-button&#39;);
+</code></pre>
+<p><a name="bulk-updates"></a></p>
+<h3 id="批量更新">批量更新</h3>
+<p>要批量更新存储的功能值，你可以使用 <code>activateForEveryone</code> 和 <code>deactivateForEveryone</code> 方法。</p>
+<p>例如，假设你现在对 <code>new-api</code> 功能的稳定性有信心，并为结帐流程找到了最佳的「purchase-button」颜色-你可以相应地更新所有用户的存储值：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+Feature::activateForEveryone(<span class="string token">'new-api'</span>);
+Feature::activateForEveryone(<span class="string token">'purchase-button'</span>, <span class="string token">'seafoam-green'</span>);
+</code></pre>
+<p>或者，你可以停用所有用户的该功能：</p>
+<pre><code class="language-php">Feature::deactivateForEveryone(&#39;new-api&#39;);
+</code></pre>
+<blockquote>
+<p><strong>注意：</strong>这将仅更新已由 Pennant 存储驱动程序存储的已解析功能值。你还需要更新应用程序中的功能定义。</p>
+</blockquote>
+<p><a name="purging-features"></a></p>
+<h3 id="清除功能">清除功能</h3>
+<p>有时，清除存储中的整个功能可以非常有用。如果你已从应用程序中删除了功能或已对功能的定义进行了调整，并希望将其部署到所有用户，则通常需要这样做。</p>
+<p>你可以使用 <code>purge</code> 方法删除功能的所有存储值：</p>
+<pre><code class="language-php"><span class="comment token">// 清除单个功能...</span>
+Feature::purge(<span class="string token">'new-api'</span>);
+
+<span class="comment token">// 清除多个功能...</span>
+Feature::purge([<span class="string token">'new-api'</span>, <span class="string token">'purchase-button'</span>]);
+</code></pre>
+<p>如果你想从存储中清除所有功能，则可以调用 <code>purge</code> 方法而不带任何参数：</p>
+<pre><code class="language-php">Feature::purge();
+</code></pre>
+<p>由于在应用程序的部署流程中清除功能可能非常有用，因此 Pennant 包括一个<code>pennant:purge</code> Artisan命令：</p>
+<pre><code class="language-sh">php artisan pennant:purge <span class="keyword token">new</span>-api
+php artisan pennant:purge <span class="keyword token">new</span>-api purchase-button
+</code></pre>
+<p><a name="testing"></a></p>
+<h2 id="测试">测试</h2>
+<p>当测试与功能标志交互的代码时，控制测试中返回的功能标志的最简单方法是简单地重新定义该功能。例如，假设你在应用程序的一个服务提供程序中定义了以下功能：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Arr;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+Feature::define(<span class="string token">'purchase-button'</span>, fn () =&gt; Arr::random([
+ <span class="string token">'blue-sapphire'</span>,
+ <span class="string token">'seafoam-green'</span>,
+ <span class="string token">'tart-orange'</span>,
+]));
+</code></pre>
+<p>要在测试中修改功能的返回值，你可以在测试开始时重新定义该功能。以下测试将始终通过，即使 <code>Arr::random()</code> 实现仍然存在于服务提供程序中：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_it_can_control_feature_values()
+{
+&nbsp; &nbsp; Feature::define(<span class="string token">'purchase-button'</span>, <span class="string token">'seafoam-green'</span>);
+&nbsp; &nbsp; <span class="variable token">$this</span>-&gt;assertSame(<span class="string token">'seafoam-green'</span>, Feature::value(<span class="string token">'purchase-button'</span>));
+}
+</code></pre>
+<p>相同的方法也可以用于基于类的功能：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> App\Features\NewApi;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">public</span> <span class="keyword token">function</span> test_it_can_control_feature_values()
+{
+&nbsp; &nbsp; Feature::define(NewApi::<span class="keyword token">class</span>, <span class="keyword token">true</span>);
+&nbsp; &nbsp; <span class="variable token">$this</span>-&gt;assertTrue(Feature::value(NewApi::<span class="keyword token">class</span>));
+}
+</code></pre>
+<p>如果你的功能返回一个 <code>Lottery</code> 实例，那么有一些有用的<a href="/docs/laravel/10.x/helpers#testing-lotteries">测试辅助函数可用</a>。</p>
+<p><a name="store-configuration"></a></p>
+<h4 id="存储配置">存储配置</h4>
+<p>你可以通过在应用程序的 <code>phpunit.xml</code> 文件中定义 <code>PENNANT_STORE</code> 环境变量来配置 Pennant 在测试期间使用的存储：</p>
+<pre><code class="language-xml">&lt;?xml version=<span class="string token">"1.0"</span>  encoding=<span class="string token">"UTF-8"</span><span class="preprocessor token">?&gt;</span>
+&lt;phpunit colors=<span class="string token">"true"</span>&gt;
+&nbsp; &nbsp; &lt;!-- ... --&gt;
+&nbsp; &nbsp; &lt;php&gt;
+&lt;env name=<span class="string token">"PENNANT_STORE"</span>  value=<span class="string token">"array"</span>/&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;!-- ... --&gt;
+&nbsp; &nbsp; &lt;/php&gt;
+&lt;/phpunit&gt;
+</code></pre>
+<p><a name="adding-custom-pennant-drivers"></a></p>
+<h2 id="添加自定义pennant驱动程序">添加自定义Pennant驱动程序</h2>
+<p><a name="implementing-the-driver"></a></p>
+<h4 id="实现驱动程序">实现驱动程序</h4>
+<p>如果 Pennant 现有的存储驱动程序都不符合你的应用程序需求，则可以编写自己的存储驱动程序。你的自定义驱动程序应实现 <code>Laravel\Pennant\Contracts\Driver</code> 接口：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Extensions;
+
+<span class="keyword token">use</span> Laravel\Pennant\Contracts\Driver;
+
+<span class="keyword token">class</span> RedisFeatureDriver <span class="keyword token">implements</span> Driver
+{
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> define(string <span class="variable token">$feature</span>, callable <span class="variable token">$resolver</span>): void {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> defined(): <span class="keyword token">array</span> {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> getAll(<span class="keyword token">array</span> <span class="variable token">$features</span>): <span class="keyword token">array</span> {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> get(string <span class="variable token">$feature</span>, mixed <span class="variable token">$scope</span>): mixed {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> set(string <span class="variable token">$feature</span>, mixed <span class="variable token">$scope</span>, mixed <span class="variable token">$value</span>): void {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> setForAllScopes(string <span class="variable token">$feature</span>, mixed <span class="variable token">$value</span>): void {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> delete(string <span class="variable token">$feature</span>, mixed <span class="variable token">$scope</span>): void {}
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> purge(<span class="keyword token">array</span>|<span class="keyword token">null</span> <span class="variable token">$features</span>): void {}
+}
+</code></pre>
+<p>现在，我们只需要使用 Redis 连接实现这些方法。可以在 <a href="https://github.com/laravel/pennant/blob/1.x/src/Drivers/DatabaseDriver.php">Pennant</a> 源代码中查看如何实现这些方法的示例。</p>
+<blockquote>
+<p><strong>注意</strong></p>
+</blockquote>
+<blockquote>
+<p>Laravel 不附带包含扩展的目录。你可以自由地将它们放在任何你喜欢的位置。在这个示例中，我们创建了一个 <code>Extensions</code> 目录来存放 <code>RedisFeatureDriver</code>。</p>
+</blockquote>
+<p><a name="registering-the-driver"></a></p>
+<h4 id="注册驱动">注册驱动</h4>
+<p>一旦你的驱动程序被实现，就可以将其注册到 Laravel 中。要向 Pennant 添加其他驱动程序，可以使用 <code>Feature</code> 门面提供的 <code>extend</code> 方法。应该在应用程序的 <a href="/docs/laravel/10.x/providers">服务提供者</a> 的 <code>boot</code> 方法中调用 <code>extend</code> 方法：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> App\Extensions\RedisFeatureDriver;
+<span class="keyword token">use</span> Illuminate\Contracts\Foundation\Application;
+<span class="keyword token">use</span> Illuminate\Support\ServiceProvider;
+<span class="keyword token">use</span> Laravel\Pennant\Feature;
+
+<span class="keyword token">class</span> AppServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 注册任何应用程序服务。
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> register(): void
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; <span class="comment token">// ...</span>
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* 引导任何应用程序服务。
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; Feature::extend(<span class="string token">'redis'</span>, <span class="keyword token">function</span> (Application <span class="variable token">$app</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class="keyword token">return</span> <span class="keyword token">new</span> RedisFeatureDriver(<span class="variable token">$app</span>-&gt;make(<span class="string token">'redis'</span>), <span class="variable token">$app</span>-&gt;make(<span class="string token">'events'</span>), []);
+&nbsp; &nbsp; &nbsp; &nbsp; });
+&nbsp; &nbsp; }
+}
+</code></pre>
+<p>一旦驱动程序被注册，就可以在应用程序的 <code>config/pennant.php</code> 配置文件中使用 <code>redis</code> 驱动程序：</p>
+<pre><code class="language-php"><span class="string token">'stores'</span> =&gt; [
+    <span class="string token">'redis'</span> =&gt; [
+        <span class="string token">'driver'</span> =&gt; <span class="string token">'redis'</span>,
+        <span class="string token">'connection'</span> =&gt; <span class="keyword token">null</span>,
+    ],
+&nbsp; &nbsp; <span class="comment token">// ...</span>
+],
+</code></pre>
+<p><a name="events"></a></p>
+<h2 id="事件">事件</h2>
+<p>Pennant 分发了各种事件，这些事件在跟踪应用程序中的特性标志时非常有用。</p>
+<h3 id="laravelpennanteventsretrievingknownfeature"><code>Laravel\Pennant\Events\RetrievingKnownFeature</code></h3>
+<p>该事件在请求特定作用域的已知特征值第一次被检索时被触发。此事件可用于创建和跟踪应用程序中使用的特征标记的度量标准。</p>
+<h3 id="laravelpennanteventsretrievingunknownfeature"><code>Laravel\Pennant\Events\RetrievingUnknownFeature</code></h3>
+<p>当在请求特定作用域的情况下第一次检索未知特性时，将分派此事件。如果你打算从应用程序中删除功能标志，但可能在整个应用程序中留下了某些零散的引用，此事件可能会有用。你可能会发现有用的是监听此事件并在其发生时 <code>report</code> 或抛出异常：</p>
+<p>例如，你可能会发现在监听到此事件并出现此情况时，使用 <code>report</code> 或引发异常会很有用：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Providers;
+
+<span class="keyword token">use</span> Illuminate\Foundation\Support\Providers\EventServiceProvider <span class="keyword token">as</span> ServiceProvider;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Event;
+<span class="keyword token">use</span> Laravel\Pennant\Events\RetrievingUnknownFeature;
+
+<span class="keyword token">class</span> EventServiceProvider <span class="keyword token">extends</span> ServiceProvider
+{
+&nbsp; &nbsp; <span class="comment token">/**
+&nbsp; &nbsp; &nbsp;* Register any other events for your application.
+&nbsp; &nbsp; &nbsp;*/</span>
+&nbsp; &nbsp; <span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; Event::listen(<span class="keyword token">function</span> (RetrievingUnknownFeature <span class="variable token">$event</span>) {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; report(<span class="string token">"Resolving unknown feature [{$event-&gt;feature}]."</span>);
+&nbsp; &nbsp; &nbsp; &nbsp; });
+&nbsp; &nbsp; }
+}
+</code></pre>
+<h3 id="laravelpennanteventsdynamicallydefiningfeature"><code>Laravel\Pennant\Events\DynamicallyDefiningFeature</code></h3>
+<p>当在请求期间首次动态检查基于类的特性时，将分派此事件。</p>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
