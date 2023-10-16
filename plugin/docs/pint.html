@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="laravel-pint">Laravel Pint</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#installation">安装</a></li>
+<li><a href="#running-pint">运行 Pint</a></li>
+<li><a href="#configuring-pint">配置 Pint</a><ul>
+<li><a href="#presets">Presets (预设)</a></li>
+<li><a href="#rules">规则</a></li>
+<li><a href="#excluding-files-or-folders">排除文件/文件夹</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p><a href="https://github.com/laravel/pint">Laravel Pint</a> 是一款面向极简主义者的 PHP 代码风格固定工具。Pint 是建立在 PHP-CS-Fixer 基础上，使保持代码风格的整洁和一致变得简单。</p>
+<p>Pint 会随着所有新的 Laravel 应用程序自动安装，所以你可以立即开始使用它。默认情况下，Pint 不需要任何配置，将通过遵循 Laravel 的观点性编码风格来修复你的代码风格问题。</p>
+<p><a name="installation"></a></p>
+<h2 id="安装">安装</h2>
+<p>Pint 已包含在 Laravel 框架的最近版本中，所以无需安装。然而，对于旧的应用程序，你可以通过 Composer 安装 Laravel Pint：</p>
+<pre><code class="language-shell">composer <span class="keyword token">require</span> laravel/pint --dev
+</code></pre>
+<p><a name="running-pint"></a></p>
+<h2 id="运行-pint">运行 Pint</h2>
+<p>可以通过调用你项目中的 <code>vendor/bin</code> 目录下的 <code>pint</code> 二进制文件来指示 Pint 修复代码风格问题：</p>
+<pre><code class="language-shell">./vendor/bin/pint
+</code></pre>
+<p>你也可以在特定的文件或目录上运行 Pint：</p>
+<pre><code class="language-shell">./vendor/bin/pint app/Models
+
+./vendor/bin/pint app/Models/User.php
+</code></pre>
+<p>Pint 将显示它所更新的所有文件的详细列表。 你可以在调用 Pint 时提供 <code>-v</code> 选项来查看更多关于 Pint 修改的细节。：</p>
+<pre><code class="language-shell">./vendor/bin/pint -v
+</code></pre>
+<p>如果你只想 Pint 检查代码中风格是否有错误，而不实际更改文件，则可以使用 <code>--test</code> 选项：</p>
+<pre><code class="language-shell">./vendor/bin/pint --test
+</code></pre>
+<p>如果你希望 Pint 根据 Git 仅修改未提交更改的文件，你可以使用 <code>--dirty</code> 选项：</p>
+<pre><code class="language-shell">./vendor/bin/pint --dirty
+</code></pre>
+<p><a name="configuring-pint"></a></p>
+<h2 id="配置-pint">配置 Pint</h2>
+<p>如前面所述，Pint 不需要任何配置。但是，如果你希望自定义预设、规则或检查的文件夹，可以在项目的根目录中创建一个 <code>pint.json</code> 文件：</p>
+<pre><code class="language-json">{
+  &quot;preset&quot;: &quot;laravel&quot;
+}
+</code></pre>
+<p>此外，如果你希望使用特定目录中的 <code>pint.json</code>，可以在调用 Pint 时提供 <code>--config</code> 选项：</p>
+<pre><code class="language-shell">pint --config vendor/my-company/coding-style/pint.json
+</code></pre>
+<p><a name="presets"></a></p>
+<h3 id="presets预设">Presets(预设)</h3>
+<p>Presets 定义了一组规则，可以用来修复代码风格问题。默认情况下，Pint 使用 laravel preset，通过遵循 <code>Laravel</code> 的固定编码风格来修复问题。但是，你可以通过向 Pint 提供 <code>--preset</code> 选项来指定一个不同的 preset 值：</p>
+<pre><code class="language-shell">pint --preset psr12
+</code></pre>
+<p>如果你愿意，还可以在项目的 <code>pint.json</code> 文件中设置 preset ：</p>
+<pre><code class="language-json">{
+  &quot;preset&quot;: &quot;psr12&quot;
+}
+</code></pre>
+<p>Pint 目前支持的 presets 有：<code>laravel</code>、<code>psr12</code> 和 <code>symfony</code>。</p>
+<p><a name="rules"></a></p>
+<h3 id="规则">规则</h3>
+<p>规则是 Pint 用于修复代码风格问题的风格指南。如上所述，presets 是预定义的规则组，适用于大多数 PHP 项目，因此你通常不需要担心它们所包含的单个规则。</p>
+<p>但是，如果你愿意，可以在 <code>pint.json</code> 文件中启用或禁用特定规则：</p>
+<pre><code class="language-json">{
+    <span class="string token">"preset"</span>: <span class="string token">"laravel"</span>,
+    <span class="string token">"rules"</span>: {
+        <span class="string token">"simplified_null_return"</span>: <span class="keyword token">true</span>,
+        <span class="string token">"braces"</span>: <span class="keyword token">false</span>,
+        <span class="string token">"new_with_braces"</span>: {
+            <span class="string token">"anonymous_class"</span>: <span class="keyword token">false</span>,
+            <span class="string token">"named_class"</span>: <span class="keyword token">false</span>
+        }
+    }
+}
+</code></pre>
+<p>Pint是基于 <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer">PHP-CS-Fixer</a> 构建的。因此，您可以使用它的任何规则来修复项目中的代码风格问题： <a href="https://mlocati.github.io/php-cs-fixer-configurator">PHP-CS-Fixer Configurator</a>.</p>
+<p><a name="excluding-files-or-folders"></a></p>
+<h3 id="排除文件文件夹">排除文件/文件夹</h3>
+<p>默认情况下，Pint将检查项目中除 <code>vendor</code> 目录以外的所有 <code>.php</code> 文件。如果您希望排除更多文件夹，可以使用 <code>exclude</code> 配置选项:</p>
+<pre><code class="language-json">{
+    &quot;exclude&quot;: [
+        &quot;my-specific/folder&quot;
+    ]
+}
+</code></pre>
+<p>如果您希望排除包含给定名称模式的所有文件，则可以使用 <code>notName</code> 配置选项:</p>
+<pre><code class="language-json">{
+    &quot;notName&quot;: [
+        &quot;*-my-file.php&quot;
+    ]
+}
+</code></pre>
+<p>如果您想要通过提供文件的完整路径来排除文件，则可以使用 <code>notPath</code> 配置选项:</p>
+<pre><code class="language-json">{
+    &quot;notPath&quot;: [
+        &quot;path/to/excluded-file.php&quot;
+    ]
+}
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
