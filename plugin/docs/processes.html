@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="进程管理">进程管理</h1>
+<ul>
+<li><a href="#introduction">介绍</a></li>
+<li><a href="#invoking-processes">调用过程</a><ul>
+<li><a href="#process-options">进程选项</a></li>
+<li><a href="#process-output">进程输出</a></li>
+</ul>
+</li>
+<li><a href="#asynchronous-processes">异步进程</a><ul>
+<li><a href="#process-ids-and-signals">进程 ID 和信号</a></li>
+<li><a href="#asynchronous-process-output">异步进程输出</a></li>
+</ul>
+</li>
+<li><a href="#concurrent-processes">并行进程</a><ul>
+<li><a href="#naming-pool-processes">命名进程池中的进程</a></li>
+<li><a href="#pool-process-ids-and-signals">进程池进程 ID 和信号</a></li>
+</ul>
+</li>
+<li><a href="#testing">测试</a><ul>
+<li><a href="#faking-processes">伪造进程</a></li>
+<li><a href="#faking-specific-processes">伪造指定进程</a></li>
+<li><a href="#faking-process-sequences">伪造进程序列</a></li>
+<li><a href="#faking-asynchronous-process-lifecycles">伪造异步进程的生命周期</a></li>
+<li><a href="#available-assertions">可用的断言</a></li>
+<li><a href="#preventing-stray-processes">防止运行未被伪造的进程</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p>Laravel 通过 <a href="https://symfony.com/doc/current/components/process.html">Symfony Process 组件</a> 提供了一个小而美的 API，让你可以方便地从 Laravel 应用程序中调用外部进程。 Laravel 的进程管理功能专注于提供最常见的用例和提升开发人员体验。</p>
+<p><a name="invoking-processes"></a></p>
+<h2 id="调用过程">调用过程</h2>
+<p>在调用过程中，你可以使用 <code>进程管理</code> facade 提供的 <code>run</code> 和 <code>start</code> 方法。 <code>run</code> 方法将调用一个进程并等待进程执行完毕，而 <code>start</code> 方法用于异步进程执行。我们将在本文档中探究这两种方法。首先，让我们了解一下如何调用基本的同步进程并检查其结果：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+<span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$result</span>-&gt;output();
+</code></pre>
+<p>当然，由 <code>run</code> 方法返回的 <code>Illuminate\Contracts\Process\ProcessResult</code> 实例提供了多种有用的方法，用于检查进程处理结果：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>);
+
+<span class="variable token">$result</span>-&gt;successful();
+<span class="variable token">$result</span>-&gt;failed();
+<span class="variable token">$result</span>-&gt;exitCode();
+<span class="variable token">$result</span>-&gt;output();
+<span class="variable token">$result</span>-&gt;errorOutput();
+</code></pre>
+<p><a name="throwing-exceptions"></a></p>
+<h4 id="抛出异常">抛出异常</h4>
+<p>如果你有一个进程结果，并且希望在退出代码大于零（以此表明失败）的情况下抛出<code>Illuminate\Process\Exceptions\ProcessFailedException</code>的一个实例，你可以使用<code>throw</code> 和 <code>throwIf</code> 方法。 如果进程没有失败，将返回进程结果实例：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>)-&gt;<span class="keyword token">throw</span>();
+
+<span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>)-&gt;throwIf(<span class="variable token">$condition</span>);
+</code></pre>
+<p><a name="process-options"></a></p>
+<h3 id="进程选项">进程选项</h3>
+<p>当然，你可能需要在调用进程之前自定义进程的行为。幸运的是，Laravel允许你调整各种进程特性，比如工作目录、超时和环境变量。</p>
+<p><a name="working-directory-path"></a></p>
+<h4 id="工作目录路径">工作目录路径</h4>
+<p>你可以使用 <code>path</code> 方法指定进程的工作目录。如果不调用这个方法，进程将继承当前正在执行的PHP脚本的工作目录</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::path(__DIR__)-&gt;run(<span class="string token">'ls -la'</span>);
+</code></pre>
+<p><a name="input"></a></p>
+<h4 id="输入">输入</h4>
+<p>你可以使用 <code>input</code> 方法通过进程的“标准输入”提供输入：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::input(<span class="string token">'Hello World'</span>)-&gt;run(<span class="string token">'cat'</span>);
+</code></pre>
+<p><a name="timeouts"></a></p>
+<h4 id="超时">超时</h4>
+<p>默认情况下，进程在执行超过60秒后将抛出<code>Illuminate\Process\Exceptions\ProcessTimedOutException</code> 实例。但是，你可以通过 <code>timeout</code> 方法自定义此行为：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::timeout(<span class="number token">120</span>)-&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p>或者，如果要完全禁用进程超时，你可以调用 <code>forever</code> 方法：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::forever()-&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p><code> idleTimeout</code>  方法可用于指定进程在不返回任何输出的情况下最多运行的秒数：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::timeout(<span class="number token">60</span>)-&gt;idleTimeout(<span class="number token">30</span>)-&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p><a name="environment-variables"></a></p>
+<h4 id="环境变量">环境变量</h4>
+<p>可以通过 <code>env</code> 方法向进程提供环境变量。 调用的进程还将继承系统定义的所有环境变量：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::forever()
+            -&gt;env([<span class="string token">'IMPORT_PATH'</span> =&gt; __DIR__])
+            -&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p>如果你希望从调用的进程中删除继承的环境变量，则可以为该环境变量提供值为 false：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::forever()
+            -&gt;env([<span class="string token">'LOAD_PATH'</span> =&gt; <span class="keyword token">false</span>])
+            -&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p><a name="tty-mode"></a></p>
+<h4 id="tty-模式">TTY 模式</h4>
+<p><code>tty</code> 方法可以用于为你的进程启用 TTY 模式。 TTY 模式将进程的输入和输出连接到你的程序的输入和输出，允许你的进程作为一个进程打开编辑器（如 Vim 或 Nano）：</p>
+<pre><code class="language-php">Process::forever()-&gt;tty()-&gt;run('vim');
+</code></pre>
+<p><a name="process-output"></a></p>
+<h3 id="进程输出">进程输出</h3>
+<p>如前所述，进程输出可以使用进程结果的 <code> output</code> （标准输出）和 <code> errorOutput</code> （标准错误输出）方法访问：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+<span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>);
+
+<span class="keyword token">echo</span> <span class="variable token">$result</span>-&gt;output();
+<span class="keyword token">echo</span> <span class="variable token">$result</span>-&gt;errorOutput();
+</code></pre>
+<p>但是，通过将闭包作为 <code> run</code>  方法的第二个参数，输出也可以实时收集。闭包将接收两个参数：输出的“类型”（stdout 或 stderr）和输出字符串本身：</p>
+<pre><code class="language-php"><span class="variable token">$result</span> = Process::run(<span class="string token">'ls -la'</span>, <span class="keyword token">function</span> (string <span class="variable token">$type</span>, string <span class="variable token">$output</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$output</span>;
+});
+</code></pre>
+<p>Laravel 还提供了 <code>seeInOutput</code> 和 <code>seeInErrorOutput</code>方法，这提供了一种方便的方式来确定进程输出中是否包含给定的字符串：</p>
+<pre><code class="language-php"><span class="keyword token">if</span> (Process::run(<span class="string token">'ls -la'</span>)-&gt;seeInOutput(<span class="string token">'laravel'</span>)) {
+    <span class="comment token">// ...</span>
+}
+</code></pre>
+<p><a name="disabling-process-output"></a></p>
+<h4 id="禁用进程输出">禁用进程输出</h4>
+<p>如果你的进程写入了大量你不感兴趣的输出，则可以通过在构建进程时调用 <code>quietly</code> 方法来禁用输出检索。为此，请执行以下操作：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+<span class="variable token">$result</span> = Process::quietly()-&gt;run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+<p><a name="asynchronous-processes"></a></p>
+<h2 id="异步进程">异步进程</h2>
+<p><code>start</code> 方法可以用来异步地调用进程，与之相对的是同步的 <code>run</code> 方法。使用 <code>start</code> 方法可以让进程在后台运行，而不会阻塞应用的其他任务。一旦进程被调用，你可以使用 <code>running</code> 方法来检查进程是否仍在运行：</p>
+<pre><code class="language-php"><span class="variable token">$process</span> = Process::timeout(<span class="number token">120</span>)-&gt;start(<span class="string token">'bash import.sh'</span>);
+
+<span class="keyword token">while</span> (<span class="variable token">$process</span>-&gt;running()) {
+    <span class="comment token">// ...</span>
+}
+
+<span class="variable token">$result</span> = <span class="variable token">$process</span>-&gt;wait();
+</code></pre>
+<p>你可以使用 <code>wait</code>方法来等待进程执行完毕，并检索进程的执行结果实例：</p>
+<pre><code class="language-php"><span class="variable token">$process</span> = Process::timeout(<span class="number token">120</span>)-&gt;start(<span class="string token">'bash import.sh'</span>);
+
+<span class="comment token">// ...</span>
+
+<span class="variable token">$result</span> = <span class="variable token">$process</span>-&gt;wait();
+</code></pre>
+<p><a name="process-ids-and-signals"></a></p>
+<h3 id="进程-id-和信号">进程 ID 和信号</h3>
+<p><code>id</code> 方法可以用来检索正在运行进程的操作系统分配的进程 ID：</p>
+<pre><code class="language-php"><span class="variable token">$process</span> = Process::start(<span class="string token">'bash import.sh'</span>);
+
+<span class="keyword token">return</span> <span class="variable token">$process</span>-&gt;id();
+</code></pre>
+<p>你可以使用 <code>signal</code> 方法向正在运行的进程发送“信号”。在 <a href="https://www.php.net/manual/en/pcntl.constants.php">PHP 文档中可以找到预定义的信号常量列表</a>:</p>
+<pre><code class="language-php"><span class="variable token">$process</span>-&gt;signal(SIGUSR2);
+</code></pre>
+<p><a name="asynchronous-process-output"></a></p>
+<h3 id="异步进程输出">异步进程输出</h3>
+<p>当异步进程在运行时，你可以使用 <code>output</code> 和 <code>errorOutput</code> 方法访问其整个当前输出；但是，你可以使用<code>latestOutput</code> 和 <code>latestErrorOutput</code> 方法访问自上次检索输出以来的进程输出：</p>
+<pre><code class="language-php"><span class="variable token">$process</span> = Process::timeout(<span class="number token">120</span>)-&gt;start(<span class="string token">'bash import.sh'</span>);
+
+<span class="keyword token">while</span> (<span class="variable token">$process</span>-&gt;running()) {
+    <span class="keyword token">echo</span> <span class="variable token">$process</span>-&gt;latestOutput();
+    <span class="keyword token">echo</span> <span class="variable token">$process</span>-&gt;latestErrorOutput();
+
+    sleep(<span class="number token">1</span>);
+}
+</code></pre>
+<p>与 <code>run</code> 方法一样，也可以通过在 <code>start</code> 方法的第二个参数中传递一个闭包来从异步进程中实时收集输出。闭包将接收两个参数：输出类型（<code>stdout</code> 或 <code>stderr</code>）和输出字符串本身：</p>
+<pre><code class="language-php"><span class="variable token">$process</span> = Process::start(<span class="string token">'bash import.sh'</span>, <span class="keyword token">function</span> (string <span class="variable token">$type</span>, string <span class="variable token">$output</span>) {
+    <span class="keyword token">echo</span> <span class="variable token">$output</span>;
+});
+
+<span class="variable token">$result</span> = <span class="variable token">$process</span>-&gt;wait();
+</code></pre>
+<p><a name="concurrent-processes"></a></p>
+<h2 id="并行处理">并行处理</h2>
+<p>Laravel 还可以轻松地管理一组并发的异步进程，使你能够轻松地同时执行多个任务。要开始，请调用 pool 方法，该方法接受一个闭包，该闭包接收 Illuminate\Process\Pool 实例。</p>
+<p>在此闭包中，你可以定义属于该池的进程。一旦通过 <code>start</code> 方法启动了进程池，你可以通过 <code>running</code> 方法访问正在运行的进程 <a href="/docs/laravel/10.x/collections">集合</a>：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Process\Pool;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+<span class="variable token">$pool</span> = Process::pool(<span class="keyword token">function</span> (Pool <span class="variable token">$pool</span>) {
+    <span class="variable token">$pool</span>-&gt;path(__DIR__)-&gt;command(<span class="string token">'bash import-1.sh'</span>);
+    <span class="variable token">$pool</span>-&gt;path(__DIR__)-&gt;command(<span class="string token">'bash import-2.sh'</span>);
+    <span class="variable token">$pool</span>-&gt;path(__DIR__)-&gt;command(<span class="string token">'bash import-3.sh'</span>);
+})-&gt;start(<span class="keyword token">function</span> (string <span class="variable token">$type</span>, string <span class="variable token">$output</span>, int <span class="variable token">$key</span>) {
+    <span class="comment token">// ...</span>
+});
+
+<span class="keyword token">while</span> (<span class="variable token">$pool</span>-&gt;running()-&gt;isNotEmpty()) {
+    <span class="comment token">// ...</span>
+}
+
+<span class="variable token">$results</span> = <span class="variable token">$pool</span>-&gt;wait();
+</code></pre>
+<p>可以看到，你可以通过 <code>wait</code> 方法等待所有池进程完成执行并解析它们的结果。<code>wait</code> 方法返回一个可访问进程结果实例的数组对象，通过其键可以访问池中每个进程的进程结果实例：</p>
+<pre><code class="language-php"><span class="variable token">$results</span> = <span class="variable token">$pool</span>-&gt;wait();
+
+<span class="keyword token">echo</span> <span class="variable token">$results</span>[<span class="number token">0</span>]-&gt;output();
+</code></pre>
+<p>或者，为方便起见，可以使用 <code>concurrently</code> 方法启动异步进程池并立即等待其结果。结合 PHP 的数组解构功能，这可以提供特别表达式的语法：</p>
+<pre><code class="language-php">[<span class="variable token">$first</span>, <span class="variable token">$second</span>, <span class="variable token">$third</span>] = Process::concurrently(<span class="keyword token">function</span> (Pool <span class="variable token">$pool</span>) {
+    <span class="variable token">$pool</span>-&gt;path(__DIR__)-&gt;command(<span class="string token">'ls -la'</span>);
+    <span class="variable token">$pool</span>-&gt;path(app_path())-&gt;command(<span class="string token">'ls -la'</span>);
+    <span class="variable token">$pool</span>-&gt;path(storage_path())-&gt;command(<span class="string token">'ls -la'</span>);
+});
+
+<span class="keyword token">echo</span> <span class="variable token">$first</span>-&gt;output();
+</code></pre>
+<p><a name="naming-pool-processes"></a></p>
+<h3 id="命名进程池中的进程">命名进程池中的进程</h3>
+<p>通过数字键访问进程池结果不太具有表达性，因此 Laravel 允许你通过 <code>as</code> 方法为进程池中的每个进程分配字符串键。该键也将传递给提供给 <code>start</code> 方法的闭包，使你能够确定输出属于哪个进程：</p>
+<pre><code class="language-php"><span class="variable token">$pool</span> = Process::pool(<span class="keyword token">function</span> (Pool <span class="variable token">$pool</span>) {
+    <span class="variable token">$pool</span>-&gt;<span class="keyword token">as</span>(<span class="string token">'first'</span>)-&gt;command(<span class="string token">'bash import-1.sh'</span>);
+    <span class="variable token">$pool</span>-&gt;<span class="keyword token">as</span>(<span class="string token">'second'</span>)-&gt;command(<span class="string token">'bash import-2.sh'</span>);
+    <span class="variable token">$pool</span>-&gt;<span class="keyword token">as</span>(<span class="string token">'third'</span>)-&gt;command(<span class="string token">'bash import-3.sh'</span>);
+})-&gt;start(<span class="keyword token">function</span> (string <span class="variable token">$type</span>, string <span class="variable token">$output</span>, string <span class="variable token">$key</span>) {
+    <span class="comment token">// ...</span>
+});
+
+<span class="variable token">$results</span> = <span class="variable token">$pool</span>-&gt;wait();
+
+<span class="keyword token">return</span> <span class="variable token">$results</span>[<span class="string token">'first'</span>]-&gt;output();
+</code></pre>
+<p><a name="pool-process-ids-and-signals"></a></p>
+<h3 id="进程池进程-id-和信号">进程池进程 ID 和信号</h3>
+<p>由于进程池的 <code>running</code> 方法提供了一个包含池中所有已调用进程的集合，因此你可以轻松地访问基础池进程 ID：</p>
+<pre><code class="language-php"><span class="variable token">$processIds</span> = <span class="variable token">$pool</span>-&gt;running()-&gt;each-&gt;id();
+</code></pre>
+<p>为了方便起见，你可以在进程池上调用 <code>signal</code> 方法，向池中的每个进程发送信号：</p>
+<pre><code class="language-php"><span class="variable token">$pool</span>-&gt;signal(SIGUSR2);
+</code></pre>
+<p><a name="testing"></a></p>
+<h2 id="测试">测试</h2>
+<p>许多 Laravel 服务都提供功能，以帮助你轻松、有表达力地编写测试，Laravel 的进程服务也不例外。<code>Process</code> 门面的 <code>fake</code> 方法允许你指示 Laravel 在调用进程时返回存根/伪造结果。</p>
+<p><a name="faking-processes"></a></p>
+<h3 id="伪造进程">伪造进程</h3>
+<p>在探索 Laravel 的伪造进程能力时，让我们想象一下调用进程的路由：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Route;
+
+Route::get(<span class="string token">'/import'</span>, <span class="keyword token">function</span> () {
+    Process::run(<span class="string token">'bash import.sh'</span>);
+
+    <span class="keyword token">return</span> <span class="string token">'Import complete!'</span>;
+});
+</code></pre>
+<p>在测试这个路由时，我们可以通过在 <code>Process</code> 门面上调用无参数的 <code>fake</code> 方法，让 Laravel 返回一个伪造的成功进程结果。此外，我们甚至可以断言某个进程“已运行”：</p>
+<pre><code class="language-php"><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> Tests\Feature;
+
+<span class="keyword token">use</span> Illuminate\Process\PendingProcess;
+<span class="keyword token">use</span> Illuminate\Contracts\Process\ProcessResult;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+<span class="keyword token">use</span> Tests\TestCase;
+
+<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase
+{
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_process_is_invoked(): void
+    {
+        Process::fake();
+
+        <span class="variable token">$response</span> = <span class="variable token">$this</span>-&gt;get(<span class="string token">'/'</span>);
+
+        <span class="comment token">// 简单的流程断言...</span>
+        Process::assertRan(<span class="string token">'bash import.sh'</span>);
+
+        <span class="comment token">// 或者，检查流程配置...</span>
+        Process::assertRan(<span class="keyword token">function</span> (PendingProcess <span class="variable token">$process</span>, ProcessResult <span class="variable token">$result</span>) {
+            <span class="keyword token">return</span> <span class="variable token">$process</span>-&gt;command === <span class="string token">'bash import.sh'</span> &amp;&amp;
+                   <span class="variable token">$process</span>-&gt;timeout === <span class="number token">60</span>;
+        });
+    }
+}
+</code></pre>
+<p>如前所述，在 <code>Process</code> 门面上调用 <code>fake</code> 方法将指示 Laravel 始终返回一个没有输出的成功进程结果。但是，你可以使用 <code>Process</code> 门面的 <code>result</code> 方法轻松指定伪造进程的输出和退出码：</p>
+<pre><code class="language-php">Process::fake([
+    '*' =&gt; Process::result(
+        output: 'Test output',
+        errorOutput: 'Test error output',
+        exitCode: 1,
+    ),
+]);
+</code></pre>
+<p><a name="faking-specific-processes"></a></p>
+<h3 id="伪造指定进程">伪造指定进程</h3>
+<p>在你测试的过程中，如果要伪造不同的进程执行结果，你可以通过传递一个数组给 <code>fake</code> 方法来实现。</p>
+<p>数组的键应该表示你想伪造的命令模式及其相关结果。星号 <code>*</code> 字符可用作通配符，任何未被伪造的进程命令将会被实际执行。你可以使用 <code>Process</code> Facade的 <code>result</code> 方法为这些命令构建 stub/fake 结果：</p>
+<pre><code class="language-php">Process::fake([
+    'cat *' =&gt; Process::result(
+        output: 'Test "cat" output',
+    ),
+    'ls *' =&gt; Process::result(
+        output: 'Test "ls" output',
+    ),
+]);
+</code></pre>
+<p>如果不需要自定义伪造进程的退出码或错误输出，你可以更方便地将伪造进程结果指定为简单字符串：</p>
+<pre><code class="language-php">Process::fake([
+    'cat *' =&gt; 'Test "cat" output',
+    'ls *' =&gt; 'Test "ls" output',
+]);
+</code></pre>
+<p><a name="faking-process-sequences"></a></p>
+<h3 id="伪造进程序列">伪造进程序列</h3>
+<p>如果你测试的代码调用了多个相同命令的进程，你可能希望为每个进程调用分配不同的伪造进程结果。你可以使用 <code>Process</code> Facade 的 <code>sequence</code>方法来实现这一点：</p>
+<pre><code class="language-php">Process::fake([
+    'ls *' =&gt; Process::sequence()
+                -&gt;push(Process::result('First invocation'))
+                -&gt;push(Process::result('Second invocation')),
+]);
+</code></pre>
+<p><a name="faking-asynchronous-process-lifecycles"></a></p>
+<h3 id="伪造异步进程的生命周期">伪造异步进程的生命周期</h3>
+<p>到目前为止，我们主要讨论了伪造使用 <code>run</code> 方法同步调用的进程。但是，如果你正在尝试测试与通过 <code>start</code> 调用的异步进程交互的代码，则可能需要更复杂的方法来描述伪造进程。</p>
+<p>例如，让我们想象以下使用异步进程交互的路由：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Log;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Route;
+
+Route::get(<span class="string token">'/import'</span>, <span class="keyword token">function</span> () {
+    <span class="variable token">$process</span> = Process::start(<span class="string token">'bash import.sh'</span>);
+
+    <span class="keyword token">while</span> (<span class="variable token">$process</span>-&gt;running()) {
+        Log::info(<span class="variable token">$process</span>-&gt;latestOutput());
+        Log::info(<span class="variable token">$process</span>-&gt;latestErrorOutput());
+    }
+
+    <span class="keyword token">return</span> <span class="string token">'Done'</span>;
+});
+</code></pre>
+<p>为了正确地伪造这个进程，我们需要能够描述 <code>running</code> 方法应返回 <code>true</code> 的次数。此外，我们可能想要指定多行顺序返回的输出。为了实现这一点，我们可以使用 <code>Process</code> Facade 的 <code>describe</code> 方法：</p>
+<pre><code class="language-php">Process::fake([
+    'bash import.sh' =&gt; Process::describe()
+            -&gt;output('First line of standard output')
+            -&gt;errorOutput('First line of error output')
+            -&gt;output('Second line of standard output')
+            -&gt;exitCode(0)
+            -&gt;iterations(3),
+]);
+</code></pre>
+<p>让我们深入研究上面的例子。使用 <code>output</code> 和 <code>errorOutput</code> 方法，我们可以指定顺序返回的多行输出。<code>exitCode</code> 方法可用于指定伪造进程的最终退出码。最后，<code>iterations</code> 方法可用于指定 <code>running</code> 方法应返回 <code>true</code> 的次数。</p>
+<p><a name="available-assertions"></a></p>
+<h3 id="可用的断言">可用的断言</h3>
+<p> <a href="#faking-processes">如前所述</a>，Laravel 为你的功能测试提供了几个进程断言。我们将在下面讨论每个断言。</p>
+<p><a name="assert-process-ran"></a></p>
+<h4 id="assertran">assertRan</h4>
+<p>断言已经执行了给定的进程：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+Process::assertRan(<span class="string token">'ls -la'</span>);
+</code></pre>
+<p><code>assertRan</code> 方法还接受一个闭包，该闭包将接收一个进程实例和一个进程结果，使你可以检查进程的配置选项。如果此闭包返回 <code>true</code>，则断言将“通过”：</p>
+<pre><code class="language-php">Process::assertRan(fn (<span class="variable token">$process</span>, <span class="variable token">$result</span>) =&gt;
+    <span class="variable token">$process</span>-&gt;command === <span class="string token">'ls -la'</span> &amp;&amp;
+    <span class="variable token">$process</span>-&gt;path === __DIR__ &amp;&amp;
+    <span class="variable token">$process</span>-&gt;timeout === <span class="number token">60</span>
+);
+</code></pre>
+<p>传递给 <code>assertRan</code> 闭包的 <code>$process</code> 是 <code>Illuminate\Process\PendingProcess</code> 的实例，而 $result 是 <code>Illuminate\Contracts\Process\ProcessResult</code> 的实例。</p>
+<p><a name="assert-process-didnt-run"></a></p>
+<h4 id="assertdidntrun">assertDidntRun</h4>
+<p>断言给定的进程没有被调用：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+Process::assertDidntRun(<span class="string token">'ls -la'</span>);
+</code></pre>
+<p>与 <code>assertRan</code> 方法类似，<code>assertDidntRun</code> 方法也接受一个闭包，该闭包将接收一个进程实例和一个进程结果，允许你检查进程的配置选项。如果此闭包返回 <code>true</code>，则断言将“失败”：</p>
+<pre><code class="language-php">Process::assertDidntRun(fn (PendingProcess <span class="variable token">$process</span>, ProcessResult <span class="variable token">$result</span>) =&gt;
+    <span class="variable token">$process</span>-&gt;command === <span class="string token">'ls -la'</span>
+);
+</code></pre>
+<p><a name="assert-process-ran-times"></a></p>
+<h4 id="assertrantimes">assertRanTimes</h4>
+<p>断言给定的进程被调用了指定的次数：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+Process::assertRanTimes(<span class="string token">'ls -la'</span>, times: <span class="number token">3</span>);
+</code></pre>
+<p><code>assertRanTimes</code> 方法也接受一个闭包，该闭包将接收一个进程实例和一个进程结果，允许你检查进程的配置选项。如果此闭包返回 <code>true</code> 并且进程被调用了指定的次数，则断言将“通过”：</p>
+<pre><code class="language-php">Process::assertRanTimes(<span class="keyword token">function</span> (PendingProcess <span class="variable token">$process</span>, ProcessResult <span class="variable token">$result</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$process</span>-&gt;command === <span class="string token">'ls -la'</span>;
+}, times: <span class="number token">3</span>);
+</code></pre>
+<p><a name="preventing-stray-processes"></a></p>
+<h3 id="防止运行未被伪造的进程">防止运行未被伪造的进程</h3>
+<p>如果你想确保在单个测试或完整的测试套件中，所有被调用的进程都已经被伪造，你可以调用<code>preventStrayProcesses</code> 方法。调用此方法后，任何没有相应的伪造结果的进程都将引发异常，而不是启动实际进程：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Process;
+
+Process::preventStrayProcesses();
+
+Process::fake([
+    <span class="string token">'ls *'</span> =&gt; <span class="string token">'Test output...'</span>,
+]);
+
+<span class="comment token">// 返回假响应...</span>
+Process::run(<span class="string token">'ls -la'</span>);
+
+<span class="comment token">// 抛出一个异常...</span>
+Process::run(<span class="string token">'bash import.sh'</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
