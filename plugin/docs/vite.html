@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="资源绑定（vite）">资源绑定（Vite）</h1>
+<ul>
+<li>  <a href="#introduction">介绍</a></li>
+<li><a href="#installation">安装和设置</a><ul>
+<li>  <a href="#installing-node">安装 Node</a></li>
+<li>  <a href="#installing-vite-and-laravel-plugin">安装 Vite 和 Laravel 插件</a></li>
+<li>  <a href="#configuring-vite">配置 Vite</a></li>
+<li>  <a href="#loading-your-scripts-and-styles">加载你的脚本和样式</a></li>
+</ul>
+</li>
+<li>  <a href="#running-vite">运行 Vite</a></li>
+<li><a href="#working-with-scripts">使用 JavaScript</a><ul>
+<li>  <a href="#aliases">别名</a></li>
+<li>  <a href="#vue">Vue</a></li>
+<li>  <a href="#react">React</a></li>
+<li>  <a href="#inertia">Inertia</a></li>
+<li>  <a href="#url-processing">URL 处理</a></li>
+</ul>
+</li>
+<li>  <a href="#working-with-stylesheets">使用样式表</a></li>
+<li><a href="#working-with-blade-and-routes">使用 Blade 和路由</a><ul>
+<li>  <a href="#blade-processing-static-assets">使用 Vite 处理静态资源</a></li>
+<li>  <a href="#blade-refreshing-on-save">保存后刷新</a></li>
+<li>  <a href="#blade-aliases">别名</a></li>
+</ul>
+</li>
+<li>  <a href="#custom-base-urls">自定义基础 URL</a></li>
+<li>  <a href="#environment-variables">环境变量</a></li>
+<li>  <a href="#disabling-vite-in-tests">在测试中禁用 Vite</a></li>
+<li>  <a href="#ssr">服务器端渲染（SSR）</a></li>
+<li><a href="#script-and-style-attributes">脚本和样式标记属性</a><ul>
+<li>  <a href="#content-security-policy-csp-nonce">内容安全策略（CSP）随机数</a></li>
+<li>  <a href="#subresource-integrity-sri">子资源完整性（SRI）</a></li>
+<li>  <a href="#arbitrary-attributes">任意属性</a></li>
+</ul>
+</li>
+<li><a href="#advanced-customization">高级定制</a><ul>
+<li>  <a href="#correcting-dev-server-urls">更正开发服务器 URL</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="introduction"></a></p>
+<h2 id="介绍">介绍</h2>
+<p><a href="https://vitejs.dev/">Vite</a> 是一款现代前端构建工具，提供极快的开发环境并将你的代码捆绑到生产准备的资源中。在使用 Laravel 构建应用程序时，通常会使用 Vite 将你的应用程序的 CSS 和 JavaScript 文件绑定到生产环境的资源中。</p>
+<p>Laravel 通过提供官方插件和 Blade 指令，与 Vite 完美集成，以加载你的资源进行开发和生产。</p>
+<blockquote>
+<p>注意：你正在运行 Laravel Mix 吗？在新的 Laravel 安装中，Vite 已经取代了 Laravel Mix 。有关 Mix 的文档，请访问 <a href="https://laravel-mix.com/">Laravel Mix</a> 网站。如果你想切换到 Vite，请参阅我们的 <a href="https://github.com/laravel/vite-plugin/blob/main/UPGRADE.md#migrating-from-laravel-mix-to-vite">迁移指南</a>。</p>
+</blockquote>
+<h4 id="选择-vite-还是-laravel-mix">选择 Vite 还是 Laravel Mix</h4>
+<p>在转向 Vite 之前，新的 Laravel 应用程序在打包资产时通常使用 <a href="https://laravel-mix.com/">Mix</a>，它由 <a href="https://webpack.js.org/">webpack</a> 支持。Vite 专注于在构建丰富的 JavaScript 应用程序时提供更快、更高效的开发体验。如果你正在开发单页面应用程序（SPA），包括使用 <a href="https://inertiajs.com/">Inertia</a> 工具开发的应用程序，则 Vite 是完美选择。</p>
+<p>Vite 也适用于具有 JavaScript “sprinkles” 的传统服务器端渲染应用程序，包括使用 <a href="https://laravel-livewire.com/">Livewire</a> 的应用程序。但是，它缺少 Laravel Mix 支持的某些功能，例如将没有直接在 JavaScript 应用程序中引用的任意资产复制到构建中的能力。</p>
+<h4 id="切换回-mix">切换回 Mix</h4>
+<p>如果你使用我们的 Vite 脚手架创建了一个新的 Laravel 应用程序，但需要切换回 Laravel Mix 和 webpack，那么也没有问题。请参阅我们的<a href="https://github.com/laravel/vite-plugin/blob/main/UPGRADE.md#migrating-from-vite-to-laravel-mix">从 Vite 切换到 Mix 的官方指南</a>。</p>
+<h2 id="安装和设置">安装和设置</h2>
+<blockquote>
+<p><strong>注意</strong>
+以下文档讨论如何手动安装和配置 Laravel Vite 插件。但是，Laravel 的<a href="/docs/laravel/10.x/starter-kits">起始套件</a>已经包含了所有的脚手架，并且是使用 Laravel 和 Vite 开始最快的方式。</p>
+</blockquote>
+<h3 id="安装-node">安装 Node</h3>
+<p>在运行 Vite 和 Laravel 插件之前，你必须确保已安装 Node.js（16+）和 NPM：</p>
+<p><code>node -v npm -v</code> </p>
+<p>你可以通过<a href="https://nodejs.org/en/download/">官方 Node 网站</a>的简单图形安装程序轻松安装最新版本的 Node 和 NPM。或者，如果你使用的是 <a href="/docs/laravel/10.x/sail">Laravel Sail</a>，可以通过 Sail 调用 Node 和 NPM：</p>
+<p><code>./vendor/bin/sail node -v ./vendor/bin/sail npm -v</code></p>
+<p><a name="installing-vite-and-laravel-plugin"></a></p>
+<h3 id="安装-vite-和-laravel-插件">安装 Vite 和 Laravel 插件</h3>
+<p>在 Laravel 的全新安装中，你会在应用程序目录结构的根目录下找到一个 package.json 文件。默认的 package.json 文件已经包含了你开始使用 Vite 和 Laravel 插件所需的一切。你可以通过 NPM 安装应用程序的前端依赖：</p>
+<pre><code class="language-sh">npm install
+</code></pre>
+<p><a name="configuring-vite"></a></p>
+<h3 id="配置-vite">配置 Vite</h3>
+<p>Vite 通过项目根目录中的 <code>vite.config.js</code> 文件进行配置。你可以根据自己的需要自定义此文件，也可以安装任何其他插件，例如 <code>@vitejs/plugin-vue</code> 或 <code>@vitejs/plugin-react</code>。</p>
+<p>Laravel Vite 插件需要你指定应用程序的入口点。这些入口点可以是 JavaScript 或 CSS 文件，并包括预处理语言，例如 TypeScript、JSX、TSX 和 Sass。</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel([
+            <span class="string token">'resources/css/app.css'</span>,
+            <span class="string token">'resources/js/app.js'</span>,
+        ]),
+    ],
+});
+</code></pre>
+<p>如果你正在构建一个单页应用程序，包括使用 Inertia 构建的应用程序，则最好不要使用 CSS 入口点：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel([
+            <span class="string token">'resources/css/app.css'</span>, <span class="comment token">// [tl! remove]</span>
+            <span class="string token">'resources/js/app.js'</span>,
+        ]),
+    ],
+});
+</code></pre>
+<p>相反，你应该通过 JavaScript 导入你的 CSS。通常，这将在应用程序的 resources/js/app.js 文件中完成：</p>
+<pre><code class="language-js">import <span class="string token">'./bootstrap'</span>;
+import <span class="string token">'../css/app.css'</span>; <span class="comment token">// [tl! add]</span>
+</code></pre>
+<p>Laravel 插件还支持多个入口点和高级配置选项，例如<a href="#ssr">SSR 入口点</a>。</p>
+<p><a name="working-with-a-secure-development-server"></a></p>
+<h4 id="使用安全的开发服务器">使用安全的开发服务器</h4>
+<p>如果你的本地开发 Web 服务器通过 HTTPS 提供应用程序服务，则可能会遇到连接到 Vite 开发服务器的问题。</p>
+<p>如果你在本地开发中使用 <a href="/docs/laravel/10.x/valet">Laravel Valet</a> 并已针对你的应用程序运行 <a href="/docs/laravel/10.x/valetmd#securing-sites">secure 命令</a>，则可以配置 Vite 开发服务器自动使用 Valet 生成的 TLS 证书：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+            valetTls: <span class="string token">'my-app.test'</span>, <span class="comment token">// [tl! add]</span>
+        }),
+    ],
+});
+</code></pre>
+<p>当使用其他 Web 服务器时，你应生成一个受信任的证书并手动配置 Vite 使用生成的证书：</p>
+<pre><code class="language-js"><span class="comment token">// ...</span>
+import fs from <span class="string token">'fs'</span>; <span class="comment token">// [tl! add]</span>
+
+<span class="keyword token">const</span> host = <span class="string token">'my-app.test'</span>; <span class="comment token">// [tl! add]</span>
+
+export <span class="keyword token">default</span> defineConfig({
+    <span class="comment token">// ...</span>
+    server: { <span class="comment token">// [tl! add]</span>
+        host, <span class="comment token">// [tl! add]</span>
+        hmr: { host }, <span class="comment token">// [tl! add]</span>
+        https: { <span class="comment token">// [tl! add]</span>
+            key: fs.readFileSync(`/path/to/${host}.key`), <span class="comment token">// [tl! add]</span>
+            cert: fs.readFileSync(`/path/to/${host}.crt`), <span class="comment token">// [tl! add]</span>
+        }, <span class="comment token">// [tl! add]</span>
+    }, <span class="comment token">// [tl! add]</span>
+});
+</code></pre>
+<p>如果你无法为系统生成可信证书，则可以安装并配置 <a href="https://github.com/vitejs/vite-plugin-basic-ssl"><code>@vitejs/plugin-basic-ssl</code> 插件</a>。使用不受信任的证书时，你需要通过在运行 <code>npm run dev</code> 命令时按照控制台中的“Local”链接接受 Vite 开发服务器的证书警告。</p>
+<p><a name="loading-your-scripts-and-styles"></a></p>
+<h3 id="加载你的脚本和样式">加载你的脚本和样式</h3>
+<p>配置了 Vite 入口点后，你只需要在应用程序根模板的 <code>&lt;head&gt;</code> 中添加一个 <code>@vite()</code> Blade 指令引用它们即可：</p>
+<pre><code class="language-blade">&lt;!doctype html&gt;
+&lt;head&gt;
+    {{-- ... --}}
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+&lt;/head&gt;
+</code></pre>
+<p>如果你通过 JavaScript 导入你的 CSS 文件，你只需要包含 JavaScript 的入口点：</p>
+<pre><code class="language-blade">&lt;!doctype html&gt;
+&lt;head&gt;
+    {{-- ... --}}
+
+    @vite('resources/js/app.js')
+&lt;/head&gt;
+</code></pre>
+<p><code>@vite</code> 指令会自动检测 Vite 开发服务器并注入 Vite 客户端以启用热模块替换。在构建模式下，该指令将加载已编译和版本化的资产，包括任何导入的 CSS 文件。</p>
+<p>如果需要，在调用 <code>@vite</code> 指令时，你还可以指定已编译资产的构建路径：</p>
+<pre><code class="language-blade">&lt;!doctype html&gt;
+&lt;head&gt;
+    {{-- Given build path is relative to <span class="keyword token">public</span> path. --}}
+
+    @vite(<span class="string token">'resources/js/app.js'</span>, <span class="string token">'vendor/courier/build'</span>)
+&lt;/head&gt;
+</code></pre>
+<p><a name="running-vite"></a></p>
+<h2 id="运行-vite">运行 Vite</h2>
+<p>你可以通过两种方式运行 Vite。你可以通过 <code>dev</code> 命令运行开发服务器，在本地开发时非常有用。开发服务器会自动检测文件的更改，并立即在任何打开的浏览器窗口中反映这些更改。</p>
+<p>或者，运行 <code>build</code> 命令将版本化并打包应用程序的资产，并准备好部署到生产环境：</p>
+<p>Or, running the <code>build</code> command will version and bundle your application&#39;s assets and get them ready for you to deploy to production:</p>
+<pre><code class="language-shell"><span class="comment token"># Run the Vite development server...</span>
+npm run dev
+
+<span class="comment token"># Build and version the assets for production...</span>
+npm run build
+</code></pre>
+<p><a name="working-with-scripts"></a></p>
+<h2 id="使用-javascript">使用 JavaScript</h2>
+<p><a name="aliases"></a></p>
+<h3 id="别名">别名</h3>
+<p>默认情况下，Laravel 插件提供一个常用的别名，以帮助你快速开始并方便地导入你的应用程序的资产：</p>
+<pre><code class="language-js">{
+    '@' =&gt; '/resources/js'
+}
+</code></pre>
+<p>你可以通过添加自己的别名到 <code>vite.config.js</code> 配置文件中，覆盖 <code>&#39;@&#39;</code> 别名：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel([<span class="string token">'resources/ts/app.tsx'</span>]),
+    ],
+    resolve: {
+        alias: {
+            <span class="string token">'@'</span>: <span class="string token">'/resources/ts'</span>,
+        },
+    },
+});
+</code></pre>
+<p><a name="vue"></a></p>
+<h3 id="vue">Vue</h3>
+<p>如果你想要使用 <a href="https://vuejs.org/">Vue</a> 框架构建前端，那么你还需要安装 <code>@vitejs/plugin-vue</code> 插件：</p>
+<pre><code class="language-sh">npm install --save-dev @vitejs/plugin-vue
+</code></pre>
+<p>然后你可以在 <code>vite.config.js</code> 配置文件中包含该插件。当使用 Laravel 和 Vue 插件时，还需要一些附加选项：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+import vue from <span class="string token">'@vitejs/plugin-vue'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel([<span class="string token">'resources/js/app.js'</span>]),
+        vue({
+            template: {
+                transformAssetUrls: {
+                    <span class="comment token">// Vue 插件会重新编写资产 URL，以便在单文件组件中引用时，指向 Laravel web 服务器。</span>
+                    <span class="comment token">// 将其设置为 `null`，则 Laravel 插件会将资产 URL 重新编写为指向 Vite 服务器。</span>
+                    base: <span class="keyword token">null</span>,
+
+                    <span class="comment token">// Vue 插件将解析绝对 URL 并将其视为磁盘上文件的绝对路径。</span>
+                    <span class="comment token">// 将其设置为 `false`，将保留绝对 URL 不变，以便可以像预期那样引用公共目录中的资源。</span>
+                    includeAbsolute: <span class="keyword token">false</span>,
+                },
+            },
+        }),
+    ],
+});
+</code></pre>
+<p><strong>注意</strong>
+Laravel 的 <a href="/docs/laravel/10.x/starter-kits">起步套件</a> 已经包含了适当的 Laravel、Vue 和 Vite 配置。请查看 <a href="/docs/laravel/10.x/starter-kitsmd#breeze-and-inertia">Laravel Breeze</a> 以了解使用 Laravel、Vue 和 Vite 快速入门的最快方法。</p>
+<p><a name="react"></a></p>
+<h3 id="react">React</h3>
+<p>如果你想要使用 <a href="https://reactjs.org/">React</a> 框架构建前端，那么你还需要安装 <code>@vitejs/plugin-react</code> 插件：</p>
+<pre><code class="language-sh">npm install --save-dev @vitejs/plugin-react
+</code></pre>
+<p>你可以在 <code>vite.config.js</code> 配置文件中包含该插件：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+import react from <span class="string token">'@vitejs/plugin-react'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel([<span class="string token">'resources/js/app.jsx'</span>]),
+        react(),
+    ],
+});
+</code></pre>
+<p>当使用 Vite 和 React 时，你将需要确保任何包含 JSX 的文件都有一个 .jsx 和 .tsx 扩展，记住更新入口文件，如果需要 <a href="#configuring-vite">如上所示</a>。你还需要在现有的 <code>@vite</code> 指令旁边包含额外的 <code>@viteReactRefresh</code> Blade 指令。</p>
+<pre><code class="language-blade">@viteReactRefresh
+@vite(&#39;resources/js/app.jsx&#39;)
+</code></pre>
+<p><code>@viteReactRefresh</code> 指令必须在 <code>@vite</code> 指令之前调用 。</p>
+<blockquote>
+<p><strong>注意</strong><br>Laravel 的 <a href="/docs/laravel/10.x/starter-kits">起步套件</a> 已经包含了适合的 Laravel、React 和 Vite 配置。查看 <a href="/docs/laravel/10.x/starter-kitsmd#breeze-and-inertia">Laravel Breeze</a> 以最快的方式开始学习 Laravel、React 和 Vite。</p>
+</blockquote>
+<p><a name="inertia"></a></p>
+<h3 id="inertia">Inertia</h3>
+<p>Laravel Vite 插件提供了一个方便的 <code>resolvePageComponent</code> 函数，帮助你解决 Inertia 页面组件。以下是使用 Vue 3 的助手示例；然而，你也可以在其他框架中使用该函数，例如 React：</p>
+<pre><code class="language-js">import { createApp, h } from <span class="string token">'vue'</span>;
+import { createInertiaApp } from <span class="string token">'@inertiajs/vue3'</span>;
+import { resolvePageComponent } from <span class="string token">'laravel-vite-plugin/inertia-helpers'</span>;
+
+createInertiaApp({
+  resolve: (name) =&gt; resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob(<span class="string token">'./Pages/**/*.vue'</span>)),
+  setup({ el, App, props, plugin }) {
+    <span class="keyword token">return</span> createApp({ render: () =&gt; h(App, props) })
+      .<span class="keyword token">use</span>(plugin)
+      .mount(el)
+  },
+});
+</code></pre>
+<blockquote>
+<p><strong>注意</strong><br>Laravel 的 <a href="/docs/laravel/10.x/starter-kits">起步套件</a> 已经包含了适合的 Laravel、Inertia 和 Vite 配置。查看 <a href="/docs/laravel/10.x/starter-kitsmd#breeze-and-inertia">Laravel Breeze</a> 以最快的方式开始学习 Laravel、Inertia 和 Vite。</p>
+</blockquote>
+<p><a name="url-processing"></a></p>
+<h3 id="url-处理">URL 处理</h3>
+<p>当使用 Vite 并在你的应用程序的 HTML，CSS 和 JS 中引用资源时，有几件事情需要考虑。首先，如果你使用绝对路径引用资源，Vite 将不会在构建中包含资源；因此，你需要确认资源在你的公共目录中是可用的。</p>
+<p>在引用相对路径的资源时，你应该记住这些路径是相对于它们被引用的文件的路径。通过相对路径引用的所有资源都将被 Vite 重写、版本化和打包。</p>
+<p>参考以下项目结构：</p>
+<pre><code><span class="keyword token">public</span>/
+  taylor.png
+resources/
+  js/
+    Pages/
+      Welcome.vue
+  images/
+    abigail.png
+</code></pre>
+<p>以下示例演示了 Vite 如何处理相对路径和绝对 URL：</p>
+<pre><code>&lt;!-- 这个资源不被 Vite 处理，不会被包含在构建中 --&gt;
+&lt;img src="/taylor.png"&gt;
+
+&lt;!-- 这个资源将由 Vite 重写、版本化和打包 --&gt;
+&lt;img src="../../images/abigail.png"&gt;` 
+</code></pre>
+<p><a name="working-with-stylesheets"></a></p>
+<h2 id="使用样式表">使用样式表</h2>
+<p>你可以在 <a href="https://vitejs.dev/guide/features.html#css">Vite 文档</a> 中了解有关 Vite 的 CSS 支持更多的信息。如果你使用 PostCSS 插件，如 <a href="https://tailwindcss.com/">Tailwind</a>，你可以在项目的根目录中创建一个 <code>postcss.config.js</code> 文件，Vite 会自动应用它：</p>
+<pre><code>module.exports = {
+    plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+    },
+};
+</code></pre>
+<blockquote>
+<p><strong>注意</strong> Laravel 的 <a href="/docs/laravel/10.x/starter-kits">起始套件</a> 已经包含了正确的 Tailwind、PostCSS 和 Vite 配置。或者，如果你想在不使用我们的起始套件的情况下使用 Tailwind 和 Laravel，请查看 <a href="https://tailwindcss.com/docs/guides/laravel">Tailwind 的 Laravel 安装指南</a>。</p>
+</blockquote>
+<p><a name="working-with-blade-and-routes"></a></p>
+<h2 id="使用-blade-和-路由">使用 Blade 和 路由</h2>
+<p><a name="blade-processing-static-assets"></a></p>
+<h3 id="通过-vite-处理静态资源">通过 Vite 处理静态资源</h3>
+<p>在你的 JavaScript 或 CSS 中引用资源时，Vite 会自动处理和版本化它们。此外，在构建基于 Blade 的应用程序时，Vite 还可以处理和版本化你仅在 Blade 模板中引用的静态资源。</p>
+<p>然而，要实现这一点，你需要通过将静态资源导入到应用程序的入口点来让 Vite 了解你的资源。例如，如果你想处理和版本化存储在 <code>resources/images</code> 中的所有图像和存储在 <code>resources/fonts</code> 中的所有字体，你应该在应用程序的 <code>resources/js/app.js</code> 入口点中添加以下内容：</p>
+<pre><code class="language-js">import.meta.glob([
+  &#39;../images/**&#39;,
+  &#39;../fonts/**&#39;,
+]);
+</code></pre>
+<p>这些资源将在运行 <code>npm run build</code> 时由 Vite 处理。然后，你可以在 Blade 模板中使用 <code>Vite::asset</code> 方法引用这些资源，该方法将返回给定资源的版本化 URL：</p>
+<pre><code class="language-blade">&lt;img src="{{ Vite::asset('resources/images/logo.png') }}"&gt;
+</code></pre>
+<p><a name="blade-refreshing-on-save"></a></p>
+<h3 id="保存刷新">保存刷新</h3>
+<p>当你的应用程序使用传统的服务器端渲染 Blade 构建时，Vite 可以通过在你的应用程序中更改视图文件时自动刷新浏览器来提高你的开发工作流程。要开始，你可以简单地将 <code>refresh</code> 选项指定为 <code>true</code>。</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+            refresh: <span class="keyword token">true</span>,
+        }),
+    ],
+});
+</code></pre>
+<p>当 <code>refresh</code> 选项为 <code>true</code> 时，保存以下目录中的文件将在你运行 <code>npm run dev</code> 时触发浏览器进行全面的页面刷新：</p>
+<ul>
+<li><code>app/View/Components/**</code></li>
+<li><code>lang/**</code></li>
+<li><code>resources/lang/**</code></li>
+<li><code>resources/views/**</code></li>
+<li><code>routes/**</code></li>
+</ul>
+<p>监听 <code>routes/**</code> 目录对于在应用程序前端中利用 <a href="https://github.com/tighten/ziggy">Ziggy</a> 生成路由链接非常有用。</p>
+<p>如果这些默认路径不符合你的需求，你可以指定自己的路径列表：</p>
+<pre><code>import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+            refresh: [<span class="string token">'resources/views/**'</span>],
+        }),
+    ],
+});
+</code></pre>
+<p>在后台，Laravel Vite 插件使用了 <a href="https://github.com/ElMassimo/vite-plugin-full-reload"><code>vite-plugin-full-reload</code></a> 包，该包提供了一些高级配置选项，可微调此功能的行为。如果你需要这种级别的自定义，可以提供一个 <code>config</code> 定义：</p>
+<pre><code>import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+            refresh: [{
+                paths: [<span class="string token">'path/to/watch/**'</span>],
+                config: { delay: <span class="number token">300</span> }
+            }],
+        }),
+    ],
+});
+</code></pre>
+<h3 id="别名-1">别名</h3>
+<p>在 JavaScript 应用程序中创建别名来引用常用目录是很常见的。但是，你也可以通过在 <code>Illuminate\Support\Facades\Vite</code> 类上使用 <code>macro</code> 方法来创建在 Blade 中使用的别名。通常，“宏”应在 <a href="/docs/laravel/10.x/providers">服务提供商</a> 的 <code>boot</code> 方法中定义：</p>
+<pre><code><span class="comment token">/**
+ * Bootstrap any application services.
+ */</span>
+<span class="keyword token">public</span> <span class="keyword token">function</span> boot(): void {
+    Vite::macro(<span class="string token">'image'</span>, fn (string <span class="variable token">$asset</span>) =&gt; <span class="variable token">$this</span>-&gt;asset(<span class="string token">"resources/images/{$asset}"</span>));
+}
+</code></pre>
+<p>定义了宏之后，可以在模板中调用它。例如，我们可以使用上面定义的 <code>image</code> 宏来引用位于 <code>resources/images/logo.png</code> 的资源：</p>
+<pre><code>&lt;img src="{{ Vite::image('logo.png') }}" alt="Laravel Logo"&gt;
+</code></pre>
+<h3 id="自定义-base-url">自定义 base URL</h3>
+<p>如果你的 Vite 编译的资产部署到与应用程序不同的域（例如通过 CDN），必须在应用程序的 <code>.env</code> 文件中指定 <code>ASSET_URL</code> 环境变量：</p>
+<pre><code>ASSET_URL=https:<span class="comment token">//cdn.example.com</span>
+</code></pre>
+<p>在配置了资源 URL 之后，所有重写的 URL 都将以配置的值为前缀：</p>
+<pre><code>https:<span class="comment token">//cdn.example.com/build/assets/app.9dce8d17.js</span>
+</code></pre>
+<p>请记住，<a href="/#url-processing">绝对路径的 URL 不会被 Vite 重新编写</a>，因此它们不会被添加前缀。</p>
+<h3 id="环境变量">环境变量</h3>
+<p>你可以在应用程序的 <code>.env</code> 文件中以 <code>VITE_</code> 为前缀注入环境变量以在 JavaScript 中使用：</p>
+<pre><code>VITE_SENTRY_DSN_PUBLIC=http:<span class="comment token">//example.com</span>
+</code></pre>
+<p>你可以通过 <code>import.meta.env</code> 对象访问注入的环境变量：</p>
+<pre><code>import.meta.env.VITE_SENTRY_DSN_PUBLIC
+</code></pre>
+<h3 id="在测试中禁用-vite">在测试中禁用 Vite</h3>
+<p>Laravel 的 Vite 集成将在运行测试时尝试解析你的资产，这需要你运行 Vite 开发服务器或构建你的资产。</p>
+<p>如果你希望在测试中模拟 Vite，你可以调用 <code>withoutVite</code> 方法，该方法对任何扩展 Laravel 的 <code>TestCase</code> 类的测试都可用：</p>
+<pre><code><span class="keyword token">use</span> Tests\TestCase;
+
+<span class="keyword token">class</span> ExampleTest <span class="keyword token">extends</span> TestCase {
+    <span class="keyword token">public</span> <span class="keyword token">function</span> test_without_vite_example(): void {
+        <span class="variable token">$this</span>-&gt;withoutVite();
+
+        <span class="comment token">// ...</span>
+    }
+}
+</code></pre>
+<p>如果你想在所有测试中禁用 Vite，可以在基本的 <code>TestCase</code> 类上的 <code>setUp</code> 方法中调用 <code>withoutVite</code> 方法：</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> Tests;
+
+<span class="keyword token">use</span> Illuminate\Foundation\Testing\TestCase <span class="keyword token">as</span> BaseTestCase;
+
+<span class="keyword token">abstract</span> <span class="keyword token">class</span> TestCase <span class="keyword token">extends</span> BaseTestCase {
+    <span class="keyword token">use</span> CreatesApplication;
+
+    <span class="keyword token">protected</span> <span class="keyword token">function</span> setUp(): void<span class="comment token">// [tl! add:start] {</span>
+        <span class="keyword token">parent</span>::setUp();
+
+        <span class="variable token">$this</span>-&gt;withoutVite();
+    }<span class="comment token">// [tl! add:end]</span>
+}
+</code></pre>
+<h3 id="服务器端渲染">服务器端渲染</h3>
+<p>Laravel Vite 插件可以轻松地设置与 Vite 的服务器端渲染。要开始使用，请在 <code>resources/js</code> 中创建一个 SSR（Server-Side Rendering）入口点，并通过将配置选项传递给 Laravel 插件来指定入口点：</p>
+<pre><code>import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            input: <span class="string token">'resources/js/app.js'</span>,
+            ssr: <span class="string token">'resources/js/ssr.js'</span>,
+        }),
+    ],
+});
+</code></pre>
+<p>为确保不遗漏重建 SSR 入口点，我们建议增加应用程序的 <code>package.json</code> 中的 「build」 脚本来创建 SSR 构建：</p>
+<pre><code><span class="string token">"scripts"</span>: {
+     <span class="string token">"dev"</span>: <span class="string token">"vite"</span>,
+     <span class="string token">"build"</span>: <span class="string token">"vite build"</span> <span class="comment token">// [tl! remove]</span>
+     <span class="string token">"build"</span>: <span class="string token">"vite build &amp;&amp; vite build --ssr"</span> <span class="comment token">// [tl! add]</span>
+}
+</code></pre>
+<p>然后，要构建和启动 SSR 服务器，你可以运行以下命令：</p>
+<pre><code>npm run build
+node bootstrap/ssr/ssr.mjs
+</code></pre>
+<blockquote>
+<p><strong>注意</strong> Laravel 的 <a href="/docs/laravel/10.x/starter-kits">starter kits</a> 已经包含了适当的 Laravel、Inertia SSR 和 Vite 配置。查看 <a href="/docs/laravel/10.x/starter-kitsmd#breeze-and-inertia">Laravel Breeze</a> ，以获得使用 Laravel、Inertia SSR 和 Vite 的最快速的方法。</p>
+</blockquote>
+<h2 id="script--style-标签的属性">Script &amp; Style 标签的属性</h2>
+<h3 id="content-security-policy-csp-nonce">Content Security Policy (CSP) Nonce</h3>
+<p>如果你希望在你的脚本和样式标签中包含 <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce"><code>nonce</code> 属性</a>，作为你的 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">Content Security Policy</a> 的一部分，你可以使用自定义 <a href="/docs/laravel/10.x/middleware">middleware</a> 中的 <code>useCspNonce</code> 方法生成或指定一个 nonce：</p>
+<p>Copy code</p>
+<pre><code><span class="preprocessor token">&lt;?php</span>
+
+<span class="keyword token">namespace</span> App\Http\Middleware;
+
+<span class="keyword token">use</span> Closure;
+<span class="keyword token">use</span> Illuminate\Http\Request;
+<span class="keyword token">use</span> Illuminate\Support\Facades\Vite;
+<span class="keyword token">use</span> Symfony\Component\HttpFoundation\Response;
+
+<span class="keyword token">class</span> AddContentSecurityPolicyHeaders {
+    <span class="comment token">/**
+     * Handle an incoming request.
+     *
+     *<span class="phpdoc token"> @param</span>  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */</span>
+    <span class="keyword token">public</span> <span class="keyword token">function</span> handle(Request <span class="variable token">$request</span>, Closure <span class="variable token">$next</span>, string <span class="variable token">$role</span>): Response {
+        Vite::useCspNonce();
+
+        <span class="keyword token">return</span> <span class="variable token">$next</span>(<span class="variable token">$request</span>)-&gt;withHeaders([
+            <span class="string token">'Content-Security-Policy'</span> =&gt; <span class="string token">"script-src 'nonce-"</span>.Vite::cspNonce().<span class="string token">"'"</span>,
+        ]);
+    }
+}
+</code></pre>
+<p>调用了 <code>useCspNonce</code> 方法后，Laravel 将自动在所有生成的脚本和样式标签上包含 <code>nonce</code> 属性。</p>
+<p>如果你需要在其他地方指定 nonce，包括 Laravel 的 starter kits 中带有的 <a href="https://github.com/tighten/ziggy#using-routes-with-a-content-security-policy">Ziggy <code>@route</code> directive</a> 指令，你可以使用 <code>cspNonce</code> 方法来检索它：</p>
+<pre><code>@routes(nonce: Vite::cspNonce())
+</code></pre>
+<p>如果你已经有了一个 nonce，想要告诉 Laravel 使用它，你可以通过将 nonce 传递给 <code>useCspNonce</code> 方法来实现：</p>
+<pre><code>Vite::useCspNonce(<span class="variable token">$nonce</span>);
+</code></pre>
+<p><a name="subresource-integrity-sri"></a>
+###子资源完整性 (SRI)
+如果你的 <code>Vite manifest</code> 中包括资源的完整性哈希，则 Laravel 将自动向其生成的任何脚本和样式标签中添加 <code>integrity</code> 属性，以执行 子资源完整性。默认情况下，Vite 不包括其清单中的 <code>integrity</code> 哈希，但是你可以通过安装 <code>vite-plugin-manifest-sri</code> NPM 插件来启用它：</p>
+<pre><code class="language-shell">npm install --save-dev vite-plugin-manifest-sri
+</code></pre>
+<p>然后，在你的 <code>vite.config.js</code> 文件中启用此插件：</p>
+<pre><code class="language-js">import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+import manifestSRI from <span class="string token">'vite-plugin-manifest-sri'</span>;<span class="comment token">// [tl! add]</span>
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+        }),
+        manifestSRI(),<span class="comment token">// [tl! add]</span>
+    ],
+});
+</code></pre>
+<p>如果需要，你也可以自定义清单中的完整性哈希键：</p>
+<pre><code class="language-php"><span class="keyword token">use</span> Illuminate\Support\Facades\Vite;
+
+Vite::useIntegrityKey(<span class="string token">'custom-integrity-key'</span>);
+</code></pre>
+<p>如果你想完全禁用这个自动检测，你可以将 <code>false</code> 传递给 <code>useIntegrityKey</code> 方法：</p>
+<pre><code>Vite::useIntegrityKey(<span class="keyword token">false</span>);
+</code></pre>
+<p><a name="arbitrary-attributes"></a></p>
+<h3 id="任意属性">任意属性</h3>
+<p>如果你需要在脚本和样式标签中包含其他属性，例如 <code>data-turbo-track</code> 属性，你可以通过 <code>useScriptTagAttributes</code> 和 <code>useStyleTagAttributes</code> 方法指定它们。通常，这些方法应从一个服务提供程序中调用：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Vite;
+
+Vite::useScriptTagAttributes([
+    <span class="string token">'data-turbo-track'</span> =&gt; <span class="string token">'reload'</span>, <span class="comment token">// 为属性指定一个值...</span>
+    <span class="string token">'async'</span> =&gt; <span class="keyword token">true</span>, <span class="comment token">// 在不使用值的情况下指定属性...</span>
+    <span class="string token">'integrity'</span> =&gt; <span class="keyword token">false</span>, <span class="comment token">// 排除一个将被包含的属性...</span>
+]);
+
+Vite::useStyleTagAttributes([
+    <span class="string token">'data-turbo-track'</span> =&gt; <span class="string token">'reload'</span>,
+]);
+</code></pre>
+<p>如果你需要有条件地添加属性，你可以传递一个回调函数，它将接收到资产源路径、它的URL、它的清单块和整个清单：</p>
+<pre><code><span class="keyword token">use</span> Illuminate\Support\Facades\Vite;
+
+Vite::useScriptTagAttributes(fn (string <span class="variable token">$src</span>, string <span class="variable token">$url</span>, <span class="keyword token">array</span>|<span class="keyword token">null</span> <span class="variable token">$chunk</span>, <span class="keyword token">array</span>|<span class="keyword token">null</span> <span class="variable token">$manifest</span>) =&gt; [
+    <span class="string token">'data-turbo-track'</span> =&gt; <span class="variable token">$src</span> === <span class="string token">'resources/js/app.js'</span> ? <span class="string token">'reload'</span> : <span class="keyword token">false</span>,
+]);
+
+Vite::useStyleTagAttributes(fn (string <span class="variable token">$src</span>, string <span class="variable token">$url</span>, <span class="keyword token">array</span>|<span class="keyword token">null</span> <span class="variable token">$chunk</span>, <span class="keyword token">array</span>|<span class="keyword token">null</span> <span class="variable token">$manifest</span>) =&gt; [
+    <span class="string token">'data-turbo-track'</span> =&gt; <span class="variable token">$chunk</span> &amp;&amp; <span class="variable token">$chunk</span>[<span class="string token">'isEntry'</span>] ? <span class="string token">'reload'</span> : <span class="keyword token">false</span>,
+]);
+</code></pre>
+<blockquote>
+<p><strong>警告</strong>
+在 Vite 开发服务器运行时，<code>$chunk</code> 和 <code>$manifest</code> 参数将为 <code>null</code>。</p>
+</blockquote>
+<p><a name="advanced-customization"></a></p>
+<h2 id="高级定制">高级定制</h2>
+<p>默认情况下，Laravel 的 Vite 插件使用合理的约定，适用于大多数应用，但是有时你可能需要自定义 Vite 的行为。为了启用额外的自定义选项，我们提供了以下方法和选项，可以用于替代 <code>@vite</code> Blade 指令：</p>
+<pre><code>&lt;!doctype html&gt;
+&lt;head&gt;
+    {{-- ... --}}
+
+    {{
+        Vite::useHotFile(storage_path(<span class="string token">'vite.hot'</span>)) <span class="comment token">// 自定义 "hot" 文件...</span>
+            -&gt;useBuildDirectory(<span class="string token">'bundle'</span>) <span class="comment token">// 自定义构建目录...</span>
+            -&gt;useManifestFilename(<span class="string token">'assets.json'</span>) <span class="comment token">// 自定义清单文件名...</span>
+            -&gt;withEntryPoints([<span class="string token">'resources/js/app.js'</span>]) <span class="comment token">// 指定入口点...</span>
+    }}
+&lt;/head&gt;
+</code></pre>
+<p>然后，在 <code>vite.config.js</code> 文件中，你应该指定相同的配置：</p>
+<pre><code>import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            hotFile: <span class="string token">'storage/vite.hot'</span>, <span class="comment token">// 自定义 "hot" 文件...</span>
+            buildDirectory: <span class="string token">'bundle'</span>, <span class="comment token">// 自定义构建目录...</span>
+            input: [<span class="string token">'resources/js/app.js'</span>], <span class="comment token">// 指定入口点...</span>
+        }),
+    ],
+    build: {
+      manifest: <span class="string token">'assets.json'</span>, <span class="comment token">// 自定义清单文件名...</span>
+    },
+});
+</code></pre>
+<p><a name="correcting-dev-server-urls"></a></p>
+<h3 id="修正开发服务器-url">修正开发服务器 URL</h3>
+<p>Vite 生态系统中的某些插件默认假设以正斜杠开头的 URL 始终指向 Vite 开发服务器。然而，由于 Laravel 集成的性质，实际情况并非如此。</p>
+<p>例如，<code>vite-imagetools</code> 插件在 Vite 服务时，你的资产时会输出以下类似的 URL：</p>
+<pre><code>&lt;img src="/@imagetools/f0b2f404b13f052c604e632f2fb60381bf61a520"&gt;
+</code></pre>
+<p><code>vite-imagetools</code> 插件期望输出URL将被 Vite 拦截，并且插件可以处理所有以 <code>/@imagetools</code> 开头的 URL。如果你正在使用期望此行为的插件，则需要手动纠正 URL。你可以在 <code>vite.config.js</code> 文件中使用 <code>transformOnServe</code> 选项来实现。</p>
+<p>在这个例子中，我们将在生成的代码中的所有 <code>/@imagetools</code> 钱加上开发服务器的 URL：</p>
+<pre><code>import { defineConfig } from <span class="string token">'vite'</span>;
+import laravel from <span class="string token">'laravel-vite-plugin'</span>;
+import { imagetools } from <span class="string token">'vite-imagetools'</span>;
+
+export <span class="keyword token">default</span> defineConfig({
+    plugins: [
+        laravel({
+            <span class="comment token">// ...</span>
+            transformOnServe: (code, devServerUrl) =&gt; code.replaceAll(<span class="string token">'/@imagetools'</span>, devServerUrl+<span class="string token">'/@imagetools'</span>),
+        }),
+        imagetools(),
+    ],
+});
+</code></pre>
+<p>现在，在 Vite 提供资产服务时，它会输出URL指向 Vite 开发服务器：</p>
+<pre><code>- &lt;img src="/@imagetools/f0b2f404b13f052c604e632f2fb60381bf61a520"&gt;&lt;!-- [tl! remove] --&gt;
++ &lt;img src="http://[::1]:5173/@imagetools/f0b2f404b13f052c604e632f2fb60381bf61a520"&gt;&lt;!-- [tl! add] --&gt;
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
