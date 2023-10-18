@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="artisan">Artisan</h1>
+<pre><code><span class="comment token">// 针对命令显示帮助信息</span>
+php artisan --help <span class="keyword token">OR</span> -h
+<span class="comment token">// 抑制输出信息</span>
+php artisan --quiet <span class="keyword token">OR</span> -q
+<span class="comment token">// 打印 Laravel 的版本信息</span>
+php artisan --version <span class="keyword token">OR</span> -V
+<span class="comment token">// 不询问任何交互性的问题</span>
+php artisan --no-interaction <span class="keyword token">OR</span> -n
+<span class="comment token">// 强制输出 ANSI 格式</span>
+php artisan --ansi
+<span class="comment token">// 禁止输出 ANSI 格式</span>
+php artisan --no-ansi
+<span class="comment token">// 显示当前命令行运行的环境</span>
+php artisan --env
+<span class="comment token">// -v|vv|vvv 通过增加 v 的个数来控制命令行输出内容的详尽情况: 1 个代表正常输出, 2 个代表输出更多消息, 3 个代表调试</span>
+php artisan --verbose
+<span class="comment token">// 移除编译优化过的文件 (storage/frameworks/compiled.php)</span>
+php artisan clear-compiled
+<span class="comment token">// 显示当前框架运行的环境</span>
+php artisan env
+<span class="comment token">// 显示某个命令的帮助信息</span>
+php artisan help
+<span class="comment token">// 显示所有可用的命令</span>
+php artisan <span class="keyword token">list</span>
+<span class="comment token">// 进入应用交互模式</span>
+php artisan tinker
+<span class="comment token">// 配合 dump() 函数调试数据</span>
+php artisan dump-server
+<span class="comment token">// 进入维护模式</span>
+php artisan down
+<span class="comment token">// 退出维护模式</span>
+php artisan up
+<span class="comment token">// 优化框架性能</span>
+ <span class="comment token">// --force    强制编译已写入文件 (storage/frameworks/compiled.php)</span>
+ <span class="comment token">// --psr      不对 Composer 的 dump-autoload 进行优化</span>
+php artisan optimize [--force] [--psr]
+<span class="comment token">// 更改前端预设</span>
+<span class="comment token">// type_name (可以是 none, bootstrap, vue, react)</span>
+php artisan preset [options] [--] type_name
+<span class="comment token">// 启动内置服务器</span>
+php artisan serve
+<span class="comment token">// 更改默认端口</span>
+php artisan serve --port <span class="number token">8080</span>
+<span class="comment token">// 使其在本地服务器外也可正常工作</span>
+php artisan serve --host <span class="number token">0.0</span>.<span class="number token">0.0</span>
+<span class="comment token">// 更改应用命名空间</span>
+php artisan app:name <span class="keyword token">namespace</span>
+<span class="comment token">// 清除过期的密码重置令牌</span>
+php artisan auth:clear-resets
+
+<span class="comment token">// 清空应用缓存</span>
+php artisan cache:clear
+<span class="comment token">// 移除 key_name 对应的缓存</span>
+php artisan cache:forget key_name [&lt;store&gt;]
+<span class="comment token">// 创建缓存数据库表 migration</span>
+php artisan cache:table
+
+<span class="comment token">// 合并所有的配置信息为一个，提高加载速度</span>
+php artisan config:cache
+<span class="comment token">// 移除配置缓存文件</span>
+php artisan config:clear
+
+<span class="comment token">// 程序内部调用 Artisan 命令</span>
+<span class="variable token">$exitCode</span> = Artisan::call(<span class="string token">'config:cache'</span>);
+<span class="comment token">// 运行所有的 seed 假数据生成类</span>
+ <span class="comment token">// --class      可以指定运行的类，默认是: "DatabaseSeeder"</span>
+ <span class="comment token">// --database   可以指定数据库</span>
+ <span class="comment token">// --force      当处于生产环境时强制执行操作</span>
+php artisan db:seed [--<span class="keyword token">class</span>[=<span class="string token">"..."</span>]] [--database[=<span class="string token">"..."</span>]] [--force]
+
+<span class="comment token">// 基于注册的信息，生成遗漏的 events 和 handlers</span>
+php artisan event:generate
+<span class="comment token">// 罗列所有事件和监听器</span>
+php artisan event:<span class="keyword token">list</span>
+<span class="comment token">// 缓存事件和监听器</span>
+php artisan event:cache
+<span class="comment token">// 清除事件和监听器缓存</span>
+php artisan event:clear
+
+<span class="comment token">// 生成新的处理器类</span>
+ <span class="comment token">// --command      需要处理器处理的命令类名字</span>
+php artisan handler:command [--command=<span class="string token">"..."</span>] name
+<span class="comment token">// 创建一个新的时间处理器类</span>
+ <span class="comment token">// --event        需要处理器处理的事件类名字</span>
+ <span class="comment token">// --queued       需要处理器使用队列话处理的事件类名字</span>
+php artisan handler:event [--event=<span class="string token">"..."</span>] [--queued] name
+
+<span class="comment token">// 生成应用的 key（会覆盖）</span>
+php artisan key:generate
+
+<span class="comment token">// 发布本地化翻译文件到 resources 文件下</span>
+<span class="comment token">// locales: 逗号分隔，如 zh_CN,tk,th [默认是: "all"]</span>
+php artisan lang:publish [options] [--] [&lt;locales&gt;]
+
+<span class="comment token">// 创建用户认证脚手架</span>
+php artisan make:auth
+<span class="comment token">// 创建 Channel 类</span>
+php artisan make:channel name
+<span class="comment token">// 在默认情况下, 这将创建未加入队列的自处理命令</span>
+ <span class="comment token">// 通过 --handler 标识来生成一个处理器, 用 --queued 来使其入队列.</span>
+php artisan make:command [--handler] [--queued] name
+<span class="comment token">// 创建一个新的 Artisan 命令</span>
+ <span class="comment token">//  --command     命令被调用的名称。 (默认为: "command:name")</span>
+php artisan make:console [--command[=<span class="string token">"..."</span>]] name
+<span class="comment token">// 创建一个新的资源控制器</span>
+ <span class="comment token">// --plain      生成一个空白的控制器类</span>
+php artisan make:controller [--plain] name
+php artisan make:controller App\\Admin\\Http\\Controllers\\DashboardController
+<span class="comment token">// 创建一个新的事件类</span>
+php artisan make:event name
+<span class="comment token">// 创建异常类</span>
+php artisan make:<span class="keyword token">exception</span> name
+<span class="comment token">// 创建模型工厂类</span>
+php artisan make:factory name
+<span class="comment token">// 创建一个队列任务文件</span>
+php artisan make:job 
+<span class="comment token">// 创建一个监听者类</span>
+php artisan make:listener name
+<span class="comment token">// 创建一个新的邮件类</span>
+php artisan make:mail name
+<span class="comment token">// 创建一个新的中间件类</span>
+php artisan make:middleware name
+<span class="comment token">// 创建一个新的迁移文件</span>
+ <span class="comment token">// --create     将被创建的数据表.</span>
+ <span class="comment token">// --table      将被迁移的数据表.</span>
+php artisan make:migration [--create[=<span class="string token">"..."</span>]] [--table[=<span class="string token">"..."</span>]] name
+<span class="comment token">// 创建一个新的 Eloquent 模型类</span>
+php artisan make:model User
+php artisan make:model Models/User
+<span class="comment token">// 新建一个消息通知类</span>
+php artisan make:notification TopicRepliedNotification
+<span class="comment token">// 新建一个模型观察者类</span>
+php artisan make:observer UserObserver
+<span class="comment token">// 创建授权策略</span>
+php artisan make:policy PostPolicy
+<span class="comment token">// 创建一个新的服务提供者类</span>
+php artisan make:provider name
+<span class="comment token">// 创建一个新的表单请求类</span>
+php artisan make:request name
+<span class="comment token">// 创建一个 API 资源类</span>
+php artisan make:resource name
+<span class="comment token">// 新建验证规则类</span>
+php artisan make:rule name
+<span class="comment token">// 创建模型脚手架</span>
+<span class="comment token">// &lt;name&gt; 模型名称，如 Post</span>
+<span class="comment token">// -s, --schema=SCHEMA 表结构如：--schema="title:string"</span>
+<span class="comment token">// -a, --validator[=VALIDATOR] 表单验证，如：--validator="title:required"</span>
+<span class="comment token">// -l, --localization[=LOCALIZATION] 设置本地化信息，如：--localization="key:value"</span>
+<span class="comment token">// -b, --lang[=LANG] 设置本地化语言 --lang="en"</span>
+<span class="comment token">// -f, --form[=FORM] 使用 Illumintate/Html Form 来生成表单选项，默认为 false</span>
+<span class="comment token">// -p, --prefix[=PREFIX] 表结构前缀，默认 false</span>
+php artisan make:scaffold  [options] [--] &lt;name&gt;
+<span class="comment token">// 生成数据填充类</span>
+php artisan make:seeder
+<span class="comment token">// 生成测试类</span>
+php artisan make:test
+
+<span class="comment token">// 数据库迁移</span>
+ <span class="comment token">// --database   指定数据库连接（下同）</span>
+ <span class="comment token">// --force      当处于生产环境时强制执行，不询问（下同）</span>
+ <span class="comment token">// --path       指定单独迁移文件地址</span>
+ <span class="comment token">// --pretend    把将要运行的 SQL 语句打印出来（下同）</span>
+ <span class="comment token">// --seed       Seed 任务是否需要被重新运行（下同）</span>
+php artisan migrate [--database[=<span class="string token">"..."</span>]] [--force] [--path[=<span class="string token">"..."</span>]] [--pretend] [--seed]
+<span class="comment token">// 创建迁移数据库表</span>
+php artisan migrate:install [--database[=<span class="string token">"..."</span>]]
+<span class="comment token">// Drop 所有数据表并重新运行 Migration</span>
+php artisan migrate:fresh
+<span class="comment token">// 重置并重新运行所有的 migrations</span>
+ <span class="comment token">// --seeder     指定主 Seeder 的类名</span>
+php artisan migrate:refresh [--database[=<span class="string token">"..."</span>]] [--force] [--seed] [--seeder[=<span class="string token">"..."</span>]]
+<span class="comment token">// 回滚所有的数据库迁移</span>
+php artisan migrate:reset [--database[=<span class="string token">"..."</span>]] [--force] [--pretend]
+<span class="comment token">// 回滚最最近一次运行的迁移任务</span>
+php artisan migrate:rollback [--database[=<span class="string token">"..."</span>]] [--force] [--pretend]
+<span class="comment token">// migrations 数据库表信息</span>
+php artisan migrate:status
+
+<span class="comment token">// 为数据库消息通知创建一个表迁移类</span>
+php artisan notifications:table
+<span class="comment token">// 清除缓存的 bootstrap 文件</span>
+php artisan optimize:clear
+<span class="comment token">// 扩展包自动发现</span>
+php artisan package:discover
+
+<span class="comment token">// 为队列数据库表创建一个新的迁移</span>
+php artisan queue:table
+<span class="comment token">// 监听指定的队列</span>
+ <span class="comment token">// --queue      被监听的队列</span>
+ <span class="comment token">// --delay      给执行失败的任务设置延时时间 (默认为零: 0)</span>
+ <span class="comment token">// --memory     内存限制大小，单位为 MB (默认为: 128)</span>
+ <span class="comment token">// --timeout    指定任务运行超时秒数 (默认为: 60)</span>
+ <span class="comment token">// --sleep      等待检查队列任务的秒数 (默认为: 3)</span>
+ <span class="comment token">// --tries      任务记录失败重试次数 (默认为: 0)</span>
+php artisan queue:listen [--queue[=<span class="string token">"..."</span>]] [--delay[=<span class="string token">"..."</span>]] [--memory[=<span class="string token">"..."</span>]] [--timeout[=<span class="string token">"..."</span>]] [--sleep[=<span class="string token">"..."</span>]] [--tries[=<span class="string token">"..."</span>]] [connection]
+<span class="comment token">// 查看所有执行失败的队列任务</span>
+php artisan queue:failed
+<span class="comment token">// 为执行失败的数据表任务创建一个迁移</span>
+php artisan queue:failed-table
+<span class="comment token">// 清除所有执行失败的队列任务</span>
+php artisan queue:flush
+<span class="comment token">// 删除一个执行失败的队列任务</span>
+php artisan queue:forget
+<span class="comment token">// 在当前的队列任务执行完毕后, 重启队列的守护进程</span>
+php artisan queue:restart
+<span class="comment token">// 对指定 id 的执行失败的队列任务进行重试(id: 失败队列任务的 ID)</span>
+php artisan queue:retry id
+<span class="comment token">// 指定订阅 Iron.io 队列的链接</span>
+ <span class="comment token">// queue: Iron.io 的队列名称.</span>
+ <span class="comment token">// url: 将被订阅的 URL.</span>
+ <span class="comment token">// --type       指定队列的推送类型.</span>
+php artisan queue:subscribe [--type[=<span class="string token">"..."</span>]] queue url
+<span class="comment token">// 处理下一个队列任务</span>
+ <span class="comment token">// --queue      被监听的队列</span>
+ <span class="comment token">// --daemon     在后台模式运行</span>
+ <span class="comment token">// --delay      给执行失败的任务设置延时时间 (默认为零: 0)</span>
+ <span class="comment token">// --force      强制在「维护模式下」运行</span>
+ <span class="comment token">// --memory     内存限制大小，单位为 MB (默认为: 128)</span>
+ <span class="comment token">// --sleep      当没有任务处于有效状态时, 设置其进入休眠的秒数 (默认为: 3)</span>
+ <span class="comment token">// --tries      任务记录失败重试次数 (默认为: 0)</span>
+php artisan queue:work [--queue[=<span class="string token">"..."</span>]] [--daemon] [--delay[=<span class="string token">"..."</span>]] [--force] [--memory[=<span class="string token">"..."</span>]] [--sleep[=<span class="string token">"..."</span>]] [--tries[=<span class="string token">"..."</span>]] [connection]
+
+<span class="comment token">// 生成路由缓存文件来提升路由效率</span>
+php artisan route:cache
+<span class="comment token">// 移除路由缓存文件</span>
+php artisan route:clear
+<span class="comment token">// 显示已注册过的路由</span>
+php artisan route:<span class="keyword token">list</span>
+
+<span class="comment token">// 运行计划命令</span>
+php artisan schedule:run
+
+<span class="comment token">// 为 session 数据表生成迁移文件</span>
+php artisan session:table
+<span class="comment token">// 创建 "public/storage" 到 "storage/app/public" 的软链接</span>
+php artisan storage:link
+
+<span class="comment token">// 从 vendor 的扩展包中发布任何可发布的资源</span>
+ <span class="comment token">// --force        重写所有已存在的文件</span>
+ <span class="comment token">// --provider     指定你想要发布资源文件的服务提供者</span>
+ <span class="comment token">// --tag          指定你想要发布标记资源.</span>
+php artisan vendor:publish [--force] [--provider[=<span class="string token">"..."</span>]] [--tag[=<span class="string token">"..."</span>]]
+php artisan tail [--path[=<span class="string token">"..."</span>]] [--lines[=<span class="string token">"..."</span>]] [connection]
+
+<span class="comment token">// 缓存视图文件以提高效率</span>
+php artisan view:cache
+<span class="comment token">// 清除视图文件缓存</span>
+php artisan view:clear
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
