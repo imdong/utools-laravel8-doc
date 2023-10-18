@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="auth">Auth</h1>
+<h2 id="用户认证">用户认证</h2>
+<pre><code><span class="comment token">// 获取 Auth 对象，等同于 Auth Facade</span>
+auth();
+<span class="comment token">// 判断当前用户是否已认证（是否已登录）</span>
+Auth::check();
+<span class="comment token">// 判断当前用户是否未登录，与 check() 相反</span>
+Auth::guest();
+<span class="comment token">// 自定义看守器 默认为 `web`</span>
+Auth::guard();
+<span class="comment token">// 获取当前的认证用户</span>
+Auth::user();
+<span class="comment token">// 获取当前的认证用户的 ID（未登录情况下会报错）</span>
+Auth::id();
+<span class="comment token">// 通过给定的信息来尝试对用户进行认证（成功后会自动启动会话）</span>
+Auth::attempt([<span class="string token">'email'</span> =&gt; <span class="variable token">$email</span>, <span class="string token">'password'</span> =&gt; <span class="variable token">$password</span>]);
+<span class="comment token">// 通过 Auth::attempt() 传入 true 值来开启 '记住我' 功能</span>
+Auth::attempt(<span class="variable token">$credentials</span>, <span class="keyword token">true</span>);
+<span class="comment token">// 注册尝试登录的事件监听器</span>
+Auth::attempting(<span class="variable token">$callback</span>);
+<span class="comment token">// 只针对一次的请求来认证用户</span>
+Auth::once(<span class="variable token">$credentials</span>);
+<span class="comment token">// 使用 ID 登录，无 Cookie 和会话登录</span>
+Auth::onceUsingId(<span class="variable token">$id</span>);
+<span class="comment token">// 登录一个指定用户到应用上</span>
+Auth::login(User::find(<span class="number token">1</span>), <span class="variable token">$remember</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 检测是否记住了登录</span>
+Auth::viaRemember();
+<span class="comment token">// 登录指定用户 ID 的用户到应用上</span>
+Auth::loginUsingId(<span class="number token">1</span>, <span class="variable token">$remember</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 使用户退出登录（清除会话）</span>
+Auth::logout();
+<span class="comment token">// 清除当前用户的其他会话</span>
+Auth::logoutOtherDevices(<span class="string token">'password'</span>, <span class="variable token">$attribute</span> = <span class="string token">'password'</span>);
+<span class="comment token">// 验证用户凭证</span>
+Auth::validate(<span class="variable token">$credentials</span>);
+<span class="comment token">// 使用 HTTP 的基本认证方式来认证</span>
+Auth::basic(<span class="string token">'username'</span>);
+<span class="comment token">// 执行「HTTP Basic」登录尝试，只认证一次</span>
+Auth::onceBasic();
+<span class="comment token">// 发送密码重置提示给用户</span>
+Password::remind(<span class="variable token">$credentials</span>, <span class="keyword token">function</span>(<span class="variable token">$message</span>, <span class="variable token">$user</span>){});
+</code></pre>
+<h2 id="用户授权">用户授权</h2>
+<pre><code><span class="comment token">// 定义权限</span>
+Gate::define(<span class="string token">'update-post'</span>, <span class="string token">'Class@method'</span>);
+Gate::define(<span class="string token">'update-post'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$post</span>) {...});
+<span class="comment token">// 传递多个参数</span>
+Gate::define(<span class="string token">'delete-comment'</span>, <span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$post</span>, <span class="variable token">$comment</span>) {});
+<span class="comment token">// 一次性的定义多个 Gate 方法</span>
+Gate::resource(<span class="string token">'posts'</span>,  <span class="string token">'App\Policies\PostPolicy'</span>);
+<span class="comment token">// 检测权限是否被定义</span>
+Gate::has(<span class="string token">'update-post'</span>);
+
+<span class="comment token">// 检查权限</span>
+Gate::denies(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+Gate::allows(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+Gate::check(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+<span class="comment token">// 指定用户进行检查</span>
+Gate::forUser(<span class="variable token">$user</span>)-&gt;allows(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+<span class="comment token">// 在 User 模型下，使用 Authorizable trait</span>
+User::find(<span class="number token">1</span>)-&gt;can(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+User::find(<span class="number token">1</span>)-&gt;cannot(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+User::find(<span class="number token">1</span>)-&gt;cant(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>);
+
+<span class="comment token">// 拦截所有检查，返回 bool</span>
+Gate::before(<span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$ability</span>) {});
+<span class="comment token">// 设置每一次验证的回调</span>
+Gate::after(<span class="keyword token">function</span> (<span class="variable token">$user</span>, <span class="variable token">$ability</span>, <span class="variable token">$result</span>, <span class="variable token">$arguments</span>) {});
+
+<span class="comment token">// Blade 模板语法</span>
+@can(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>)
+@endcan
+<span class="comment token">// 支持 else 表达式</span>
+@can(<span class="string token">'update-post'</span>, <span class="variable token">$post</span>)
+@<span class="keyword token">else</span>
+@endcan
+<span class="comment token">// 无权限判断</span>
+@cannot
+@endcannot
+
+<span class="comment token">// 生成一个新的策略</span>
+php artisan make:policy PostPolicy
+php artisan make:policy PostPolicy --model=Post
+<span class="comment token">// `policy` 帮助函数</span>
+policy(<span class="variable token">$post</span>)-&gt;update(<span class="variable token">$user</span>, <span class="variable token">$post</span>)
+
+<span class="comment token">// 控制器授权</span>
+<span class="variable token">$this</span>-&gt;authorize(<span class="string token">'update'</span>, <span class="variable token">$post</span>);
+<span class="comment token">// 指定用户 $user 授权</span>
+<span class="variable token">$this</span>-&gt;authorizeForUser(<span class="variable token">$user</span>, <span class="string token">'update'</span>, <span class="variable token">$post</span>);
+<span class="comment token">// 控制器的 __construct 中授权资源控制器</span>
+<span class="variable token">$this</span>-&gt;authorizeResource(Post::<span class="keyword token">class</span>,  <span class="string token">'post'</span>);
+
+<span class="comment token">// AuthServiceProvider-&gt;boot() 里修改策略自动发现的逻辑</span>
+Gate::guessPolicyNamesUsing(<span class="keyword token">function</span> (<span class="variable token">$modelClass</span>) {
+    <span class="comment token">// 返回模型对应的策略名称，如：// 'App\Model\User' =&gt; 'App\Policies\UserPolicy',</span>
+    <span class="keyword token">return</span> <span class="string token">'App\Policies\\'</span>.class_basename(<span class="variable token">$modelClass</span>).<span class="string token">'Policy'</span>;
+});
+
+<span class="comment token">// 中间件指定模型实例</span>
+Route::put(<span class="string token">'/post/{post}'</span>,  <span class="keyword token">function</span>  (Post <span class="variable token">$post</span>)  { ... })-&gt;middleware(<span class="string token">'can:update,post'</span>);
+<span class="comment token">// 中间件未指定模型实例</span>
+Route::post(<span class="string token">'/post'</span>,  <span class="keyword token">function</span>  ()  { ... })-&gt;middleware(<span class="string token">'can:create,App\Post'</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
