@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="blade">Blade</h1>
+<h2 id="包含和继承">包含和继承</h2>
+<pre><code><span class="comment token">// 扩展布局模板</span>
+@<span class="keyword token">extends</span>(<span class="string token">'layout.name'</span>)
+<span class="comment token">// 区块占位</span>
+@yield(<span class="string token">'name'</span>)
+<span class="comment token">// 第一种、直接填入扩展内容</span>
+@section(<span class="string token">'title'</span>,  <span class="string token">'Page Title'</span>)
+<span class="comment token">// 第二种、实现命名为 name 的区块（yield 占位的地方）</span>
+@section(<span class="string token">'sidebar'</span>)
+    <span class="comment token">// 继承父模板内容</span>
+    @<span class="keyword token">parent</span>
+@endsection
+<span class="comment token">// 可继承内容区块</span>
+@section(<span class="string token">'sidebar'</span>)
+@show
+<span class="comment token">// 继承父模板内容（@show 的区块内容）</span>
+@<span class="keyword token">parent</span>
+<span class="comment token">// 包含子视图</span>
+@<span class="keyword token">include</span>(<span class="string token">'view.name'</span>)
+<span class="comment token">// 包含子视图，并传参</span>
+@<span class="keyword token">include</span>(<span class="string token">'view.name'</span>, [<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>]);
+@includeIf(<span class="string token">'view.name'</span>,  [<span class="string token">'some'</span>  =&gt;  <span class="string token">'data'</span>])
+@includeWhen(<span class="variable token">$boolean</span>,  <span class="string token">'view.name'</span>,  [<span class="string token">'some'</span>  =&gt;  <span class="string token">'data'</span>])
+<span class="comment token">// 包含给定视图数组中第一个存在的视图</span>
+@includeFirst([<span class="string token">'custom.admin'</span>,  <span class="string token">'admin'</span>],  [<span class="string token">'some'</span>  =&gt;  <span class="string token">'data'</span>])
+<span class="comment token">// 加载本地化语句</span>
+@lang(<span class="string token">'messages.name'</span>)
+@choice(<span class="string token">'messages.name'</span>, <span class="number token">1</span>);
+<span class="comment token">// 检查片断是否存在</span>
+@hasSection(<span class="string token">'navigation'</span>)
+        @yield(<span class="string token">'navigation'</span>)
+@<span class="keyword token">endif</span>
+<span class="comment token">// 迭代 jobs 数组并包含</span>
+@each(<span class="string token">'view.name'</span>,  <span class="variable token">$jobs</span>,  <span class="string token">'job'</span>)
+@each(<span class="string token">'view.name'</span>,  <span class="variable token">$jobs</span>,  <span class="string token">'job'</span>,  <span class="string token">'view.empty'</span>)
+<span class="comment token">// 堆栈</span>
+@stack(<span class="string token">'scripts'</span>)
+@push(<span class="string token">'scripts'</span>)
+    &lt;script src=<span class="string token">"/example.js"</span>&gt;&lt;/script&gt;
+@endpush
+<span class="comment token">// 栈顶插入</span>
+@prepend(<span class="string token">'scripts'</span>)
+@endprepend
+<span class="comment token">// 组件</span>
+@component(<span class="string token">'alert'</span>, [<span class="string token">'foo'</span> =&gt; <span class="string token">'bar'</span>])
+    @slot(<span class="string token">'title'</span>)
+    @endslot
+@endcomponent
+<span class="comment token">// 注册别名 @alert(['type' =&gt; 'danger'])...@endalert</span>
+Blade::component(<span class="string token">'components.alert'</span>,  <span class="string token">'alert'</span>);
+</code></pre>
+<h2 id="条件语句">条件语句</h2>
+<pre><code>@<span class="keyword token">if</span> (count(<span class="variable token">$records</span>) === <span class="number token">1</span>)
+@<span class="keyword token">elseif</span>  (count(<span class="variable token">$records</span>) &gt; <span class="number token">1</span>)
+@<span class="keyword token">else</span>
+@<span class="keyword token">endif</span>
+<span class="comment token">// 登录情况下</span>
+@unless (Auth::check())
+@endunless
+<span class="comment token">// $records 被定义且不是  null...</span>
+@<span class="keyword token">isset</span>(<span class="variable token">$records</span>)
+@endisset
+<span class="comment token">// $records 为空...</span>
+@<span class="keyword token">empty</span>(<span class="variable token">$records</span>)
+@endempty
+<span class="comment token">// 此用户身份已验证...</span>
+@auth <span class="comment token">// 或 @auth('admin')</span>
+@endauth
+<span class="comment token">// 此用户身份未验证...</span>
+@guest <span class="comment token">// 或 @guest('admin')</span>
+@endguest
+@<span class="keyword token">switch</span>(<span class="variable token">$i</span>)
+    @<span class="keyword token">case</span>(<span class="number token">1</span>)
+        @<span class="keyword token">break</span>
+    @<span class="keyword token">default</span>
+        <span class="comment token">// 默认</span>
+@<span class="keyword token">endswitch</span>
+</code></pre>
+<h2 id="循环">循环</h2>
+<pre><code><span class="comment token">// for 循环</span>
+@<span class="keyword token">for</span> (<span class="variable token">$i</span> = <span class="number token">0</span>; <span class="variable token">$i</span> &lt; <span class="number token">10</span>; <span class="variable token">$i</span>++)
+@<span class="keyword token">endfor</span>
+<span class="comment token">// foreach 迭代</span>
+@<span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
+@<span class="keyword token">endforeach</span>
+<span class="comment token">// 迭代如果为空的话</span>
+@forelse (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>)
+@<span class="keyword token">empty</span>
+@endforelse
+<span class="comment token">// while 循环</span>
+@<span class="keyword token">while</span> (<span class="keyword token">true</span>)
+@<span class="keyword token">endwhile</span>
+<span class="comment token">// 终结循环</span>
+@<span class="keyword token">continue</span>
+@<span class="keyword token">continue</span>(<span class="variable token">$user</span>-&gt;type  ==  <span class="number token">1</span>) <span class="comment token">// 带条件</span>
+<span class="comment token">// 跳过本次迭代</span>
+@<span class="keyword token">break</span>
+@<span class="keyword token">break</span>(<span class="variable token">$user</span>-&gt;number  ==  <span class="number token">5</span>) <span class="comment token">// 带条件</span>
+<span class="comment token">// 循环变量</span>
+<span class="variable token">$loop</span>-&gt;index        <span class="comment token">// 当前迭代的索引（从 0 开始计数）。</span>
+<span class="variable token">$loop</span>-&gt;iteration    <span class="comment token">// 当前循环迭代 (从 1 开始计算）。</span>
+<span class="variable token">$loop</span>-&gt;remaining    <span class="comment token">// 循环中剩余迭代的数量。</span>
+<span class="variable token">$loop</span>-&gt;count        <span class="comment token">// 被迭代的数组元素的总数。</span>
+<span class="variable token">$loop</span>-&gt;first        <span class="comment token">// 是否为循环的第一次迭代。</span>
+<span class="variable token">$loop</span>-&gt;last         <span class="comment token">// 是否为循环的最后一次迭代。</span>
+<span class="variable token">$loop</span>-&gt;depth        <span class="comment token">// 当前迭代的嵌套深度级数。</span>
+<span class="variable token">$loop</span>-&gt;<span class="keyword token">parent</span>       <span class="comment token">// 嵌套循环中，父循环的循环变量</span>
+</code></pre>
+<h2 id="javascript-代码">JavaScript 代码</h2>
+<pre><code><span class="comment token">// JS 框架，保留双大括号，以下会编译为 {{ name }}</span>
+@{{ name }}
+<span class="comment token">// 大段 JavaScript 变量，verbatim 里模板引擎将不解析</span>
+@verbatim
+        Hello, {{ javascriptVariableName }}.
+@endverbatim
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
