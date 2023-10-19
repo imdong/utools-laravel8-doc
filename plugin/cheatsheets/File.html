@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="file">File</h1>
+<pre><code>File::exists(<span class="variable token">$path</span>);
+File::get(<span class="variable token">$path</span>, <span class="variable token">$lock</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 加锁读取文件内容</span>
+File::sharedGet(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件内容，不存在会抛出 FileNotFoundException 异常</span>
+File::getRequire(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件内容, 仅能引入一次</span>
+File::requireOnce(<span class="variable token">$file</span>);
+<span class="comment token">// 生成文件路径的 MD5 哈希</span>
+File::hash(<span class="variable token">$path</span>);
+<span class="comment token">// 将内容写入文件</span>
+File::put(<span class="variable token">$path</span>, <span class="variable token">$contents</span>, <span class="variable token">$lock</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 写入文件，存在的话覆盖写入</span>
+File::replace(<span class="variable token">$path</span>, <span class="variable token">$content</span>);
+<span class="comment token">// 将内容添加在文件原内容前面</span>
+File::prepend(<span class="variable token">$path</span>, <span class="variable token">$data</span>);
+<span class="comment token">// 将内容添加在文件原内容后</span>
+File::append(<span class="variable token">$path</span>, <span class="variable token">$data</span>);
+<span class="comment token">// 修改路径权限</span>
+File::chmod(<span class="variable token">$path</span>, <span class="variable token">$mode</span> = <span class="keyword token">null</span>);
+<span class="comment token">// 通过给定的路径来删除文件</span>
+File::delete(<span class="variable token">$paths</span>);
+<span class="comment token">// 将文件移动到新目录下</span>
+File::move(<span class="variable token">$path</span>, <span class="variable token">$target</span>);
+<span class="comment token">// 将文件复制到新目录下</span>
+File::copy(<span class="variable token">$path</span>, <span class="variable token">$target</span>);
+<span class="comment token">// 创建硬连接</span>
+File::link(<span class="variable token">$target</span>, <span class="variable token">$link</span>);
+<span class="comment token">// 从文件路径中提取文件名，不包含后缀</span>
+File::name(<span class="variable token">$path</span>);
+<span class="comment token">// 从文件路径中提取文件名，包含后缀</span>
+File::basename(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件路径名称</span>
+File::dirname(<span class="variable token">$path</span>);
+<span class="comment token">// 从文件的路径地址提取文件的扩展</span>
+File::extension(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件类型</span>
+File::type(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件 MIME 类型</span>
+File::mimeType(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件大小</span>
+File::size(<span class="variable token">$path</span>);
+<span class="comment token">// 获取文件的最后修改时间</span>
+File::lastModified(<span class="variable token">$path</span>);
+<span class="comment token">// 判断给定的路径是否是文件目录</span>
+File::isDirectory(<span class="variable token">$directory</span>);
+<span class="comment token">// 判断给定的路径是否是可读取</span>
+File::isReadable(<span class="variable token">$path</span>);
+<span class="comment token">// 判断给定的路径是否是可写入的</span>
+File::isWritable(<span class="variable token">$path</span>);
+<span class="comment token">// 判断给定的路径是否是文件</span>
+File::isFile(<span class="variable token">$file</span>);
+<span class="comment token">// 查找能被匹配到的路径名</span>
+File::glob(<span class="variable token">$pattern</span>, <span class="variable token">$flags</span> = <span class="number token">0</span>);
+<span class="comment token">// 获取一个目录下的所有文件, 以数组类型返回</span>
+File::files(<span class="variable token">$directory</span>, <span class="variable token">$hidden</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 获取一个目录下的所有文件 (递归).</span>
+File::allFiles(<span class="variable token">$directory</span>, <span class="variable token">$hidden</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 获取一个目录内的目录</span>
+File::directories(<span class="variable token">$directory</span>);
+<span class="comment token">// 创建一个目录</span>
+File::makeDirectory(<span class="variable token">$path</span>, <span class="variable token">$mode</span> = <span class="number token">0755</span>, <span class="variable token">$recursive</span> = <span class="keyword token">false</span>, <span class="variable token">$force</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 移动目录</span>
+File::moveDirectory(<span class="variable token">$from</span>, <span class="variable token">$to</span>, <span class="variable token">$overwrite</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 将文件夹从一个目录复制到另一个目录下</span>
+File::copyDirectory(<span class="variable token">$directory</span>, <span class="variable token">$destination</span>, <span class="variable token">$options</span> = <span class="keyword token">null</span>);
+<span class="comment token">// 删除目录</span>
+File::deleteDirectory(<span class="variable token">$directory</span>, <span class="variable token">$preserve</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 递归式删除目录</span>
+File::deleteDirectories(<span class="variable token">$directory</span>);
+<span class="comment token">// 清空指定目录的所有文件和文件夹</span>
+File::cleanDirectory(<span class="variable token">$directory</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
