@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="container">Container</h1>
+<pre><code>App::bind(<span class="string token">'foo'</span>, <span class="keyword token">function</span>(<span class="variable token">$app</span>){ <span class="keyword token">return</span> <span class="keyword token">new</span> Foo; });
+App::make(<span class="string token">'foo'</span>);
+<span class="comment token">// 如果存在此类, 则返回</span>
+App::make(<span class="string token">'FooBar'</span>);
+<span class="comment token">// 单例模式实例到服务容器中</span>
+App::singleton(<span class="string token">'foo'</span>, <span class="keyword token">function</span>(){ <span class="keyword token">return</span> <span class="keyword token">new</span> Foo; });
+<span class="comment token">// 将已实例化的对象注册到服务容器中</span>
+App::instance(<span class="string token">'foo'</span>, <span class="keyword token">new</span> Foo);
+<span class="comment token">// 注册绑定规则到服务容器中</span>
+App::bind(<span class="string token">'FooRepositoryInterface'</span>, <span class="string token">'BarRepository'</span>);
+<span class="comment token">// 绑定基本值</span>
+App::when(<span class="string token">'App\Http\Controllers\UserController'</span>)-&gt;needs(<span class="string token">'$variableName'</span>)-&gt;give(<span class="variable token">$value</span>);
+<span class="comment token">// 标记</span>
+<span class="variable token">$this</span>-&gt;app-&gt;tag([<span class="string token">'SpeedReport'</span>,  <span class="string token">'MemoryReport'</span>],  <span class="string token">'reports'</span>);
+<span class="comment token">// 给应用注册一个服务提供者</span>
+App::register(<span class="string token">'FooServiceProvider'</span>);
+<span class="comment token">// 监听容器对某个对象的解析</span>
+App::resolving(<span class="keyword token">function</span>(<span class="variable token">$object</span>){});
+resolve(<span class="string token">'HelpSpot\API'</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
