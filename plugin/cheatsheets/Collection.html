@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="collection">Collection</h1>
+<pre><code><span class="comment token">// 创建集合</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+<span class="comment token">// 返回该集合所代表的底层数组：</span>
+<span class="variable token">$collection</span>-&gt;all();
+<span class="comment token">// 返回集合中所有项目的平均值：</span>
+collect([<span class="number token">1</span>, <span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">4</span>])-&gt;avg() <span class="comment token">// 2</span>
+<span class="variable token">$collection</span>-&gt;average();
+<span class="comment token">// 将集合拆成多个给定大小的较小集合：</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>])-&gt;chunk(<span class="number token">2</span>); <span class="comment token">// [[1,2], [3,4], [5]]</span>
+<span class="comment token">// 将多个数组组成的集合折成单一数组集合：</span>
+collect([[<span class="number token">1</span>],  [<span class="number token">4</span>,  <span class="number token">5</span>]])-&gt;collapse(); <span class="comment token">// [1, 4, 5]</span>
+<span class="comment token">// 将一个集合的值作为键，再将另一个集合作为值合并成一个集合</span>
+collect([<span class="string token">'name'</span>, <span class="string token">'age'</span>])-&gt;combine([<span class="string token">'George'</span>, <span class="number token">29</span>]);
+<span class="comment token">// 将给定的 数组 或集合值追加到集合的末尾</span>
+collect([<span class="string token">'PHP'</span>])-&gt;concat([<span class="string token">'Laravel'</span>]); <span class="comment token">// ['PHP', 'Laravel']</span>
+<span class="comment token">// 用来判断该集合是否含有指定的项目：</span>
+collect([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>])-&gt;contains(<span class="string token">'Desk'</span>); <span class="comment token">// true</span>
+collect([<span class="string token">'name'</span> =&gt; <span class="string token">'Desk'</span>])-&gt;contains(<span class="string token">'name'</span>,  <span class="string token">'Desk'</span>); <span class="comment token">// true</span>
+<span class="comment token">// 返回该集合内的项目总数：</span>
+<span class="variable token">$collection</span>-&gt;count();
+<span class="comment token">// 交叉连接指定数组或集合的值，返回所有可能排列的笛卡尔积</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>])-&gt;crossJoin([<span class="string token">'a'</span>, <span class="string token">'b'</span>]); <span class="comment token">// [[1, 'a'],[1, 'b'],[2, 'a'],[2, 'b']]</span>
+<span class="comment token">// dd($collection) 的另一个写法</span>
+collect([<span class="string token">'John Doe'</span>, <span class="string token">'Jane Doe'</span>])-&gt;dd();
+<span class="comment token">// 返回原集合中存在而指定集合中不存在的值</span>
+collect([<span class="number token">1</span>,  <span class="number token">2</span>,  <span class="number token">3</span>])-&gt;diff([<span class="number token">2</span>, <span class="number token">4</span>]); <span class="comment token">// [1, 3]</span>
+<span class="comment token">// 返回原集合不存在与指定集合的键 / 值对</span>
+collect([<span class="string token">'color'</span> =&gt; <span class="string token">'orange'</span>, <span class="string token">'remain'</span> =&gt;  <span class="number token">6</span>])-&gt;diffAssoc([<span class="string token">'color'</span> =&gt; <span class="string token">'yellow'</span>, <span class="string token">'remain'</span> =&gt; <span class="number token">6</span>, <span class="string token">'used'</span> =&gt; <span class="number token">6</span>]);  <span class="comment token">// ['color' =&gt; 'orange']</span>
+<span class="comment token">// 返回原集合中存在而指定集合中不存在键所对应的键 / 值对</span>
+collect([<span class="string token">'one'</span> =&gt; <span class="number token">10</span>, <span class="string token">'two'</span> =&gt; <span class="number token">20</span>])-&gt;diffKeys([<span class="string token">'two'</span> =&gt; <span class="number token">2</span>, <span class="string token">'four'</span> =&gt; <span class="number token">4</span>]); <span class="comment token">// ['one' =&gt; 10]</span>
+<span class="comment token">// 类似于 dd() 方法，但是不会中断</span>
+collect([<span class="string token">'John Doe'</span>, <span class="string token">'Jane Doe'</span>])-&gt;dump();
+<span class="comment token">// 遍历集合中的项目，并将之传入给定的回调函数：</span>
+<span class="variable token">$collection</span> = <span class="variable token">$collection</span>-&gt;each(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {});
+<span class="comment token">// 验证集合中的每一个元素是否通过指定的条件测试</span>
+collect([<span class="number token">1</span>,  <span class="number token">2</span>])-&gt;every(<span class="keyword token">function</span>  (<span class="variable token">$value</span>,  <span class="variable token">$key</span>)  { <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">1</span>; }); <span class="comment token">// false</span>
+<span class="comment token">// 返回集合中排除指定键的所有项目：</span>
+<span class="variable token">$collection</span>-&gt;except([<span class="string token">'price'</span>, <span class="string token">'discount'</span>]);
+<span class="comment token">// 以给定的回调函数筛选集合，只留下那些通过判断测试的项目：</span>
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;filter(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$item</span> &gt; <span class="number token">2</span>;
+});
+<span class="comment token">// 返回集合中，第一个通过给定测试的元素：</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>])-&gt;first(<span class="keyword token">function</span> (<span class="variable token">$key</span>, <span class="variable token">$value</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$value</span> &gt; <span class="number token">2</span>;
+});
+<span class="comment token">// 将多维集合转为一维集合：</span>
+<span class="variable token">$flattened</span> = <span class="variable token">$collection</span>-&gt;flatten();
+<span class="comment token">// 将集合中的键和对应的数值进行互换：</span>
+<span class="variable token">$flipped</span> = <span class="variable token">$collection</span>-&gt;flip();
+<span class="comment token">// 以键自集合移除掉一个项目：</span>
+<span class="variable token">$collection</span>-&gt;forget(<span class="string token">'name'</span>);
+<span class="comment token">// 返回含有可以用来在给定页码显示项目的新集合：</span>
+<span class="variable token">$chunk</span> = <span class="variable token">$collection</span>-&gt;forPage(<span class="number token">2</span>, <span class="number token">3</span>);
+<span class="comment token">// 返回给定键的项目。如果该键不存在，则返回 null：</span>
+<span class="variable token">$value</span> = <span class="variable token">$collection</span>-&gt;get(<span class="string token">'name'</span>);
+<span class="comment token">// 根据给定的键替集合内的项目分组：</span>
+<span class="variable token">$grouped</span> = <span class="variable token">$collection</span>-&gt;groupBy(<span class="string token">'account_id'</span>);
+<span class="comment token">// 用来确认集合中是否含有给定的键：</span>
+<span class="variable token">$collection</span>-&gt;has(<span class="string token">'email'</span>);
+<span class="comment token">// 用来连接集合中的项目</span>
+<span class="variable token">$collection</span>-&gt;implode(<span class="string token">'product'</span>, <span class="string token">', '</span>);
+<span class="comment token">// 移除任何给定数组或集合内所没有的数值：</span>
+<span class="variable token">$intersect</span> = <span class="variable token">$collection</span>-&gt;intersect([<span class="string token">'Desk'</span>, <span class="string token">'Chair'</span>, <span class="string token">'Bookcase'</span>]);
+<span class="comment token">// 假如集合是空的，isEmpty 方法会返回 true：</span>
+collect([])-&gt;isEmpty();
+<span class="comment token">// 以给定键的值作为集合项目的键：</span>
+<span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;keyBy(<span class="string token">'product_id'</span>);
+<span class="comment token">// 传入回调函数，该函数会返回集合的键的值：</span>
+<span class="variable token">$keyed</span> = <span class="variable token">$collection</span>-&gt;keyBy(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+    <span class="keyword token">return</span> strtoupper(<span class="variable token">$item</span>[<span class="string token">'product_id'</span>]);
+});
+<span class="comment token">// 返回该集合所有的键：</span>
+<span class="variable token">$keys</span> = <span class="variable token">$collection</span>-&gt;keys();
+<span class="comment token">// 返回集合中，最后一个通过给定测试的元素：</span>
+<span class="variable token">$collection</span>-&gt;last();
+<span class="comment token">// 遍历整个集合并将每一个数值传入给定的回调函数：</span>
+<span class="variable token">$multiplied</span> = <span class="variable token">$collection</span>-&gt;map(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$item</span> * <span class="number token">2</span>;
+});
+<span class="comment token">// 返回给定键的最大值：</span>
+<span class="variable token">$max</span> = collect([[<span class="string token">'foo'</span> =&gt; <span class="number token">10</span>], [<span class="string token">'foo'</span> =&gt; <span class="number token">20</span>]])-&gt;max(<span class="string token">'foo'</span>);
+<span class="variable token">$max</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>])-&gt;max();
+<span class="comment token">// 将合并指定的数组或集合到原集合：</span>
+<span class="variable token">$merged</span> = <span class="variable token">$collection</span>-&gt;merge([<span class="string token">'price'</span> =&gt; <span class="number token">100</span>, <span class="string token">'discount'</span> =&gt; <span class="keyword token">false</span>]);
+<span class="comment token">// 返回给定键的最小值：</span>
+<span class="variable token">$min</span> = collect([[<span class="string token">'foo'</span> =&gt; <span class="number token">10</span>], [<span class="string token">'foo'</span> =&gt; <span class="number token">20</span>]])-&gt;min(<span class="string token">'foo'</span>);
+<span class="variable token">$min</span> = collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>])-&gt;min();
+<span class="comment token">// 返回集合中指定键的所有项目：</span>
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;only([<span class="string token">'product_id'</span>, <span class="string token">'name'</span>]);
+<span class="comment token">// 获取所有集合中给定键的值：</span>
+<span class="variable token">$plucked</span> = <span class="variable token">$collection</span>-&gt;pluck(<span class="string token">'name'</span>);
+<span class="comment token">// 移除并返回集合最后一个项目：</span>
+<span class="variable token">$collection</span>-&gt;pop();
+<span class="comment token">// 在集合前面增加一个项目：</span>
+<span class="variable token">$collection</span>-&gt;prepend(<span class="number token">0</span>);
+<span class="comment token">// 传递第二个参数来设置前置项目的键：</span>
+<span class="variable token">$collection</span>-&gt;prepend(<span class="number token">0</span>, <span class="string token">'zero'</span>);
+<span class="comment token">// 以键从集合中移除并返回一个项目：</span>
+<span class="variable token">$collection</span>-&gt;pull(<span class="string token">'name'</span>);
+<span class="comment token">// 附加一个项目到集合后面：</span>
+<span class="variable token">$collection</span>-&gt;push(<span class="number token">5</span>);
+<span class="comment token">// put 在集合内设置一个给定键和数值：</span>
+<span class="variable token">$collection</span>-&gt;put(<span class="string token">'price'</span>, <span class="number token">100</span>);
+<span class="comment token">// 从集合中随机返回一个项目：</span>
+<span class="variable token">$collection</span>-&gt;random();
+<span class="comment token">// 传入一个整数到 random。如果该整数大于 1，则会返回一个集合：</span>
+<span class="variable token">$random</span> = <span class="variable token">$collection</span>-&gt;random(<span class="number token">3</span>);
+<span class="comment token">// 会将每次迭代的结果传入到下一次迭代：</span>
+<span class="variable token">$total</span> = <span class="variable token">$collection</span>-&gt;reduce(<span class="keyword token">function</span> (<span class="variable token">$carry</span>, <span class="variable token">$item</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$carry</span> + <span class="variable token">$item</span>;
+});
+<span class="comment token">// 以给定的回调函数筛选集合：</span>
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;reject(<span class="keyword token">function</span> (<span class="variable token">$item</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$item</span> &gt; <span class="number token">2</span>;
+});
+<span class="comment token">// 反转集合内项目的顺序：</span>
+<span class="variable token">$reversed</span> = <span class="variable token">$collection</span>-&gt;reverse();
+<span class="comment token">// 在集合内搜索给定的数值并返回找到的键：</span>
+<span class="variable token">$collection</span>-&gt;search(<span class="number token">4</span>);
+<span class="comment token">// 移除并返回集合的第一个项目：</span>
+<span class="variable token">$collection</span>-&gt;shift();
+<span class="comment token">// 随机排序集合的项目：</span>
+<span class="variable token">$shuffled</span> = <span class="variable token">$collection</span>-&gt;shuffle();
+<span class="comment token">// 返回集合从给定索引开始的一部分切片：</span>
+<span class="variable token">$slice</span> = <span class="variable token">$collection</span>-&gt;slice(<span class="number token">4</span>);
+<span class="comment token">// 对集合排序：</span>
+<span class="variable token">$sorted</span> = <span class="variable token">$collection</span>-&gt;sort();
+<span class="comment token">// 以给定的键排序集合：</span>
+<span class="variable token">$sorted</span> = <span class="variable token">$collection</span>-&gt;sortBy(<span class="string token">'price'</span>);
+<span class="comment token">// 移除并返回从指定的索引开始的一小切片项目：</span>
+<span class="variable token">$chunk</span> = <span class="variable token">$collection</span>-&gt;splice(<span class="number token">2</span>);
+<span class="comment token">// 返回集合内所有项目的总和：</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>, <span class="number token">4</span>, <span class="number token">5</span>])-&gt;sum();
+<span class="comment token">// 返回有着指定数量项目的集合：</span>
+<span class="variable token">$chunk</span> = <span class="variable token">$collection</span>-&gt;take(<span class="number token">3</span>);
+<span class="comment token">// 将集合转换成纯 PHP 数组：</span>
+<span class="variable token">$collection</span>-&gt;toArray();
+<span class="comment token">// 将集合转换成 JSON：</span>
+<span class="variable token">$collection</span>-&gt;toJson();
+<span class="comment token">// 遍历集合并对集合内每一个项目调用给定的回调函数：</span>
+<span class="variable token">$collection</span>-&gt;transform(<span class="keyword token">function</span> (<span class="variable token">$item</span>, <span class="variable token">$key</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$item</span> * <span class="number token">2</span>;
+});
+<span class="comment token">// 返回集合中所有唯一的项目：</span>
+<span class="variable token">$unique</span> = <span class="variable token">$collection</span>-&gt;unique();
+<span class="comment token">// 返回键重设为连续整数的的新集合：</span>
+<span class="variable token">$values</span> = <span class="variable token">$collection</span>-&gt;values();
+<span class="comment token">// 以一对给定的键／数值筛选集合：</span>
+<span class="variable token">$filtered</span> = <span class="variable token">$collection</span>-&gt;where(<span class="string token">'price'</span>, <span class="number token">100</span>);
+<span class="comment token">// 将集合与给定数组同样索引的值合并在一起：</span>
+<span class="variable token">$zipped</span> = <span class="variable token">$collection</span>-&gt;zip([<span class="number token">100</span>, <span class="number token">200</span>]);
+<span class="comment token">//把集合放到回调参数中并返回回调的结果:</span>
+collect([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;pipe(<span class="keyword token">function</span> (<span class="variable token">$collection</span>) {
+    <span class="keyword token">return</span> <span class="variable token">$collection</span>-&gt;sum();
+});<span class="comment token">//6</span>
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
