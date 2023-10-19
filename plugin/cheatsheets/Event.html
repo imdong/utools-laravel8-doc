@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="event">Event</h1>
+<pre><code><span class="comment token">// 1. EventServiceProvider 类里的 $listen 属性</span>
+<span class="keyword token">protected</span> <span class="variable token">$listen</span> =[<span class="string token">'App\Events\OrderShipped'</span> =&gt; [<span class="string token">'App\Listeners\SendShipmentNotification'</span>]];
+<span class="comment token">// 2. 生成监听类</span>
+php artisan event:generate
+
+<span class="comment token">// 触发命令</span>
+Event::dispatch(<span class="variable token">$event</span>, <span class="variable token">$payload</span> = [], <span class="variable token">$halt</span> = <span class="keyword token">false</span>);
+event(<span class="variable token">$event</span>, <span class="variable token">$payload</span> = [], <span class="variable token">$halt</span> = <span class="keyword token">false</span>);
+<span class="comment token">// 触发命令并等待</span>
+Event::until(<span class="variable token">$event</span>, <span class="variable token">$payload</span> = []);
+<span class="comment token">// 注册一个事件监听器.</span>
+<span class="comment token">// void listen(string|array $events, mixed $listener, int $priority)</span>
+Event::listen(<span class="string token">'App\Events\UserSignup'</span>, <span class="keyword token">function</span>(<span class="variable token">$bar</span>){});
+Event::listen(<span class="string token">'event.*'</span>, <span class="keyword token">function</span>(<span class="variable token">$bar</span>){}); <span class="comment token">// 通配符监听器</span>
+Event::listen(<span class="string token">'foo.bar'</span>, <span class="string token">'FooHandler'</span>, <span class="number token">10</span>);
+Event::listen(<span class="string token">'foo.bar'</span>, <span class="string token">'BarHandler'</span>, <span class="number token">5</span>);
+<span class="comment token">// 你可以直接在处理逻辑中返回 false 来停止一个事件的传播.</span>
+Event::listen(<span class="string token">'foor.bar'</span>, <span class="keyword token">function</span>(<span class="variable token">$event</span>){ <span class="keyword token">return</span> <span class="keyword token">false</span>; });
+Event::subscribe(<span class="string token">'UserEventHandler'</span>);
+<span class="comment token">// 获取所有监听者</span>
+Event::getListeners(<span class="variable token">$eventName</span>);
+<span class="comment token">// 移除事件及其对应的监听者</span>
+Event::forget(<span class="variable token">$event</span>);
+<span class="comment token">// 将事件推入堆栈中等待执行</span>
+Event::push(<span class="variable token">$event</span>, <span class="variable token">$payload</span> = []);
+<span class="comment token">// 移除指定的堆栈事件</span>
+Event::flush(<span class="variable token">$event</span>);
+<span class="comment token">// 移除所有堆栈中的事件</span>
+Event::forgetPushed();
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
