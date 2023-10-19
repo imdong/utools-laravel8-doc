@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="db">DB</h1>
+<h2 id="基本使用">基本使用</h2>
+<pre><code>DB::connection(<span class="string token">'connection_name'</span>);
+<span class="comment token">// 运行数据库查询语句</span>
+<span class="variable token">$results</span> = DB::select(<span class="string token">'select * from users where id = ?'</span>, [<span class="number token">1</span>]);
+<span class="variable token">$results</span> = DB::select(<span class="string token">'select * from users where id = :id'</span>, [<span class="string token">'id'</span> =&gt; <span class="number token">1</span>]);
+<span class="comment token">// 运行普通语句</span>
+DB::statement(<span class="string token">'drop table users'</span>);
+<span class="comment token">// 监听查询事件</span>
+DB::listen(<span class="keyword token">function</span>(<span class="variable token">$sql</span>, <span class="variable token">$bindings</span>, <span class="variable token">$time</span>) { code_here; });
+<span class="comment token">// 数据库事务处理</span>
+DB::transaction(<span class="keyword token">function</span>() {
+    DB::table(<span class="string token">'users'</span>)-&gt;update([<span class="string token">'votes'</span> =&gt; <span class="number token">1</span>]);
+    DB::table(<span class="string token">'posts'</span>)-&gt;delete();
+});
+DB::beginTransaction();
+DB::rollBack();
+DB::commit();
+
+<span class="comment token">// 获取表前缀</span>
+DB::getTablePrefix()
+</code></pre>
+<h2 id="查询语句构造器">查询语句构造器</h2>
+<pre><code><span class="comment token">// 取得数据表的所有行</span>
+DB::table(<span class="string token">'name'</span>)-&gt;get();
+<span class="comment token">// 取数据表的部分数据</span>
+DB::table(<span class="string token">'users'</span>)-&gt;chunk(<span class="number token">100</span>, <span class="keyword token">function</span>(<span class="variable token">$users</span>) {
+  <span class="keyword token">foreach</span> (<span class="variable token">$users</span> <span class="keyword token">as</span> <span class="variable token">$user</span>) {
+      <span class="comment token">//</span>
+  }
+});
+<span class="comment token">// 取回数据表的第一条数据</span>
+<span class="variable token">$user</span> = DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'name'</span>, <span class="string token">'John'</span>)-&gt;first();
+DB::table(<span class="string token">'name'</span>)-&gt;first();
+<span class="comment token">// 从单行中取出单列数据</span>
+<span class="variable token">$name</span> = DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'name'</span>, <span class="string token">'John'</span>)-&gt;pluck(<span class="string token">'name'</span>);
+DB::table(<span class="string token">'name'</span>)-&gt;pluck(<span class="string token">'column'</span>);
+<span class="comment token">// 取多行数据的「列数据」数组</span>
+<span class="variable token">$roles</span> = DB::table(<span class="string token">'roles'</span>)-&gt;lists(<span class="string token">'title'</span>);
+<span class="variable token">$roles</span> = DB::table(<span class="string token">'roles'</span>)-&gt;lists(<span class="string token">'title'</span>, <span class="string token">'name'</span>);
+<span class="comment token">// 指定一个选择字段</span>
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;select(<span class="string token">'name'</span>, <span class="string token">'email'</span>)-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;distinct()-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;select(<span class="string token">'name as user_name'</span>)-&gt;get();
+<span class="comment token">// 添加一个选择字段到一个已存在的查询语句中</span>
+<span class="variable token">$query</span> = DB::table(<span class="string token">'users'</span>)-&gt;select(<span class="string token">'name'</span>);
+<span class="variable token">$users</span> = <span class="variable token">$query</span>-&gt;addSelect(<span class="string token">'age'</span>)-&gt;get();
+<span class="comment token">// 使用 Where 运算符</span>
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+              -&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)
+              -&gt;orWhere(<span class="string token">'name'</span>, <span class="string token">'John'</span>)
+              -&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereBetween(<span class="string token">'votes'</span>, [<span class="number token">1</span>, <span class="number token">100</span>])-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereNotBetween(<span class="string token">'votes'</span>, [<span class="number token">1</span>, <span class="number token">100</span>])-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereIn(<span class="string token">'id'</span>, [<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereNotIn(<span class="string token">'id'</span>, [<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>])-&gt;get();
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereNull(<span class="string token">'updated_at'</span>)-&gt;get();
+DB::table(<span class="string token">'name'</span>)-&gt;whereNotNull(<span class="string token">'column'</span>)-&gt;get();
+<span class="comment token">// 动态的 Where 字段</span>
+<span class="variable token">$admin</span> = DB::table(<span class="string token">'users'</span>)-&gt;whereId(<span class="number token">1</span>)-&gt;first();
+<span class="variable token">$john</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereIdAndEmail(<span class="number token">2</span>, <span class="string token">'john@doe.com'</span>)
+      -&gt;first();
+<span class="variable token">$jane</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;whereNameOrAge(<span class="string token">'Jane'</span>, <span class="number token">22</span>)
+      -&gt;first();
+<span class="comment token">// Order By, Group By, 和 Having</span>
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+      -&gt;orderBy(<span class="string token">'name'</span>, <span class="string token">'desc'</span>)
+      -&gt;groupBy(<span class="string token">'count'</span>)
+      -&gt;having(<span class="string token">'count'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)
+      -&gt;get();
+DB::table(<span class="string token">'name'</span>)-&gt;orderBy(<span class="string token">'column'</span>)-&gt;get();
+DB::table(<span class="string token">'name'</span>)-&gt;orderBy(<span class="string token">'column'</span>,<span class="string token">'desc'</span>)-&gt;get();
+DB::table(<span class="string token">'name'</span>)-&gt;having(<span class="string token">'count'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)-&gt;get();
+<span class="comment token">// 偏移 &amp; 限制</span>
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;skip(<span class="number token">10</span>)-&gt;take(<span class="number token">5</span>)-&gt;get();
+</code></pre>
+<h2 id="joins">Joins</h2>
+<pre><code><span class="comment token">// 基本的 Join 声明语句</span>
+DB::table(<span class="string token">'users'</span>)
+    -&gt;join(<span class="string token">'contacts'</span>, <span class="string token">'users.id'</span>, <span class="string token">'='</span>, <span class="string token">'contacts.user_id'</span>)
+    -&gt;join(<span class="string token">'orders'</span>, <span class="string token">'users.id'</span>, <span class="string token">'='</span>, <span class="string token">'orders.user_id'</span>)
+    -&gt;select(<span class="string token">'users.id'</span>, <span class="string token">'contacts.phone'</span>, <span class="string token">'orders.price'</span>)
+    -&gt;get();
+<span class="comment token">// Left Join 声明语句</span>
+DB::table(<span class="string token">'users'</span>)
+-&gt;leftJoin(<span class="string token">'posts'</span>, <span class="string token">'users.id'</span>, <span class="string token">'='</span>, <span class="string token">'posts.user_id'</span>)
+-&gt;get();
+<span class="comment token">// select * from users where name = 'John' or (votes &gt; 100 and title &lt;&gt; 'Admin')</span>
+DB::table(<span class="string token">'users'</span>)
+    -&gt;where(<span class="string token">'name'</span>, <span class="string token">'='</span>, <span class="string token">'John'</span>)
+    -&gt;orWhere(<span class="keyword token">function</span>(<span class="variable token">$query</span>) {
+        <span class="variable token">$query</span>-&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)
+              -&gt;where(<span class="string token">'title'</span>, <span class="string token">'&lt;&gt;'</span>, <span class="string token">'Admin'</span>);
+    })
+    -&gt;get();
+</code></pre>
+<h2 id="聚合">聚合</h2>
+<pre><code><span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;count();
+<span class="variable token">$price</span> = DB::table(<span class="string token">'orders'</span>)-&gt;max(<span class="string token">'price'</span>);
+<span class="variable token">$price</span> = DB::table(<span class="string token">'orders'</span>)-&gt;min(<span class="string token">'price'</span>);
+<span class="variable token">$price</span> = DB::table(<span class="string token">'orders'</span>)-&gt;avg(<span class="string token">'price'</span>);
+<span class="variable token">$total</span> = DB::table(<span class="string token">'users'</span>)-&gt;sum(<span class="string token">'votes'</span>);
+</code></pre>
+<h2 id="原始表达句">原始表达句</h2>
+<pre><code><span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)
+                   -&gt;select(DB::raw(<span class="string token">'count(*) as user_count, status'</span>))
+                   -&gt;where(<span class="string token">'status'</span>, <span class="string token">'&lt;&gt;'</span>, <span class="number token">1</span>)
+                   -&gt;groupBy(<span class="string token">'status'</span>)
+                   -&gt;get();
+<span class="comment token">// 返回行</span>
+DB::select(<span class="string token">'select * from users where id = ?'</span>, <span class="keyword token">array</span>(<span class="string token">'value'</span>));
+DB::insert(<span class="string token">'insert into foo set bar=2'</span>);
+DB::update(<span class="string token">'update foo set bar=2'</span>);
+DB::delete(<span class="string token">'delete from bar'</span>);
+<span class="comment token">// 返回 void</span>
+DB::statement(<span class="string token">'update foo set bar=2'</span>);
+<span class="comment token">// 在声明语句中加入原始的表达式</span>
+DB::table(<span class="string token">'name'</span>)-&gt;select(DB::raw(<span class="string token">'count(*) as count, column2'</span>))-&gt;get();
+</code></pre>
+<h2 id="inserts--updates--deletes--unions--pessimistic-locking">Inserts / Updates / Deletes / Unions / Pessimistic Locking</h2>
+<pre><code><span class="comment token">// 插入</span>
+DB::table(<span class="string token">'users'</span>)-&gt;insert(
+  [<span class="string token">'email'</span> =&gt; <span class="string token">'john@example.com'</span>, <span class="string token">'votes'</span> =&gt; <span class="number token">0</span>]
+);
+<span class="variable token">$id</span> = DB::table(<span class="string token">'users'</span>)-&gt;insertGetId(
+  [<span class="string token">'email'</span> =&gt; <span class="string token">'john@example.com'</span>, <span class="string token">'votes'</span> =&gt; <span class="number token">0</span>]
+);
+DB::table(<span class="string token">'users'</span>)-&gt;insert([
+  [<span class="string token">'email'</span> =&gt; <span class="string token">'taylor@example.com'</span>, <span class="string token">'votes'</span> =&gt; <span class="number token">0</span>],
+  [<span class="string token">'email'</span> =&gt; <span class="string token">'dayle@example.com'</span>, <span class="string token">'votes'</span> =&gt; <span class="number token">0</span>]
+]);
+<span class="comment token">// 更新</span>
+DB::table(<span class="string token">'users'</span>)
+          -&gt;where(<span class="string token">'id'</span>, <span class="number token">1</span>)
+          -&gt;update([<span class="string token">'votes'</span> =&gt; <span class="number token">1</span>]);
+DB::table(<span class="string token">'users'</span>)-&gt;increment(<span class="string token">'votes'</span>);
+DB::table(<span class="string token">'users'</span>)-&gt;increment(<span class="string token">'votes'</span>, <span class="number token">5</span>);
+DB::table(<span class="string token">'users'</span>)-&gt;decrement(<span class="string token">'votes'</span>);
+DB::table(<span class="string token">'users'</span>)-&gt;decrement(<span class="string token">'votes'</span>, <span class="number token">5</span>);
+DB::table(<span class="string token">'users'</span>)-&gt;increment(<span class="string token">'votes'</span>, <span class="number token">1</span>, [<span class="string token">'name'</span> =&gt; <span class="string token">'John'</span>]);
+<span class="comment token">// 删除</span>
+DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&lt;'</span>, <span class="number token">100</span>)-&gt;delete();
+DB::table(<span class="string token">'users'</span>)-&gt;delete();
+DB::table(<span class="string token">'users'</span>)-&gt;truncate();
+<span class="comment token">// 集合</span>
+ <span class="comment token">// unionAll() 方法也是可供使用的，调用方式与 union 相似</span>
+<span class="variable token">$first</span> = DB::table(<span class="string token">'users'</span>)-&gt;whereNull(<span class="string token">'first_name'</span>);
+<span class="variable token">$users</span> = DB::table(<span class="string token">'users'</span>)-&gt;whereNull(<span class="string token">'last_name'</span>)-&gt;union(<span class="variable token">$first</span>)-&gt;get();
+<span class="comment token">// 消极锁</span>
+DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)-&gt;sharedLock()-&gt;get();
+DB::table(<span class="string token">'users'</span>)-&gt;where(<span class="string token">'votes'</span>, <span class="string token">'&gt;'</span>, <span class="number token">100</span>)-&gt;lockForUpdate()-&gt;get();
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
