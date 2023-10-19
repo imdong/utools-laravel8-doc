@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="cookie">Cookie</h1>
+<pre><code><span class="comment token">// 等于 Cookie</span>
+cookie();
+request()-&gt;cookie(<span class="string token">'name'</span>);
+Cookie::get(<span class="string token">'key'</span>);
+Cookie::get(<span class="string token">'key'</span>, <span class="string token">'default'</span>);
+<span class="comment token">// 创建一个永久有效的 cookie</span>
+Cookie::forever(<span class="string token">'key'</span>, <span class="string token">'value'</span>);
+<span class="comment token">// 创建一个 N 分钟有效的 cookie</span>
+Cookie::make(<span class="string token">'key'</span>, <span class="string token">'value'</span>, <span class="string token">'minutes'</span>);
+cookie(<span class="string token">'key'</span>, <span class="string token">'value'</span>, <span class="string token">'minutes'</span>);
+<span class="comment token">// 在回应之前先积累 cookie，回应时统一返回</span>
+Cookie::queue(<span class="string token">'key'</span>, <span class="string token">'value'</span>, <span class="string token">'minutes'</span>);
+<span class="comment token">// 移除 Cookie</span>
+Cookie::forget(<span class="string token">'key'</span>);
+<span class="comment token">// 从 response 发送一个 cookie</span>
+<span class="variable token">$response</span> = Response::make(<span class="string token">'Hello World'</span>);
+<span class="variable token">$response</span>-&gt;withCookie(Cookie::make(<span class="string token">'name'</span>, <span class="string token">'value'</span>, <span class="variable token">$minutes</span>));
+<span class="comment token">// 设置未加密 Cookie app/Http/Middleware/EncryptCookies.php</span>
+EncryptCookies-&gt;except = [<span class="string token">'cookie_name_1'</span>];
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
