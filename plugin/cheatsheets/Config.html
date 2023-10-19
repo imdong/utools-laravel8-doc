@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="config">Config</h1>
+<pre><code><span class="comment token">// config/app.php 里的 timezone 配置项</span>
+Config::get(<span class="string token">'app.timezone'</span>)
+Config::get(<span class="string token">'app.timezone'</span>, <span class="string token">'default'</span>);
+Config::set(<span class="string token">'database.default'</span>, <span class="string token">'sqlite'</span>);
+<span class="comment token">// config() 等同于 Config Facade</span>
+config()-&gt;get(<span class="string token">'app.timezone'</span>);
+config(<span class="string token">'app.timezone'</span>, <span class="string token">'default'</span>);   <span class="comment token">// get</span>
+config([<span class="string token">'database.default'</span> =&gt; <span class="string token">'sqlite'</span>]); <span class="comment token">// set</span>
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
