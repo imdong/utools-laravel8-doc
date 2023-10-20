@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="input">Input</h1>
+<h2 id="会话周期内-input">会话周期内 Input</h2>
+<pre><code><span class="comment token">// 清除会话周期内的输入</span>
+Input::flash();
+<span class="comment token">// 清除会话周期内的指定输入</span>
+Input::flashOnly(<span class="string token">'foo'</span>, <span class="string token">'bar'</span>);
+<span class="comment token">// 清除会话周期内的除了指定的其他输入</span>
+Input::flashExcept(<span class="string token">'foo'</span>, <span class="string token">'baz'</span>);
+<span class="comment token">// 取回一个旧的输入条目</span>
+Input::old(<span class="string token">'key'</span>,<span class="string token">'default_value'</span>);
+</code></pre>
+<h2 id="files">Files</h2>
+<pre><code><span class="comment token">// 使用一个已上传的文件</span>
+Input::file(<span class="string token">'filename'</span>);
+<span class="comment token">// 判断文件是否已上传</span>
+Input::hasFile(<span class="string token">'filename'</span>);
+<span class="comment token">// 获取文件属性</span>
+Input::file(<span class="string token">'name'</span>)-&gt;getRealPath();
+Input::file(<span class="string token">'name'</span>)-&gt;getClientOriginalName();
+Input::file(<span class="string token">'name'</span>)-&gt;getClientOriginalExtension();
+Input::file(<span class="string token">'name'</span>)-&gt;getSize();
+Input::file(<span class="string token">'name'</span>)-&gt;getMimeType();
+<span class="comment token">// 移动一个已上传的文件</span>
+Input::file(<span class="string token">'name'</span>)-&gt;move(<span class="variable token">$destinationPath</span>);
+<span class="comment token">// 移动一个已上传的文件，并设置新的名字</span>
+Input::file(<span class="string token">'name'</span>)-&gt;move(<span class="variable token">$destinationPath</span>, <span class="variable token">$fileName</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
