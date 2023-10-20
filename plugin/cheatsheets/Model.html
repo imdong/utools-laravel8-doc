@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="model">Model</h1>
+<h2 id="基础使用">基础使用</h2>
+<pre><code><span class="comment token">// 定义一个 Eloquent 模型</span>
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model {}
+<span class="comment token">// 生成一个 Eloquent 模型</span>
+php artisan make:model User
+<span class="comment token">// 生成一个 Eloquent 模型的时候，顺便生成迁移文件</span>
+php artisan make:model User --migration <span class="keyword token">OR</span> -m
+<span class="comment token">// 生成一个 Eloquent 模型的时候，顺便生成迁移文件、控制器（或资源控制器）</span>
+php artisan make:model User -mc[r]
+<span class="comment token">// 指定一个自定义的数据表名称</span>
+<span class="keyword token">class</span> User <span class="keyword token">extends</span> Model {
+  <span class="keyword token">protected</span> <span class="variable token">$table</span> = <span class="string token">'my_users'</span>;
+}
+</code></pre>
+<h2 id="more">More</h2>
+<pre><code><span class="comment token">//新增一条新数据</span>
+Model::create(<span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 通过属性找到第一条相匹配的数据或创造一条新数据</span>
+Model::firstOrCreate(<span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 通过属性找到第一条相匹配的数据或实例化一条新数据</span>
+Model::firstOrNew(<span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 通过属性找到相匹配的数据并更新，如果不存在即创建</span>
+Model::updateOrCreate(<span class="keyword token">array</span>(<span class="string token">'search_key'</span> =&gt; <span class="string token">'search_value'</span>), <span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 使用属性的数组来填充一个模型, 用的时候要小心「Mass Assignment」安全问题 !</span>
+Model::fill(<span class="variable token">$attributes</span>);
+Model::destroy(<span class="number token">1</span>);
+Model::all();
+Model::find(<span class="number token">1</span>);
+<span class="comment token">// 使用双主键进行查找</span>
+Model::find(<span class="keyword token">array</span>(<span class="string token">'first'</span>, <span class="string token">'last'</span>));
+<span class="comment token">// 查找失败时抛出异常</span>
+Model::findOrFail(<span class="number token">1</span>);
+<span class="comment token">// 使用双主键进行查找, 失败时抛出异常</span>
+Model::findOrFail(<span class="keyword token">array</span>(<span class="string token">'first'</span>, <span class="string token">'last'</span>));
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;get();
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;first();
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;exists();
+<span class="comment token">// 动态属性查找</span>
+Model::whereFoo(<span class="string token">'bar'</span>)-&gt;first();
+<span class="comment token">// 查找失败时抛出异常</span>
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;firstOrFail();
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;count();
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;delete();
+<span class="comment token">// 输出原始的查询语句</span>
+Model::where(<span class="string token">'foo'</span>, <span class="string token">'='</span>, <span class="string token">'bar'</span>)-&gt;toSql();
+Model::whereRaw(<span class="string token">'foo = bar and cars = 2'</span>, <span class="keyword token">array</span>(<span class="number token">20</span>))-&gt;get();
+Model::on(<span class="string token">'connection-name'</span>)-&gt;find(<span class="number token">1</span>);
+Model::with(<span class="string token">'relation'</span>)-&gt;get();
+Model::all()-&gt;take(<span class="number token">10</span>);
+Model::all()-&gt;skip(<span class="number token">10</span>);
+<span class="comment token">// 默认的 Eloquent 排序是上升排序</span>
+Model::all()-&gt;sortBy(<span class="string token">'column'</span>);
+Model::all()-&gt;sortDesc(<span class="string token">'column'</span>);
+
+<span class="comment token">// 查询 json 数据</span>
+Model::where(<span class="string token">'options-&gt;language'</span>, <span class="string token">'en'</span>)-&gt;get(); <span class="comment token"># 字段是字符串</span>
+Model::whereJsonContains(<span class="string token">'options-&gt;languages'</span>, <span class="string token">'en'</span>)-&gt;get(); <span class="comment token"># 字段是数组</span>
+Model::whereJsonLength(<span class="string token">'options-&gt;languages'</span>, <span class="number token">0</span>)-&gt;get(); <span class="comment token"># 字段长度为 0</span>
+Model::whereJsonDoesntContain(<span class="string token">'options-&gt;languages'</span>, <span class="string token">'en'</span>)-&gt;get(); <span class="comment token"># 字段是数组, 不包含</span>
+</code></pre>
+<h2 id="软删除">软删除</h2>
+<pre><code>Model::withTrashed()-&gt;where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;get();
+<span class="comment token">// 在查询结果中包括带被软删除的模型</span>
+Model::withTrashed()-&gt;where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;restore();
+Model::where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;forceDelete();
+<span class="comment token">// 查找只带有软删除的模型</span>
+Model::onlyTrashed()-&gt;where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;get();
+</code></pre>
+<h2 id="模型关联">模型关联</h2>
+<pre><code><span class="comment token">// 一对一 - User::phone()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasOne(<span class="string token">'App\Phone'</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'local_key'</span>);
+<span class="comment token">// 一对一 - Phone::user(), 定义相对的关联</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(<span class="string token">'App\User'</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'other_key'</span>);
+
+<span class="comment token">// 一对多 - Post::comments()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasMany(<span class="string token">'App\Comment'</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'local_key'</span>);
+<span class="comment token">//  一对多 - Comment::post()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsTo(<span class="string token">'App\Post'</span>, <span class="string token">'foreign_key'</span>, <span class="string token">'other_key'</span>);
+
+<span class="comment token">// 多对多 - User::roles();</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(<span class="string token">'App\Role'</span>, <span class="string token">'user_roles'</span>, <span class="string token">'user_id'</span>, <span class="string token">'role_id'</span>);
+<span class="comment token">// 多对多 - Role::users();</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(<span class="string token">'App\User'</span>);
+<span class="comment token">// 多对多 - Retrieving Intermediate Table Columns</span>
+<span class="variable token">$role</span>-&gt;pivot-&gt;created_at;
+<span class="comment token">// 多对多 - 中介表字段</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(<span class="string token">'App\Role'</span>)-&gt;withPivot(<span class="string token">'column1'</span>, <span class="string token">'column2'</span>);
+<span class="comment token">// 多对多 - 自动维护 created_at 和 updated_at 时间戳</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;belongsToMany(<span class="string token">'App\Role'</span>)-&gt;withTimestamps();
+
+<span class="comment token">// 远层一对多 - Country::posts(), 一个 Country 模型可能通过中介的 Users</span>
+<span class="comment token">// 模型关联到多个 Posts 模型(User::country_id)</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;hasManyThrough(<span class="string token">'App\Post'</span>, <span class="string token">'App\User'</span>, <span class="string token">'country_id'</span>, <span class="string token">'user_id'</span>);
+
+<span class="comment token">// 多态关联 - Photo::imageable()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphTo();
+<span class="comment token">// 多态关联 - Staff::photos()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphMany(<span class="string token">'App\Photo'</span>, <span class="string token">'imageable'</span>);
+<span class="comment token">// 多态关联 - Product::photos()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphMany(<span class="string token">'App\Photo'</span>, <span class="string token">'imageable'</span>);
+<span class="comment token">// 多态关联 - 在 AppServiceProvider 中注册你的「多态对照表」</span>
+Relation::morphMap([
+    <span class="string token">'Post'</span> =&gt; App\Post::<span class="keyword token">class</span>,
+    <span class="string token">'Comment'</span> =&gt; App\Comment::<span class="keyword token">class</span>,
+]);
+
+<span class="comment token">// 多态多对多关联 - 涉及数据库表: posts,videos,tags,taggables</span>
+<span class="comment token">// Post::tags()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphToMany(<span class="string token">'App\Tag'</span>, <span class="string token">'taggable'</span>);
+<span class="comment token">// Video::tags()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphToMany(<span class="string token">'App\Tag'</span>, <span class="string token">'taggable'</span>);
+<span class="comment token">// Tag::posts()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphedByMany(<span class="string token">'App\Post'</span>, <span class="string token">'taggable'</span>);
+<span class="comment token">// Tag::videos()</span>
+<span class="keyword token">return</span> <span class="variable token">$this</span>-&gt;morphedByMany(<span class="string token">'App\Video'</span>, <span class="string token">'taggable'</span>);
+
+<span class="comment token">// 查找关联</span>
+<span class="variable token">$user</span>-&gt;posts()-&gt;where(<span class="string token">'active'</span>, <span class="number token">1</span>)-&gt;get();
+<span class="comment token">// 获取所有至少有一篇评论的文章...</span>
+<span class="variable token">$posts</span> = App\Post::has(<span class="string token">'comments'</span>)-&gt;get();
+<span class="comment token">// 获取所有至少有三篇评论的文章...</span>
+<span class="variable token">$posts</span> = Post::has(<span class="string token">'comments'</span>, <span class="string token">'&gt;='</span>, <span class="number token">3</span>)-&gt;get();
+<span class="comment token">// 获取所有至少有一篇评论被评分的文章...</span>
+<span class="variable token">$posts</span> = Post::has(<span class="string token">'comments.votes'</span>)-&gt;get();
+<span class="comment token">// 获取所有至少有一篇评论相似于 foo% 的文章</span>
+<span class="variable token">$posts</span> = Post::whereHas(<span class="string token">'comments'</span>, <span class="keyword token">function</span> (<span class="variable token">$query</span>) {
+    <span class="variable token">$query</span>-&gt;where(<span class="string token">'content'</span>, <span class="string token">'like'</span>, <span class="string token">'foo%'</span>);
+})-&gt;get();
+
+<span class="comment token">// 预加载</span>
+<span class="variable token">$books</span> = App\Book::with(<span class="string token">'author'</span>)-&gt;get();
+<span class="variable token">$books</span> = App\Book::with(<span class="string token">'author'</span>, <span class="string token">'publisher'</span>)-&gt;get();
+<span class="variable token">$books</span> = App\Book::with(<span class="string token">'author.contacts'</span>)-&gt;get();
+
+<span class="comment token">// 延迟预加载</span>
+<span class="variable token">$books</span>-&gt;load(<span class="string token">'author'</span>, <span class="string token">'publisher'</span>);
+
+<span class="comment token">// 写入关联模型</span>
+<span class="variable token">$comment</span> = <span class="keyword token">new</span> App\Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>]);
+<span class="variable token">$post</span>-&gt;comments()-&gt;save(<span class="variable token">$comment</span>);
+<span class="comment token">// Save 与多对多关联</span>
+<span class="variable token">$post</span>-&gt;comments()-&gt;saveMany([
+    <span class="keyword token">new</span> App\Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>]),
+    <span class="keyword token">new</span> App\Comment([<span class="string token">'message'</span> =&gt; <span class="string token">'Another comment.'</span>]),
+]);
+<span class="variable token">$post</span>-&gt;comments()-&gt;create([<span class="string token">'message'</span> =&gt; <span class="string token">'A new comment.'</span>]);
+
+<span class="comment token">// 更新「从属」关联</span>
+<span class="variable token">$user</span>-&gt;account()-&gt;associate(<span class="variable token">$account</span>);
+<span class="variable token">$user</span>-&gt;save();
+<span class="variable token">$user</span>-&gt;account()-&gt;dissociate();
+<span class="variable token">$user</span>-&gt;save();
+
+<span class="comment token">// 附加多对多关系</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;attach(<span class="variable token">$roleId</span>);
+<span class="variable token">$user</span>-&gt;roles()-&gt;attach(<span class="variable token">$roleId</span>, [<span class="string token">'expires'</span> =&gt; <span class="variable token">$expires</span>]);
+<span class="comment token">// 从用户上移除单一身份...</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach(<span class="variable token">$roleId</span>);
+<span class="comment token">// 从用户上移除所有身份...</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach();
+<span class="variable token">$user</span>-&gt;roles()-&gt;detach([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+<span class="variable token">$user</span>-&gt;roles()-&gt;attach([<span class="number token">1</span> =&gt; [<span class="string token">'expires'</span> =&gt; <span class="variable token">$expires</span>], <span class="number token">2</span>, <span class="number token">3</span>]);
+
+<span class="comment token">// 任何不在给定数组中的 IDs 将会从中介表中被删除。</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;sync([<span class="number token">1</span>, <span class="number token">2</span>, <span class="number token">3</span>]);
+<span class="comment token">// 你也可以传递中介表上该 IDs 额外的值：</span>
+<span class="variable token">$user</span>-&gt;roles()-&gt;sync([<span class="number token">1</span> =&gt; [<span class="string token">'expires'</span> =&gt; <span class="keyword token">true</span>], <span class="number token">2</span>, <span class="number token">3</span>]);
+</code></pre>
+<h2 id="事件">事件</h2>
+<pre><code>Model::retrieved(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::creating(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::created(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::updating(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::updated(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::saving(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::saved(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::deleting(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::deleted(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::restoring(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::restored(<span class="keyword token">function</span>(<span class="variable token">$model</span>){});
+Model::observe(<span class="keyword token">new</span> FooObserver);
+</code></pre>
+<h2 id="eloquent--配置信息">Eloquent  配置信息</h2>
+<pre><code><span class="comment token">// 关闭模型插入或更新操作引发的 「mass assignment」异常</span>
+Eloquent::unguard();
+<span class="comment token">// 重新开启「mass assignment」异常抛出功能</span>
+Eloquent::reguard();
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
