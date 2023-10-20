@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="mail">Mail</h1>
+<h2 id="消息">消息</h2>
+<pre><code><span class="comment token">// 这些都能在 $message 实例中使用, 并可传入到 Mail::send() 或 Mail::queue()</span>
+<span class="variable token">$message</span>-&gt;from(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;sender(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;returnPath(<span class="string token">'email@example.com'</span>);
+<span class="variable token">$message</span>-&gt;to(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;cc(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;bcc(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;replyTo(<span class="string token">'email@example.com'</span>, <span class="string token">'Mr. Example'</span>);
+<span class="variable token">$message</span>-&gt;subject(<span class="string token">'Welcome to the Jungle'</span>);
+<span class="variable token">$message</span>-&gt;priority(<span class="number token">2</span>);
+<span class="variable token">$message</span>-&gt;attach(<span class="string token">'foo\bar.txt'</span>, <span class="variable token">$options</span>);
+<span class="comment token">// 使用内存数据作为附件</span>
+<span class="variable token">$message</span>-&gt;attachData(<span class="string token">'bar'</span>, <span class="string token">'Data Name'</span>, <span class="variable token">$options</span>);
+<span class="comment token">// 附带文件，并返回 CID</span>
+<span class="variable token">$message</span>-&gt;embed(<span class="string token">'foo\bar.txt'</span>);
+<span class="variable token">$message</span>-&gt;embedData(<span class="string token">'foo'</span>, <span class="string token">'Data Name'</span>, <span class="variable token">$options</span>);
+<span class="comment token">// 获取底层的 Swift Message 对象</span>
+<span class="variable token">$message</span>-&gt;getSwiftMessage();
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
