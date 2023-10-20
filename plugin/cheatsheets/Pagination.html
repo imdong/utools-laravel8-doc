@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="pagination">Pagination</h1>
+<pre><code><span class="comment token">// 自动处理分页逻辑</span>
+Model::paginate(<span class="number token">15</span>);
+Model::where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;paginate(<span class="number token">15</span>);
+<span class="comment token">// 使用简单模板 - 只有 "上一页" 或 "下一页" 链接</span>
+Model::where(<span class="string token">'cars'</span>, <span class="number token">2</span>)-&gt;simplePaginate(<span class="number token">15</span>);
+<span class="comment token">// 手动分页</span>
+Paginator::make(<span class="variable token">$items</span>, <span class="variable token">$totalItems</span>, <span class="variable token">$perPage</span>);
+<span class="comment token">// 在页面打印分页导航栏</span>
+<span class="variable token">$variable</span>-&gt;links();
+
+<span class="comment token">// 获取当前页数据数量。</span>
+<span class="variable token">$results</span>-&gt;count()
+<span class="comment token">// 获取当前页页码。</span>
+<span class="variable token">$results</span>-&gt;currentPage()
+<span class="comment token">// 获取结果集中第一条数据的结果编号。</span>
+<span class="variable token">$results</span>-&gt;firstItem()
+<span class="comment token">// 获取分页器选项。</span>
+<span class="variable token">$results</span>-&gt;getOptions()
+<span class="comment token">// 创建分页 URL 范围。</span>
+<span class="variable token">$results</span>-&gt;getUrlRange(<span class="variable token">$start</span>, <span class="variable token">$end</span>)
+<span class="comment token">// 是否有多页。</span>
+<span class="variable token">$results</span>-&gt;hasMorePages()
+<span class="comment token">// 获取结果集中最后一条数据的结果编号。</span>
+<span class="variable token">$results</span>-&gt;lastItem()
+<span class="comment token">// 获取最后一页的页码（在 `simplePaginate` 中无效）。</span>
+<span class="variable token">$results</span>-&gt;lastPage()
+<span class="comment token">// 获取下一页的 URL 。</span>
+<span class="variable token">$results</span>-&gt;nextPageUrl()
+<span class="comment token">// 当前而是否为第一页。</span>
+<span class="variable token">$results</span>-&gt;onFirstPage()
+<span class="comment token">// 每页的数据条数。</span>
+<span class="variable token">$results</span>-&gt;perPage()
+<span class="comment token">// 获取前一页的 URL。</span>
+<span class="variable token">$results</span>-&gt;previousPageUrl()
+<span class="comment token">// 数据总数（在 `simplePaginate` 无效）。</span>
+<span class="variable token">$results</span>-&gt;total()
+<span class="comment token">// 获取指定页的 URL。</span>
+<span class="variable token">$results</span>-&gt;url(<span class="variable token">$page</span>)
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
