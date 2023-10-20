@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="queue">Queue</h1>
+<pre><code>Queue::push(<span class="string token">'SendMail'</span>, <span class="keyword token">array</span>(<span class="string token">'message'</span> =&gt; <span class="variable token">$message</span>));
+Queue::push(<span class="string token">'SendEmail@send'</span>, <span class="keyword token">array</span>(<span class="string token">'message'</span> =&gt; <span class="variable token">$message</span>));
+Queue::push(<span class="keyword token">function</span>(<span class="variable token">$job</span>) <span class="keyword token">use</span> <span class="variable token">$id</span> {});
+<span class="comment token">// 在多个 workers 中使用相同的负载</span>
+ Queue::bulk(<span class="keyword token">array</span>(<span class="string token">'SendEmail'</span>, <span class="string token">'NotifyUser'</span>), <span class="variable token">$payload</span>);
+<span class="comment token">// 开启队列监听器</span>
+php artisan queue:listen
+php artisan queue:listen connection
+php artisan queue:listen --timeout=<span class="number token">60</span>
+<span class="comment token">// 只处理第一个队列任务</span>
+php artisan queue:work
+<span class="comment token">// 在后台模式启动一个队列 worker</span>
+php artisan queue:work --daemon
+<span class="comment token">// 为失败的任务创建 migration 文件</span>
+php artisan queue:failed-table
+<span class="comment token">// 监听失败任务</span>
+php artisan queue:failed
+<span class="comment token">// 通过 id 删除失败的任务</span>
+php artisan queue:forget <span class="number token">5</span>
+<span class="comment token">// 删除所有失败任务</span>
+php artisan queue:flush
+<span class="comment token">// 因为队列不会默认使用 PHP memory 参数，需要在队列指定(单位默认mb)</span>
+php artisan queue:work --memory=<span class="number token">50</span>
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
