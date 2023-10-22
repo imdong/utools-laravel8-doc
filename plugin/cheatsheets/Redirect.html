@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="redirect">Redirect</h1>
+<pre><code><span class="keyword token">return</span> Redirect::to(<span class="string token">'foo/bar'</span>);
+<span class="keyword token">return</span> Redirect::to(<span class="string token">'foo/bar'</span>)-&gt;with(<span class="string token">'key'</span>, <span class="string token">'value'</span>);
+<span class="keyword token">return</span> Redirect::to(<span class="string token">'foo/bar'</span>)-&gt;withInput(Input::get());
+<span class="keyword token">return</span> Redirect::to(<span class="string token">'foo/bar'</span>)-&gt;withInput(Input::except(<span class="string token">'password'</span>));
+<span class="keyword token">return</span> Redirect::to(<span class="string token">'foo/bar'</span>)-&gt;withErrors(<span class="variable token">$validator</span>);
+<span class="comment token">// 重定向到之前的请求</span>
+<span class="keyword token">return</span> Redirect::back();
+<span class="comment token">// 重定向到命名路由（根据命名路由算出 URL）</span>
+<span class="keyword token">return</span> Redirect::route(<span class="string token">'foobar'</span>);
+<span class="keyword token">return</span> Redirect::route(<span class="string token">'foobar'</span>, <span class="keyword token">array</span>(<span class="string token">'value'</span>));
+<span class="keyword token">return</span> Redirect::route(<span class="string token">'foobar'</span>, <span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 重定向到控制器动作（根据控制器动作算出 URL）</span>
+<span class="keyword token">return</span> Redirect::action(<span class="string token">'FooController@index'</span>);
+<span class="keyword token">return</span> Redirect::action(<span class="string token">'FooController@baz'</span>, <span class="keyword token">array</span>(<span class="string token">'value'</span>));
+<span class="keyword token">return</span> Redirect::action(<span class="string token">'FooController@baz'</span>, <span class="keyword token">array</span>(<span class="string token">'key'</span> =&gt; <span class="string token">'value'</span>));
+<span class="comment token">// 跳转到目的地址，如果没有设置则使用默认值 foo/bar</span>
+<span class="keyword token">return</span> Redirect::intended(<span class="string token">'foo/bar'</span>);
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
