@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Laravel 10.x 中文文档</title>
+    <link rel="stylesheet" href="../style/idea.css">
+<link rel="stylesheet" href="../style/bd0cbd7aa15e5518a47099735133bf3a-vendors.css">
+<link rel="stylesheet" href="../style/a91e47e2539b98438cb4c6c3a665d642-app.css">
+    <style>
+        div.markdown-body {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="markdown-body"><h1 id="request">Request</h1>
+<pre><code><span class="comment token">//获取请求参数 form-data 与 raw 请求类型</span>
+request()-&gt;input();
+<span class="comment token">// url: http://xx.com/aa/bb</span>
+Request::url();
+<span class="comment token">// 路径: /aa/bb</span>
+Request::path();
+<span class="comment token">// 获取请求 Uri: /aa/bb/?c=d</span>
+Request::getRequestUri();
+<span class="comment token">// 返回用户的 IP</span>
+Request::ip();
+<span class="comment token">// 获取 Uri: http://xx.com/aa/bb/?c=d</span>
+Request::getUri();
+<span class="comment token">// 获取查询字符串: c=d</span>
+Request::getQueryString();
+<span class="comment token">// 获取请求端口 (例如 80, 443 等等)</span>
+Request::getPort();
+<span class="comment token">// 判断当前请求的 URI 是否可被匹配</span>
+Request::is(<span class="string token">'foo/*'</span>);
+<span class="comment token">// 获取 URI 的分段值 (索引从 1 开始)</span>
+Request::segment(<span class="number token">1</span>);
+<span class="comment token">// 从请求中取回头部信息</span>
+Request::header(<span class="string token">'Content-Type'</span>);
+<span class="comment token">// 从请求中取回服务器变量</span>
+Request::server(<span class="string token">'PATH_INFO'</span>);
+<span class="comment token">// 判断请求是否是 AJAX 请求</span>
+Request::ajax();
+<span class="comment token">// 判断请求是否使用 HTTPS</span>
+Request::secure();
+<span class="comment token">// 获取请求方法</span>
+Request::method();
+<span class="comment token">// 判断请求方法是否是指定类型的</span>
+Request::isMethod(<span class="string token">'post'</span>);
+<span class="comment token">// 获取原始的 POST 数据</span>
+Request::instance()-&gt;getContent();
+<span class="comment token">// 获取请求要求返回的格式</span>
+Request::format();
+<span class="comment token">// 判断 HTTP Content-Type 头部信息是否包含 */json</span>
+Request::isJson();
+<span class="comment token">// 判断 HTTP Accept 头部信息是否为 application/json</span>
+Request::wantsJson();
+</code></pre>
+</div>
+    <blockquote style="font-size: 0.9em;">
+        本译文仅用于学习和交流目的，转载请务必注明文章译者、出处、和本文链接 <br>
+        我们的翻译工作遵照 <a href="https://learnku.com/docs/guide/cc4.0/6589">CC 协议</a>，如果我们的工作有侵犯到您的权益，请及时联系我们。
+    </blockquote>
+</body>
+
+</html>
